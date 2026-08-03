@@ -204,5 +204,5 @@ ARTICLES.push({
 
   ],
 
-  related:['niporan','hubert','daily-life'],
+  related:['niporan','hubert','daily-life','kounkoubou'],
 });

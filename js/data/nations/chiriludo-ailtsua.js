@@ -112,5 +112,5 @@ ARTICLES.push({
     ]},
   ],
 
-  related:['orgaron','larliafrus','天界氷廊群'],
+  related:['orgaron','larliafrus','天界氷廊群','hyokyo','noahsark','setsuhyo'],
 });

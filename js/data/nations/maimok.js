@@ -212,5 +212,5 @@ ARTICLES.push({
 
   ],
 
-  related:['SVH','歯車戦争','変異体'],
+  related:['SVH','歯車戦争','変異体','yokubounosu','svh'],
 });

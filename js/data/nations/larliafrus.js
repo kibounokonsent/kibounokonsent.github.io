@@ -62,5 +62,5 @@ ARTICLES.push({
         {t:'p', text:'穏やかで柔らかい話し方をする人が多い。断定を避ける傾向があり、「〜かもしれないねぇ」「〜なんだってぇ」など、優しく余白を残すような言い回しがよく使われる。自然や天候を会話に混ぜる者も多い。'},
       ]},
     ],
-    related:['daily-life','niporan','garhyura'],
+    related:['daily-life','niporan','garhyura','rifinesu','naturalfriend'],
   });

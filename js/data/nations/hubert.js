@@ -107,5 +107,5 @@ ARTICLES.push({
 
   ],
 
-  related:['niporan','sertcity','EIO','リンクチン','ハーネンス'],
+  related:['niporan','sertcity','EIO','harnest','harnens_institute','harnens_university','ハーネンス','telepass'],
 });

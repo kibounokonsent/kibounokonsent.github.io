@@ -71,5 +71,5 @@ ARTICLES.push({
       {t:'p', text:'感情表現が豊かで、人との距離が近い。食べ物を例えに使うことが多く、「その話、味あるな」「おきやすに」など、関西弁風の柔らかな話し方をする人が多い。「おきやすに」は「いただきます」を意味する挨拶である。'},
     ]},
   ],
-  related:['daily-life','larliafrus','食文化','food-delivery'],
+  related:['daily-life','larliafrus','食文化','food-delivery','miretche','perfectfood','wishpolan'],
 });

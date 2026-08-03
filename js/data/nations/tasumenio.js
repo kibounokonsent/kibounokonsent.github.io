@@ -103,5 +103,5 @@ ARTICLES.push({
     ]},
   ],
 
-  related:['wonhead','hubert','海底都市'],
+  related:['wonhead','hubert','海底都市','freshresh','shirasu','gekaisis','sanparallel-company'],
 });

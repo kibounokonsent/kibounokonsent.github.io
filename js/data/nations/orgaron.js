@@ -162,5 +162,5 @@ ARTICLES.push({
     }
   ],
 
-  related:['hubert','chiriludo-ailtsua','daily-life','garhyura'],
+  related:['hubert','chiriludo-ailtsua','daily-life','garhyura','hitsritche','kachoufuugetsu','stralibady'],
 });

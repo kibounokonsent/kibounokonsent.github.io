@@ -129,5 +129,5 @@ ARTICLES.push({
     ]},
   ],
 
-  related:['hubert','tasumenio','daily-life'],
+  related:['hubert','tasumenio','daily-life','tensho','telepass'],
 });

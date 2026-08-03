@@ -66,5 +66,5 @@ ARTICLES.push({
       {t:'p', text:'生命への強い興味が言葉に表れる。「美しい生態だ」「なんて素晴らしい生命なんだ」など、生き物について語り始めると熱量が一気に高まり、専門用語を交えながら夢中で話し続ける人が多い。'},
     ]},
   ],
-  related:['daily-life','larliafrus','hubert'],
+  related:['daily-life','larliafrus','hubert','jungler','seyo','deoxycorp','dnar'],
 });

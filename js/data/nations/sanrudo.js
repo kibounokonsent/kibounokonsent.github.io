@@ -98,5 +98,5 @@ ARTICLES.push({
     ]},
   ],
 
-  related:['wonhead','hubert','daily-life'],
+  related:['wonhead','hubert','daily-life','goldenspecialmenicompany','grk','worldcreditbank'],
 });
