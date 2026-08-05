@@ -1,272 +1,137 @@
 <!DOCTYPE html>
-<html lang="ja" data-theme="light">
+<html lang="ja">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>MOON CORE ARCHIVE | 未来世界 公式設定資料集</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>コンセントのポートフォリオ</title>
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-
-<!-- 背景 -->
-<div class="bg-canvas" aria-hidden="true">
-
-    <!-- 背景色 -->
-    <div class="bg-color-layer"></div>
-
-    <!-- グリッド -->
-    <svg class="bg-grid" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
-        <defs>
-            <pattern id="bgGridPattern" width="48" height="48" patternUnits="userSpaceOnUse">
-                <path d="M48 0H0V48"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="0.6"/>
-            </pattern>
-        </defs>
-
-        <rect width="1000"
-              height="1000"
-              fill="url(#bgGridPattern)"/>
-    </svg>
-
-    <!-- リング -->
-    <svg class="bg-rings" viewBox="0 0 1000 1000" preserveAspectRatio="xMidYMid slice">
-        <circle cx="860" cy="140" r="220"/>
-        <circle cx="860" cy="140" r="320"/>
-        <circle cx="860" cy="140" r="420"/>
-
-        <circle cx="120" cy="920" r="160"/>
-        <circle cx="120" cy="920" r="240"/>
-    </svg>
-
-    <!-- 巨大背景アイコン -->
-    <div id="bg-icon" class="bg-icon"></div>
-
-</div>
-
-<header class="site-header">
-    <div class="header-inner">
-
-        <a class="brand" href="#/">
-            <img
-                class="brand-logo-img"
-                src="assets/mooncore.svg"
-                alt="MOON CORE">
-
-            <div class="brand-text">
-                <span class="brand-eyebrow">
-                    未来世界 ARCHIVE
-                </span>
-
-                <span class="brand-title">
-                    MOON CORE
-                </span>
+    <div class="page-shell">
+        <div class="announcement-bar">
+            <div class="announcement-text">
+                <span class="announcement-tag">重要</span>
+                <h2>MOON CORE 移転のお知らせ</h2>
+                <p>新しい場所へ移転しました。今後の更新は新しいサイトで行います。</p>
             </div>
-        </a>
-
-        <nav class="main-nav" id="main-nav"></nav>
-
-        <div class="header-actions">
-
-            <button
-                class="icon-btn"
-                aria-label="検索"
-                onclick="openSearch()">
-
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <circle cx="11" cy="11" r="7"/>
-                    <line x1="21" y1="21" x2="16.4" y2="16.4"/>
-                </svg>
-
-            </button>
-
-            <button
-                class="icon-btn"
-                aria-label="テーマ切替"
-                onclick="toggleTheme()">
-
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                    <circle cx="12" cy="12" r="4.5"/>
-                    <path d="M12 2v2.4M12 19.6V22M4.9 4.9l1.7 1.7M17.4 17.4l1.7 1.7M2 12h2.4M19.6 12H22M4.9 19.1l1.7-1.7M17.4 6.6l1.7-1.7"/>
-                </svg>
-
-            </button>
-
+            <a href="moon_core/" class="announcement-link">MOON CORE を開く</a>
         </div>
 
+        <header class="site-header">
+            <div class="brand">コンセント</div>
+            <nav aria-label="メインナビゲーション">
+                <a href="index.html" class="active">ホーム</a>
+                <a href="about.html">私について</a>
+                <a href="illustration.html">イラスト</a>
+                <a href="webworks.html">Web作品</a>
+            </nav>
+        </header>
+
+        <main>
+            <section class="hero">
+                <div class="hero-copy centered-hero">
+                    <p class="eyebrow">Creative portfolio</p>
+                    <h1 class="portfolio-title">
+                        <span class="title-line"></span>
+                        <span class="title-text">コンセントのポートフォリオ</span>
+                        <span class="title-line"></span>
+                    </h1>
+                    <p class="lead">
+                        ベクターイラストを中心に、Web制作や世界観デザインに取り組む
+                        クリエイターです。
+                    </p>
+                    <div class="cta-row">
+                        <a href="illustration.html" class="button primary">作品を見る</a>
+                        <a href="about.html" class="button secondary">自己紹介</a>
+                    </div>
+                </div>
+            </section>
+
+            <section class="skills">
+                <div class="section-heading">
+                    <h2>できること</h2>
+                </div>
+
+                <div class="card-grid">
+                    <article class="art-card">
+                        <h3>ベクターイラスト</h3>
+                        <p>
+                            シンプルで見やすく、伝わりやすいデザインを意識した
+                            イラスト制作を行っています。
+                        </p>
+                    </article>
+
+                    <article class="art-card">
+                        <h3>Web制作</h3>
+                        <p>
+                            HTML・CSSを中心に学習し、見やすく使いやすいWebサイト制作に取り組んでいます。
+                        </p>
+                    </article>
+
+                    <article class="art-card">
+                        <h3>世界観制作</h3>
+                        <p>
+                            オリジナルの世界設定やキャラクター、ストーリーなどを制作しています。
+                        </p>
+                    </article>
+
+                    <article class="art-card">
+                        <h3>ゲーム企画</h3>
+                        <p>
+                            世界観やゲームシステムを考案し、企画としてまとめることが得意です。
+                        </p>
+                    </article>
+                </div>
+            </section>
+
+            <section class="works">
+                <div class="section-heading">
+                    <h2>作品集</h2>
+                </div>
+
+                <div class="card-grid two-col">
+                    <article class="art-card">
+                        <h3>イラスト</h3>
+                        <p>
+                            オリジナルキャラクターやロゴデザイン、世界観イラストなどを掲載しています。
+                        </p>
+                        <a href="illustration.html">→ イラスト作品を見る</a>
+                    </article>
+
+                    <article class="art-card">
+                        <h3>Web作品</h3>
+                        <p>
+                            HTML・CSSを使用して制作したWebサイトを掲載しています。
+                        </p>
+                        <a href="webworks.html">→ Web作品を見る</a>
+                    </article>
+                </div>
+            </section>
+
+            <section class="illustration">
+                <div class="section-heading">
+                    <h2>新着作品</h2>
+                </div>
+
+                <article class="art-card spotlight-card">
+                    <h3>MOONCORE</h3>
+                    <p>
+                        科学技術やAIが発展した未来を舞台とする オリジナルSF世界観作品です。
+                    </p>
+                </article>
+            </section>
+
+            <section class="contact">
+                <div class="section-heading">
+                    <h2>お問い合わせ</h2>
+                </div>
+
+                <div class="contact-card">
+                    <p>ご連絡はメールよりお願いいたします。</p>
+                    <a href="mailto:example@example.com">example@example.com</a>
+                </div>
+            </section>
+        </main>
     </div>
-</header>
-
-
-
-<div
-    class="search-overlay"
-    id="search-overlay"
-    onclick="if(event.target===this)closeSearch()">
-
-    <div class="search-panel">
-
-        <div class="search-input-row">
-
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">
-                <circle cx="11" cy="11" r="7"/>
-                <line x1="21" y1="21" x2="16.4" y2="16.4"/>
-            </svg>
-
-            <input
-                id="search-input"
-                type="text"
-                placeholder="用語・鉱物・技術を検索…"
-                autocomplete="off"
-                oninput="runSearch(this.value)">
-
-            <span class="esc" onclick="closeSearch()">ESC</span>
-
-        </div>
-
-        <div id="search-results" class="search-results"></div>
-
-    </div>
-
-</div>
-
-
-
-<div id="toast" class="toast"></div>
-
-
-
-<div id="home-hero">
-    <section class="hero">
-
-        <svg class="hero-rings" viewBox="0 0 400 400">
-            <circle cx="200" cy="200" r="190"/>
-            <circle cx="200" cy="200" r="150"/>
-            <circle cx="200" cy="200" r="110"/>
-            <circle cx="200" cy="200" r="70"/>
-        </svg>
-
-        <div class="hero-inner fade-seq">
-
-            <img
-                class="hero-logo"
-                src="assets/mooncore.svg"
-                alt="MOON CORE">
-
-            <div class="hero-eyebrow">
-                <span class="dot"></span>
-                公式設定資料集・全文検索可能
-            </div>
-
-            <h1>MOON CORE</h1>
-
-            <p class="hero-quote">
-                「この世界は理想郷でも、終末世界でもない。<br>
-                便利になったからこそ、新たな問題を抱えた人類の未来。<br>
-                それが、この『未来世界』である。」
-            </p>
-
-            <p class="hero-desc">
-                本資料集は未来世界の文明・国家・技術・文化などをまとめた公式設定資料集です。
-            </p>
-
-            <div class="hero-cta">
-                <a class="btn btn-primary" href="#/article/world-overview">
-                    「未来世界」とはを読む
-                </a>
-
-                <a
-                    class="btn btn-ghost"
-                    href="#"
-                    onclick="event.preventDefault();openSearch();">
-
-                    資料集を検索する
-
-                </a>
-            </div>
-
-        </div>
-
-    </section>
-</div>
-
-
-
-<main id="app"></main>
-
-<footer>
-    MOON CORE ARCHIVE — 未来世界 公式設定資料集 /
-    本サイトはフィクション作品「未来世界」の設定資料集です
-</footer>
-
-<script src="js/data/00-categories.js"></script>
-<script src="js/data/articles-world-life.js"></script>
-<script src="js/data/articles-tech.js"></script>
-<script src="js/data/articles-substance.js"></script>
-<script src="js/data/articles-creature.js"></script>
-<script src="js/data/articles-mutant.js"></script>
-<script src="js/data/articles-culture.js"></script>
-<script src="js/data/articles-law.js"></script>
-<script src="js/data/nations/belnea.js"></script>
-<script src="js/data/nations/chiriludo-ailtsua.js"></script>
-<script src="js/data/nations/fumora-skypill.js"></script>
-<script src="js/data/nations/garhyura.js"></script>
-<script src="js/data/nations/hubert.js"></script>
-<script src="js/data/nations/kyuma.js"></script>
-<script src="js/data/nations/larliafrus.js"></script>
-<script src="js/data/nations/maimok.js"></script>
-<script src="js/data/nations/niporan.js"></script>
-<script src="js/data/nations/orgaron.js"></script>
-<script src="js/data/nations/sanrudo.js"></script>
-<script src="js/data/nations/sertcity.js"></script>
-<script src="js/data/nations/tasumenio.js"></script>
-<script src="js/data/nations/wonhead.js"></script>
-<script src="js/data/nations/yuretsuea.js"></script>
-<script src="js/data/org/antioldrange.js"></script>
-<script src="js/data/org/code.js"></script>
-<script src="js/data/org/international-organizations.js"></script>
-<script src="js/data/org/kounkoubou.js"></script>
-<script src="js/data/org/deoxycorp.js"></script>
-<script src="js/data/org/dnar.js"></script>
-<script src="js/data/org/evolions.js"></script>
-<script src="js/data/org/freshresh.js"></script>
-<script src="js/data/org/gekaisis.js"></script>
-<script src="js/data/org/goldenspecialmenicompany.js"></script>
-<script src="js/data/org/grk.js"></script>
-<script src="js/data/org/hagurumaunion.js"></script>
-<script src="js/data/org/happycaddy.js"></script>
-<script src="js/data/org/harnens_university.js"></script>
-<script src="js/data/org/harnest.js"></script>
-<script src="js/data/org/harnens_institute.js"></script>
-<script src="js/data/org/hatenkurenbu.js"></script>
-<script src="js/data/org/hitsritche.js"></script>
-<script src="js/data/org/hyokyo.js"></script>
-<script src="js/data/org/jungler.js"></script>
-<script src="js/data/org/kachoufuugetsu.js"></script>
-<script src="js/data/org/kogamichurch.js"></script>
-<script src="js/data/org/miretche.js"></script>
-<script src="js/data/org/naturalfriend.js"></script>
-<script src="js/data/org/noahsark.js"></script>
-<script src="js/data/org/oldworldmuseum.js"></script>
-<script src="js/data/org/perfectfood.js"></script>
-<script src="js/data/org/rifinesu.js"></script>
-<script src="js/data/org/sanparallel-company.js"></script>
-<script src="js/data/org/setsuhyo.js"></script>
-<script src="js/data/org/seyo.js"></script>
-<script src="js/data/org/shirasu.js"></script>
-<script src="js/data/org/stralibady.js"></script>
-<script src="js/data/org/svh.js"></script>
-<script src="js/data/org/telepass.js"></script>
-<script src="js/data/org/tensho.js"></script>
-<script src="js/data/org/wishpolan.js"></script>
-<script src="js/data/org/worldcreditbank.js"></script>
-<script src="js/data/org/worldtreec.js"></script>
-<script src="js/data/org/yokubounosu.js"></script>
-<script src="js/data/glossary.js"></script>
-<script src="js/app.js"></script>
-
 </body>
 </html>
