@@ -47,8 +47,8 @@
                         <span class="archive-tag">研究施設エクリプスラボ</span>
                     </div>
                     <div class="image-grid">
-                        <img src="images/logo.svg" alt="ロゴ">
-                        <img src="images/logo(1).svg" alt="ロゴ2">
+                        <img class="zoom-image" src="images/logo.svg" alt="ロゴ" onclick="openImage(this)">
+                        <img class="zoom-image" src="images/logo(1).svg" alt="ロゴ2" onclick="openImage(this)">
                     </div>
                     <p>
                         架空の研究機関「エクリプスラボ」のために制作したロゴデザインです。<br><br>
@@ -76,7 +76,7 @@
 
                 <div class="art-card character kanel">
                     <h3>カネル・ヴァンパイア</h3>
-                    <img src="images/カネル・ヴァンパイア.jpeg" alt="カネル・ヴァンパイア">
+                    <img class="zoom-image" src="images/カネル・ヴァンパイア.jpeg" alt="カネル・ヴァンパイア" onclick="openImage(this)">
                     <p>
                         Scratchのベクターエディターのみを使用し、どこまで滑らかな陰影や立体感を表現できるかに挑戦した作品です。<br><br>
 
@@ -105,7 +105,7 @@
 
                 <div class="art-card character ryu">
                     <h3>龍</h3>
-                    <img src="images/龍.jpeg" alt="龍">
+                    <img class="zoom-image" src="images/龍.jpeg" alt="龍" onclick="openImage(this)">
                     <p>
                         自分の思う神をテーマに制作したオリジナル作品です。<br><br>
 
@@ -152,10 +152,10 @@
                         アイコンやWebサイトなど様々な場面で使用できるよう、シンプルな構成を意識しました。
                     </p>
                     <div class="image-grid">
-                        <img src="images/MOONCORE.svg" alt="MOONCOREロゴイラスト">
-                        <img src="images/MOONCORE (1).svg" alt="MOONCOREロゴイラスト1">
-                        <img src="images/MOONCORE (2).svg" alt="MOONCOREロゴイラスト2">
-                        <img src="images/MOONCORE (3).svg" alt="MOONCOREロゴイラスト3">
+                        <img class="zoom-image" src="images/MOONCORE.svg" alt="MOONCOREロゴイラスト" onclick="openImage(this)">
+                        <img class="zoom-image" src="images/MOONCORE (1).svg" alt="MOONCOREロゴイラスト1" onclick="openImage(this)">
+                        <img class="zoom-image" src="images/MOONCORE (2).svg" alt="MOONCOREロゴイラスト2" onclick="openImage(this)">
+                        <img class="zoom-image" src="images/MOONCORE (3).svg" alt="MOONCOREロゴイラスト3" onclick="openImage(this)">
                     </div>
                     <p>MOON COREは、科学技術やAI、生体工学が極限まで発展した未来を舞台とするオリジナルSF世界観作品です。</p>
                     
@@ -190,19 +190,47 @@
         </main>
     </div>
 
-    <script>
-        function toggleDetail(detailId, buttonId) {
-            const detail = document.getElementById(detailId);
-            const button = document.getElementById(buttonId);
 
-            if (detail.style.display === "block") {
-                detail.style.display = "none";
-                button.textContent = "▼ 詳細を見る";
-            } else {
-                detail.style.display = "block";
-                button.textContent = "▲ 閉じる";
-            }
+    <div id="image-modal" class="image-modal" onclick="closeImage()">
+        <div class="image-modal-inner" onclick="event.stopPropagation()">
+            <button class="modal-close" type="button" onclick="closeImage()" aria-label="閉じる">×</button>
+            <img id="modal-image" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+    function toggleDetail(detailId, buttonId) {
+        const detail = document.getElementById(detailId);
+        const button = document.getElementById(buttonId);
+
+        if (detail.style.display === "block") {
+            detail.style.display = "none";
+            button.textContent = "▼ 詳細を見る";
+        } else {
+            detail.style.display = "block";
+            button.textContent = "▲ 閉じる";
         }
-    </script>
+    }
+
+    function openImage(image) {
+        const modal = document.getElementById("image-modal");
+        const modalImage = document.getElementById("modal-image");
+
+        modalImage.src = image.src;
+        modalImage.alt = image.alt;
+        modal.classList.add("active");
+    }
+
+    function closeImage() {
+        document.getElementById("image-modal").classList.remove("active");
+    }
+
+    document.addEventListener("keydown", function(event) {
+        if (event.key === "Escape") {
+            closeImage();
+        }
+    });
+</script>
+
 </body>
 </html>
