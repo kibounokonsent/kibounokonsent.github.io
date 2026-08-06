@@ -739,3 +739,214 @@ body.theme-glossary{
 .content-card tr:hover{
   background:color-mix(in srgb, var(--surface-alt) 45%, transparent);
 }
+
+/* ---------- 記事一覧 ---------- */
+
+.article-index-card{
+
+  display:flex;
+  justify-content:space-between;
+  gap:30px;
+
+  padding:22px 24px;
+  margin-bottom:12px;
+
+  background:var(--surface);
+
+  border:1px solid var(--border);
+
+  /* カテゴリ識別ライン */
+  border-left:4px solid var(--category-color,var(--accent-signal));
+
+  text-decoration:none;
+  color:inherit;
+
+  border-radius:var(--radius-md);
+
+  transition:
+    transform .2s ease,
+    box-shadow .2s ease,
+    border-color .2s ease;
+}
+
+
+.article-index-card:hover{
+
+  transform:translateX(8px);
+
+  box-shadow:var(--shadow-md);
+
+}
+
+
+
+.article-index-title{
+
+  font-size:18px;
+  font-weight:600;
+
+  margin-bottom:8px;
+
+}
+
+
+
+.article-index-lede{
+
+  color:var(--text-secondary);
+
+  font-size:14px;
+
+  line-height:1.6;
+
+}
+
+
+
+.article-index-meta{
+
+  min-width:120px;
+
+  display:flex;
+
+  flex-direction:column;
+
+  align-items:flex-end;
+
+  gap:10px;
+
+}
+
+
+
+.article-index-cat{
+
+  padding:4px 12px;
+
+  border-radius:20px;
+
+  border:1px solid
+    color-mix(
+      in srgb,
+      var(--category-color,var(--accent-signal)) 45%,
+      var(--border)
+    );
+
+  color:var(--category-color,var(--accent-signal));
+
+  background:
+    color-mix(
+      in srgb,
+      var(--category-color,var(--accent-signal)) 12%,
+      transparent
+    );
+
+  font-size:12px;
+
+}
+
+
+
+.article-index-date{
+
+  color:var(--text-secondary);
+
+  font-size:13px;
+
+}
+
+
+
+.index-sort{
+
+  display:flex;
+
+  gap:10px;
+
+  margin-top:20px;
+
+}
+
+
+
+.index-sort button{
+
+  padding:8px 16px;
+
+  background:var(--surface);
+
+  border:1px solid var(--border);
+
+  color:var(--text-primary);
+
+  border-radius:20px;
+
+  cursor:pointer;
+
+  transition:.2s;
+
+}
+
+
+
+.index-sort button:hover{
+
+  border-color:var(--category-color,var(--accent-signal));
+
+  color:var(--category-color,var(--accent-signal));
+
+  transform:translateY(-2px);
+
+}
+
+
+
+/* 記事カードカテゴリカラー */
+
+.article-index-card.theme-world{
+  --category-color:#3FCBD1;
+}
+
+.article-index-card.theme-history{
+  --category-color:#B08B57;
+}
+
+.article-index-card.theme-life{
+  --category-color:#52B788;
+}
+
+.article-index-card.theme-tech{
+  --category-color:#38BDF8;
+}
+
+.article-index-card.theme-substance{
+  --category-color:#A78BFA;
+}
+
+.article-index-card.theme-nation{
+  --category-color:#D4AF37;
+}
+
+.article-index-card.theme-creature{
+  --category-color:#4ADE80;
+}
+
+.article-index-card.theme-org{
+  --category-color:#94A3B8;
+}
+
+.article-index-card.theme-mutant{
+  --category-color:#EF4444;
+}
+
+.article-index-card.theme-culture{
+  --category-color:#FACC15;
+}
+
+.article-index-card.theme-law{
+  --category-color:#818CF8;
+}
+
+.article-index-card.theme-glossary{
+  --category-color:#64748B;
+}

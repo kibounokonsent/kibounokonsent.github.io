@@ -48,15 +48,19 @@ function iconSvg(key, cls){ return `<svg class="${cls||''}" viewBox="0 0 24 24" 
 function navLinkFor(c){ return `<a href="#/category/${c.key}">${c.name}</a>`; }
 
 function renderNav(){
-  // ヘッダーには主要6カテゴリーを表示
-  const main = ['world','history','tech','substance','nation','glossary'];
-  document.getElementById('main-nav').innerHTML = main.map(k => navLinkFor(catByKey(k))).join('');
-}
 
-function relatedChip(ref){
-  const a = articleById(ref);
-  if(a){ return `<a class="related-chip" href="#/article/${a.id}">${a.title}</a>`; }
-  return `<span class="related-chip" onclick="toastMsg('「${ref}」— 詳細ページは準備中です')">${ref}</span>`;
+  // ヘッダーには主要カテゴリーを表示
+  const main = ['world','history','tech','mutant','nation','glossary'];
+
+  const nav =
+    main.map(k => navLinkFor(catByKey(k))).join('') +
+    `
+      <a href="#/articles">
+        全記事一覧
+      </a>
+    `;
+
+  document.getElementById('main-nav').innerHTML = nav;
 }
 
 function renderBlocks(blocks){
@@ -108,12 +112,16 @@ function renderHome(){
     </a>`;
   }).join('');
 
-  const recent = ARTICLES.slice(0, 6).map(a => `
+const recent = [...ARTICLES]
+  .sort((a,b)=> b.updated.localeCompare(a.updated))
+  .slice(0,6)
+  .map(a => `
     <a class="update-row" href="#/article/${a.id}">
       <span class="update-date">${a.updated}</span>
       <span class="update-name">${a.title}</span>
       <span class="update-cat">${catByKey(a.cat).name}</span>
-    </a>`).join('');
+    </a>
+  `).join('');
 
   document.getElementById('app').innerHTML = `
     <section class="section">
@@ -338,6 +346,209 @@ function renderCategoryPage(key){
 
 }
 
+
+let articleIndexSort = 'updated';
+/* ---------------- 全記事一覧 ---------------- */
+function renderAllArticles(){
+
+  setBackgroundTheme(null);
+  document.getElementById("home-hero").style.display = "none";
+
+
+  let list = [...ARTICLES];
+
+
+  // 並び順
+  if(articleIndexSort === 'updated'){
+
+    list.sort((a,b)=>
+      b.updated.localeCompare(a.updated)
+    );
+
+  }else if(articleIndexSort === 'title'){
+
+    list.sort((a,b)=>
+      a.title.localeCompare(b.title,"ja")
+    );
+
+  }else if(articleIndexSort === 'category'){
+
+    list.sort((a,b)=>{
+
+      const ca = catByKey(a.cat).name;
+      const cb = catByKey(b.cat).name;
+
+      return ca.localeCompare(cb,"ja");
+
+    });
+
+  }
+
+
+
+  const rows = list.map(a=>`
+
+   <a class="article-index-card theme-${a.cat}"
+   href="#/article/${a.id}">
+
+      <div class="article-index-main">
+
+
+        <div class="article-index-title">
+          ${a.title}
+        </div>
+
+
+        <div class="article-index-lede">
+
+          ${a.lede || 
+          "詳細情報は資料ページを参照してください。"}
+
+        </div>
+
+
+      </div>
+
+
+
+      <div class="article-index-meta">
+
+
+        <span class="article-index-cat">
+
+          ${catByKey(a.cat).name}
+
+        </span>
+
+
+
+        <span class="article-index-date">
+
+          ${a.updated}
+
+        </span>
+
+
+      </div>
+
+
+    </a>
+
+
+  `).join("");
+
+
+
+
+
+  document.getElementById("app").innerHTML = `
+
+
+    <div class="page-header">
+
+
+      <div class="breadcrumb">
+
+        <a href="#/">MOON CORE</a>
+
+        <span>/</span>
+
+        <span style="color:var(--text-primary)">
+          全記事一覧
+        </span>
+
+      </div>
+
+
+
+
+      <div class="title-block fade-seq">
+
+
+        <span class="cat-badge">
+          ARTICLE INDEX
+        </span>
+
+
+
+        <h1>
+          全記事一覧
+        </h1>
+
+
+
+
+        <p class="lede">
+
+          MOON COREに登録されている
+          すべての記事一覧です。<br>
+
+          現在登録資料：
+          <strong>${ARTICLES.length}項目</strong>
+
+        </p>
+
+
+
+        <div class="index-sort">
+
+
+          <button onclick="setArticleSort('updated')">
+            更新順
+          </button>
+
+
+          <button onclick="setArticleSort('title')">
+            名前順
+          </button>
+
+
+          <button onclick="setArticleSort('category')">
+            カテゴリ順
+          </button>
+
+
+        </div>
+
+
+
+      </div>
+
+
+    </div>
+
+
+
+
+
+    <div class="wrap article-index-wrap">
+
+
+      <div class="article-index-list">
+
+
+        ${rows}
+
+
+      </div>
+
+
+    </div>
+
+
+  `;
+
+
+}
+
+/* ---------------- 全記事一覧 並び替え ---------------- */
+function setArticleSort(type){
+
+  articleIndexSort = type;
+
+  renderAllArticles();
+
+}
 /* ---------------- 記事ページ ---------------- */
 function renderArticlePage(id){
 
@@ -412,18 +623,36 @@ ${imageHtml}
 
 /* ---------------- ルーター ---------------- */
 function router(){
+
   const hash = location.hash;
-  if(hash.startsWith('#/article/')){
+
+  if(hash === '#/articles'){
+
+    renderAllArticles();
+
+  } else if(hash.startsWith('#/article/')){
+
     renderArticlePage(hash.replace('#/article/',''));
+
   } else if(hash.startsWith('#/category/')){
+
     renderCategoryPage(hash.replace('#/category/',''));
+
   } else if(hash === '' || hash === '#/' || hash === '#'){
+
     renderHome();
+
   } else {
-    return; // ページ内アンカー（目次リンクなど）は無視してブラウザ標準の挙動に任せる
+
+    // ページ内アンカー（目次リンクなど）は無視
+    return;
+
   }
-  window.scrollTo({top:0, behavior:'auto'});
+
+  window.scrollTo({ top:0, behavior:'auto' });
+
 }
+
 window.addEventListener('hashchange', router);
 
 /* ---------------- トースト ---------------- */
