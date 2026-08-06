@@ -13,6 +13,10 @@
     --text-muted: #d6d0c4;
     --neon-glow: rgba(255, 213, 74, 0.38);
     --panel-alt: rgba(16, 16, 16, 0.9);
+    --button-bg: linear-gradient(135deg, rgba(255, 255, 255, 0.09), rgba(255, 255, 255, 0.03));
+    --button-border: rgba(255, 255, 255, 0.16);
+    --button-text: var(--text-main);
+    --button-shadow: rgba(0, 0, 0, 0.18);
 }
 
 * {
@@ -119,18 +123,19 @@ main,
     align-items: center;
     justify-content: center;
     padding: 10px 16px;
-    background: linear-gradient(135deg, rgba(255, 213, 74, 0.18), rgba(255, 201, 40, 0.06));
-    border: 1px solid rgba(255, 213, 74, 0.4);
+    background: linear-gradient(135deg, rgba(255, 213, 74, 0.16), rgba(255, 201, 40, 0.06));
+    border: 1px solid rgba(255, 213, 74, 0.34);
     color: var(--text-main);
     border-radius: 999px;
     text-decoration: none;
     white-space: nowrap;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .announcement-link:hover {
     transform: translateY(-1px);
-    box-shadow: 0 8px 18px rgba(255, 213, 74, 0.18);
+    box-shadow: 0 8px 18px rgba(255, 213, 74, 0.16);
+    border-color: rgba(255, 213, 74, 0.44);
 }
 
 .site-header {
@@ -166,12 +171,13 @@ nav a {
     justify-content: center;
     padding: 10px 16px;
     border-radius: 999px;
-    background: rgba(22, 22, 22, 0.92);
-    border: 1px solid rgba(255, 213, 74, 0.18);
-    color: var(--text-main);
+    background: var(--button-bg);
+    border: 1px solid var(--button-border);
+    color: var(--button-text);
     text-decoration: none;
-    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease;
+    transition: transform 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
     margin-right: 0;
+    box-shadow: 0 6px 16px var(--button-shadow);
 }
 
 nav a:hover,
@@ -264,24 +270,34 @@ nav a.active {
     justify-content: center;
 }
 
-.button {
+.button,
+.art-card a,
+.contact-card a {
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    padding: 12px 20px;
+    padding: 10px 16px;
     border-radius: 999px;
     text-decoration: none;
     font-weight: 600;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    letter-spacing: 0.04em;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, background 0.2s ease, color 0.2s ease;
+    background: var(--button-bg);
+    border: 1px solid var(--button-border);
+    color: var(--button-text);
+    box-shadow: 0 8px 20px var(--button-shadow);
 }
 
-.button:hover {
+.button:hover,
+.art-card a:hover,
+.contact-card a:hover {
     transform: translateY(-2px);
 }
 
 .button.primary {
     background: linear-gradient(135deg, var(--accent-color), var(--accent-strong));
     color: #111111;
+    border-color: transparent;
     box-shadow: 0 8px 20px rgba(255, 213, 74, 0.2);
 }
 
@@ -421,11 +437,8 @@ nav a.active {
 
 .art-card a,
 .contact-card a {
-    display: inline-block;
     margin-top: 16px;
     color: var(--accent-color);
-    text-decoration: none;
-    font-weight: 600;
 }
 
 .spotlight-card {
@@ -472,12 +485,34 @@ nav a.active {
 }
 
 .mooncore {
+    --button-bg: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(61, 124, 255, 0.16));
+    --button-border: rgba(0, 229, 255, 0.3);
+    --button-text: #f3fbff;
+    --button-shadow: rgba(0, 229, 255, 0.18);
     background: linear-gradient(135deg, rgba(0, 229, 255, 0.12), rgba(58, 123, 255, 0.2));
     color: #eaf7ff;
     border-left: 0;
     padding: 25px;
     box-shadow: 0 0 0 1px rgba(0, 229, 255, 0.14) inset, 0 10px 28px rgba(0, 0, 0, 0.28);
     position: relative;
+}
+
+.mooncore-card {
+    --button-bg: linear-gradient(135deg, rgba(0, 229, 255, 0.18), rgba(61, 124, 255, 0.16));
+    --button-border: rgba(0, 229, 255, 0.3);
+    --button-text: #f3fbff;
+    --button-shadow: rgba(0, 229, 255, 0.18);
+    background: linear-gradient(135deg, rgba(6, 24, 38, 0.98), rgba(10, 34, 55, 0.98));
+    border-color: rgba(0, 229, 255, 0.3);
+}
+
+.mooncore-card::before {
+    background: linear-gradient(180deg, #5cf5ff, rgba(0, 229, 255, 0.2));
+    box-shadow: 0 0 12px rgba(0, 229, 255, 0.2);
+}
+
+.mooncore-card h3 {
+    color: #7fefff;
 }
 
 .mooncore::before {
@@ -501,21 +536,21 @@ nav a.active {
 }
 
 .mooncore button {
-    background-color: #4ea1ff;
-    color: white;
-    border: none;
+    background: var(--button-bg);
+    color: var(--button-text);
+    border: 1px solid var(--button-border);
     border-radius: 999px;
     padding: 10px 18px;
     cursor: pointer;
     font-size: 15px;
     font-weight: 600;
-    box-shadow: 0 4px 10px rgba(78, 161, 255, 0.25);
-    transition: 0.2s;
+    box-shadow: 0 8px 20px var(--button-shadow);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
 }
 
 .mooncore button:hover {
-    background-color: #2c7be5;
     transform: translateY(-2px);
+    border-color: rgba(0, 229, 255, 0.4);
 }
 
 .character {
