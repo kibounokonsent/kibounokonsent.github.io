@@ -503,6 +503,16 @@ if(articleIndexSort === 'updated'){
 
 }
 
+/* ---------------- 全記事一覧 並び替え ---------------- */
+
+function setArticleSort(type){
+
+  articleIndexSort = type;
+
+  renderAllArticles();
+
+}
+
 /* ---------------- 記事ページ ---------------- */
 function renderArticlePage(id){
 
