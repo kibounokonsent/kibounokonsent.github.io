@@ -48,9 +48,26 @@ function iconSvg(key, cls){ return `<svg class="${cls||''}" viewBox="0 0 24 24" 
 function navLinkFor(c){ return `<a href="#/category/${c.key}">${c.name}</a>`; }
 
 function renderNav(){
-  // ヘッダーには主要6カテゴリーを表示
-  const main = ['world','history','tech','mutant','nation','glossary'];
-  document.getElementById('main-nav').innerHTML = main.map(k => navLinkFor(catByKey(k))).join('');
+
+  // ヘッダーには主要カテゴリーを表示
+  const main = [
+    'world',
+    'history',
+    'tech',
+    'mutant',
+    'nation',
+    'glossary'
+  ];
+
+  const nav =
+    main.map(k => navLinkFor(catByKey(k))).join('') +
+    `
+      <a href="#/articles">
+        全記事一覧
+      </a>
+    `;
+
+  document.getElementById('main-nav').innerHTML = nav;
 }
 
 function relatedChip(ref){
