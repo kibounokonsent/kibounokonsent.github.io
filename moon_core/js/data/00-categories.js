@@ -4,7 +4,7 @@
    ============================================================================ */
 const CATEGORIES = [
   {key:'world',     name:'世界概要',     desc:'未来世界という文明の全体像', icon:'globe', color:'#35528C'},
-  {key:'history',   name:'歴史年表',     desc:'文明・国家・技術・災害を年代順に', icon:'clock', renderMode:'timeline', color:'#A9793C'},
+  {key:'history',   name:'歴史',     desc:'文明・国家・技術・災害', icon:'clock', color:'#A9793C',renderMode:'history'},
   {key:'life',      name:'人々の暮らし', desc:'寿命・人生・家族・日常生活', icon:'person', color:'#C97B63'},
   {key:'tech',      name:'科学技術',     desc:'子陽炉、ニューロシンクなど', icon:'chip', color:'#2AA9C4'},
   {key:'substance', name:'特殊物質',     desc:'アナザニウム、フラマニウムほか', icon:'crystal', color:'#7A5FB0'},

@@ -41,8 +41,6 @@ function setBackgroundTheme(theme){
 
 function articleById(id){ return ARTICLES.find(a => a.id === id); }
 function articlesInCat(key){ return ARTICLES.filter(a => a.cat === key); }
-function articleById(id){ return ARTICLES.find(a => a.id === id); }
-function articlesInCat(key){ return ARTICLES.filter(a => a.cat === key); }
 function iconSvg(key, cls){ return `<svg class="${cls||''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[key]||''}</svg>`; }
 
 function navLinkFor(c){ return `<a href="#/category/${c.key}">${c.name}</a>`; }
@@ -214,61 +212,43 @@ function renderCategoryPage(key){
       </div>
     `;
 
-  }else if(c.renderMode==="timeline"){
+}else if(c.renderMode==="history"){
 
-    if(TIMELINE.length===0){
+    const arts = ARTICLES.filter(a=>a.cat==="history");
 
-      body = `
+    body = `
         ${note}
-        <div class="empty-state">
-          年表はまだ登録されていません。<br>
-          出来事は今後追加される予定です。
-        </div>
-      `;
 
-    }else{
+        <div class="hero-cta history-entry">
 
-      body = `
-        ${note}
-        <div class="timeline-list">
+    <a class="btn btn-ghost" href="#/history/timeline">
+        歴史年表を見る
+    </a>
 
-          ${TIMELINE.map(ev=>`
+</div>
 
-            <div class="timeline-item">
+        <div class="article-grid">
 
-              <div class="timeline-dot"></div>
+            ${arts.map(a=>`
 
-              <div class="timeline-content">
+                <a class="article-card" href="#/article/${a.id}">
 
-                <div class="timeline-era">
-                  ${ev.era}
-                  ${
-                    ev.tag
-                    ? `<span class="timeline-tag">${ev.tag}</span>`
-                    : ""
-                  }
-                </div>
+                    <div class="article-card-title">
+                        ${a.title}
+                    </div>
 
-                <div class="timeline-title">
-                  ${ev.title}
-                </div>
+                    <div class="article-card-lede">
+                        ${a.lede}
+                    </div>
 
-                <div class="timeline-desc">
-                  ${ev.desc}
-                </div>
+                </a>
 
-              </div>
-
-            </div>
-
-          `).join("")}
+            `).join("")}
 
         </div>
-      `;
+    `;
 
-    }
-
-  }else{
+}else{
 
     const arts = articlesInCat(key);
 
@@ -289,7 +269,7 @@ function renderCategoryPage(key){
 
         <div class="article-grid">
 
-          ${arts.map(a=>`
+  ${arts.map(a=>`
 
             <a class="article-card"
                href="#/article/${a.id}">
@@ -352,6 +332,133 @@ function renderCategoryPage(key){
     </div>
 
   `;
+
+}
+
+function renderHistoryPage(title, subtitle, body, breadcrumbText){
+
+  document.getElementById("app").innerHTML = `
+
+    <div class="page-header">
+
+      <div class="breadcrumb">
+        <a href="#/">MOON CORE</a>
+        <span>/</span>
+        <a href="#/category/history">歴史</a>
+        <span>/</span>
+        <span>${breadcrumbText}</span>
+      </div>
+
+      <div class="title-block">
+        <span class="cat-badge">HISTORY</span>
+        <h1>${title}</h1>
+        <p class="lede">
+          ${subtitle}
+        </p>
+      </div>
+
+    </div>
+
+    <div class="wrap">
+      ${body}
+    </div>
+
+  `;
+
+}
+
+function renderHistoryArticles(){
+
+  setBackgroundTheme("history");
+  document.getElementById("home-hero").style.display = "none";
+
+  const arts = articlesInCat("history");
+
+  const body = arts.length === 0
+    ? `
+      <div class="empty-state">
+        歴史記事はまだありません。
+      </div>
+    `
+    : `
+      <div class="article-grid">
+
+        ${arts.map(a=>`
+
+          <a class="article-card"
+             href="#/article/${a.id}">
+
+            <div class="article-card-title">
+              ${a.title}
+            </div>
+
+            <div class="article-card-lede">
+              ${a.lede}
+            </div>
+
+          </a>
+
+        `).join("")}
+
+      </div>
+    `;
+
+  renderHistoryPage("歴史記事","世界史を詳しく解説した資料一覧です。", body, "歴史記事");
+
+}
+
+function renderHistoryTimeline(){
+
+  setBackgroundTheme("history");
+  document.getElementById("home-hero").style.display = "none";
+
+  let body = "";
+
+  if(TIMELINE.length === 0){
+
+    body = `
+      <div class="empty-state">
+        年表はまだありません。
+      </div>
+    `;
+
+  }else{
+
+    body = `
+      <div class="timeline-list">
+
+        ${TIMELINE.map(ev=>`
+
+          <div class="timeline-item">
+
+            <div class="timeline-dot"></div>
+
+            <div class="timeline-content">
+
+              <div class="timeline-era">
+                ${ev.era}
+                ${ev.tag ? `<span class="timeline-tag">${ev.tag}</span>` : ""}
+              </div>
+
+              <div class="timeline-title">
+                ${ev.title}
+              </div>
+
+              <div class="timeline-desc">
+                ${ev.desc}
+              </div>
+
+            </div>
+
+          </div>
+
+        `).join("")}
+
+      </div>
+    `;
+  }
+
+  renderHistoryPage("歴史年表","統合暦の出来事を年代順に閲覧できます。", body, "歴史年表");
 
 }
 
@@ -590,11 +697,19 @@ function router(){
 
   const hash = location.hash;
 
-  if(hash === '#/articles'){
+if(hash === '#/articles'){
 
-    renderAllArticles();
+  renderAllArticles();
 
-  } else if(hash.startsWith('#/article/')){
+} else if(hash === '#/history/articles'){
+
+  renderHistoryArticles();
+
+} else if(hash === '#/history/timeline'){
+
+  renderHistoryTimeline();
+
+} else if(hash.startsWith('#/article/')){
 
     renderArticlePage(hash.replace('#/article/',''));
 

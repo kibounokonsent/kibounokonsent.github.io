@@ -424,7 +424,7 @@ blockquote.warn{border-left-color:var(--danger); color:var(--text-primary);}
 .facility-name{font-weight:700; font-size:14.5px; margin-bottom:4px;}
 .facility-desc{font-size:13.5px; color:var(--text-secondary); line-height:1.85;}
 
-/* ---------- 歴史年表 ---------- */
+/* ---------- 歴史 ---------- */
 .timeline-list{max-width:var(--content-max); position:relative; padding-left:26px; border-left:2px solid var(--border);}
 .timeline-item{position:relative; padding-bottom:34px;}
 .timeline-item:last-child{padding-bottom:0;}
@@ -949,4 +949,23 @@ body.theme-glossary{
 
 .article-index-card.theme-glossary{
   --category-color:#64748B;
+}
+
+.theme-history .history-button{
+    border-color:#B08B57;
+}
+
+.history-entry{
+  margin-bottom:50px;
+}
+
+.history-entry .btn{
+    background:#B08B57;
+    color:#fff;
+    border-color:#B08B57;
+}
+
+.history-entry .btn:hover{
+    background:#8b6b3f;
+    border-color:#8b6b3f;
 }
