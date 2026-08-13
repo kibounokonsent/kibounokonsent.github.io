@@ -10,7 +10,7 @@ ARTICLES.push({
 
   lede:'時計技術を起点に発展した工匠国家。物を単なる道具ではなく、共に時間を過ごす存在として扱い、精密さと耐久性をあらゆる技術へ応用している愛着国家。',
 
-  accentColor:'#B5A27A',
+  accentColor:'#8c00ff',
   flagUrl:'assets/images/nation/flags/ユーレツェア.svg',
 
   sections:[
