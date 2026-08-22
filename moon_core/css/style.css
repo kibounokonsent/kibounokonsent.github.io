@@ -969,3 +969,116 @@ body.theme-glossary{
     background:#8b6b3f;
     border-color:#8b6b3f;
 }
+
+
+.theme-nation .nation-button{
+    border-color:#b0a457;
+}
+
+.nation-entry{
+  margin-bottom:50px;
+}
+
+.nation-entry .btn{
+    background:#b0a457;
+    color:#fff;
+    border-color:#b0a457;
+}
+
+.nation-entry .btn:hover{
+    background:#b0a457;
+    border-color:#b0a457;
+}
+
+/* ===========================
+   世界地図
+=========================== */
+
+.world-map-wrap{
+  max-width:var(--max);
+  margin:0 auto;
+  padding:48px 32px 100px;
+}
+
+.world-map-card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  padding:24px;
+  box-shadow:var(--shadow-md);
+  overflow:hidden;
+}
+
+.world-map-image{
+  width:100%;
+  height:auto;
+  display:block;
+  border-radius:var(--radius-md);
+}
+
+.world-map-note{
+  margin-top:18px;
+  padding:20px 22px;
+  background:var(--surface-alt);
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  color:var(--text-secondary);
+}
+
+.world-map-note-title{
+  margin-bottom:8px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:11px;
+  letter-spacing:.14em;
+  color:var(--accent-signal);
+}
+
+.world-map-note p{
+  font-size:13.5px;
+  line-height:1.9;
+}
+
+@media (max-width:640px){
+
+  .world-map-wrap{
+    padding:32px 20px 80px;
+  }
+
+  .world-map-card{
+    padding:12px;
+  }
+
+}
+
+.world-map-image {
+  display: block;
+  width: 100%;
+  max-width: 900px;
+  height: auto;
+  margin: 0 auto;
+}
+
+.climate-card{
+  margin-top:24px;
+  padding:24px;
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+  box-shadow:var(--shadow-sm);
+  overflow:hidden;
+}
+
+.climate-card img,
+.climate-card canvas,
+.climate-card svg{
+  display:block;
+  width:100%;
+  max-width:100%;
+  height:auto;
+}
+
+@media (max-width:640px){
+  .climate-card{
+    padding:16px;
+  }
+}

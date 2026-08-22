@@ -156,6 +156,125 @@ function renderHome(){
   initCardObserver();
 }
 
+function renderClimateChart(countryId){
+
+  const data = CLIMATE_DATA[countryId];
+
+  if(!data) return "";
+
+  const width = 760;
+  const height = 360;
+
+  const chartLeft = 60;
+  const chartRight = 700;
+  const chartTop = 30;
+  const chartBottom = 290;
+
+  const chartWidth = chartRight - chartLeft;
+  const chartHeight = chartBottom - chartTop;
+
+  const maxRain = 300;
+  const minTemp = -20;
+  const maxTemp = 40;
+
+  const monthWidth = chartWidth / 12;
+
+  let svg = `
+    <svg
+      class="climate-chart"
+      viewBox="0 0 ${width} ${height}"
+      role="img"
+      aria-label="${data.name}の雨温図"
+    >
+  `;
+
+  /* 降水量の棒 */
+
+  data.months.forEach((m, i) => {
+
+    const x =
+      chartLeft +
+      i * monthWidth +
+      monthWidth * 0.2;
+
+    const barWidth = monthWidth * 0.6;
+
+    const barHeight =
+      (m.rain / maxRain) * chartHeight;
+
+    const y =
+      chartBottom - barHeight;
+
+    svg += `
+      <rect
+        x="${x}"
+        y="${y}"
+        width="${barWidth}"
+        height="${barHeight}"
+        class="climate-rain"
+      />
+    `;
+
+  });
+
+
+  /* 気温の折れ線 */
+
+  const points = data.months.map((m, i) => {
+
+    const x =
+      chartLeft +
+      i * monthWidth +
+      monthWidth / 2;
+
+    const y =
+      chartBottom -
+      ((m.temp - minTemp) /
+      (maxTemp - minTemp)) *
+      chartHeight;
+
+    return `${x},${y}`;
+
+  }).join(" ");
+
+
+  svg += `
+    <polyline
+      points="${points}"
+      class="climate-temp"
+      fill="none"
+    />
+  `;
+
+
+  /* 月 */
+
+  data.months.forEach((m, i) => {
+
+    const x =
+      chartLeft +
+      i * monthWidth +
+      monthWidth / 2;
+
+    svg += `
+      <text
+        x="${x}"
+        y="${chartBottom + 28}"
+        class="climate-month"
+        text-anchor="middle"
+      >
+        ${i + 1}
+      </text>
+    `;
+
+  });
+
+
+  svg += `</svg>`;
+
+  return svg;
+}
+
 /* ---------------- カテゴリーページ ---------------- */
 function renderCategoryPage(key){
 
@@ -212,6 +331,42 @@ function renderCategoryPage(key){
       </div>
     `;
 
+    }else if(c.renderMode==="nation"){
+
+    const arts = ARTICLES.filter(a => a.cat === "nation");
+
+    body = `
+        ${note}
+
+        <div class="hero-cta nation-entry">
+
+            <a class="btn btn-ghost" href="#/world-map">
+                世界地図を見る
+            </a>
+
+        </div>
+
+        <div class="article-grid">
+
+            ${arts.map(a=>`
+
+                <a class="article-card" href="#/article/${a.id}">
+
+                    <div class="article-card-title">
+                        ${a.title}
+                    </div>
+
+                    <div class="article-card-lede">
+                        ${a.lede}
+                    </div>
+
+                </a>
+
+            `).join("")}
+
+        </div>
+    `;
+
 }else if(c.renderMode==="history"){
 
     const arts = ARTICLES.filter(a=>a.cat==="history");
@@ -226,6 +381,7 @@ function renderCategoryPage(key){
     </a>
 
 </div>
+
 
         <div class="article-grid">
 
@@ -403,7 +559,84 @@ function renderHistoryArticles(){
       </div>
     `;
 
-  renderHistoryPage("歴史記事","世界史を詳しく解説した資料一覧です。", body, "歴史記事");
+  renderHistoryPage(
+    "歴史記事",
+    "世界史を詳しく解説した資料一覧です。",
+    body,
+    "歴史記事"
+  );
+
+}
+
+/* ---------------- 世界地図 ---------------- */
+
+function renderWorldMap(){
+
+  setBackgroundTheme("nation");
+  document.getElementById("home-hero").style.display = "none";
+
+  const climateHtml = Object.keys(CLIMATE_DATA)
+    .map(id => renderClimateCard(id))
+    .join("");
+
+  document.getElementById("app").innerHTML = `
+
+    <div class="page-header">
+
+      <div class="breadcrumb">
+        <a href="#/">MOON CORE</a>
+        <span>/</span>
+        <span style="color:var(--text-primary)">
+          世界地図
+        </span>
+      </div>
+
+      <div class="title-block fade-seq">
+
+        <span class="cat-badge">
+          WORLD MAP
+        </span>
+
+        <h1>世界地図</h1>
+
+        <p class="lede">
+          未来世界における各国家の位置関係を確認できます。
+        </p>
+
+      </div>
+
+    </div>
+
+    <div class="wrap world-map-wrap">
+
+      <div class="world-map-card">
+
+        <img
+          src="assets/world-map.svg"
+          alt="未来世界 世界地図"
+          class="world-map-image"
+        >
+
+      </div>
+
+      <div class="world-map-note">
+
+        <div class="world-map-note-title">
+          WORLD MAP
+        </div>
+
+        <p>
+          地図上の国家名や地域については、
+          各国家の資料ページから詳しく確認できます。
+        </p>
+
+      </div>
+
+      ${climateHtml}
+
+    </div>
+
+  `;
 
 }
 
@@ -643,7 +876,10 @@ function renderArticlePage(id){
   const toc = a.sections.map(s => `<a href="#${s.id}">${s.title}</a>`).join('');
   const miniCats = CATEGORIES.map(cc => `<a href="#/category/${cc.key}" class="${cc.key===a.cat?'active':''}">${cc.name}</a>`).join('');
   const sectionsHtml = a.sections.map(s => `<h2 id="${s.id}">${s.title}</h2>${renderBlocks(s.blocks)}`).join('');
-  const related = (a.related||[]).map(relatedChip).join('');
+  const climateHtml = CLIMATE_DATA && CLIMATE_DATA[id] ? renderClimateCard(id) : '';
+const related = (a.related||[]).map(relatedChip).join('');
+
+
   const isNation = a.cat === 'nation';
   const accentStyle = isNation && a.accentColor ? ` style="--nation-accent:${a.accentColor};background:${a.accentColor}11;"` : '';
   const flagHtml = isNation ? `<div class="flag-box">${a.flagUrl ? `<img src="${a.flagUrl}" alt="${a.title}の国旗" onerror="this.parentElement.innerHTML='国旗&lt;br&gt;（未設定）'">` : '国旗<br>（未設定）'}</div>` : '';
@@ -683,14 +919,19 @@ ${imageHtml}
       </aside>
       <div class="article-content">
         <div class="content-card">
-          ${sectionsHtml}
-          ${a.related && a.related.length ? `<h2>関連項目</h2><div class="related-links">${related}</div>` : ''}
-        </div>
+  ${sectionsHtml}
+
+  ${climateHtml}
+
+  ${a.related && a.related.length ? `<h2>関連項目</h2><div class="related-links">${related}</div>` : ''}
+</div>
         <a class="back-top-link" href="#/">← 資料集トップへ戻る</a>
       </div>
     </div>`;
   initScrollSpy();
 }
+
+
 
 /* ---------------- ルーター ---------------- */
 function router(){
@@ -700,6 +941,10 @@ function router(){
 if(hash === '#/articles'){
 
   renderAllArticles();
+
+} else if(hash === '#/world-map'){
+
+  renderWorldMap();
 
 } else if(hash === '#/history/articles'){
 

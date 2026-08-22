@@ -8,7 +8,7 @@ const CATEGORIES = [
   {key:'life',      name:'人々の暮らし', desc:'寿命・人生・家族・日常生活', icon:'person', color:'#C97B63'},
   {key:'tech',      name:'科学技術',     desc:'子陽炉、ニューロシンクなど', icon:'chip', color:'#2AA9C4'},
   {key:'substance', name:'特殊物質',     desc:'アナザニウム、フラマニウムほか', icon:'crystal', color:'#7A5FB0'},
-  {key:'nation',    name:'国家',         desc:'未来世界を構成する国家群', icon:'flag', color:'#C1443C'},
+  {key:'nation', name:'国家', desc:'未来世界を構成する国家群', icon:'flag', renderMode:'nation', color:'#C1443C'},
   {key:'creature',  name:'生物',         desc:'植物・動物・海洋生物の図鑑', icon:'leaf', color:'#3F8F5E'},
   {key:'org',       name:'組織・企業',   desc:'統治機構・研究機関・民間企業', icon:'org', color:'#5B6E8C'},
   {key:'mutant',    name:'変異体',       desc:'文明が生んだ未知の災害', icon:'creature', color:'#7A2E2E'},
