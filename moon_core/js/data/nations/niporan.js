@@ -11,7 +11,7 @@ ARTICLES.push({
   lede:'かつての日本が未来へ発展した姿を持つ龍の国。S.V.H.中央本部を有し、変異体対策において世界を支える国家。',
 
   accentColor:'#B71C1C',
-  flagUrl:'assets/images/nation/flags/ニポラン.svg',
+  flagUrl:'assets/images/nation/flags/二ポラン.svg',
 
   sections:[
     {id:'sec-overview', title:'概要', blocks:[

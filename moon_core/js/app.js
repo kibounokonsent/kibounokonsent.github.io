@@ -174,12 +174,16 @@ function renderHome(){
     </a>`;
 }).join('');
 
-  const recent = ARTICLES.slice(0, 6).map(a => `
+  const recent = [...ARTICLES]
+  .sort((a, b) => new Date(b.updated) - new Date(a.updated))
+  .slice(0, 6)
+  .map(a => `
     <a class="update-row" href="#/article/${a.id}">
       <span class="update-date">${a.updated}</span>
       <span class="update-name">${a.title}</span>
       <span class="update-cat">${catByKey(a.cat).name}</span>
-    </a>`).join('');
+    </a>
+  `).join('');
 
   document.getElementById('app').innerHTML = `
     <section class="section">
