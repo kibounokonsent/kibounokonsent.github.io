@@ -953,3 +953,7 @@ nav a.active {
     margin: 20px auto;
     cursor: pointer;
 }
+
+.gallery > .art-card {
+    margin-bottom: 32px;
+}
