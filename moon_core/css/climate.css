@@ -1,0 +1,540 @@
+/* ==========================================================================
+   CLIMATE — 気候・環境情報
+   ========================================================================== */
+
+
+/* ==========================================================================
+   全体
+   ========================================================================== */
+
+.climate-card{
+  width:100%;
+  margin-top:20px;
+  padding:20px;
+
+  background:var(--surface);
+
+  border:1px solid var(--border);
+  border-radius:var(--radius-md);
+
+  box-shadow:var(--shadow-sm);
+}
+
+
+/* ==========================================================================
+   ヘッダー
+   ========================================================================== */
+
+.climate-card-header{
+  margin-bottom:18px;
+  padding:2px 4px 14px;
+
+  border-bottom:1px solid var(--border);
+}
+
+.climate-card-label{
+  display:block;
+  margin-bottom:4px;
+
+  color:var(--accent-signal);
+
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+  font-weight:500;
+
+  letter-spacing:.16em;
+}
+
+.climate-card-header h2{
+  margin:0;
+
+  color:var(--text-primary);
+
+  font-family:'Noto Serif JP',serif;
+  font-size:22px;
+  font-weight:700;
+
+  line-height:1.45;
+}
+
+
+/* ==========================================================================
+   パネルレイアウト
+   ========================================================================== */
+
+.climate-layout{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:12px;
+}
+
+
+/* ==========================================================================
+   パネルカード
+   ========================================================================== */
+
+.climate-panel{
+  min-width:0;
+
+  padding:18px;
+
+  background:var(--surface-alt);
+
+  border:1px solid var(--border);
+  border-radius:var(--radius-sm);
+}
+
+
+/* ==========================================================================
+   パネル見出し
+   ========================================================================== */
+
+.climate-panel-header{
+  margin-bottom:14px;
+  padding-bottom:10px;
+
+  border-bottom:1px solid var(--border);
+}
+
+.climate-panel-header span{
+  display:block;
+  margin-bottom:4px;
+
+  color:var(--text-tertiary);
+
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+  font-weight:500;
+
+  letter-spacing:.12em;
+  line-height:1.3;
+}
+
+.climate-panel-header h3{
+  margin:0;
+
+  color:var(--text-primary);
+
+  font-family:'Noto Serif JP',serif;
+  font-size:17px;
+  font-weight:700;
+
+  line-height:1.45;
+}
+
+
+/* ==========================================================================
+   気候概要
+   ========================================================================== */
+
+.climate-info-grid{
+  display:grid;
+
+  grid-template-columns:
+    repeat(2,minmax(0,1fr));
+
+  gap:0 22px;
+}
+
+.climate-info{
+  display:grid;
+
+  grid-template-columns:
+    86px minmax(0,1fr);
+
+  align-items:baseline;
+
+  min-width:0;
+
+  padding:8px 0;
+
+  border-bottom:1px solid var(--border);
+}
+
+.climate-info span{
+  color:var(--text-tertiary);
+
+  font-size:11px;
+  line-height:1.5;
+
+  white-space:nowrap;
+}
+
+.climate-info strong{
+  min-width:0;
+
+  color:var(--text-primary);
+
+  font-size:13px;
+  font-weight:600;
+
+  line-height:1.55;
+
+  overflow-wrap:anywhere;
+}
+
+
+/* ==========================================================================
+   本文
+   ========================================================================== */
+
+.climate-panel p{
+  margin:0;
+
+  color:var(--text-secondary);
+
+  font-size:13px;
+  line-height:1.8;
+}
+
+
+/* ==========================================================================
+   メタ情報
+   ========================================================================== */
+
+.climate-meta{
+  margin-top:15px;
+  padding-top:12px;
+
+  border-top:1px solid var(--border);
+}
+
+.climate-meta > span{
+  display:block;
+  margin-bottom:6px;
+
+  color:var(--text-tertiary);
+
+  font-family:'JetBrains Mono',monospace;
+  font-size:9px;
+
+  letter-spacing:.06em;
+}
+
+.climate-meta > strong{
+  display:block;
+
+  color:var(--text-primary);
+
+  font-size:12px;
+  font-weight:600;
+
+  line-height:1.6;
+
+  overflow-wrap:anywhere;
+}
+
+
+/* ==========================================================================
+   地形
+   ========================================================================== */
+
+.climate-meta ul{
+  display:flex;
+  flex-wrap:wrap;
+  gap:5px;
+
+  margin:0;
+  padding:0;
+
+  list-style:none;
+}
+
+.climate-meta li{
+  padding:4px 8px;
+
+  color:var(--text-secondary);
+
+  background:var(--surface);
+
+  border:1px solid var(--border);
+  border-radius:4px;
+
+  font-size:11px;
+  line-height:1.4;
+}
+
+
+/* ==========================================================================
+   気候要因・自然災害
+   ========================================================================== */
+
+.climate-tag-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+
+  margin:0;
+  padding:0;
+
+  list-style:none;
+}
+
+.climate-tag-list li{
+  padding:6px 10px;
+
+  color:var(--text-secondary);
+
+  background:var(--surface);
+
+  border:1px solid var(--border);
+  border-radius:4px;
+
+  font-size:12px;
+  line-height:1.45;
+}
+
+
+/* ==========================================================================
+   雨温図
+   ========================================================================== */
+
+.climate-chart-panel{
+  min-width:0;
+}
+
+.climate-chart-svg{
+  display:block;
+
+  width:100%;
+  max-width:none;
+  height:auto;
+
+  margin:0;
+}
+
+
+/* ==========================================================================
+   雨温図 — グラフ
+   ========================================================================== */
+
+.climate-grid{
+  opacity:.06;
+}
+
+.climate-grid-line{
+  stroke:var(--border);
+  stroke-width:1;
+  opacity:.7;
+}
+
+.climate-axis{
+  stroke:var(--text-tertiary);
+  stroke-width:1;
+  opacity:.65;
+}
+
+.climate-axis-label{
+  fill:var(--text-tertiary);
+
+  font-family:'Noto Sans JP',sans-serif;
+  font-size:11px;
+}
+
+.climate-scale{
+  fill:var(--text-tertiary);
+
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+}
+
+.climate-month{
+  fill:var(--text-tertiary);
+
+  font-family:'JetBrains Mono',monospace;
+  font-size:10px;
+}
+
+
+/* ==========================================================================
+   降水量
+   ========================================================================== */
+
+.climate-rain{
+  fill:#3B82F6;
+  opacity:.22;
+
+  transition:opacity .2s ease;
+}
+
+.climate-rain:hover{
+  opacity:.36;
+}
+
+
+/* ==========================================================================
+   気温
+   ========================================================================== */
+
+.climate-temp{
+  fill:none;
+
+  stroke:#EF4444;
+  stroke-width:2.5;
+
+  stroke-linecap:round;
+  stroke-linejoin:round;
+}
+
+.climate-temp-point{
+  fill:var(--surface-alt);
+
+  stroke:#EF4444;
+  stroke-width:2;
+}
+
+
+/* ==========================================================================
+   気候の特徴
+   ========================================================================== */
+
+.climate-characteristics{
+  grid-column:1 / -1;
+
+  padding:18px;
+}
+
+.climate-characteristics-list{
+  margin:0;
+  padding:0;
+
+  list-style:none;
+}
+
+.climate-characteristics-list li{
+  position:relative;
+
+  margin:0;
+  padding:8px 0 8px 19px;
+
+  color:var(--text-secondary);
+
+  font-size:13px;
+  line-height:1.7;
+}
+
+.climate-characteristics-list li + li{
+  border-top:1px solid var(--border);
+}
+
+.climate-characteristics-list li::before{
+  content:'';
+
+  position:absolute;
+
+  left:3px;
+  top:16px;
+
+  width:6px;
+  height:6px;
+
+  background:var(--accent-signal);
+  border-radius:50%;
+}
+
+
+/* ==========================================================================
+   PC
+   ========================================================================== */
+
+@media (min-width:1100px){
+
+  .climate-card{
+    padding:22px;
+  }
+
+  .climate-layout{
+    gap:14px;
+  }
+
+  .climate-panel{
+    padding:20px;
+  }
+
+}
+
+
+/* ==========================================================================
+   タブレット
+   ========================================================================== */
+
+@media (max-width:760px){
+
+  .climate-card{
+    padding:16px;
+  }
+
+  .climate-layout{
+    grid-template-columns:1fr;
+    gap:10px;
+  }
+
+  .climate-characteristics{
+    grid-column:auto;
+  }
+
+  .climate-info-grid{
+    grid-template-columns:
+      repeat(2,minmax(0,1fr));
+  }
+
+}
+
+
+/* ==========================================================================
+   スマートフォン
+   ========================================================================== */
+
+@media (max-width:480px){
+
+  .climate-card{
+    margin-top:14px;
+    padding:12px;
+  }
+
+  .climate-card-header{
+    padding:2px 2px 12px;
+  }
+
+  .climate-card-header h2{
+    font-size:19px;
+  }
+
+  .climate-panel{
+    padding:15px;
+  }
+
+  .climate-panel-header h3{
+    font-size:16px;
+  }
+
+  .climate-info-grid{
+    grid-template-columns:1fr;
+  }
+
+  .climate-info{
+    grid-template-columns:
+      88px minmax(0,1fr);
+  }
+
+  .climate-info strong{
+    font-size:12px;
+  }
+
+  .climate-panel p{
+    font-size:12px;
+  }
+
+  .climate-axis-label{
+    font-size:9px;
+  }
+
+  .climate-scale,
+  .climate-month{
+    font-size:8px;
+  }
+
+}

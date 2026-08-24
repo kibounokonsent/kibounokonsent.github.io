@@ -43,23 +43,57 @@ function articleById(id){ return ARTICLES.find(a => a.id === id); }
 function articlesInCat(key){ return ARTICLES.filter(a => a.cat === key); }
 function iconSvg(key, cls){ return `<svg class="${cls||''}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round">${ICONS[key]||''}</svg>`; }
 
-function navLinkFor(c){ return `<a href="#/category/${c.key}">${c.name}</a>`; }
+function navLinkFor(c){
+  return `<a href="#/category/${c.key}" style="--nav-color:${c.color};">${c.name}</a>`;
+}
 
 function renderNav(){
 
-  // ヘッダーには主要カテゴリーを表示
+  // ヘッダーに常時表示する主要カテゴリー
   const main = [
     'world',
     'history',
     'tech',
     'mutant',
-    'nation',
-    'glossary'
+    'nation'
   ];
+
+  // その他に入れるカテゴリー
+  const others = [
+  'life',
+  'substance',
+  'creature',
+  'org',
+  'culture',
+  'law',
+  'glossary'
+];
 
   const nav =
     main.map(k => navLinkFor(catByKey(k))).join('') +
+
     `
+      <div class="nav-dropdown">
+        <button
+  type="button"
+  class="nav-dropdown-btn"
+  onclick="toggleNavDropdown(event)"
+>
+  その他
+  <svg viewBox="0 0 24 24" fill="none"
+       stroke="currentColor"
+       stroke-width="2"
+       stroke-linecap="round"
+       stroke-linejoin="round">
+    <polyline points="6 9 12 15 18 9"></polyline>
+  </svg>
+</button>
+
+        <div class="nav-dropdown-menu">
+          ${others.map(k => navLinkFor(catByKey(k))).join('')}
+        </div>
+      </div>
+
       <a href="#/articles">
         全記事一覧
       </a>
@@ -67,6 +101,17 @@ function renderNav(){
 
   document.getElementById('main-nav').innerHTML = nav;
 }
+function toggleNavDropdown(event){
+  event.stopPropagation();
+
+  const dropdown = event.currentTarget.parentElement;
+  dropdown.classList.toggle('open');
+}
+
+document.addEventListener('click', () => {
+  document.querySelectorAll('.nav-dropdown.open')
+    .forEach(el => el.classList.remove('open'));
+});
 
 function relatedChip(ref){
   const a = articleById(ref);
@@ -113,15 +158,21 @@ function renderHome(){
 
   document.getElementById('home-hero').style.display = 'block';
   const grid = CATEGORIES.map(c => {
-    const count = c.renderMode === 'glossary' ? GLOSSARY.length : (c.renderMode === 'timeline' ? TIMELINE.length : articlesInCat(c.key).length);
-    return `
-    <a class="cat-card" href="#/category/${c.key}">
+  const count =
+    c.renderMode === 'glossary'
+      ? GLOSSARY.length
+      : (c.renderMode === 'timeline'
+          ? TIMELINE.length
+          : articlesInCat(c.key).length);
+
+  return `
+    <a class="cat-card theme-${c.key}" href="#/category/${c.key}">
       <div class="cat-icon">${iconSvg(c.icon)}</div>
       <div class="cat-name">${c.name}</div>
       <div class="cat-desc">${c.desc}</div>
       <div class="cat-count">${count}項目</div>
     </a>`;
-  }).join('');
+}).join('');
 
   const recent = ARTICLES.slice(0, 6).map(a => `
     <a class="update-row" href="#/article/${a.id}">
@@ -154,125 +205,6 @@ function renderHome(){
       </div>
     </section>`;
   initCardObserver();
-}
-
-function renderClimateChart(countryId){
-
-  const data = CLIMATE_DATA[countryId];
-
-  if(!data) return "";
-
-  const width = 760;
-  const height = 360;
-
-  const chartLeft = 60;
-  const chartRight = 700;
-  const chartTop = 30;
-  const chartBottom = 290;
-
-  const chartWidth = chartRight - chartLeft;
-  const chartHeight = chartBottom - chartTop;
-
-  const maxRain = 300;
-  const minTemp = -20;
-  const maxTemp = 40;
-
-  const monthWidth = chartWidth / 12;
-
-  let svg = `
-    <svg
-      class="climate-chart"
-      viewBox="0 0 ${width} ${height}"
-      role="img"
-      aria-label="${data.name}の雨温図"
-    >
-  `;
-
-  /* 降水量の棒 */
-
-  data.months.forEach((m, i) => {
-
-    const x =
-      chartLeft +
-      i * monthWidth +
-      monthWidth * 0.2;
-
-    const barWidth = monthWidth * 0.6;
-
-    const barHeight =
-      (m.rain / maxRain) * chartHeight;
-
-    const y =
-      chartBottom - barHeight;
-
-    svg += `
-      <rect
-        x="${x}"
-        y="${y}"
-        width="${barWidth}"
-        height="${barHeight}"
-        class="climate-rain"
-      />
-    `;
-
-  });
-
-
-  /* 気温の折れ線 */
-
-  const points = data.months.map((m, i) => {
-
-    const x =
-      chartLeft +
-      i * monthWidth +
-      monthWidth / 2;
-
-    const y =
-      chartBottom -
-      ((m.temp - minTemp) /
-      (maxTemp - minTemp)) *
-      chartHeight;
-
-    return `${x},${y}`;
-
-  }).join(" ");
-
-
-  svg += `
-    <polyline
-      points="${points}"
-      class="climate-temp"
-      fill="none"
-    />
-  `;
-
-
-  /* 月 */
-
-  data.months.forEach((m, i) => {
-
-    const x =
-      chartLeft +
-      i * monthWidth +
-      monthWidth / 2;
-
-    svg += `
-      <text
-        x="${x}"
-        y="${chartBottom + 28}"
-        class="climate-month"
-        text-anchor="middle"
-      >
-        ${i + 1}
-      </text>
-    `;
-
-  });
-
-
-  svg += `</svg>`;
-
-  return svg;
 }
 
 /* ---------------- カテゴリーページ ---------------- */
@@ -338,13 +270,11 @@ function renderCategoryPage(key){
     body = `
         ${note}
 
-        <div class="hero-cta nation-entry">
-
-            <a class="btn btn-ghost" href="#/world-map">
-                世界地図を見る
-            </a>
-
-        </div>
+        <div class="category-actions nation-entry">
+    <a class="btn btn-ghost nation-button" href="#/world-map">
+        世界地図を見る
+    </a>
+</div>
 
         <div class="article-grid">
 
@@ -374,12 +304,10 @@ function renderCategoryPage(key){
     body = `
         ${note}
 
-        <div class="hero-cta history-entry">
-
+        <div class="category-actions history-entry">
     <a class="btn btn-ghost" href="#/history/timeline">
         歴史年表を見る
     </a>
-
 </div>
 
 
@@ -876,7 +804,7 @@ function renderArticlePage(id){
   const toc = a.sections.map(s => `<a href="#${s.id}">${s.title}</a>`).join('');
   const miniCats = CATEGORIES.map(cc => `<a href="#/category/${cc.key}" class="${cc.key===a.cat?'active':''}">${cc.name}</a>`).join('');
   const sectionsHtml = a.sections.map(s => `<h2 id="${s.id}">${s.title}</h2>${renderBlocks(s.blocks)}`).join('');
-  const climateHtml = CLIMATE_DATA && CLIMATE_DATA[id] ? renderClimateCard(id) : '';
+
 const related = (a.related||[]).map(relatedChip).join('');
 
 
@@ -921,7 +849,6 @@ ${imageHtml}
         <div class="content-card">
   ${sectionsHtml}
 
-  ${climateHtml}
 
   ${a.related && a.related.length ? `<h2>関連項目</h2><div class="related-links">${related}</div>` : ''}
 </div>
@@ -1025,7 +952,15 @@ document.addEventListener('keydown', (e) => {
 function toggleTheme(){
   const html = document.documentElement;
   html.setAttribute('data-theme', html.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
-}
+
+const heroLogo = document.getElementById('hero-logo');
+
+if (heroLogo) {
+    heroLogo.src =
+        document.documentElement.dataset.theme === 'dark'
+        ? 'assets/mooncore4.svg'
+        : 'assets/mooncore3.svg';
+}}
 
 /* ---------------- カードのフェードイン ---------------- */
 function initCardObserver(){

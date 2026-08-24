@@ -151,49 +151,56 @@
 
         <div class="hero-inner fade-seq">
 
+            <!-- ロゴ -->
             <img
                 class="hero-logo"
-                src="assets/mooncore.svg"
-                alt="MOON CORE">
+                src="assets/mooncore3.svg"
+                alt="MOON CORE"
+                id="hero-logo"
+            >
 
+            <!-- サブタイトル -->
             <div class="hero-eyebrow">
                 <span class="dot"></span>
                 公式設定資料集・全文検索可能
             </div>
 
-            <h1>MOON CORE</h1>
-
+            <!-- 世界観 -->
             <p class="hero-quote">
                 「この世界は理想郷でも、終末世界でもない。<br>
                 便利になったからこそ、新たな問題を抱えた人類の未来。<br>
                 それが、この『未来世界』である。」
             </p>
 
+            <!-- 資料集の説明 -->
             <p class="hero-desc">
                 本資料集は未来世界の文明・国家・技術・文化などをまとめた公式設定資料集です。
             </p>
 
+            <!-- ナビゲーション -->
             <div class="hero-cta">
-                <a class="btn btn-primary" href="#/article/world-overview">
+
+                <a
+                    class="btn btn-primary"
+                    href="#/article/world-overview"
+                >
                     「未来世界」とはを読む
                 </a>
 
                 <a
                     class="btn btn-ghost"
                     href="#"
-                    onclick="event.preventDefault();openSearch();">
-
+                    onclick="event.preventDefault();openSearch();"
+                >
                     資料集を検索する
-
                 </a>
 
-    <a class="btn btn-ghost" href="#/articles">
-        全記事一覧
-    </a>
-
-    <div class="index-sort">
-
-</div>
+                <a
+                    class="btn btn-ghost"
+                    href="#/articles"
+                >
+                    全記事一覧
+                </a>
 
             </div>
 
@@ -211,6 +218,7 @@
     本サイトはフィクション作品「未来世界」の設定資料集です
 </footer>
 
+<link rel="stylesheet" href="css/climate.css">
 <script src="js/data/00-categories.js"></script>
 <script src="js/climate.js"></script>
 <script src="js/data/articles-world-life.js"></script>
