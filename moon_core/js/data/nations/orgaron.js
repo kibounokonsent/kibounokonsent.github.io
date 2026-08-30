@@ -26,7 +26,7 @@ ARTICLES.push({
           items:[
             {label:'スローガン', value:'創造'},
             {label:'特性', value:'芸術・思想・創造文化の中心国家'},
-            {label:'名称', value:'芸術国家'},
+            {label:'名称', value:'継承国家'},
             {label:'シンボル', value:'未完の創造'},
             {label:'元首', value:'バララ・オーネス'},
             {label:'首都', value:'フォルネータ'},

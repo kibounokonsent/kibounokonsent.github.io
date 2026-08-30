@@ -1487,6 +1487,28 @@ body.theme-glossary{
     border-color:#8b6b3f;
 }
 
+/* ---------- 暮らし：カレンダー ---------- */
+
+.theme-life .calendar-button{
+    border-color:#52B788;
+}
+
+.life-entry{
+    margin-bottom:50px;
+}
+
+.life-entry .btn{
+    background:#52B788;
+    color:#fff;
+    border-color:#52B788;
+}
+
+.life-entry .btn:hover{
+    background:#3F8F6A;
+    border-color:#3F8F6A;
+}
+
+
 .theme-nation .nation-button{
     border-color:#A84D78;
 }

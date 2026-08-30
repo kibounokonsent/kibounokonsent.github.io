@@ -336,6 +336,40 @@ function renderCategoryPage(key){
         </div>
     `;
 
+}else if(c.renderMode==="life"){
+
+    const arts = ARTICLES.filter(a => a.cat === "life");
+
+    body = `
+        ${note}
+
+        <div class="category-actions life-entry">
+    <a class="btn btn-ghost calendar-button" href="#/calendar">
+        世界カレンダーを見る
+    </a>
+</div>
+
+        <div class="article-grid">
+
+            ${arts.map(a=>`
+
+                <a class="article-card" href="#/article/${a.id}">
+
+                    <div class="article-card-title">
+                        ${a.title}
+                    </div>
+
+                    <div class="article-card-lede">
+                        ${a.lede}
+                    </div>
+
+                </a>
+
+            `).join("")}
+
+        </div>
+    `;
+
 }else{
 
     const arts = articlesInCat(key);
@@ -872,6 +906,12 @@ function router(){
 if(hash === '#/articles'){
 
   renderAllArticles();
+
+} else if(hash === '#/calendar'){
+
+  setBackgroundTheme(null);
+  document.getElementById('home-hero').style.display = 'none';
+  renderCalendarPage(document.getElementById('app'));
 
 } else if(hash === '#/world-map'){
 
