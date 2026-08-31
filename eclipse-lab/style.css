@@ -1,0 +1,1968 @@
+/* ==========================================================
+   ECLIPSE LAB
+   Archive System v2
+========================================================== */
+
+
+/* ==========================================================
+   RESET
+========================================================== */
+
+*{
+
+    margin:0;
+    padding:0;
+
+    box-sizing:border-box;
+
+}
+
+html,
+body{
+
+    width:100%;
+    height:100%;
+
+}
+
+body{
+
+    background:
+    radial-gradient(circle at top,
+    #1b1b1b 0%,
+    #0f0f0f 45%,
+    #050505 100%);
+
+    color:#f2f2f2;
+
+    font-family:
+
+    "Segoe UI",
+    "Yu Gothic UI",
+    sans-serif;
+
+    overflow:hidden;
+
+}
+
+
+/* ==========================================================
+   CRT EFFECT
+========================================================== */
+
+body::before{
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    pointer-events:none;
+
+    opacity:.05;
+
+    background:
+
+    repeating-linear-gradient(
+
+    transparent 0px,
+
+    transparent 3px,
+
+    rgba(255,255,255,.5) 4px
+
+    );
+
+}
+
+
+/* ==========================================================
+   COMMON
+========================================================== */
+
+.hidden{
+
+    display:none !important;
+
+}
+
+section{
+
+    width:100%;
+    height:100vh;
+
+}
+
+button{
+
+    cursor:pointer;
+
+}
+
+input,
+button{
+
+    font-family:inherit;
+
+}
+
+
+/* ==========================================================
+   ANIMATION
+========================================================== */
+
+@keyframes fadeIn{
+
+    from{
+
+        opacity:0;
+
+    }
+
+    to{
+
+        opacity:1;
+
+    }
+
+}
+
+@keyframes fadeUp{
+
+    from{
+
+        opacity:0;
+
+        transform:
+
+        translateY(15px);
+
+    }
+
+    to{
+
+        opacity:1;
+
+        transform:
+
+        translateY(0);
+
+    }
+
+}
+
+@keyframes blink{
+
+    50%{
+
+        opacity:.25;
+
+    }
+
+}
+
+
+/* ==========================================================
+   BOOT
+========================================================== */
+
+#boot-screen{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    animation:fadeIn .7s;
+
+}
+
+.boot-window{
+
+    width:760px;
+
+    max-width:92%;
+
+}
+
+.boot-header{
+
+    margin-bottom:45px;
+
+    text-align:center;
+
+}
+
+.boot-header h1{
+
+    font-size:52px;
+
+    font-weight:200;
+
+    letter-spacing:12px;
+
+}
+
+.boot-header p{
+
+    margin-top:12px;
+
+    color:#888;
+
+    letter-spacing:4px;
+
+}
+
+.progress{
+
+    width:100%;
+
+    height:4px;
+
+    background:#222;
+
+    overflow:hidden;
+
+}
+
+#progress-bar{
+
+    width:0%;
+
+    height:100%;
+
+    background:white;
+
+    transition:.15s;
+
+}
+
+.boot-info{
+
+    margin-top:25px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    color:#999;
+
+}
+
+#boot-percent{
+
+    font-size:30px;
+
+    font-weight:200;
+
+}
+
+#boot-log{
+
+    margin-top:45px;
+
+    height:170px;
+
+    overflow:hidden;
+
+    font-family:
+
+    Consolas,
+    monospace;
+
+    font-size:14px;
+
+    color:#66ff66;
+
+    line-height:1.6;
+
+}
+
+
+/* ==========================================================
+   WELCOME
+========================================================== */
+
+
+#welcome-screen{
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    text-align:center;
+
+}
+
+
+
+
+.welcome-window{
+
+    animation:fadeUp .8s ease;
+
+}
+
+
+
+
+
+
+/* ==========================================================
+   LOGO
+========================================================== */
+
+
+#logo-area{
+
+    width:300px;
+
+    height:300px;
+
+    margin:40px auto;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+
+
+
+.eclipse-logo{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:contain;
+
+    opacity:0;
+
+
+    animation:
+
+        logoAppear 1.5s ease forwards,
+
+        logoGlow 3s ease-in-out infinite alternate;
+
+
+}
+
+
+
+
+
+
+
+/* ==========================================================
+   TITLE
+========================================================== */
+
+
+#welcome-title{
+
+
+    font-size:58px;
+
+    font-weight:200;
+
+    letter-spacing:14px;
+
+    color:#bcbcbc;
+
+
+    margin:0;
+
+
+}
+
+
+
+
+
+
+/* ==========================================================
+   SUBTITLE
+========================================================== */
+
+
+#welcome-subtitle{
+
+
+    color:#888;
+
+    margin-top:15px;
+
+    letter-spacing:4px;
+
+
+}
+
+
+
+
+
+
+/* ==========================================================
+   LAUNCH MESSAGE
+========================================================== */
+
+
+#launch-message{
+
+
+    color:white;
+
+    margin-top:60px;
+
+    letter-spacing:4px;
+
+    animation:blink 1s infinite;
+
+
+}
+
+
+
+
+
+
+
+/* ==========================================================
+   ANIMATION
+========================================================== */
+
+
+@keyframes logoAppear{
+
+
+    from{
+
+        opacity:0;
+
+        transform:
+
+            scale(.8);
+
+    }
+
+
+    to{
+
+        opacity:1;
+
+        transform:
+
+            scale(1);
+
+    }
+
+
+}
+
+
+
+
+@keyframes logoGlow{
+
+
+    from{
+
+
+        filter:
+
+        drop-shadow(
+
+            0 0 5px
+
+            rgba(0,180,255,.3)
+
+        );
+
+
+    }
+
+
+    to{
+
+
+        filter:
+
+        drop-shadow(
+
+            0 0 25px
+
+            rgba(0,180,255,.8)
+
+        );
+
+
+    }
+
+
+}
+
+
+
+
+
+@keyframes blink{
+
+
+    50%{
+
+        opacity:.3;
+
+    }
+
+
+}
+/* ==========================================================
+   LOGIN
+========================================================== */
+
+#auth-screen{
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+}
+
+.auth-window{
+
+    width:500px;
+    max-width:90%;
+
+    padding:40px;
+
+    background:rgba(255,255,255,.02);
+
+    border:1px solid #2b2b2b;
+
+    backdrop-filter:blur(6px);
+
+}
+
+.auth-header{
+
+    margin-bottom:35px;
+
+}
+
+.auth-header h2{
+
+    font-size:34px;
+
+    font-weight:200;
+
+    letter-spacing:8px;
+
+}
+
+.auth-header p{
+
+    margin-top:10px;
+
+    color:#888;
+
+}
+
+.input-group{
+
+    margin-bottom:25px;
+
+}
+
+.input-group label{
+
+    display:block;
+
+    color:#999;
+
+    margin-bottom:8px;
+
+    letter-spacing:2px;
+
+}
+
+.input-group input{
+
+    width:100%;
+
+    padding:15px;
+
+    background:#111;
+
+    color:white;
+
+    border:1px solid #444;
+
+    outline:none;
+
+    transition:.25s;
+
+}
+
+.input-group input:focus{
+
+    border-color:white;
+
+}
+
+#authorize{
+
+    width:100%;
+
+    padding:15px;
+
+    background:white;
+
+    color:black;
+
+    border:none;
+
+    margin-top:15px;
+
+    transition:.2s;
+
+}
+
+#authorize:hover{
+
+    background:#ddd;
+
+}
+
+#auth-status{
+
+    margin-top:25px;
+
+    color:#888;
+
+    text-align:center;
+
+}
+
+
+
+/* ==========================================================
+   CONSOLE
+========================================================== */
+
+#console-screen{
+
+    display:flex;
+    justify-content:center;
+    align-items:center;
+
+}
+
+.console-window{
+
+    width:85%;
+    height:80%;
+
+    border:1px solid #333;
+
+    background:#050505;
+
+}
+
+.console-header{
+
+    height:45px;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 20px;
+
+    border-bottom:1px solid #222;
+
+    color:#888;
+
+}
+
+#console-log{
+
+    height:calc(100% - 45px);
+
+    overflow:hidden;
+
+    padding:20px;
+
+    font-family:Consolas,monospace;
+
+    color:#67ff67;
+
+    line-height:1.6;
+
+}
+
+
+
+/* ==========================================================
+   EXPLORER
+========================================================== */
+
+#explorer-screen{
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+
+/* ---------- Header ---------- */
+
+#topbar{
+
+    height:72px;
+
+    background:#0d0d0d;
+
+    border-bottom:1px solid #222;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 25px;
+
+}
+
+.header-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:20px;
+
+}
+
+#header-logo{
+
+    width:45px;
+
+    height:45px;
+
+}
+
+.header-left h2{
+
+    font-weight:300;
+
+    letter-spacing:5px;
+
+}
+
+.header-left small{
+
+    color:#888;
+
+}
+
+.header-right{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:25px;
+
+    color:#aaa;
+
+}
+
+#switch-user{
+
+    padding:8px 16px;
+
+    background:#181818;
+
+    color:white;
+
+    border:1px solid #444;
+
+}
+
+
+
+/* ---------- Navigation ---------- */
+
+#navigation-bar{
+
+    height:48px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+
+    padding:0 18px;
+
+    background:#111;
+
+    border-bottom:1px solid #222;
+
+}
+
+#navigation-bar button{
+
+    background:#1a1a1a;
+
+    color:white;
+
+    border:1px solid #333;
+
+    padding:6px 12px;
+
+}
+
+#path{
+
+    margin-left:20px;
+
+    color:#999;
+
+}
+
+
+
+/* ---------- Main ---------- */
+
+#explorer-main{
+
+    flex:1;
+
+    display:flex;
+
+}
+
+
+
+/* ---------- Sidebar ---------- */
+
+#sidebar{
+
+    width:260px;
+
+    background:#0d0d0d;
+
+    border-right:1px solid #222;
+
+    padding:18px;
+
+}
+
+#sidebar h3{
+
+    margin-bottom:20px;
+
+    color:#999;
+
+    font-weight:300;
+
+}
+
+.folder{
+
+    padding:12px;
+
+    margin-bottom:6px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.folder:hover{
+
+    background:#1d1d1d;
+
+}
+
+
+
+/* ---------- Workspace ---------- */
+
+#workspace{
+
+    flex:1;
+
+    display:flex;
+
+}
+
+
+
+/* ---------- File List ---------- */
+
+#file-list{
+
+    width:260px;
+
+    border-right:1px solid #222;
+
+    overflow:auto;
+
+}
+
+.file{
+
+    padding:12px 18px;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+.file:hover{
+
+    background:#1d1d1d;
+
+}
+
+
+
+/* ---------- Viewer ---------- */
+
+#viewer{
+
+    flex:1;
+
+    padding:35px;
+
+    overflow:auto;
+
+}
+
+#viewer-header{
+
+    border-bottom:1px solid #222;
+
+    padding-bottom:15px;
+
+    margin-bottom:30px;
+
+}
+
+#viewer-header h2{
+
+    font-weight:300;
+
+}
+
+#file-id{
+
+    color:#888;
+
+}
+
+#file-content{
+
+    line-height:2;
+
+    color:#ddd;
+
+}
+
+
+
+/* ---------- Footer ---------- */
+
+#status-bar{
+
+    height:34px;
+
+    border-top:1px solid #222;
+
+    display:flex;
+
+    justify-content:space-between;
+
+    align-items:center;
+
+    padding:0 15px;
+
+    font-size:13px;
+
+    color:#888;
+
+}
+
+
+
+/* ==========================================================
+   POPUP
+========================================================== */
+
+#popup{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.65);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.popup-window{
+
+    width:600px;
+
+    background:#111;
+
+    border:1px solid #444;
+
+    padding:30px;
+
+}
+
+
+
+/* ==========================================================
+   NOTIFICATION
+========================================================== */
+
+#notification{
+
+    position:fixed;
+
+    right:25px;
+
+    top:25px;
+
+    width:280px;
+
+    background:#111;
+
+    border-left:4px solid white;
+
+    padding:18px;
+
+    box-shadow:0 0 20px rgba(0,0,0,.4);
+
+}
+
+#notification h3{
+
+    margin-bottom:10px;
+
+}
+
+
+
+/* ==========================================================
+   WARNING
+========================================================== */
+
+#warning-overlay{
+
+    position:fixed;
+
+    inset:0;
+
+    background:rgba(0,0,0,.85);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.warning-window{
+
+    text-align:center;
+
+}
+
+.warning-window h1{
+
+    color:#ff4d4d;
+
+    font-size:60px;
+
+    letter-spacing:10px;
+
+}
+
+.warning-window p{
+
+    margin-top:20px;
+
+    color:white;
+
+}
+
+
+
+/* ==========================================================
+   CONTEXT MENU
+========================================================== */
+
+#context-menu{
+
+    position:fixed;
+
+    width:220px;
+
+    background:#101010;
+
+    border:1px solid #444;
+
+    display:none;
+
+    z-index:9999;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.5);
+
+}
+
+.menu-item{
+
+    padding:12px 18px;
+
+    cursor:pointer;
+
+    transition:.15s;
+
+    user-select:none;
+
+}
+
+.menu-item:hover{
+
+    background:#222;
+
+}
+/* ==========================================================
+   EFFECT COLORS
+========================================================== */
+
+:root{
+
+    --white:#f5f5f5;
+    --gray:#888;
+
+    --green:#65ff65;
+    --red:#ff4b4b;
+    --yellow:#ffd34d;
+    --blue:#5ca8ff;
+
+}
+
+
+/* ==========================================================
+   SYSTEM COLOR
+========================================================== */
+
+.system{
+
+    color:var(--green);
+
+}
+
+.warning{
+
+    color:var(--red);
+
+}
+
+.notice{
+
+    color:var(--yellow);
+
+}
+
+.admin{
+
+    color:var(--blue);
+
+}
+
+
+/* ==========================================================
+   GLITCH
+========================================================== */
+
+@keyframes glitch{
+
+    0%{
+
+        transform:translate(0);
+
+    }
+
+    20%{
+
+        transform:translate(-2px,1px);
+
+    }
+
+    40%{
+
+        transform:translate(2px,-1px);
+
+    }
+
+    60%{
+
+        transform:translate(-1px,2px);
+
+    }
+
+    80%{
+
+        transform:translate(1px,-2px);
+
+    }
+
+    100%{
+
+        transform:translate(0);
+
+    }
+
+}
+
+.glitch{
+
+    animation:glitch .15s infinite;
+
+}
+
+
+/* ==========================================================
+   NOTIFICATION ANIMATION
+========================================================== */
+
+@keyframes notification{
+
+    from{
+
+        transform:translateX(320px);
+
+        opacity:0;
+
+    }
+
+    to{
+
+        transform:translateX(0);
+
+        opacity:1;
+
+    }
+
+}
+
+#notification{
+
+    animation:notification .35s;
+
+}
+
+
+/* ==========================================================
+   BOOT LOG
+========================================================== */
+
+.log{
+
+    color:var(--green);
+
+}
+
+.log.error{
+
+    color:var(--red);
+
+}
+
+.log.notice{
+
+    color:var(--yellow);
+
+}
+
+
+/* ==========================================================
+   SCROLL BAR
+========================================================== */
+
+::-webkit-scrollbar{
+
+    width:10px;
+
+}
+
+::-webkit-scrollbar-track{
+
+    background:#111;
+
+}
+
+::-webkit-scrollbar-thumb{
+
+    background:#333;
+
+}
+
+::-webkit-scrollbar-thumb:hover{
+
+    background:#555;
+
+}
+
+
+/* ==========================================================
+   TEXT SELECTION
+========================================================== */
+
+::selection{
+
+    background:white;
+
+    color:black;
+
+}
+
+
+/* ==========================================================
+   SVG LOGO
+========================================================== */
+
+#logo-area svg{
+
+    stroke:white;
+
+    fill:none;
+
+    stroke-width:2;
+
+    stroke-linecap:round;
+
+    stroke-linejoin:round;
+
+}
+
+
+/* ==========================================================
+   SVG DRAW
+========================================================== */
+
+.draw{
+
+    stroke-dasharray:2500;
+
+    stroke-dashoffset:2500;
+
+    animation:drawLogo 4s ease forwards;
+
+}
+
+@keyframes drawLogo{
+
+    to{
+
+        stroke-dashoffset:0;
+
+    }
+
+}
+
+
+/* ==========================================================
+   FADE
+========================================================== */
+
+.fade-out{
+
+    animation:fadeOut .6s forwards;
+
+}
+
+@keyframes fadeOut{
+
+    to{
+
+        opacity:0;
+
+        visibility:hidden;
+
+    }
+
+}
+
+
+/* ==========================================================
+   FILE HOVER
+========================================================== */
+
+.file:hover{
+
+    padding-left:28px;
+
+}
+
+
+/* ==========================================================
+   FOLDER HOVER
+========================================================== */
+
+.folder:hover{
+
+    padding-left:28px;
+
+}
+
+
+/* ==========================================================
+   SECRET FILE
+========================================================== */
+
+.secret{
+
+    color:var(--red);
+
+    letter-spacing:2px;
+
+}
+
+
+/* ==========================================================
+   ACCESS LEVEL
+========================================================== */
+
+.level-admin{
+
+    color:var(--blue);
+
+}
+
+.level-system{
+
+    color:var(--green);
+
+}
+
+.level-warning{
+
+    color:var(--red);
+
+}
+
+
+/* ==========================================================
+   BOOT BLINK
+========================================================== */
+
+.cursor::after{
+
+    content:"_";
+
+    animation:blink 1s infinite;
+
+}
+/* ==========================================================
+   NOTIFICATION
+========================================================== */
+
+
+.system-notification{
+
+
+    position:fixed;
+
+
+    right:30px;
+
+
+    bottom:40px;
+
+
+    width:320px;
+
+
+    padding:20px;
+
+
+    border:1px solid #444;
+
+
+    background:#111;
+
+
+    animation:
+
+    notification-in .3s;
+
+
+}
+
+
+
+.notification-title{
+
+
+    font-size:13px;
+
+
+    letter-spacing:3px;
+
+
+    color:#999;
+
+
+    margin-bottom:10px;
+
+
+}
+
+
+
+.notification-text{
+
+
+    font-size:15px;
+
+
+}
+
+
+
+.system-notification.hide{
+
+
+    opacity:0;
+
+
+    transition:.5s;
+
+
+}
+
+
+
+
+
+@keyframes notification-in{
+
+
+    from{
+
+
+        transform:translateX(50px);
+
+
+        opacity:0;
+
+
+    }
+
+
+    to{
+
+
+        transform:translateX(0);
+
+
+        opacity:1;
+
+
+    }
+
+
+}
+
+.eclipse-logo{
+
+    width:280px;
+
+    height:280px;
+
+    object-fit:contain;
+
+    opacity:0;
+
+    animation:
+        logo-start 1.5s ease forwards;
+
+}
+
+
+@keyframes logo-start{
+
+    from{
+
+        opacity:0;
+
+        filter:
+
+            grayscale(1)
+
+            contrast(.3);
+
+
+    }
+
+
+    to{
+
+        opacity:1;
+
+        filter:
+
+            grayscale(1)
+
+            contrast(1);
+
+
+    }
+
+}
+
+/* ==========================================================
+   BOOT LOG
+========================================================== */
+
+
+#boot-log{
+
+    margin-top:30px;
+
+    height:120px;
+
+    overflow:hidden;
+
+    text-align:left;
+
+    font-family:
+    "Consolas",
+    monospace;
+
+    font-size:14px;
+
+    color:#aaa;
+
+}
+
+
+
+.boot-line{
+
+    animation:
+    bootText .3s;
+
+    margin:5px 0;
+
+}
+
+
+
+@keyframes bootText{
+
+    from{
+
+        opacity:0;
+
+        transform:translateX(-10px);
+
+    }
+
+
+    to{
+
+        opacity:1;
+
+        transform:translateX(0);
+
+    }
+
+}
+
+/* ==========================================================
+   ADDED: FILE STATE / PERMISSION STYLES
+========================================================== */
+
+.file.selected{
+
+    background:#1d1d1d;
+    border-left:2px solid #66ff66;
+
+}
+
+.file-status{
+
+    margin-bottom:16px;
+    padding:10px 14px;
+    border:1px solid #333;
+    background:#101010;
+    color:#66ff66;
+    font-size:13px;
+    white-space:pre-line;
+    line-height:1.6;
+
+}
+
+.permission-error{
+
+    padding:24px;
+    border:1px solid #ff4d4d;
+    background:#101010;
+    color:#ff4d4d;
+    text-align:center;
+    line-height:1.8;
+    letter-spacing:.5px;
+
+}
+
+
+/* ==========================================================
+   ADDED: CONSOLE LOG SEQUENCE
+========================================================== */
+
+.console-line{
+
+    animation:bootText .25s;
+    margin:6px 0;
+    letter-spacing:.3px;
+
+}
+
+.console-status-dot{
+
+    color:#66ff66;
+    animation:blink 1s infinite;
+
+}
+
+
+/* ==========================================================
+   ADDED: BOOT SEQUENCE REDESIGN
+   （静かで業務用端末らしいBOOT画面）
+========================================================== */
+
+.boot-window{
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    position:relative;
+
+}
+
+#boot-cursor-line{
+
+    height:36px;
+    opacity:0;
+    transition:opacity .15s;
+    font-size:26px;
+    color:#eee;
+    font-family:Consolas,monospace;
+
+}
+
+#boot-cursor-line.visible{
+
+    opacity:1;
+
+}
+
+#boot-cursor{
+
+    animation:blink 1s infinite;
+
+}
+
+#boot-title{
+
+    opacity:0;
+    transition:opacity .5s;
+    font-size:38px;
+    font-weight:200;
+    letter-spacing:10px;
+    color:#eee;
+    margin:0;
+
+}
+
+#boot-title.visible{
+
+    opacity:1;
+
+}
+
+#boot-scanline{
+
+    position:absolute;
+    top:0;
+    left:-120%;
+    width:100%;
+    height:100%;
+    background:linear-gradient(90deg,transparent,rgba(255,255,255,.07),transparent);
+    pointer-events:none;
+
+}
+
+#boot-scanline.sweep{
+
+    animation:bootScanSweep 1s ease-out forwards;
+
+}
+
+@keyframes bootScanSweep{
+
+    from{ left:-120%; }
+    to{ left:120%; }
+
+}
+
+#boot-log{
+
+    margin-top:34px;
+    height:150px;
+    width:100%;
+    max-width:520px;
+    overflow:hidden;
+    text-align:left;
+    font-family:Consolas,monospace;
+    font-size:13px;
+    color:#aaa;
+
+}
+
+.boot-line-warning{
+
+    color:#c9a227;
+
+}
+
+#boot-bar-line{
+
+    margin-top:18px;
+    display:flex;
+    align-items:baseline;
+    gap:16px;
+    font-family:Consolas,monospace;
+    font-size:14px;
+    color:#777;
+    letter-spacing:1px;
+
+}
+
+#boot-ready{
+
+    margin-top:26px;
+    opacity:0;
+    transition:opacity .4s;
+    font-size:14px;
+    letter-spacing:4px;
+    color:#eee;
+
+}
+
+#boot-ready.visible{
+
+    opacity:1;
+
+}
+
+
+/* ==========================================================
+   ADDED: AUTHENTICATION SEQUENCE COLORS
+========================================================== */
+
+.log-normal{
+
+    color:#999;
+
+}
+
+.log-success{
+
+    color:#66ff66;
+
+}
+
+.log-warning{
+
+    color:#c9a227;
+
+}
+
+.log-critical{
+
+    color:#ff4d4d;
+
+}
+
+#console-log.auth-final-mode{
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    justify-content:center;
+    height:100%;
+    text-align:center;
+
+}
+
+.auth-final{
+
+    font-size:24px;
+    font-weight:200;
+    letter-spacing:4px;
+
+}
+
+.auth-final-success{
+
+    color:#66ff66;
+
+}
+
+.auth-final-recovery{
+
+    color:#ccc;
+
+}
+
+.auth-sub{
+
+    margin-top:16px;
+    font-size:13px;
+    letter-spacing:2px;
+    color:#777;
+    animation:fadeIn .6s;
+
+}

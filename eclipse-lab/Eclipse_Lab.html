@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0">
+
+    <title>Eclipse Lab Archive System</title>
+
+    <link
+        rel="stylesheet"
+        href="style.css">
+
+</head>
+
+<body>
+
+<!-- ==========================================================
+BOOT SCREEN
+========================================================== -->
+
+<section
+    id="boot-screen"
+    class="hidden">
+
+
+    <div class="boot-window">
+
+
+        <div id="boot-cursor-line">
+
+            <span id="boot-cursor">&gt;</span>
+
+        </div>
+
+
+        <h1 id="boot-title">
+
+            ECLIPSE LAB
+
+        </h1>
+
+
+        <div id="boot-scanline"></div>
+
+
+        <!-- TERMINAL LOG -->
+
+        <div id="boot-log">
+
+            <!-- JavaScriptで追加 -->
+
+        </div>
+
+
+        <div id="boot-bar-line">
+
+            <span id="boot-bar-ascii"></span>
+
+            <span id="boot-percent">0%</span>
+
+        </div>
+
+
+        <div id="boot-ready">
+
+            ARCHIVE MODE READY
+
+        </div>
+
+
+    </div>
+
+
+</section>
+
+<!-- ==========================================================
+WELCOME
+========================================================== -->
+
+<section
+    id="welcome-screen"
+    class="hidden">
+
+
+    <div class="welcome-window">
+
+
+        <!-- LOGO -->
+
+        <div id="logo-area">
+
+
+            <img
+
+                src="./images/logo.svg"
+
+                alt="Eclipse Lab Logo"
+
+                class="eclipse-logo">
+
+
+        </div>
+
+
+
+
+
+        <!-- TITLE -->
+
+        <h1 id="welcome-title">
+
+            ECLIPSE LAB
+
+        </h1>
+
+
+
+
+
+        <!-- SUBTITLE -->
+
+        <p id="welcome-subtitle">
+
+            Welcome to Eclipse Lab
+
+        </p>
+
+
+
+
+
+        <!-- START MESSAGE -->
+
+        <p id="launch-message">
+
+            PRESS ENTER OR CLICK ANYWHERE
+
+        </p>
+
+
+
+    </div>
+
+
+</section>
+
+<!-- ==========================================================
+LOGIN
+========================================================== -->
+
+
+<section
+    id="auth-screen"
+    class="hidden">
+
+
+    <div class="auth-window">
+
+
+
+        <h2>
+
+            ACCESS TERMINAL
+
+        </h2>
+
+
+
+
+
+        <p class="auth-message">
+
+            Enter your Staff ID and Access Key.
+
+        </p>
+
+
+
+
+
+
+        <div class="input-group">
+
+
+            <label for="staff-id">
+
+                STAFF ID
+
+            </label>
+
+
+
+            <input
+
+                type="text"
+
+                id="staff-id"
+
+                autocomplete="off"
+
+                spellcheck="false">
+
+
+        </div>
+
+
+
+
+
+
+        <div class="input-group">
+
+
+            <label for="access-key">
+
+                ACCESS KEY
+
+            </label>
+
+
+
+            <input
+
+                type="password"
+
+                id="access-key">
+
+
+        </div>
+
+
+
+
+
+
+        <button id="authorize">
+
+            AUTHORIZE
+
+        </button>
+
+
+
+
+
+        <p id="auth-status">
+
+        </p>
+
+
+
+    </div>
+
+
+</section>
+<!-- ==========================================================
+CONSOLE
+========================================================== -->
+
+<section
+    id="console-screen"
+    class="hidden">
+
+    <div class="console-window">
+
+        <div class="console-header">
+
+            <span>ARCHIVE CONNECTION</span>
+
+            <span class="console-status-dot">●</span>
+
+        </div>
+
+        <div id="console-log">
+
+            <!-- Console Log -->
+
+        </div>
+
+    </div>
+
+</section>
+
+<!-- ==========================================================
+EXPLORER
+========================================================== -->
+
+<section
+    id="explorer-screen"
+    class="hidden">
+
+    <div id="topbar">
+
+        <div class="header-left">
+
+            <div id="header-logo"></div>
+
+            <div>
+
+                <h2>
+
+                    ECLIPSE LAB
+
+                </h2>
+
+                <small>
+
+                    ARCHIVE MODE
+
+                </small>
+
+            </div>
+
+        </div>
+
+        <div class="header-right">
+
+            <button id="switch-user">
+
+                SWITCH USER
+
+            </button>
+
+            <div id="system-time">
+
+                00:00:00
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="navigation-bar">
+
+        <button>
+
+            BACK
+
+        </button>
+
+        <button>
+
+            FORWARD
+
+        </button>
+
+        <span id="path">
+
+            Archive /
+
+        </span>
+
+    </div>
+
+
+
+    <div id="explorer-main">
+
+        <aside id="sidebar">
+
+            <h3>
+
+                ARCHIVE FOLDERS
+
+            </h3>
+
+            <div
+                class="folder"
+                data-folder="welcome">
+
+                📁 Welcome
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="archive">
+
+                📁 Archive
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="entity">
+
+                📁 Entity Database
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="staff">
+
+                📁 Staff Database
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="incident">
+
+                📁 Incident Reports
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="facility">
+
+                📁 Facility
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="system">
+
+                📁 System
+
+            </div>
+
+        </aside>
+
+
+
+        <div id="workspace">
+
+            <section id="file-list">
+
+                <!-- JS -->
+
+            </section>
+
+
+
+            <section id="viewer">
+
+                <div id="viewer-header">
+
+                    <h2 id="viewer-title">
+
+                        Welcome.txt
+
+                    </h2>
+
+                    <div id="file-id">
+
+                        Archive / Welcome.txt
+
+                    </div>
+
+                </div>
+
+                <div id="file-content">
+
+                    <div id="viewer-content">
+
+                        Eclipse Lab Archiveへようこそ。
+
+                    </div>
+
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+
+
+    <div id="status-bar">
+
+        <span>
+
+            STATUS :
+            ARCHIVE MODE
+
+        </span>
+
+        <span>
+
+            ACCESS LEVEL :
+            ARCHIVE
+
+        </span>
+
+    </div>
+
+</section>
+
+
+
+<!-- ==========================================================
+NOTIFICATION
+========================================================== -->
+
+<div
+    id="notification"
+    class="hidden">
+
+    <span id="notification-text">
+
+        Notification
+
+    </span>
+
+</div>
+
+
+
+<!-- ==========================================================
+POPUP
+========================================================== -->
+
+<div
+    id="popup"
+    class="hidden">
+
+    <div class="popup-window">
+
+        <h2 id="popup-title">
+
+            Popup
+
+        </h2>
+
+        <div id="popup-content">
+
+        </div>
+
+        <button id="popup-close">
+
+            CLOSE
+
+        </button>
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+CONTEXT MENU
+========================================================== -->
+
+<div
+    id="context-menu"
+    class="hidden">
+
+    <div data-action="open">
+
+        Open
+
+    </div>
+
+    <div data-action="copy">
+
+        Copy
+
+    </div>
+
+    <div data-action="properties">
+
+        Properties
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+OVERLAY
+========================================================== -->
+
+<div
+    id="overlay"
+    class="hidden">
+
+</div>
+
+
+
+<!-- ==========================================================
+CRT EFFECT
+========================================================== -->
+
+<div id="crt">
+
+    <div class="scanline">
+
+    </div>
+
+    <div class="noise">
+
+    </div>
+
+</div>
+
+
+
+<!-- ==========================================================
+SCRIPT
+========================================================== -->
+
+<script src="js/system.js"></script>
+
+<script src="js/audio.js"></script>
+
+<script src="js/notification.js"></script>
+
+<script src="js/keymanager.js"></script>
+
+<script src="js/data.js"></script>
+
+<script src="js/boot.js"></script>
+
+<script src="js/console.js"></script>
+
+<script src="js/login.js"></script>
+
+<script src="js/explorer.js"></script>
+
+<script src="js/main.js"></script>
+
+<div id="screen-flash"></div>
+
+</body>
+
+</html>
