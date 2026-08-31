@@ -119,13 +119,14 @@ function startEclipseSystem(){
 ========================================================== */
 
 
-function loginComplete(user,level){
+function loginComplete(user,level,rank){
 
 
     console.log(
         "LOGIN COMPLETE:",
         user,
-        level
+        level,
+        rank
     );
 
 
@@ -136,7 +137,8 @@ function loginComplete(user,level){
 
         setSystemUser(
             user,
-            level
+            level,
+            rank
         );
 
     }

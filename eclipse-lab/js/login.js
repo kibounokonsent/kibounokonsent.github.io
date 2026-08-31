@@ -23,21 +23,48 @@ const staffDatabase = {
         name:"Unknown Staff 0001",
         key:"ECLIPSE-0001",
         status:"missing",
-        level:"UNKNOWN"
+        level:"UNKNOWN",
+        rank:"PLATINUM"   // 創設十席の一人。到達すると全クリアランスが開放される
     },
 
     "0002":{
         name:"Staff 0002",
         key:"ARCHIVE-0002",
         status:"deceased",
-        level:"NONE"
+        level:"NONE",
+        rank:null
+    },
+
+    "2210":{
+        name:"Field Technician",
+        key:"BRONZE-2210",
+        status:"active",
+        level:"ARCHIVE",
+        rank:"BRONZE"
+    },
+
+    "3305":{
+        name:"Archive Analyst",
+        key:"SILVER-3305",
+        status:"active",
+        level:"ARCHIVE",
+        rank:"SILVER"
+    },
+
+    "4090":{
+        name:"Senior Researcher",
+        key:"GOLD-4090",
+        status:"active",
+        level:"ARCHIVE",
+        rank:"GOLD"
     },
 
     "admin":{
         name:"System Administrator",
         key:"ROOT-ADMIN",
         status:"active",
-        level:"ADMIN"
+        level:"ADMIN",
+        rank:"PLATINUM"
     }
 
 };
@@ -125,11 +152,11 @@ function authorize(){
 function finalizeLogin(staff){
 
     if(typeof setSystemUser === "function"){
-        setSystemUser(staff.name, staff.level);
+        setSystemUser(staff.name, staff.level, staff.rank);
     }
 
     if(typeof loginComplete === "function"){
-        loginComplete(staff.name, staff.level);
+        loginComplete(staff.name, staff.level, staff.rank);
     }
     else if(typeof showScreen === "function"){
         showScreen("explorer-screen");

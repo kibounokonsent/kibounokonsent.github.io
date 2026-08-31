@@ -22,6 +22,9 @@ const viewerTitle =
 const viewerContent =
     document.getElementById("viewer-content");
 
+const viewer =
+    document.getElementById("viewer");
+
 const sidebar =
     document.getElementById("sidebar");
 
@@ -30,6 +33,12 @@ const pathBar =
 
 const accessLevelBadge =
     document.querySelector("#status-bar span:nth-child(2)");
+
+const clearanceBadge =
+    document.getElementById("clearance-badge");
+
+const clearanceTopbar =
+    document.getElementById("clearance-topbar");
 
 
 /* ==========================================================
@@ -64,6 +73,18 @@ function checkPermission(file){
 
         case "secret":
             return level === "ADMIN";
+
+        case "bronze":
+            return getRankValue(getSystemUser().rank) >= rankOrder.BRONZE;
+
+        case "silver":
+            return getRankValue(getSystemUser().rank) >= rankOrder.SILVER;
+
+        case "gold":
+            return getRankValue(getSystemUser().rank) >= rankOrder.GOLD;
+
+        case "platinum":
+            return getSystemUser().rank === "PLATINUM";
 
         default:
             return false;
@@ -135,12 +156,34 @@ function createArchiveFolder(key, def){
    FILE LIST
 ========================================================== */
 
+function isDangerUnlocked(dangerKey){
+
+    const required =
+        requiredRankByDanger[dangerKey] || "BRONZE";
+
+    return getRankValue(getSystemUser().rank) >= getRankValue(required);
+
+}
+
+const dangerSortOrder = ["asphales", "epimeleia", "kindynos", "theos"];
+
 function renderFiles(files){
 
     fileList.innerHTML = "";
 
-    const visibleFiles =
+    let visibleFiles =
         filterVisibleFiles(files);
+
+    const isEntityFolder =
+        visibleFiles.length > 0 && visibleFiles[0].type === "entity";
+
+    if(isEntityFolder){
+
+        visibleFiles = [...visibleFiles].sort((a, b)=>
+            dangerSortOrder.indexOf(a.danger) - dangerSortOrder.indexOf(b.danger)
+        );
+
+    }
 
     visibleFiles.forEach(file=>{
 
@@ -148,7 +191,30 @@ function renderFiles(files){
             document.createElement("div");
 
         item.className = "file";
-        item.textContent = (file.hidden ? "🔓 " : "📄 ") + file.name;
+
+        if(file.type === "entity" && !isDangerUnlocked(file.danger)){
+
+            const level =
+                dangerLevels[file.danger];
+
+            item.classList.add("locked");
+            item.textContent = "🔒 [ LOCKED ] " + (level ? level.label : "");
+
+            item.addEventListener("click", ()=>{
+                showLockedEntity(file);
+            });
+
+            fileList.appendChild(item);
+            return;
+
+        }
+
+        const prefix =
+            file.type === "entity"
+                ? (dangerLevels[file.danger] ? dangerLevels[file.danger].emoji : "📄") + " "
+                : (file.hidden ? "🔓 " : "📄 ");
+
+        item.textContent = prefix + file.name;
 
         item.addEventListener("mouseenter", ()=> play("hover"));
 
@@ -195,6 +261,16 @@ function renderFileView(file){
 
     viewerContent.innerHTML = "";
 
+    if(file.type === "entity"){
+        renderEntityView(file);
+        return;
+    }
+
+    if(file.type === "photo"){
+        renderPhotoView(file);
+        return;
+    }
+
     const status =
         displayFileStatus(file);
 
@@ -219,6 +295,106 @@ function renderFileView(file){
 
 }
 
+
+/* ==========================================================
+   ENTITY VIEW（紛異体の研究記録レイアウト）
+========================================================== */
+
+function entityThumbHtml(entity){
+
+    if(entity.image){
+        return `
+        <div class="entity-thumb">
+            <img src="${entity.image}" alt="${entity.name}"
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+            <div class="entity-thumb-fallback">NO VISUAL<br>RECORD</div>
+        </div>`;
+    }
+
+    return `<div class="entity-thumb"><div class="entity-thumb-fallback">NO VISUAL<br>RECORD</div></div>`;
+
+}
+
+function renderEntityView(entity){
+
+    const level =
+        dangerLevels[entity.danger];
+
+    const requiredRank =
+        requiredRankByDanger[entity.danger] || "BRONZE";
+
+    let html = "";
+
+    html += `<div class="entity-id">${entity.id}</div>`;
+
+    html += `<div class="entity-meta">`;
+
+    html += `<div class="entity-meta-block">
+                <span class="entity-meta-label">危険度</span>
+                <span class="entity-meta-value">${dangerIconHtml(entity.danger, 26)} ${level ? level.label : ""}</span>
+             </div>`;
+
+    html += `<div class="entity-meta-block">
+                <span class="entity-meta-label">管理区分</span>
+                <span class="entity-meta-value">${entity.containment || ""}</span>
+             </div>`;
+
+    html += `<div class="entity-meta-block">
+                <span class="entity-meta-label">必要クリアランス</span>
+                <span class="entity-meta-value">${requiredRank}</span>
+             </div>`;
+
+    html += `</div>`;
+
+    html += entityThumbHtml(entity);
+
+    const sections =
+        entity.sections || [];
+
+    sections.forEach(section=>{
+
+        html += `<div class="entity-section">
+                    <h3>${section.heading}</h3>
+                    ${section.text.split(/\n\n+/).map(block=>`<p>${block.replace(/\n/g,"<br>")}</p>`).join("")}
+                 </div>`;
+
+    });
+
+    viewerContent.innerHTML = html;
+
+}
+
+
+/* ==========================================================
+   LOCKED ENTITY（一覧で[ LOCKED ]をクリックした場合）
+========================================================== */
+
+function showLockedEntity(file){
+
+    play("error");
+
+    currentFile = null;
+
+    updatePath();
+
+    const level =
+        dangerLevels[file.danger];
+
+    const requiredRank =
+        requiredRankByDanger[file.danger] || "BRONZE";
+
+    viewerTitle.textContent = "[ LOCKED ]";
+
+    viewerContent.innerHTML =
+        `<div class="permission-error">
+            ACCESS DENIED<br><br>
+            危険度：<br>${level ? level.label : ""}<br><br>
+            必要クリアランス：<br>${requiredRank}<br><br>
+            現在のクリアランス：<br>${getSystemUser().rank || "なし"}
+         </div>`;
+
+}
+
 function showPermissionError(file){
 
     play("error");
@@ -231,8 +407,21 @@ function showPermissionError(file){
         document.createElement("div");
 
     box.className = "permission-error";
-    box.innerHTML =
-        `ACCESS DENIED<br><br>REQUIRED LEVEL:<br>${file.permission}<br><br>YOUR LEVEL:<br>${getSystemUser().level}`;
+
+    const rankTiers = ["bronze", "silver", "gold", "platinum"];
+
+    if(rankTiers.includes(file.permission)){
+
+        box.innerHTML =
+            `ACCESS DENIED<br><br>必要クリアランス：<br>${file.permission.toUpperCase()}<br><br>現在のクリアランス：<br>${getSystemUser().rank || "なし"}`;
+
+    }
+    else{
+
+        box.innerHTML =
+            `ACCESS DENIED<br><br>必要レベル：<br>${file.permission}<br><br>現在のレベル：<br>${getSystemUser().level}`;
+
+    }
 
     viewerContent.appendChild(box);
 
@@ -251,20 +440,92 @@ function openFile(file){
 
     updatePath();
 
+    viewerTitle.textContent = file.name;
+
+    if(file.broken){
+        showBrokenFile(file);
+        recordFileView(file);
+        return;
+    }
+
     if(!checkPermission(file)){
         showPermissionError(file);
         return;
     }
-
-    viewerTitle.textContent = file.name;
 
     renderFileView(file);
 
     recordFileView(file);
 
     if(file.unlocksArchive){
-        unlockArchive(file.unlocksArchive);
+        watchReadCompletion(file);
     }
+
+}
+
+
+/* ==========================================================
+   BROKEN FILE（権限ではなく、データ破損で読めないファイル）
+========================================================== */
+
+function showBrokenFile(file){
+
+    play("error");
+
+    viewerContent.innerHTML = "";
+
+    const box =
+        document.createElement("div");
+
+    box.className = "file-corrupted";
+    box.innerHTML =
+        `${file.broken.title}` +
+        (file.broken.sub ? `<br><br>${file.broken.sub}` : "");
+
+    viewerContent.appendChild(box);
+
+}
+
+
+/* ==========================================================
+   READ COMPLETION（最後まで読んだら解禁）
+
+   スクロールしきる必要のない短い資料は、開いた時点で
+   「読了」とみなす。スクロールが必要な資料は、
+   ビューアの一番下まで到達した時点で解禁する。
+========================================================== */
+
+let readCompletionHandler = null;
+
+function watchReadCompletion(file){
+
+    if(readCompletionHandler){
+        viewer.removeEventListener("scroll", readCompletionHandler);
+        readCompletionHandler = null;
+    }
+
+    const isScrollable =
+        viewer.scrollHeight > viewer.clientHeight + 4;
+
+    if(!isScrollable){
+        unlockArchive(file.unlocksArchive);
+        return;
+    }
+
+    readCompletionHandler = ()=>{
+
+        const reachedBottom =
+            viewer.scrollTop + viewer.clientHeight >= viewer.scrollHeight - 280;
+
+        if(reachedBottom){
+            unlockArchive(file.unlocksArchive);
+            viewer.removeEventListener("scroll", readCompletionHandler);
+            readCompletionHandler = null;
+        }
+
+    };
+
+    viewer.addEventListener("scroll", readCompletionHandler);
 
 }
 
@@ -287,10 +548,28 @@ function updatePath(){
 
 function updateAccessDisplay(){
 
-    if(!accessLevelBadge) return;
+    if(accessLevelBadge){
+        accessLevelBadge.textContent =
+            "ACCESS LEVEL : " + getSystemUser().level;
+    }
 
-    accessLevelBadge.textContent =
-        "ACCESS LEVEL : " + getSystemUser().level;
+    if(clearanceBadge){
+        clearanceBadge.textContent =
+            "CLEARANCE : " + (getSystemUser().rank || "NONE");
+    }
+
+    if(clearanceTopbar){
+
+        const rank =
+            getSystemUser().rank || "NONE";
+
+        clearanceTopbar.textContent =
+            "CLEARANCE : " + rank;
+
+        clearanceTopbar.className =
+            "clearance-" + rank.toLowerCase();
+
+    }
 
 }
 
@@ -317,7 +596,7 @@ function unlockArchive(key, options = {}){
 
     if(!options.silent){
         play("secret");
-        showNotification(def.name + " Unlocked");
+        showNotification(def.unlockMessage || (def.name + " Unlocked"));
     }
 
     recordUnlock(key);
@@ -351,7 +630,8 @@ function checkLevelUnlocks(){
 
 let archiveSave = {
     unlocked: [],
-    viewed: []
+    viewed: [],
+    highestRank: null
 };
 
 function loadArchiveSave(){
@@ -404,6 +684,63 @@ function restorePreviousUnlocks(){
 
 
 /* ==========================================================
+   CLEARANCE UPDATED（前回より高い階級でログインした時だけ）
+========================================================== */
+
+function checkClearanceUpgrade(){
+
+    const currentRank =
+        getSystemUser().rank;
+
+    const currentValue =
+        getRankValue(currentRank);
+
+    const previousValue =
+        getRankValue(archiveSave.highestRank);
+
+    if(currentValue <= previousValue) return;
+
+    const newlyUnlockedDanger =
+        dangerSortOrder.find(dangerKey=>{
+
+            const required =
+                getRankValue(requiredRankByDanger[dangerKey]);
+
+            return required > previousValue && required <= currentValue;
+
+        });
+
+    archiveSave.highestRank = currentRank;
+    saveArchive();
+
+    if(newlyUnlockedDanger){
+
+        const count =
+            (archiveData.entity.files || []).filter(f=>
+                f.type === "entity" && f.danger === newlyUnlockedDanger
+            ).length;
+
+        const label =
+            dangerLevels[newlyUnlockedDanger] ? dangerLevels[newlyUnlockedDanger].label : newlyUnlockedDanger;
+
+        const message =
+`CLEARANCE UPDATED
+
+${currentRank}
+
+New archive access granted.
+
+> ${label.toUpperCase()} ARCHIVE
+${count} new record(s) available.`;
+
+        showNotification(message);
+
+    }
+
+}
+
+
+/* ==========================================================
    STATIC FOLDER EVENTS（HTMLに最初から存在するフォルダ）
 ========================================================== */
 
@@ -429,6 +766,7 @@ function initializeExplorer(){
 
     updateAccessDisplay();
     checkLevelUnlocks();
+    checkClearanceUpgrade();
 
     openFolder("welcome");
 
@@ -437,3 +775,36 @@ function initializeExplorer(){
 window.addEventListener("load", ()=>{
     initializeExplorer();
 });
+
+
+/* ==========================================================
+   PHOTO VIEW（集合写真。実画像は無いので人型シルエットで代用。
+   カーソルを合わせると個々の状態が見える）
+========================================================== */
+
+function renderPhotoView(file){
+
+    let html = "";
+
+    if(file.caption){
+        html += `<div class="photo-caption">${file.caption}</div>`;
+    }
+
+    html += `<div class="photo-grid">`;
+
+    (file.people || []).forEach(person=>{
+
+        html += `
+        <div class="photo-person">
+            <div class="photo-avatar">🧑</div>
+            <div class="photo-id">${person.label}</div>
+            <div class="photo-status">${person.status}</div>
+        </div>`;
+
+    });
+
+    html += `</div>`;
+
+    viewerContent.innerHTML = html;
+
+}

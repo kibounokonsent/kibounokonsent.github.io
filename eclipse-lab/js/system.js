@@ -25,7 +25,10 @@ const EclipseSystem = {
         name:null,
 
 
-        level:"NONE"
+        level:"NONE",
+
+
+        rank:null,
 
 
     },
@@ -57,13 +60,16 @@ const EclipseSystem = {
 ========================================================== */
 
 
-function setSystemUser(name,level){
+function setSystemUser(name,level,rank){
 
 
     EclipseSystem.user.name=name;
 
 
     EclipseSystem.user.level=level;
+
+
+    EclipseSystem.user.rank=rank||null;
 
 
 

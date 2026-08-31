@@ -4,7 +4,9 @@
    console.js
 
    AUTHORIZE後に流れる高速ログ演出。
-   ・大量の断片的なログを高速表示（20〜40行/秒目安）
+   ログの素材（通常/成功/警告/施設ロア）は log-pool.js を使う。
+
+   ・大量の断片的なログを高速表示
    ・古い行は消えていく（読み切れなくてよい）
    ・まれに赤い「本物のロア」が紛れ込む
    ・最後だけ一呼吸おいて、はっきり読める結果メッセージを出す
@@ -12,86 +14,8 @@
 
 
 /* ==========================================================
-   LOG CONTENT POOLS
+   OUTCOME別ログ
 ========================================================== */
-
-const authFillerNormal = [
-    "CHECKING SECTOR {n}...",
-    "READING NODE {n}...",
-    "SYNCING TABLE {n}...",
-    "SCANNING BLOCK {n}...",
-    "MOUNTING INDEX {n}...",
-    "QUERY THREAD {n} ACTIVE",
-    "VALIDATING RECORD {n}",
-    "BUFFER FLUSH {n}",
-    "INDEX REPAIR PASS {n}",
-    "REQUESTING NODE {n}",
-    "PARSING HEADER {n}",
-    "TRACE ROUTE {n}"
-];
-
-const authFillerSuccess = [
-    "SECTOR {n} OK",
-    "NODE {n} SYNCHRONIZED",
-    "CHECKSUM VALID",
-    "RECORD VERIFIED",
-    "ARCHIVE LINK STABLE"
-];
-
-const authFillerWarning = [
-    "SIGNAL DEGRADED",
-    "RETRYING CONNECTION",
-    "LATENCY HIGH",
-    "PARTIAL DATA LOSS"
-];
-
-// レア表示：本物のロア（世界観の欠片）
-const authLoreCritical = [
-    "FACILITY STATUS : OFFLINE",
-    "PERSONNEL DATABASE CORRUPTED",
-    "ARCHIVE NODE 07 LOST",
-    "RECOVERY FAILED",
-    "ENTITY DATABASE INCOMPLETE",
-    "SPECIMEN FILE MISSING",
-    "COMMUNICATION LINK DEAD",
-    "POWER GRID FAILURE",
-    "UNKNOWN SIGNAL RECEIVED",
-    "CLASSIFICATION DATA MISSING"
-];
-
-
-/* ==========================================================
-   LINE BUILDERS
-========================================================== */
-
-function fillNumberToken(template){
-    return template.replace("{n}", String(Math.floor(Math.random()*90)+10));
-}
-
-function pickFillerLine(){
-
-    const roll = Math.random();
-
-    if(roll < 0.08){
-        return {
-            type:"success",
-            text:fillNumberToken(authFillerSuccess[Math.floor(Math.random()*authFillerSuccess.length)])
-        };
-    }
-
-    if(roll < 0.11){
-        return {
-            type:"warning",
-            text:authFillerWarning[Math.floor(Math.random()*authFillerWarning.length)]
-        };
-    }
-
-    return {
-        type:"normal",
-        text:fillNumberToken(authFillerNormal[Math.floor(Math.random()*authFillerNormal.length)])
-    };
-
-}
 
 function buildOutcomeLines(outcome){
 
@@ -110,6 +34,10 @@ function buildOutcomeLines(outcome){
 
         if(staff.level === "ADMIN"){
             lines.push({type:"success", text:"ALL SECTORS UNLOCKED"});
+        }
+
+        if(staff.rank){
+            lines.push({type:"success", text:`RANK : ${staff.rank}`});
         }
 
         return lines;
@@ -136,33 +64,9 @@ function buildOutcomeLines(outcome){
 
 function buildAuthLines(outcome){
 
-    const lines = [];
+    const lines =
+        buildFastLog(60);
 
-    const fillerCount = 60;
-
-    for(let n=0; n<fillerCount; n++){
-        lines.push(pickFillerLine());
-    }
-
-    // レアなロアを1〜2個だけ、ランダムな位置に紛れ込ませる
-    const loreCount =
-        Math.random() < 0.5 ? 1 : 2;
-
-    for(let n=0; n<loreCount; n++){
-
-        const line = {
-            type:"critical",
-            text:authLoreCritical[Math.floor(Math.random()*authLoreCritical.length)]
-        };
-
-        const pos =
-            Math.floor(Math.random() * lines.length);
-
-        lines.splice(pos, 0, line);
-
-    }
-
-    // 結果に応じたログを末尾に追加（速度は変えない）
     lines.push(...buildOutcomeLines(outcome));
 
     return lines;
@@ -262,7 +166,7 @@ function showAuthFinal(outcome, onComplete){
 
     consoleLog.appendChild(main);
 
-    play(outcome.type === "staff" ? "loginSuccess" : "notification");
+    play(outcome.type === "staff" ? "loginSuccess" : "recover");
 
     setTimeout(()=>{
 

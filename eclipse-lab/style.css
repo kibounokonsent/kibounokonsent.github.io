@@ -855,6 +855,8 @@ button{
 
     display:flex;
 
+    min-height:0;
+
 }
 
 
@@ -869,7 +871,11 @@ button{
 
     border-right:1px solid #222;
 
-    padding:18px;
+    padding:18px 18px 140px 18px;
+
+    overflow-y:auto;
+
+    min-height:0;
 
 }
 
@@ -911,6 +917,8 @@ button{
 
     display:flex;
 
+    min-height:0;
+
 }
 
 
@@ -923,7 +931,11 @@ button{
 
     border-right:1px solid #222;
 
-    overflow:auto;
+    overflow-y:auto;
+
+    padding-bottom:140px;
+
+    min-height:0;
 
 }
 
@@ -951,9 +963,11 @@ button{
 
     flex:1;
 
-    padding:35px;
+    padding:35px 35px 260px 35px;
 
     overflow:auto;
+
+    min-height:0;
 
 }
 
@@ -1555,6 +1569,8 @@ button{
 
     font-size:15px;
 
+    white-space:pre-line;
+
 
 }
 
@@ -1880,22 +1896,6 @@ button{
 
 }
 
-#boot-ready{
-
-    margin-top:26px;
-    opacity:0;
-    transition:opacity .4s;
-    font-size:14px;
-    letter-spacing:4px;
-    color:#eee;
-
-}
-
-#boot-ready.visible{
-
-    opacity:1;
-
-}
 
 
 /* ==========================================================
@@ -1964,5 +1964,399 @@ button{
     letter-spacing:2px;
     color:#777;
     animation:fadeIn .6s;
+
+}
+
+
+/* ==========================================================
+   ADDED: BOOT FAST LOG / FINAL REVEAL
+========================================================== */
+
+.boot-fast-line{
+
+    animation:bootText .18s;
+    margin:3px 0;
+
+}
+
+.boot-final-line{
+
+    animation:fadeIn .5s;
+    margin:8px 0;
+    font-size:14px;
+    letter-spacing:.5px;
+
+}
+
+#boot-bar-line{
+
+    transition:opacity .5s;
+
+}
+
+#boot-bar-line.faded{
+
+    opacity:0;
+
+}
+
+
+/* ==========================================================
+   ADDED: ENTITY VIEW（紛異体の研究記録レイアウト）
+========================================================== */
+
+.entity-id{
+
+    color:#666;
+    font-size:11px;
+    letter-spacing:2px;
+    margin-bottom:6px;
+
+}
+
+.entity-meta{
+
+    display:flex;
+    gap:32px;
+    flex-wrap:wrap;
+    margin-bottom:18px;
+
+}
+
+.entity-meta-block{
+
+    display:flex;
+    flex-direction:column;
+    gap:4px;
+
+}
+
+.entity-meta-label{
+
+    color:#666;
+    font-size:10px;
+    letter-spacing:2px;
+
+}
+
+.entity-meta-value{
+
+    display:flex;
+    align-items:center;
+    gap:8px;
+    font-size:13px;
+    color:#ddd;
+
+}
+
+.danger-icon{
+
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    position:relative;
+}
+
+.danger-icon img{
+
+    width:100%;
+    height:100%;
+    object-fit:contain;
+
+}
+
+.danger-icon-fallback{
+
+    display:none;
+    width:100%;
+    height:100%;
+    align-items:center;
+    justify-content:center;
+    color:#888;
+    font-size:14px;
+
+}
+
+.entity-thumb{
+
+    max-width:280px;
+    aspect-ratio:4/3;
+    margin:0 0 20px;
+    background:#0d0d0d;
+    border:1px solid #222;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+
+}
+
+.entity-thumb img{
+
+    width:100%;
+    height:100%;
+    object-fit:cover;
+
+}
+
+.entity-thumb-fallback{
+
+    display:none;
+    width:100%;
+    height:100%;
+    align-items:center;
+    justify-content:center;
+    text-align:center;
+    color:#3a3a3a;
+    font-size:10px;
+    letter-spacing:2px;
+    line-height:1.8;
+
+}
+
+.entity-thumb:not(:has(img)) .entity-thumb-fallback{
+
+    display:flex;
+
+}
+
+.entity-section{
+
+    margin-bottom:22px;
+    padding-top:14px;
+    border-top:1px solid #1c1c1c;
+
+}
+
+.entity-section h3{
+
+    font-size:12px;
+    letter-spacing:2px;
+    color:#66ff66;
+    font-weight:400;
+    margin:0 0 10px;
+
+}
+
+.entity-section p{
+
+    color:#ccc;
+    line-height:1.9;
+    font-size:13px;
+    margin:0 0 12px;
+
+}
+
+
+/* ==========================================================
+   ADDED: CLEARANCE / REDACTED（職員階級による閲覧制限）
+========================================================== */
+
+.clearance-banner{
+
+    margin-bottom:20px;
+    padding:14px 18px;
+    border:1px solid #ff4d4d;
+    background:#120a0a;
+    color:#ff4d4d;
+    font-size:12px;
+    letter-spacing:1px;
+    line-height:1.8;
+    text-align:center;
+
+}
+
+.entity-section-redacted h3{
+
+    color:#666;
+
+}
+
+.redacted-line{
+
+    color:#555;
+    letter-spacing:2px;
+    font-size:12px;
+
+}
+
+
+/* ==========================================================
+   ADDED: FILE CORRUPTED（権限ではなく破損で読めないファイル）
+========================================================== */
+
+.file-corrupted{
+
+    padding:24px;
+    border:1px solid #444;
+    background:#0d0d0d;
+    color:#777;
+    text-align:center;
+    line-height:1.8;
+    letter-spacing:1px;
+
+}
+
+
+/* ==========================================================
+   ADDED: WELCOME BACK（0000閲覧後だけ、一瞬だけ出て消える）
+========================================================== */
+
+#welcome-back{
+
+    position:absolute;
+    top:-34px;
+    left:0;
+    right:0;
+    text-align:center;
+    color:#66ff66;
+    font-size:12px;
+    letter-spacing:3px;
+    opacity:0;
+    transition:opacity 1s;
+    pointer-events:none;
+
+}
+
+#welcome-back.show{
+
+    opacity:1;
+
+}
+
+.auth-window{
+
+    position:relative;
+
+}
+
+
+/* ==========================================================
+   ADDED: GROUP PHOTO（ホバーで状態が見える）
+========================================================== */
+
+.photo-caption{
+
+    color:#888;
+    font-size:13px;
+    margin-bottom:20px;
+    letter-spacing:.5px;
+
+}
+
+.photo-grid{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(74px, 1fr));
+    gap:14px;
+    max-width:560px;
+
+}
+
+.photo-person{
+
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    padding:10px 4px;
+    border:1px solid #1c1c1c;
+    cursor:default;
+    transition:.15s;
+
+}
+
+.photo-person:hover{
+
+    border-color:#555;
+    background:#111;
+
+}
+
+.photo-avatar{
+
+    font-size:22px;
+    opacity:.6;
+
+}
+
+.photo-id{
+
+    margin-top:6px;
+    font-size:11px;
+    color:#999;
+    letter-spacing:1px;
+
+}
+
+.photo-status{
+
+    margin-top:4px;
+    font-size:10px;
+    color:#ff4d4d;
+    letter-spacing:1px;
+
+}
+
+
+/* ==========================================================
+   ADDED: LOCKED ENTITY ROW（一覧で見える「存在するが読めない」）
+========================================================== */
+
+.file.locked{
+
+    color:#555;
+    letter-spacing:1px;
+
+}
+
+.file.locked:hover{
+
+    background:#141010;
+    color:#777;
+
+}
+
+
+/* ==========================================================
+   ADDED: CLEARANCE TOPBAR BADGE（左上、常時表示）
+========================================================== */
+
+#clearance-topbar{
+
+    margin-top:4px;
+    display:inline-block;
+    font-size:11px;
+    letter-spacing:2px;
+    padding:2px 8px;
+    border:1px solid #333;
+    color:#666;
+
+}
+
+.clearance-bronze{
+
+    color:#cd8a4d;
+    border-color:#cd8a4d;
+
+}
+
+.clearance-silver{
+
+    color:#c8c8c8;
+    border-color:#c8c8c8;
+
+}
+
+.clearance-gold{
+
+    color:#e6c34d;
+    border-color:#e6c34d;
+
+}
+
+.clearance-platinum{
+
+    color:#eafff0;
+    border-color:#88ffaa;
 
 }
