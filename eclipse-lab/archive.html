@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Eclipse Lab Archive</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+<!-- ==========================================================
+ARCHIVE ENTRY
+========================================================== -->
+
+<section id="explorer-screen">
+
+    <div id="topbar">
+
+        <div class="header-left">
+
+            <div id="header-logo"></div>
+
+            <div>
+
+                <h2>ECLIPSE LAB</h2>
+                <small>ARCHIVE MODE</small>
+                <div id="clearance-topbar">CLEARANCE : NONE</div>
+
+            </div>
+
+        </div>
+
+        <div class="header-right">
+
+            <button id="switch-user" onclick="signOut(); return false;">SIGN OUT</button>
+            <button id="notification-reopen" class="notification-show-button" type="button" style="display:none;">NOTIFICATIONS</button>
+            <div id="system-time">00:00:00</div>
+
+        </div>
+
+    </div>
+
+    <div id="navigation-bar">
+
+        <button>BACK</button>
+        <button>FORWARD</button>
+        <span id="path">Archive /</span>
+
+    </div>
+
+    <div id="explorer-main">
+
+        <aside id="sidebar">
+
+            <h3>ARCHIVE FOLDERS</h3>
+
+            <div class="folder" data-folder="welcome">📁 Welcome</div>
+            <div class="folder" data-folder="archive">📁 ECLIPSE LAB ARCHIVE</div>
+            <div class="folder" data-folder="entity">📁 Entity Database</div>
+            <div class="folder" data-folder="staff">📁 Staff Database</div>
+            <div class="folder" data-folder="logs">📁 Internal Logs</div>
+            <div class="folder" data-folder="observation">📁 Observation Records</div>
+            <div class="folder" data-folder="documents">📁 Documents</div>
+            <div class="folder" data-folder="zero">📁 0000</div>
+            <div class="folder" data-folder="one">📁 0001</div>
+            <div class="folder" data-folder="disaster">📁 Disaster Records</div>
+
+        </aside>
+
+        <div id="workspace">
+
+            <section id="file-list"></section>
+
+            <section id="viewer">
+
+                <div id="viewer-header">
+                    <h2 id="viewer-title">Welcome.txt</h2>
+                    <div id="file-id">Archive / Welcome.txt</div>
+                </div>
+
+                <div id="file-content">
+                    <div id="viewer-content">Eclipse Lab Archiveへようこそ。</div>
+                </div>
+
+            </section>
+
+        </div>
+
+    </div>
+
+    <div id="status-bar">
+        <span>STATUS : ARCHIVE MODE</span>
+        <span>ACCESS LEVEL : ARCHIVE</span>
+        <span id="clearance-badge">CLEARANCE : NONE</span>
+    </div>
+
+</section>
+
+<!-- ==========================================================
+NOTIFICATION
+========================================================== -->
+
+<button id="notification-reopen" class="notification-show-button" type="button">NOTIFICATIONS</button>
+
+<div id="notification" class="notification-panel">
+
+    <div class="notification-panel-header">
+
+        <span>NOTIFICATIONS</span>
+        <button id="notification-toggle" type="button">HIDE</button>
+
+    </div>
+
+    <div id="notification-list">
+
+        <button type="button" class="notification-item system">
+            ARCHIVE SYSTEM ONLINE
+        </button>
+
+    </div>
+
+</div>
+
+<!-- ==========================================================
+CRT EFFECT
+========================================================== -->
+
+<div id="crt">
+    <div class="scanline"></div>
+    <div class="noise"></div>
+</div>
+
+<!-- ==========================================================
+SCRIPT
+========================================================== -->
+
+<script src="js/system.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/notification.js"></script>
+<script src="js/keymanager.js"></script>
+<script src="js/data.js"></script>
+<script src="js/danger-data.js"></script>
+<script src="js/entities-data.js"></script>
+<script src="js/log-pool.js"></script>
+<script src="js/boot.js"></script>
+<script src="js/console.js"></script>
+<script src="js/login.js"></script>
+<script src="js/explorer.js"></script>
+<script src="js/main.js"></script>
+
+<script>
+window.addEventListener("load", () => {
+    if (typeof setSystemUser === "function") {
+        setSystemUser("Guest User", "ARCHIVE", null);
+    }
+
+    if (typeof showScreen === "function") {
+        showScreen("explorer-screen");
+    }
+
+    if (typeof initializeExplorer === "function") {
+        initializeExplorer();
+    }
+
+    if (typeof updateAccessDisplay === "function") {
+        updateAccessDisplay();
+    }
+
+    const signOutButton = document.getElementById("switch-user");
+    if (signOutButton && typeof signOut === "function") {
+        signOutButton.addEventListener("click", signOut);
+    }
+});
+</script>
+
+</body>
+</html>

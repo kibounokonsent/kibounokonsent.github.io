@@ -98,13 +98,16 @@ function isHiddenFile(file){
 
 function filterVisibleFiles(files){
 
-    const level =
-        getSystemUser().level;
-
     return files.filter(file=>{
 
-        if(isHiddenFile(file)){
-            return level === "UNKNOWN" || level === "ADMIN";
+        if(file.hidden === true){
+
+            if(!file.permission){
+                return false;
+            }
+
+            return checkPermission(file);
+
         }
 
         return true;
@@ -596,7 +599,7 @@ function unlockArchive(key, options = {}){
 
     if(!options.silent){
         play("secret");
-        showNotification(def.unlockMessage || (def.name + " Unlocked"));
+        showNotification(def.unlockMessage || (def.name + " Unlocked"), "notice");
     }
 
     recordUnlock(key);
@@ -687,6 +690,72 @@ function restorePreviousUnlocks(){
    CLEARANCE UPDATED（前回より高い階級でログインした時だけ）
 ========================================================== */
 
+function canViewFileWithRank(file, rank){
+    if(!file.permission) return true;
+    if(!["bronze","silver","gold","platinum"].includes(file.permission)) return true;
+    return getRankValue(rank) >= getRankValue(file.permission);
+}
+
+function detectNewlyVisibleData(previousRank, currentRank){
+    
+    const newlyVisible = {
+        folders: [],
+        files: []
+    };
+
+    // スキャン対象：archiveData のすべてのフォルダ
+    Object.entries(archiveData).forEach(([folderKey, folder])=>{
+        
+        if(!folder.files) return;
+
+        folder.files.forEach(file=>{
+            
+            const wasVisible = canViewFileWithRank(file, previousRank);
+            const isVisible = canViewFileWithRank(file, currentRank);
+
+            if(!wasVisible && isVisible){
+                newlyVisible.files.push({
+                    folderKey: folderKey,
+                    folderName: folder.name,
+                    fileName: file.name
+                });
+            }
+
+        });
+
+    });
+
+    return newlyVisible;
+}
+
+function generateClearanceNotification(previousRank, currentRank, newlyVisible){
+
+    if(newlyVisible.files.length === 0) return null;
+
+    // ファイルをフォルダごとに集計
+    const byFolder = {};
+    newlyVisible.files.forEach(item=>{
+        if(!byFolder[item.folderKey]){
+            byFolder[item.folderKey] = {
+                folderName: item.folderName,
+                count: 0,
+                files: []
+            };
+        }
+        byFolder[item.folderKey].count++;
+        byFolder[item.folderKey].files.push(item.fileName);
+    });
+
+    // 通知を組み立てる
+    let message = `[ARCHIVE NOTICE]\n\nCLEARANCE UPDATED\n\n${currentRank}\n\nNEW DATA AVAILABLE\n\n`;
+
+    Object.values(byFolder).forEach(folder=>{
+        message += `[${folder.folderName.toUpperCase()}]\n${folder.count} new record(s)\n\n`;
+    });
+
+    return message;
+}
+
 function checkClearanceUpgrade(){
 
     const currentRank =
@@ -700,42 +769,67 @@ function checkClearanceUpgrade(){
 
     if(currentValue <= previousValue) return;
 
-    const newlyUnlockedDanger =
-        dangerSortOrder.find(dangerKey=>{
+    // 前回のクリアランスを保存しておく
+const previousRank = archiveSave.highestRank;
 
-            const required =
-                getRankValue(requiredRankByDanger[dangerKey]);
+// 新しく見えるようになったデータを検出
+const newlyVisible =
+    detectNewlyVisibleData(
+        previousRank,
+        currentRank
+    );
 
-            return required > previousValue && required <= currentValue;
+// 今回のクリアランスを保存
+archiveSave.highestRank =
+    currentRank;
 
-        });
+saveArchive();
 
-    archiveSave.highestRank = currentRank;
+function checkClearanceUpgrade(){
+
+    const currentRank =
+        getSystemUser().rank;
+
+    const currentValue =
+        getRankValue(currentRank);
+
+    const previousRank =
+        archiveSave.highestRank;
+
+    const previousValue =
+        getRankValue(previousRank);
+
+    if(currentValue <= previousValue) return;
+
+
+    // 新しく見えるようになったデータを検出
+    const newlyVisible =
+        detectNewlyVisibleData(
+            previousRank,
+            currentRank
+        );
+
+
+    // 今回のクリアランスを保存
+    archiveSave.highestRank =
+        currentRank;
+
     saveArchive();
 
-    if(newlyUnlockedDanger){
 
-        const count =
-            (archiveData.entity.files || []).filter(f=>
-                f.type === "entity" && f.danger === newlyUnlockedDanger
-            ).length;
+    // 通知を生成・表示
+    const message =
+        generateClearanceNotification(
+            previousRank,
+            currentRank,
+            newlyVisible
+        );
 
-        const label =
-            dangerLevels[newlyUnlockedDanger] ? dangerLevels[newlyUnlockedDanger].label : newlyUnlockedDanger;
-
-        const message =
-`CLEARANCE UPDATED
-
-${currentRank}
-
-New archive access granted.
-
-> ${label.toUpperCase()} ARCHIVE
-${count} new record(s) available.`;
-
+    if(message){
         showNotification(message);
-
     }
+
+}
 
 }
 

@@ -331,6 +331,7 @@ EXPLORER
 
             </button>
 
+
             <div id="system-time">
 
                 00:00:00
@@ -389,7 +390,7 @@ EXPLORER
                 class="folder"
                 data-folder="archive">
 
-                📁 Archive
+                📁 ECLIPSE LAB ARCHIVE
 
             </div>
 
@@ -411,30 +412,6 @@ EXPLORER
 
             <div
                 class="folder"
-                data-folder="incident">
-
-                📁 Incident Reports
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="facility">
-
-                📁 Facility
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="system">
-
-                📁 System
-
-            </div>
-
-            <div
-                class="folder"
                 data-folder="logs">
 
                 📁 Internal Logs
@@ -443,9 +420,41 @@ EXPLORER
 
             <div
                 class="folder"
+                data-folder="observation">
+
+                📁 Observation Records
+
+            </div>
+
+            <div
+                class="folder"
                 data-folder="documents">
 
                 📁 Documents
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="zero">
+
+                📁 0000
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="one">
+
+                📁 0001
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="disaster">
+
+                📁 Disaster Records
 
             </div>
 
@@ -532,15 +541,24 @@ EXPLORER
 NOTIFICATION
 ========================================================== -->
 
-<div
-    id="notification"
-    class="hidden">
+<button id="notification-reopen" class="notification-show-button" type="button">NOTIFICATIONS</button>
 
-    <span id="notification-text">
+<div id="notification" class="notification-panel">
 
-        Notification
+    <div class="notification-panel-header">
 
-    </span>
+        <span>NOTIFICATIONS</span>
+        <button id="notification-toggle" type="button">HIDE</button>
+
+    </div>
+
+    <div id="notification-list">
+
+        <button type="button" class="notification-item system">
+            ARCHIVE SYSTEM ONLINE
+        </button>
+
+    </div>
 
 </div>
 
@@ -651,6 +669,8 @@ SCRIPT
 <script src="js/keymanager.js"></script>
 
 <script src="js/data.js"></script>
+
+<script src="js/data2.js"></script>
 
 <script src="js/danger-data.js"></script>
 

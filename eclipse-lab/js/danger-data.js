@@ -8,64 +8,73 @@
    画像が無い間は代替のシンボル表示になる。
 ========================================================== */
 
+/* ==========================================================
+   ECLIPSE LAB
+   DANGER LEVEL DATA
+========================================================== */
+
 const dangerLevels = {
 
     theos:{
         label:"テオス",
-        symbol:"Θ",
-        emoji:"⚫"
+        symbol:"./images/T.svg",
+        emoji:"./images/T.svg"
     },
 
     kindynos:{
         label:"キンディノス",
-        symbol:"▲",
-        emoji:"🔴"
+        symbol:"./images/K.svg",
+        emoji:"./images/K.svg"
     },
 
     epimeleia:{
         label:"エピメレイア",
-        symbol:"⬡",
-        emoji:"🟡"
+        symbol:"./images/E.svg",
+        emoji:"./images/E.svg"
     },
 
     asphales:{
         label:"アスファレス",
-        symbol:"❖",
-        emoji:"🟢"
+        symbol:"./images/A.svg",
+        emoji:"./images/A.svg"
     }
 
 };
 
 
 /* ==========================================================
-   危険度アイコン（imgタグ。読み込めない間はシンボルで代替）
+   危険度アイコン
 ========================================================== */
 
 function dangerIconHtml(dangerKey, size){
 
-    const level =
-        dangerLevels[dangerKey];
+    const level = dangerLevels[dangerKey];
 
     if(!level) return "";
 
     const s = size || 24;
 
     return `
-    <span class="danger-icon" style="width:${s}px;height:${s}px;">
-        <img src="images/${dangerKey}.png" alt="${level.label}"
-             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
-        <span class="danger-icon-fallback">${level.symbol}</span>
-    </span>`;
-
+        <span
+            class="danger-icon"
+            style="
+                width:${s}px;
+                height:${s}px;
+            "
+        >
+            <img
+                src="${level.symbol}"
+                alt="${level.label}"
+                width="${s}"
+                height="${s}"
+            >
+        </span>
+    `;
 }
 
 
 /* ==========================================================
    職員階級（クリアランス）
-
-   ブロンズ < シルバー < ゴールド < プラチナ
-   各紛異体は、危険度に応じた最低階級以上でのみ
-   全文閲覧できる。
 ========================================================== */
 
 const rankOrder = {
@@ -75,13 +84,27 @@ const rankOrder = {
     PLATINUM:4
 };
 
+
+/* ==========================================================
+   危険度ごとの必要クリアランス
+========================================================== */
+
 const requiredRankByDanger = {
+
     asphales:"BRONZE",
+
     epimeleia:"SILVER",
+
     kindynos:"GOLD",
+
     theos:"PLATINUM"
+
 };
 
+
 function getRankValue(rank){
+
     return rankOrder[rank] || 0;
+
 }
+

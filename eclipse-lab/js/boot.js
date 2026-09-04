@@ -342,6 +342,21 @@ function showWelcome(){
 
 }
 
+function signOut(){
+
+    if(typeof setSystemUser === "function"){
+        setSystemUser(null, "NONE", null);
+    }
+
+    if(typeof EclipseMain !== "undefined"){
+        EclipseMain.state = "STARTING";
+    }
+
+    window.location.assign("Eclipse_Lab.html");
+    return false;
+
+}
+
 
 /* ==========================================================
    WELCOME START INPUT
@@ -443,6 +458,35 @@ function startWelcomeEffect(){
 ========================================================== */
 
 window.addEventListener("load", ()=>{
+
+    const switchButton = document.getElementById("switch-user");
+    if(switchButton){
+        switchButton.textContent = "SIGN OUT";
+        switchButton.addEventListener("click", signOut);
+    }
+
+    const params = new URLSearchParams(window.location.search);
+    const directArchive =
+        params.get("mode") === "archive" ||
+        /archive\.html$/i.test(window.location.pathname);
+
+    if(directArchive){
+
+        if(typeof setSystemUser === "function"){
+            setSystemUser("Guest User", "ARCHIVE", null);
+        }
+
+        if(typeof showScreen === "function"){
+            showScreen("explorer-screen");
+        }
+
+        if(typeof updateAccessDisplay === "function"){
+            updateAccessDisplay();
+        }
+
+        return;
+    }
+
     startBoot();
     startWelcomeEffect();
 });
