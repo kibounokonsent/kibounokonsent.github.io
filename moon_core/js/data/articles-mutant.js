@@ -174,7 +174,7 @@ ARTICLES.push({
 
   ],
 
-  related:['EIO','GIIR','AIOS','変異体','マザー']
+  related:['giir-linktin','eio-evolion','aios-option','variant','mother-colony']
 });
 
 ARTICLES.push({
@@ -333,7 +333,7 @@ ARTICLES.push({
 
   ],
 
-  related:['evolution-disease','giir-linktin','EIO','AIOS','変異体','マザー']
+  related:['evolution-disease','giir-linktin','eio-evolion','aios-option','variant','mother-colony']
 });
 
 ARTICLES.push({
@@ -563,7 +563,7 @@ image: 'assets/images/mutant/GIIR.svg',
 
   ],
 
-  related:['evolution-disease','三要素理論','EIO','AIOS','変異体']
+  related:['evolution-disease','three-element-theory','giir-linktin','eio-evolion','aios-option','variant']
 });
 
 ARTICLES.push({
@@ -795,7 +795,7 @@ image: 'assets/images/mutant/EIO.svg',
 
   ],
 
-  related:['evolution-disease','三要素理論','GIIR','AIOS','変異体']
+  related:['evolution-disease','three-element-theory','giir-linktin','aios-option','variant']
 });
 
 ARTICLES.push({
@@ -1024,7 +1024,7 @@ ARTICLES.push({
 
   ],
 
-  related:['evolution-disease','三要素理論','giir-linktin','eio-evolion','変異体']
+  related:['evolution-disease','three-element-theory','giir-linktin','eio-evolion','variant']
 });
 
 ARTICLES.push({
@@ -1326,7 +1326,7 @@ ARTICLES.push({
 
   ],
 
-  related:['evolution-disease','aios-option','giir-linktin','eio-evolion','純粋種','マザー']
+  related:['evolution-disease','aios-option','giir-linktin','eio-evolion','mother-colony','pure-variant']
 });
 
 ARTICLES.push({
@@ -2056,5 +2056,5 @@ ARTICLES.push({
 
   ],
 
-  related:['evolution-disease','AIOS','GIIR','EIO','変異体','純粋種']
+  related:['evolution-disease','giir-linktin','eio-evolion','aios-option','variant','pure-variant']
 });

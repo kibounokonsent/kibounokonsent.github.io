@@ -389,7 +389,7 @@ const CALENDAR_EVENTS = [
 },
 
 {
-    id: 'sert-city-foundation-day',
+    id: 'sertcity-foundation-day',
     month: 7,
     day: 7,
     name: 'セルトシティ創立記念日',
@@ -1049,7 +1049,7 @@ const CALENDAR_EVENTS = [
 },
 
 {
-    id: 'wonheado-world-food-festival',
+    id: 'wonhead-world-food-festival',
     month: 12,
     day: 25,
     name: '世界料理祭',

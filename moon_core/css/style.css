@@ -1696,3 +1696,121 @@ body.theme-glossary{
   background:var(--surface-alt);
   color:var(--accent-signal);
 }
+
+/* ==========================================================
+   HISTORY TIMELINE FILTER
+========================================================== */
+
+.timeline-filter {
+  margin-bottom: 36px;
+}
+
+.timeline-filter-title {
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--text-primary);
+}
+
+.timeline-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timeline-filter-btn.active {
+  background: #B08B57;
+  border-color: #B08B57;
+  color: #fff;
+}
+
+/* ---------- 記事一覧フィルター ---------- */
+
+.article-filter{
+  margin-top:24px;
+  margin-bottom:28px;
+}
+
+.article-filter-title{
+  margin-bottom:14px;
+  font-size:13px;
+  font-weight:700;
+  letter-spacing:.08em;
+  color:var(--text-primary);
+}
+
+.article-filter-list{
+  display:flex;
+  flex-wrap:wrap;
+  gap:8px;
+}
+
+.article-filter-btn.active,
+.article-filter-btn.active:hover{
+  background:var(--accent-signal);
+  border-color:var(--accent-signal);
+  color:#fff;
+}
+
+.article-index-count{
+  margin-top:16px;
+  color:var(--text-secondary);
+  font-size:13px;
+}
+
+.index-sort{
+  display:flex;
+  gap:10px;
+  margin-top:20px;
+}
+
+.index-sort button.active,
+.index-sort button.active:hover{
+  background:var(--accent-signal);
+  border-color:var(--accent-signal);
+  color:#fff;
+}
+
+/* ==========================================================
+   HISTORY TIMELINE FILTER
+========================================================== */
+
+.timeline-filter {
+  margin-bottom: 36px;
+}
+
+.timeline-filter-title {
+  margin-bottom: 14px;
+  font-size: 13px;
+  font-weight: 700;
+  letter-spacing: .08em;
+  color: var(--text-primary);
+}
+
+.timeline-filter-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.timeline-filter-btn.active {
+  background: #B08B57;
+  border-color: #B08B57;
+  color: #fff;
+}
+
+/* ==========================================================
+   CREATURE FILTER
+========================================================== */
+
+.creature-filter{
+  margin-bottom:36px;
+}
+
+.creature-filter .timeline-filter-btn.active,
+.creature-filter .timeline-filter-btn.active:hover{
+  background:#2FAE68;
+  border-color:#2FAE68;
+  color:#fff;
+}

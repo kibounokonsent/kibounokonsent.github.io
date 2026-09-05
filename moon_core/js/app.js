@@ -370,7 +370,88 @@ function renderCategoryPage(key){
         </div>
     `;
 
-}else{
+}else if(key === "creature"){
+
+    const activeSubcat = creatureFilter;
+
+    const subcats = [
+      { key:"plant",  name:"植物" },
+      { key:"animal", name:"動物" },
+      { key:"marine", name:"海洋生物" }
+    ];
+
+    const filterButtons = `
+      <div class="timeline-filter creature-filter">
+
+        <div class="timeline-filter-title">
+          生物カテゴリー
+        </div>
+
+        <div class="timeline-filter-list">
+
+          ${subcats.map(sub => `
+            <button
+              class="btn btn-ghost timeline-filter-btn ${activeSubcat === sub.key ? "active" : ""}"
+              onclick="setCreatureFilter('${sub.key}')"
+            >
+              ${sub.name}
+            </button>
+          `).join("")}
+
+        </div>
+
+      </div>
+    `;
+
+    const arts = ARTICLES.filter(a =>
+      a.cat === "creature" &&
+      a.subcat === activeSubcat
+    );
+
+    if(arts.length === 0){
+
+      body = `
+        ${note}
+
+        ${filterButtons}
+
+        <div class="empty-state">
+          このカテゴリーにはまだ記事がありません。
+        </div>
+      `;
+
+    }else{
+
+      body = `
+        ${note}
+
+        ${filterButtons}
+
+        <div class="article-grid">
+
+          ${arts.map(a=>`
+
+            <a class="article-card"
+               href="#/article/${a.id}">
+
+              <div class="article-card-title">
+                ${a.title}
+              </div>
+
+              <div class="article-card-lede">
+                ${a.lede}
+              </div>
+
+            </a>
+
+          `).join("")}
+
+        </div>
+      `;
+
+    }
+
+  }else{
 
     const arts = articlesInCat(key);
 
@@ -391,18 +472,18 @@ function renderCategoryPage(key){
 
         <div class="article-grid">
 
-  ${arts.map(a=>`
+          ${arts.map(a=>`
 
             <a class="article-card"
                href="#/article/${a.id}">
 
-                <div class="article-card-title">
-                  ${a.title}
-                </div>
+              <div class="article-card-title">
+                ${a.title}
+              </div>
 
-                <div class="article-card-lede">
-                  ${a.lede}
-                </div>
+              <div class="article-card-lede">
+                ${a.lede}
+              </div>
 
             </a>
 
@@ -414,6 +495,8 @@ function renderCategoryPage(key){
     }
 
   }
+
+  
 
   document.getElementById("app").innerHTML = `
 
@@ -611,22 +694,87 @@ function renderHistoryTimeline(){
   setBackgroundTheme("history");
   document.getElementById("home-hero").style.display = "none";
 
+  /*
+   * 現在選択されている年表カテゴリー
+   * "all" = すべて
+   */
+  const activeTag =
+    window.historyTimelineFilter || "all";
+
+  /*
+   * TIMELINE に登録されているカテゴリーを自動取得
+   *
+   * 手動でカテゴリー名を追加する必要はありません。
+   */
+  const tags = [
+    ...new Set(
+      TIMELINE
+        .map(ev => ev.tag)
+        .filter(Boolean)
+    )
+  ];
+
+  /*
+   * フィルター用ボタン
+   */
+ const filterButtons = `
+  <div class="timeline-filter">
+
+    <div class="timeline-filter-title">
+      年表カテゴリー
+    </div>
+
+    <div class="timeline-filter-list">
+
+      <button
+        class="btn btn-ghost timeline-filter-btn ${activeTag === "all" ? "active" : ""}"
+        onclick="setHistoryTimelineFilter('all')"
+      >
+        すべて
+      </button>
+
+      ${tags.map(tag => `
+        <button
+          class="btn btn-ghost timeline-filter-btn ${activeTag === tag ? "active" : ""}"
+          onclick="setHistoryTimelineFilter('${tag}')"
+        >
+          ${tag}
+        </button>
+      `).join("")}
+
+    </div>
+
+  </div>
+`;
+
+  /*
+   * 選択されたカテゴリーで年表を絞り込む
+   */
+  const filteredTimeline =
+    activeTag === "all"
+      ? TIMELINE
+      : TIMELINE.filter(ev => ev.tag === activeTag);
+
   let body = "";
 
-  if(TIMELINE.length === 0){
+  if(filteredTimeline.length === 0){
 
     body = `
+      ${filterButtons}
+
       <div class="empty-state">
-        年表はまだありません。
+        このカテゴリーの年表項目はまだありません。
       </div>
     `;
 
   }else{
 
     body = `
+      ${filterButtons}
+
       <div class="timeline-list">
 
-        ${TIMELINE.map(ev=>`
+        ${filteredTimeline.map(ev=>`
 
           <div class="timeline-item">
 
@@ -636,7 +784,9 @@ function renderHistoryTimeline(){
 
               <div class="timeline-era">
                 ${ev.era}
-                ${ev.tag ? `<span class="timeline-tag">${ev.tag}</span>` : ""}
+                ${ev.tag
+                  ? `<span class="timeline-tag">${ev.tag}</span>`
+                  : ""}
               </div>
 
               <div class="timeline-title">
@@ -657,10 +807,44 @@ function renderHistoryTimeline(){
     `;
   }
 
-  renderHistoryPage("歴史年表","統合暦の出来事を年代順に閲覧できます。", body, "歴史年表");
+  renderHistoryPage(
+    "歴史年表",
+    "統合暦の出来事を年代順に閲覧できます。",
+    body,
+    "歴史年表"
+  );
 
 }
 
+
+/* ---------------- 歴史年表 カテゴリーフィルター ---------------- */
+
+function setHistoryTimelineFilter(tag){
+
+  /*
+   * 選択中のカテゴリーを保存
+   */
+  window.historyTimelineFilter = tag;
+
+  /*
+   * 年表を再描画
+   */
+  renderHistoryTimeline();
+
+}
+
+/* ---------------- 生物カテゴリー フィルター ---------------- */
+
+let creatureFilter = 'plant';
+
+function setCreatureFilter(subcat){
+
+  creatureFilter = subcat;
+
+  renderCategoryPage("creature");
+
+
+}
 /* ---------------- 全記事一覧 ---------------- */
 
 let articleIndexSort = 'updated';
@@ -773,22 +957,28 @@ if(articleIndexSort === 'updated'){
 
 <div class="index-sort">
 
-  <button onclick="setArticleSort('updated')">
+  <button
+    class="btn btn-ghost ${articleIndexSort === 'updated' ? 'active' : ''}"
+    onclick="setArticleSort('updated')"
+  >
     更新順
   </button>
 
-
-  <button onclick="setArticleSort('title')">
+  <button
+    class="btn btn-ghost ${articleIndexSort === 'title' ? 'active' : ''}"
+    onclick="setArticleSort('title')"
+  >
     名前順
   </button>
 
-
-  <button onclick="setArticleSort('category')">
+  <button
+    class="btn btn-ghost ${articleIndexSort === 'category' ? 'active' : ''}"
+    onclick="setArticleSort('category')"
+  >
     カテゴリ順
   </button>
 
-
-      </div>
+</div>
 
     </div>
 
