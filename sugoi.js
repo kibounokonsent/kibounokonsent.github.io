@@ -93,3 +93,23 @@ document.addEventListener("keydown", (event) => {
     }
 
 });
+
+/* ==========================================================
+   DETAIL TOGGLE
+========================================================== */
+
+function toggleDetail(detailId, buttonId) {
+
+    const detail = document.getElementById(detailId);
+    const button = document.getElementById(buttonId);
+
+    if (!detail || !button) return;
+
+    detail.classList.toggle("open");
+
+    if (detail.classList.contains("open")) {
+        button.textContent = "▲ 閉じる";
+    } else {
+        button.textContent = "▼ 詳細を見る";
+    }
+}
