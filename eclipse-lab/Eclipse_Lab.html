@@ -325,12 +325,15 @@ EXPLORER
 
         <div class="header-right">
 
+            <button id="notification-history-toggle" type="button">通知履歴<span id="notification-history-badge"></span></button>
+
+            <button id="mute-toggle" type="button" title="サウンドのON/OFF">🔊</button>
+
             <button id="switch-user">
 
-                SWITCH USER
+                LOG OUT
 
             </button>
-
 
             <div id="system-time">
 
@@ -382,7 +385,7 @@ EXPLORER
                 class="folder"
                 data-folder="welcome">
 
-                📁 Welcome
+                📁 はじめに
 
             </div>
 
@@ -390,7 +393,7 @@ EXPLORER
                 class="folder"
                 data-folder="archive">
 
-                📁 ECLIPSE LAB ARCHIVE
+                📁 アーカイブ
 
             </div>
 
@@ -398,7 +401,23 @@ EXPLORER
                 class="folder"
                 data-folder="entity">
 
-                📁 Entity Database
+                📁 紛異体データベース
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="facility">
+
+                📁 施設情報
+
+            </div>
+
+            <div
+                class="folder"
+                data-folder="system">
+
+                📁 システム
 
             </div>
 
@@ -406,55 +425,7 @@ EXPLORER
                 class="folder"
                 data-folder="staff">
 
-                📁 Staff Database
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="logs">
-
-                📁 Internal Logs
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="observation">
-
-                📁 Observation Records
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="documents">
-
-                📁 Documents
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="zero">
-
-                📁 0000
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="one">
-
-                📁 0001
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="disaster">
-
-                📁 Disaster Records
+                📁 職員データベース
 
             </div>
 
@@ -487,6 +458,8 @@ EXPLORER
                         Archive / Welcome.txt
 
                     </div>
+
+                    <button id="export-file" type="button" style="display:none;">この記録を書き出す</button>
 
                 </div>
 
@@ -541,24 +514,28 @@ EXPLORER
 NOTIFICATION
 ========================================================== -->
 
-<button id="notification-reopen" class="notification-show-button" type="button">NOTIFICATIONS</button>
+<div
+    id="notification"
+    class="hidden">
 
-<div id="notification" class="notification-panel">
+    <span id="notification-text">
 
-    <div class="notification-panel-header">
+        Notification
 
-        <span>NOTIFICATIONS</span>
-        <button id="notification-toggle" type="button">HIDE</button>
+    </span>
+
+</div>
+
+<div id="notification-history-panel" class="hidden">
+
+    <div class="notification-history-header">
+
+        <span>通知履歴</span>
+        <button id="notification-history-close" type="button">CLOSE</button>
 
     </div>
 
-    <div id="notification-list">
-
-        <button type="button" class="notification-item system">
-            ARCHIVE SYSTEM ONLINE
-        </button>
-
-    </div>
+    <div id="notification-history-list"></div>
 
 </div>
 
@@ -670,11 +647,13 @@ SCRIPT
 
 <script src="js/data.js"></script>
 
-<script src="js/data2.js"></script>
-
 <script src="js/danger-data.js"></script>
 
 <script src="js/entities-data.js"></script>
+<script src="js/staff-records-data.js"></script>
+<script src="js/old-records-data.js"></script>
+<script src="js/founders-data.js"></script>
+<script src="js/disaster-data.js"></script>
 
 <script src="js/log-pool.js"></script>
 

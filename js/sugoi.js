@@ -98,6 +98,10 @@ document.addEventListener("keydown", (event) => {
    DETAIL TOGGLE
 ========================================================== */
 
+/* ==========================================================
+   DETAIL TOGGLE
+========================================================== */
+
 function toggleDetail(detailId, buttonId) {
 
     const detail = document.getElementById(detailId);
@@ -113,3 +117,29 @@ function toggleDetail(detailId, buttonId) {
         button.textContent = "▼ 詳細を見る";
     }
 }
+
+
+/* ==========================================================
+   ACCESSIBILITY: キーボード操作対応
+   （HTML側のonclick="openImage(this)"はそのまま残し、
+   　ここでTab移動とEnter/Spaceでの拡大表示だけを追加する）
+========================================================== */
+
+document.querySelectorAll(".zoom-image").forEach((img) => {
+
+    // Tabキーでフォーカスできるようにする
+    img.setAttribute("tabindex", "0");
+    img.setAttribute("role", "button");
+
+    if (!img.hasAttribute("aria-label")) {
+        img.setAttribute("aria-label", (img.alt || "画像") + "を拡大表示");
+    }
+
+    img.addEventListener("keydown", (event) => {
+        if (event.key === "Enter" || event.key === " ") {
+            event.preventDefault();
+            openImage(img);
+        }
+    });
+
+});

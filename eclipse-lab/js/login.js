@@ -13,6 +13,10 @@
 
 /* ==========================================================
    STAFF DATABASE
+   ここはログイン認証用の職員IDテーブル。
+   物語上の実名スタッフ（staff-records-data.jsのemployeeId：
+   3642佐伯/3305神田/5218高橋/2048西村/2210小林/1190三浦/0005-0007）
+   とは別の採番。番号が重ならないよう管理すること。
 ========================================================== */
 
 let loginProcessing = false;
@@ -24,7 +28,7 @@ const staffDatabase = {
         key:"ECLIPSE-0001",
         status:"missing",
         level:"UNKNOWN",
-        rank:"PLATINUM"   // 創設十席の一人。到達すると全クリアランスが開放される
+        rank:"0001"   // 創設十席の一人。到達すると全クリアランス（PLATINUMの先）が開放される
     },
 
     "0002":{
@@ -35,20 +39,48 @@ const staffDatabase = {
         rank:null
     },
 
-    "2210":{
+    "6110":{
         name:"Field Technician",
-        key:"BRONZE-2210",
+        key:"BRONZE-6110",
         status:"active",
         level:"ARCHIVE",
-        rank:"BRONZE"
+        rank:"BRONZE",
+        personalArchive:[
+            {
+                name:"personal_readme.txt",
+                isPersonal:true,
+                content:
+`
+PERSONAL DIRECTORY
+
+OWNER: 6110
+
+保存されているデータはありません。
+`
+            }
+        ]
     },
 
-    "3305":{
+    "7225":{
         name:"Archive Analyst",
-        key:"SILVER-3305",
+        key:"SILVER-7225",
         status:"active",
         level:"ARCHIVE",
-        rank:"SILVER"
+        rank:"SILVER",
+        personalArchive:[
+            {
+                name:"personal_readme.txt",
+                isPersonal:true,
+                content:
+`
+PERSONAL DIRECTORY
+
+OWNER: 7225
+
+保存されているデータはありません。
+`
+            }
+        ]
     },
 
     "4090":{
@@ -56,7 +88,21 @@ const staffDatabase = {
         key:"GOLD-4090",
         status:"active",
         level:"ARCHIVE",
-        rank:"GOLD"
+        rank:"GOLD",
+        personalArchive:[
+            {
+                name:"personal_readme.txt",
+                isPersonal:true,
+                content:
+`
+PERSONAL DIRECTORY
+
+OWNER: 4090
+
+保存されているデータはありません。
+`
+            }
+        ]
     },
 
     "admin":{
@@ -64,7 +110,21 @@ const staffDatabase = {
         key:"ROOT-ADMIN",
         status:"active",
         level:"ADMIN",
-        rank:"PLATINUM"
+        rank:"PLATINUM",
+        personalArchive:[
+            {
+                name:"personal_readme.txt",
+                isPersonal:true,
+                content:
+`
+PERSONAL DIRECTORY
+
+OWNER: admin
+
+保存されているデータはありません。
+`
+            }
+        ]
     }
 
 };
@@ -139,7 +199,7 @@ function authorize(){
 
     runAuthSequence(
         { type:"staff", id:id, staff:staff },
-        ()=> finalizeLogin(staff)
+        ()=> finalizeLogin(staff, id)
     );
 
 }
@@ -149,10 +209,14 @@ function authorize(){
    FINALIZE LOGIN（認証シーケンス完了後に呼ばれる）
 ========================================================== */
 
-function finalizeLogin(staff){
+function finalizeLogin(staff, employeeId){
 
     if(typeof setSystemUser === "function"){
-        setSystemUser(staff.name, staff.level, staff.rank);
+        setSystemUser(staff.name, staff.level, staff.rank, employeeId || null);
+    }
+
+    if(typeof saveUserSession === "function"){
+        saveUserSession();
     }
 
     if(typeof loginComplete === "function"){

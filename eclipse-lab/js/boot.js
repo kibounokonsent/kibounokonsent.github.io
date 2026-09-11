@@ -65,6 +65,29 @@ function hasSeenZero(){
 
 }
 
+function hasSeenTrueEnding(){
+
+    try{
+
+        const data =
+            localStorage.getItem("eclipseArchiveSave");
+
+        if(!data) return false;
+
+        const parsed =
+            JSON.parse(data);
+
+        return parsed.trueEndingSeen === true;
+
+    }
+    catch(e){
+
+        return false;
+
+    }
+
+}
+
 function runBootGhostSequence(){
 
     if(bootBarLine){
@@ -330,6 +353,14 @@ function showWelcome(){
     welcomeSubtitle.style.opacity = 0;
     launchMessage.style.opacity = 0;
 
+    // 真エンディング（0001_Final_Conversation.txt）既読の場合だけ、
+    // 声高に告げず、色味とサブタイトルだけをそっと変える
+    if(hasSeenTrueEnding()){
+
+        welcomeScreen.classList.add("archive-closed");
+
+    }
+
     setTimeout(()=>{ welcomeTitle.style.opacity = 1; },300);
     setTimeout(()=>{ welcomeSubtitle.style.opacity = 1; },1000);
 
@@ -339,21 +370,6 @@ function showWelcome(){
         enableWelcomeStart();
 
     },1800);
-
-}
-
-function signOut(){
-
-    if(typeof setSystemUser === "function"){
-        setSystemUser(null, "NONE", null);
-    }
-
-    if(typeof EclipseMain !== "undefined"){
-        EclipseMain.state = "STARTING";
-    }
-
-    window.location.assign("Eclipse_Lab.html");
-    return false;
 
 }
 
@@ -459,34 +475,13 @@ function startWelcomeEffect(){
 
 window.addEventListener("load", ()=>{
 
-    const switchButton = document.getElementById("switch-user");
-    if(switchButton){
-        switchButton.textContent = "SIGN OUT";
-        switchButton.addEventListener("click", signOut);
-    }
+    const hasSession =
+        (typeof restoreUserSession === "function") &&
+        !!restoreUserSession();
 
-    const params = new URLSearchParams(window.location.search);
-    const directArchive =
-        params.get("mode") === "archive" ||
-        /archive\.html$/i.test(window.location.pathname);
-
-    if(directArchive){
-
-        if(typeof setSystemUser === "function"){
-            setSystemUser("Guest User", "ARCHIVE", null);
-        }
-
-        if(typeof showScreen === "function"){
-            showScreen("explorer-screen");
-        }
-
-        if(typeof updateAccessDisplay === "function"){
-            updateAccessDisplay();
-        }
-
-        return;
-    }
+    if(hasSession) return;
 
     startBoot();
     startWelcomeEffect();
+
 });

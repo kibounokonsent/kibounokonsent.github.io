@@ -40,6 +40,31 @@ const clearanceBadge =
 const clearanceTopbar =
     document.getElementById("clearance-topbar");
 
+const exportButton =
+    document.getElementById("export-file");
+
+const popup =
+    document.getElementById("popup");
+
+const popupTitle =
+    document.getElementById("popup-title");
+
+const popupContent =
+    document.getElementById("popup-content");
+
+const popupClose =
+    document.getElementById("popup-close");
+
+if(popupClose){
+    popupClose.addEventListener("click", closePopup);
+}
+
+function closePopup(){
+    if(popup){
+        popup.classList.add("hidden");
+    }
+}
+
 
 /* ==========================================================
    CURRENT STATE
@@ -84,7 +109,10 @@ function checkPermission(file){
             return getRankValue(getSystemUser().rank) >= rankOrder.GOLD;
 
         case "platinum":
-            return getSystemUser().rank === "PLATINUM";
+            return getRankValue(getSystemUser().rank) >= rankOrder.PLATINUM;
+
+        case "0001":
+            return getSystemUser().rank === "0001";
 
         default:
             return false;
@@ -98,16 +126,20 @@ function isHiddenFile(file){
 
 function filterVisibleFiles(files){
 
+    const level =
+        getSystemUser().level;
+
     return files.filter(file=>{
 
-        if(file.hidden === true){
+        if(isHiddenFile(file)){
+            return level === "UNKNOWN" || level === "ADMIN";
+        }
 
-            if(!file.permission){
-                return false;
-            }
-
-            return checkPermission(file);
-
+        // 通常はpermission不足でも一覧には出してACCESS DENIEDを見せるが、
+        // hideUntilUnlocked:true のファイルだけは権限を満たすまで一覧にも出さない
+        // （存在自体が伏線・ネタバレになってしまうファイル専用）
+        if(file.hideUntilUnlocked && !checkPermission(file)){
+            return false;
         }
 
         return true;
@@ -152,6 +184,162 @@ function createArchiveFolder(key, def){
 
     sidebar.appendChild(folder);
 
+    updateFolderBadges();
+
+}
+
+
+/* ==========================================================
+   未読バッジ（フォルダに未読ファイルがあることだけを示す。
+   中身やタイトルは一切表示しない）
+========================================================== */
+
+function folderHasUnread(key){
+
+    const data =
+        archiveData[key];
+
+    if(!data) return false;
+
+    return filterVisibleFiles(data.files).some(file=>
+        isFileReadable(file) &&
+        !archiveSave.viewed.includes(file.name)
+    );
+
+}
+
+function updateFolderBadges(){
+
+    document.querySelectorAll(".folder").forEach(folderEl=>{
+
+        const key =
+            folderEl.dataset.folder;
+
+        folderEl.classList.toggle("has-unread", folderHasUnread(key));
+
+    });
+
+}
+
+
+/* ==========================================================
+   PERSONAL DIRECTORY
+
+   施設ログインとは別の、職員ID単位の個人領域。
+   ・ログイン中の本人自身の領域は無条件で見える（自分だから）
+   ・他職員の領域は、Staff Databaseのページからパスワードを
+     推理して個別に認証する必要がある
+========================================================== */
+
+function revealOwnPersonalFolder(){
+
+    const user =
+        getSystemUser();
+
+    if(!user.employeeId) return;
+
+    const staffEntry =
+        typeof staffDatabase !== "undefined" ? staffDatabase[user.employeeId] : null;
+
+    if(!staffEntry || !staffEntry.personalArchive) return;
+
+    const key = "personal_self";
+
+    if(archiveData[key]) return;
+
+    archiveData[key] = {
+        name:"PERSONAL",
+        files: staffEntry.personalArchive
+    };
+
+    createArchiveFolder(key, { name:"PERSONAL", icon:"🗂" });
+
+}
+
+function openPersonalArchive(employeeId, ownerName, files){
+
+    const key =
+        "personal_" + employeeId;
+
+    archiveData[key] = {
+        name: ownerName + " — PERSONAL ARCHIVE",
+        files: files
+    };
+
+    closePopup();
+
+    openFolder(key);
+
+}
+
+function openPersonalLoginPopup(staff){
+
+    if(!popup || !popupTitle || !popupContent) return;
+
+    popupTitle.textContent = "PERSONAL DIRECTORY";
+
+    popupContent.innerHTML = `
+        <div class="personal-login-owner">OWNER: ${staff.employeeId}</div>
+        <div class="personal-login-field">
+            <label for="personal-login-password">PASSWORD</label>
+            <input type="password" id="personal-login-password" autocomplete="off">
+        </div>
+        <button id="personal-login-submit">AUTHORIZE</button>
+        <div id="personal-login-status"></div>
+    `;
+
+    popup.classList.remove("hidden");
+
+    const input =
+        document.getElementById("personal-login-password");
+
+    const submit =
+        document.getElementById("personal-login-submit");
+
+    const status =
+        document.getElementById("personal-login-status");
+
+    function attempt(){
+
+        play("click");
+
+        const entered =
+            input.value;
+
+        const correct =
+            typeof staff.personalPassword === "string" &&
+            entered === staff.personalPassword;
+
+        if(correct){
+
+            play("loginSuccess");
+            openPersonalArchive(staff.employeeId, staff.name, staff.personalArchive || []);
+
+        }
+        else{
+
+            play("loginFail");
+            status.textContent = "AUTHENTICATION FAILED";
+            input.value = "";
+
+        }
+
+    }
+
+    if(submit){
+        submit.addEventListener("click", attempt);
+    }
+
+    if(input){
+
+        input.focus();
+
+        input.addEventListener("keydown", e=>{
+            if(e.key === "Enter") attempt();
+        });
+
+    }
+
 }
 
 
@@ -159,12 +347,112 @@ function createArchiveFolder(key, def){
    FILE LIST
 ========================================================== */
 
+/* ==========================================================
+   ファイルの表示名
+   （ファイル名は英語の内部識別子のまま、
+   　一覧・タイトルにはできるだけ日本語の見出しを出す）
+========================================================== */
+
+function fileExtensionFor(file){
+
+    if(file.type === "photo") return ".jpg";
+
+    return ".txt";
+
+}
+
+function getDisplayLabel(file){
+
+    let label;
+
+    if(file.label){
+
+        label = file.label;
+
+    }
+    else if(!isFileReadable(file)){
+
+        label = file.name;
+
+    }
+    else if(typeof file.content === "string"){
+
+        /* 【カテゴリ】サブタイトル 形式の場合、カテゴリだけでなく
+           同じ行に続くサブタイトルまで拾う。サブタイトルが無い
+           場合はカテゴリのみにフォールバックする（従来通り）。
+           これをやらないと、同じカテゴリの文書が並んだとき
+           サイドバー上で全部同じラベルに見えてしまう。 */
+
+        const match =
+            file.content.match(/【([^】]{1,40})】[ \t]*([^\n]{0,40})/);
+
+        if(match){
+
+            const category = match[1];
+            const subtitle = (match[2] || "").trim();
+
+            label = subtitle ? subtitle : category;
+
+        }
+        else{
+
+            label = file.name;
+
+        }
+
+    }
+    else{
+
+        label = file.name;
+
+    }
+
+    /* エクスプローラーという体裁なので、拡張子の付いていない
+       ラベルには拡張子を補う（ただし紛異体の詩的な固有名と、
+       破損表示・システム識別子そのままの名前はそのまま残す）。 */
+
+    const alreadyLooksLikeFilename =
+        /\.[a-zA-Z0-9]{2,5}$/.test(label);
+
+    const skipExtension =
+        alreadyLooksLikeFilename ||
+        file.type === "entity" ||
+        file.broken ||
+        !isFileReadable(file);
+
+    if(!skipExtension){
+
+        label += fileExtensionFor(file);
+
+    }
+
+    return label;
+
+}
+
 function isDangerUnlocked(dangerKey){
 
     const required =
         requiredRankByDanger[dangerKey] || "BRONZE";
 
     return getRankValue(getSystemUser().rank) >= getRankValue(required);
+
+}
+
+/* ==========================================================
+   ファイルが「今読める状態か」の統一判定
+   （entityは危険度、それ以外は permission で判定が分かれるため）
+========================================================== */
+
+function isFileReadable(file){
+
+    if(file.broken) return false;
+
+    if(file.type === "entity"){
+        return isDangerUnlocked(file.danger);
+    }
+
+    return checkPermission(file);
 
 }
 
@@ -215,9 +503,15 @@ function renderFiles(files){
         const prefix =
             file.type === "entity"
                 ? (dangerLevels[file.danger] ? dangerLevels[file.danger].emoji : "📄") + " "
+                : file.type === "staff"
+                ? (file.isDepartment ? "🏢 " : "◇ ")
                 : (file.hidden ? "🔓 " : "📄 ");
 
-        item.textContent = prefix + file.name;
+        item.textContent = prefix + getDisplayLabel(file);
+
+        if(isFileReadable(file) && !archiveSave.viewed.includes(file.name)){
+            item.classList.add("has-unread");
+        }
 
         item.addEventListener("mouseenter", ()=> play("hover"));
 
@@ -225,6 +519,7 @@ function renderFiles(files){
 
             document.querySelectorAll(".file").forEach(el=> el.classList.remove("selected"));
             item.classList.add("selected");
+            item.classList.remove("has-unread");
 
             openFile(file);
 
@@ -266,6 +561,11 @@ function renderFileView(file){
 
     if(file.type === "entity"){
         renderEntityView(file);
+        return;
+    }
+
+    if(file.type === "staff"){
+        renderStaffView(file);
         return;
     }
 
@@ -369,6 +669,157 @@ function renderEntityView(entity){
 
 
 /* ==========================================================
+   STAFF VIEW（職員データベースの表示レイアウト）
+========================================================== */
+
+function renderStaffView(staff){
+
+    let html = "";
+
+    html += `<div class="entity-id">${staff.employeeId || staff.name}</div>`;
+
+    html += `<div class="entity-meta">`;
+
+    if(!staff.isDepartment){
+        html += `<div class="entity-meta-block">
+                    <span class="entity-meta-label">職員番号</span>
+                    <span class="entity-meta-value">${staff.employeeId || "―"}</span>
+                 </div>`;
+    }
+
+    html += `<div class="entity-meta-block">
+                <span class="entity-meta-label">配属</span>
+                <span class="entity-meta-value">${staff.department || ""}</span>
+             </div>`;
+
+    const showPersonalHint =
+        !staff.isDepartment && archiveSave.personalConceptDiscovered;
+
+    if(showPersonalHint){
+        html += `<div class="entity-meta-block">
+                    <span class="entity-meta-label">個人フォルダ</span>
+                    <span class="entity-meta-value personal-folder-hint" id="personal-folder-hint">ACCESS UNKNOWN</span>
+                 </div>`;
+    }
+
+    html += `</div>`;
+
+    const staffSections =
+        staff.sections || [];
+
+    staffSections.forEach(section=>{
+
+        html += `<div class="entity-section">
+                    <h3>${section.heading}</h3>
+                    ${section.text.split(/\n\n+/).map(block=>`<p>${block.replace(/\n/g,"<br>")}</p>`).join("")}
+                 </div>`;
+
+    });
+
+    const relatedLogs =
+        findRelatedLogs(staff);
+
+    if(relatedLogs.length > 0){
+
+        html += `<div class="entity-section related-logs-section">
+                    <h3>関連ログ</h3>
+                    <div class="related-log-list">
+                        ${relatedLogs.map(log=>
+                            `<div class="related-log-item" data-log-name="${log.name}">📄 ${getDisplayLabel(log)}</div>`
+                        ).join("")}
+                    </div>
+                 </div>`;
+
+    }
+
+    viewerContent.innerHTML = html;
+
+    if(showPersonalHint){
+
+        const hint =
+            document.getElementById("personal-folder-hint");
+
+        if(hint){
+
+            hint.addEventListener("mouseenter", ()=> play("hover"));
+
+            hint.addEventListener("click", ()=>{
+                openPersonalLoginPopup(staff);
+            });
+
+        }
+
+    }
+
+    if(relatedLogs.length > 0){
+
+        viewerContent.querySelectorAll(".related-log-item").forEach(item=>{
+
+            item.addEventListener("mouseenter", ()=> play("hover"));
+
+            item.addEventListener("click", ()=>{
+                openRelatedLog(item.dataset.logName);
+            });
+
+        });
+
+    }
+
+}
+
+
+/* ==========================================================
+   RELATED LOGS（Staff Database ⇄ Internal Logs の相互リンク）
+
+   Internal Logsの各ファイルは relatedStaff:[...] に
+   employeeId（個人）または name（部門）を持つ場合がある。
+   職員詳細を開いたとき、それを参照して逆引きする。
+========================================================== */
+
+function findRelatedLogs(staff){
+
+    const logsFolder =
+        archiveData.logs;
+
+    if(!logsFolder) return [];
+
+    const key =
+        staff.employeeId || staff.name;
+
+    return logsFolder.files.filter(file=>
+        Array.isArray(file.relatedStaff) && file.relatedStaff.includes(key)
+    );
+
+}
+
+function openRelatedLog(logName){
+
+    const logsFolder =
+        archiveData.logs;
+
+    if(!logsFolder) return;
+
+    const file =
+        logsFolder.files.find(f=> f.name === logName);
+
+    if(!file) return;
+
+    openFolder("logs");
+
+    const item =
+        Array.from(fileList.children).find(el=> el.textContent.includes(logName));
+
+    if(item){
+        document.querySelectorAll(".file").forEach(el=> el.classList.remove("selected"));
+        item.classList.add("selected");
+    }
+
+    openFile(file);
+
+}
+
+
+/* ==========================================================
    LOCKED ENTITY（一覧で[ LOCKED ]をクリックした場合）
 ========================================================== */
 
@@ -402,7 +853,7 @@ function showPermissionError(file){
 
     play("error");
 
-    viewerTitle.textContent = file.name;
+    viewerTitle.textContent = getDisplayLabel(file);
 
     viewerContent.innerHTML = "";
 
@@ -411,7 +862,7 @@ function showPermissionError(file){
 
     box.className = "permission-error";
 
-    const rankTiers = ["bronze", "silver", "gold", "platinum"];
+    const rankTiers = ["bronze", "silver", "gold", "platinum", "0001"];
 
     if(rankTiers.includes(file.permission)){
 
@@ -443,7 +894,11 @@ function openFile(file){
 
     updatePath();
 
-    viewerTitle.textContent = file.name;
+    viewerTitle.textContent = getDisplayLabel(file);
+
+    if(exportButton){
+        exportButton.style.display = "none";
+    }
 
     if(file.broken){
         showBrokenFile(file);
@@ -460,10 +915,49 @@ function openFile(file){
 
     recordFileView(file);
 
+    if(exportButton && typeof file.content === "string"){
+        exportButton.style.display = "inline-block";
+    }
+
     if(file.unlocksArchive){
         watchReadCompletion(file);
     }
 
+}
+
+
+/* ==========================================================
+   持ち帰り機能（開いている記録をテキストで書き出す）
+========================================================== */
+
+function downloadCurrentFile(){
+
+    if(!currentFile || typeof currentFile.content !== "string") return;
+
+    const blob =
+        new Blob([currentFile.content], { type:"text/plain;charset=utf-8" });
+
+    const url =
+        URL.createObjectURL(blob);
+
+    const link =
+        document.createElement("a");
+
+    link.href = url;
+    link.download = currentFile.name;
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+
+    play("click");
+
+}
+
+if(exportButton){
+    exportButton.addEventListener("click", downloadCurrentFile);
 }
 
 
@@ -545,7 +1039,7 @@ function updatePath(){
         archiveData[currentFolder] ? archiveData[currentFolder].name : "";
 
     pathBar.textContent =
-        "Archive / " + folderName + (currentFile ? " / " + currentFile.name : "");
+        "Archive / " + folderName + (currentFile ? " / " + getDisplayLabel(currentFile) : "");
 
 }
 
@@ -583,23 +1077,30 @@ function updateAccessDisplay(){
 
 function unlockArchive(key, options = {}){
 
-    if(archiveData[key]) return;
+    // archiveData[key] の有無ではなく、サイドバーに既にフォルダが
+    // 出ているかどうかで「解禁済みか」を判定する。
+    // documents/logs/incident/observation/disaster のように
+    // archiveDataの実体は他スクリプトから既に存在しているが
+    // フォルダ表示だけをここで遅らせているケースに対応するため。
+    if(document.querySelector(`[data-folder='${key}']`)) return;
 
     const def =
         lockedArchives[key];
 
     if(!def) return;
 
-    archiveData[key] = {
-        name: def.name,
-        files: def.files
-    };
+    if(!archiveData[key]){
+        archiveData[key] = {
+            name: def.name,
+            files: def.files
+        };
+    }
 
     createArchiveFolder(key, def);
 
     if(!options.silent){
         play("secret");
-        showNotification(def.unlockMessage || (def.name + " Unlocked"), "notice");
+        showNotification(def.unlockMessage || "新たな記録が解禁されました。", "normal", key);
     }
 
     recordUnlock(key);
@@ -611,14 +1112,60 @@ function checkLevelUnlocks(){
     const level =
         getSystemUser().level;
 
+    const rank =
+        getSystemUser().rank;
+
     Object.keys(lockedArchives).forEach(key=>{
 
         const def = lockedArchives[key];
 
-        if(def.trigger !== "level") return;
-        if(archiveData[key]) return;
+        if(document.querySelector(`[data-folder='${key}']`)) return;
 
-        if(level === def.requiredLevel){
+        if(def.trigger === "level" && level === def.requiredLevel){
+            unlockArchive(key);
+        }
+        else if(def.trigger === "rank" && getRankValue(rank) >= getRankValue(def.requiredRank)){
+            unlockArchive(key);
+        }
+
+    });
+
+    checkReadAllUnlocks();
+
+}
+
+
+/* ==========================================================
+   READ-ALL UNLOCK SYSTEM
+
+   trigger:"readAll" のアーカイブは、requiredFiles に列挙した
+   ファイル名を全て読了した時点で解禁される（requiredLevel /
+   requiredRank を指定すれば、その条件も同時に満たす必要がある）。
+
+   例：Old Records全4本を読了 かつ 0001としてログイン中
+       → lockedArchives.one（0001フォルダ）が解禁される
+========================================================== */
+
+function checkReadAllUnlocks(){
+
+    Object.keys(lockedArchives).forEach(key=>{
+
+        const def = lockedArchives[key];
+
+        if(def.trigger !== "readAll") return;
+        if(document.querySelector(`[data-folder='${key}']`)) return;
+
+        if(def.requiredLevel && getSystemUser().level !== def.requiredLevel) return;
+        if(def.requiredRank && getSystemUser().rank !== def.requiredRank) return;
+
+        const requiredFiles =
+            def.requiredFiles || [];
+
+        const allRead =
+            requiredFiles.length > 0 &&
+            requiredFiles.every(name => archiveSave.viewed.includes(name));
+
+        if(allRead){
             unlockArchive(key);
         }
 
@@ -663,7 +1210,18 @@ function recordFileView(file){
         archiveSave.viewed.push(file.name);
     }
 
+    if(file.name === "0001_Final_Conversation.txt"){
+        archiveSave.trueEndingSeen = true;
+    }
+
+    if(file.isPersonal){
+        archiveSave.personalConceptDiscovered = true;
+    }
+
     saveArchive();
+
+    checkReadAllUnlocks();
+    updateFolderBadges();
 
 }
 
@@ -677,10 +1235,63 @@ function recordUnlock(key){
 
 }
 
+function canRestoreArchive(key){
+
+    const def =
+        lockedArchives[key];
+
+    if(!def) return false;
+
+    const user =
+        getSystemUser();
+
+    if(def.trigger === "rank"){
+        return getRankValue(user.rank) >=
+               getRankValue(def.requiredRank);
+    }
+
+    if(def.trigger === "level"){
+        return user.level === def.requiredLevel;
+    }
+
+    if(def.trigger === "event"){
+        // 特定のファイルを読んだことによる恒久的な進行度。
+        // 現在のランク・レベルに関わらず、一度読んだ事実は消えない。
+        return archiveSave.unlocked.includes(key);
+    }
+
+    if(def.trigger === "readAll"){
+
+        if(def.requiredLevel && user.level !== def.requiredLevel){
+            return false;
+        }
+
+        if(def.requiredRank && user.rank !== def.requiredRank){
+            return false;
+        }
+
+        return (def.requiredFiles || []).every(
+            name => archiveSave.viewed.includes(name)
+        );
+
+    }
+
+    return false;
+
+}
+
 function restorePreviousUnlocks(){
 
     archiveSave.unlocked.forEach(key=>{
+
+        // 過去に解禁したという記録だけでなく、「今のログイン状態でも
+        // 解禁条件を満たしているか」を毎回チェックする。
+        // 例：PLATINUMで災害記録を解禁 → ログアウトしてGuest(NONE)で
+        // 入り直した場合は、災害記録が再びサイドバーから消える。
+        if(!canRestoreArchive(key)) return;
+
         unlockArchive(key, { silent:true });
+
     });
 
 }
@@ -689,72 +1300,6 @@ function restorePreviousUnlocks(){
 /* ==========================================================
    CLEARANCE UPDATED（前回より高い階級でログインした時だけ）
 ========================================================== */
-
-function canViewFileWithRank(file, rank){
-    if(!file.permission) return true;
-    if(!["bronze","silver","gold","platinum"].includes(file.permission)) return true;
-    return getRankValue(rank) >= getRankValue(file.permission);
-}
-
-function detectNewlyVisibleData(previousRank, currentRank){
-    
-    const newlyVisible = {
-        folders: [],
-        files: []
-    };
-
-    // スキャン対象：archiveData のすべてのフォルダ
-    Object.entries(archiveData).forEach(([folderKey, folder])=>{
-        
-        if(!folder.files) return;
-
-        folder.files.forEach(file=>{
-            
-            const wasVisible = canViewFileWithRank(file, previousRank);
-            const isVisible = canViewFileWithRank(file, currentRank);
-
-            if(!wasVisible && isVisible){
-                newlyVisible.files.push({
-                    folderKey: folderKey,
-                    folderName: folder.name,
-                    fileName: file.name
-                });
-            }
-
-        });
-
-    });
-
-    return newlyVisible;
-}
-
-function generateClearanceNotification(previousRank, currentRank, newlyVisible){
-
-    if(newlyVisible.files.length === 0) return null;
-
-    // ファイルをフォルダごとに集計
-    const byFolder = {};
-    newlyVisible.files.forEach(item=>{
-        if(!byFolder[item.folderKey]){
-            byFolder[item.folderKey] = {
-                folderName: item.folderName,
-                count: 0,
-                files: []
-            };
-        }
-        byFolder[item.folderKey].count++;
-        byFolder[item.folderKey].files.push(item.fileName);
-    });
-
-    // 通知を組み立てる
-    let message = `[ARCHIVE NOTICE]\n\nCLEARANCE UPDATED\n\n${currentRank}\n\nNEW DATA AVAILABLE\n\n`;
-
-    Object.values(byFolder).forEach(folder=>{
-        message += `[${folder.folderName.toUpperCase()}]\n${folder.count} new record(s)\n\n`;
-    });
-
-    return message;
-}
 
 function checkClearanceUpgrade(){
 
@@ -769,67 +1314,56 @@ function checkClearanceUpgrade(){
 
     if(currentValue <= previousValue) return;
 
-    // 前回のクリアランスを保存しておく
-const previousRank = archiveSave.highestRank;
+    const newlyUnlockedDanger =
+        dangerSortOrder.find(dangerKey=>{
 
-// 新しく見えるようになったデータを検出
-const newlyVisible =
-    detectNewlyVisibleData(
-        previousRank,
-        currentRank
-    );
+            const required =
+                getRankValue(requiredRankByDanger[dangerKey]);
 
-// 今回のクリアランスを保存
-archiveSave.highestRank =
-    currentRank;
+            return required > previousValue && required <= currentValue;
 
-saveArchive();
+        });
 
-function checkClearanceUpgrade(){
-
-    const currentRank =
-        getSystemUser().rank;
-
-    const currentValue =
-        getRankValue(currentRank);
-
-    const previousRank =
-        archiveSave.highestRank;
-
-    const previousValue =
-        getRankValue(previousRank);
-
-    if(currentValue <= previousValue) return;
-
-
-    // 新しく見えるようになったデータを検出
-    const newlyVisible =
-        detectNewlyVisibleData(
-            previousRank,
-            currentRank
-        );
-
-
-    // 今回のクリアランスを保存
-    archiveSave.highestRank =
-        currentRank;
-
+    archiveSave.highestRank = currentRank;
     saveArchive();
 
+    if(newlyUnlockedDanger){
 
-    // 通知を生成・表示
-    const message =
-        generateClearanceNotification(
-            previousRank,
-            currentRank,
-            newlyVisible
-        );
+        const count =
+            (archiveData.entity.files || []).filter(f=>
+                f.type === "entity" && f.danger === newlyUnlockedDanger
+            ).length;
 
-    if(message){
+        const label =
+            dangerLevels[newlyUnlockedDanger] ? dangerLevels[newlyUnlockedDanger].label : newlyUnlockedDanger;
+
+        const message =
+`CLEARANCE UPDATED
+
+${currentRank}
+
+New archive access granted.
+
+> ${label.toUpperCase()} ARCHIVE
+${count} new record(s) available.`;
+
         showNotification(message);
-    }
 
-}
+    }
+    else if(currentRank === "0001"){
+
+        const message =
+`CLEARANCE UPDATED
+
+0001
+
+Unrecognized access level accepted.
+
+Archive index has been restructured.`;
+
+        showNotification(message);
+
+    }
 
 }
 
@@ -862,6 +1396,10 @@ function initializeExplorer(){
     checkLevelUnlocks();
     checkClearanceUpgrade();
 
+    revealOwnPersonalFolder();
+
+    updateFolderBadges();
+
     openFolder("welcome");
 
 }
@@ -890,7 +1428,7 @@ function renderPhotoView(file){
 
         html += `
         <div class="photo-person">
-            <div class="photo-avatar">🧑</div>
+            <div class="photo-avatar">▓</div>
             <div class="photo-id">${person.label}</div>
             <div class="photo-status">${person.status}</div>
         </div>`;

@@ -17,18 +17,26 @@
        content: `本文`,
 
        // 省略可能なオプション
-       permission: "bronze" | "silver" | "gold" | "platinum"  // 職員階級（rank）によるゲート
-                  | "archive" | "unknown" | "secret"           // ログイン時のアクセスレベル（level）によるゲート
-                  ,                                             // 未指定なら誰でも閲覧可
+       permission: "bronze" | "silver" | "gold" | "platinum" | "0001"  // 職員階級（rank）によるゲート
+                  | "archive" | "unknown" | "secret"                    // ログイン時のアクセスレベル（level）によるゲート
+                  ,                                                      // 未指定なら誰でも閲覧可
        hidden: true,                                   // 通常は一覧に出さない隠しファイル（現状未使用、将来用に予約）
        status: "damaged" | "locked" | "recovered",     // 本文は表示されるが、ビューア上部に状態バッジを追加する
        broken: { title:"...", sub:"..." },              // 本文の代わりに破損表示（ACCESS DENIEDとは別の、権限に関係ない読めなさ）
        unlocksArchive: "recovery"                       // このファイルを最後まで読むとlockedArchivesの
                                                           // 該当キーが解禁される
+       ,
+       hideUntilUnlocked: true                          // permissionを満たすまでACCESS DENIEDでも出さず、
+                                                          // 一覧からその存在自体を消す（存在すること自体が
+                                                          // ネタバレになる伏線ファイル専用。通常のpermission
+                                                          // ファイルはこれを付けず、一覧には出してACCESS DENIED
+                                                          // を見せる＝「先に何かある」と分かる方が良いケースに使う）
    }
 
    permission の2系統について：
-   ・bronze/silver/gold/platinum は職員階級（rank）を見る。主にEntity DatabaseとInternal Logsで使用。
+   ・bronze/silver/gold/platinum/0001 は職員階級（rank）を見る。主にEntity DatabaseとInternal Logsで使用。
+     rankOrderは BRONZE < SILVER < GOLD < PLATINUM < "0001" の5段階。
+     "0001"は通常の昇格では到達できず、職員0001としてログインした場合にのみ得られる。
    ・archive/unknown/secret はログインレベル（level）を見る。0001のUNKNOWNレベルなど特殊ルート専用。
    両者は独立した軸であり、rankとlevelは別々にEclipseSystem.userへ保持される。
 ========================================================== */
@@ -40,723 +48,8 @@
 
 const archiveData = {
 
-    archive:{
-        name:"ECLIPSE LAB ARCHIVE",
-        files:[
-            {
-                name:"Archive_Overview.txt",
-                content:
-`
-ECLIPSE LAB ARCHIVE
-
-設計方針：
-
-1. 紛異体を知る
-2. 職員の日常を知る
-3. 0000と0001の関係を知る
-4. 災害の真相を知る
-5. 記憶として残す
-
-本Archiveは、単なる資料の集積ではない。
-何が起きたのかではなく、
-誰がここで暮らし、研究し、最後の日を迎えたのかを記憶するための場所である。
-`
-            },
-            {
-                name:"Observation_Index.txt",
-                content:
-`
-【観測資料目録】
-
-0000 / 0001 / 紛異体 / 職員 / 災害記録
-
-主要記録は、日常に潜む違和感から始まり、
-災害資料へと接続する。
-
-対象の読解順:
-
-1. Entity Database
-2. Staff Database
-3. Internal Logs
-4. 0000 Diary
-5. 0001 Records
-6. Disaster Records
-
-最後に見えるものは、
-施設そのものではなく、
-ここにいた人々の存在である。
-`
-            },
-            {
-                name:"Access_Protocol.txt",
-                permission:"gold",
-                content:
-`
-【アクセス規定】
-
-一般職員は通常資料のみ閲覧可能。
-職員の内情や個人記録は、
-必要な階級と承認を得た場合のみアクセスできる。
-
-0000と0001の記録は、
-通常の研究資料とは異なる分類を持つ。
-
-本Archiveは、記録を読む行為自体が
-追悼と確認の行為である。
-`
-            },
-            {
-                name:"Narrative_Sequence.txt",
-                content:
-`
-【Archiveの読み順】
-
-1. 紛異体を知る
-2. 職員の日常を知る
-3. 0000の存在を知る
-4. 0001の痕跡を知る
-5. 0000と0001の関係を知る
-6. 2016/01/06の災害を知る
-7. 最後に人々の記録を読む
-8. その後に、Archive自体が記憶の器になる
-
-本Archiveは、
-単なる発見の記録集ではなく、
-かつてここで生きていた誰かの痕跡を残すための場所である。
-`
-            }
-        ]
-    },
-
-    entity:{
-        name:"Entity Database",
-        files:[]
-    },
-
-    staff:{
-        name:"Staff Database",
-        files:[
-            {
-                name:"Staff_Registry_Index.txt",
-                content:
-`
-【職員名簿・閲覧索引】
-
-- 0001 : 創設十席 / 研究記録の保管者
-- 0005 : 技術部門 / 最後まで設備と通信を維持
-- 佐伯 : 研究部門 / 手順と記録を残す
-- 神田 : 監視と避難に奔走
-- 高橋 : 脱出経路に尽力
-- 西村 : 職員の避難を統率
-- 小林 : 誰かを見失わない人物
-- 経理担当 : 業務を最後まで守る
-- 食堂スタッフ : 日常の痕跡を最後まで残す
-`
-            },
-            {
-                name:"Staff_Communication_Log.txt",
-                permission:"silver",
-                content:
-`
-【職員コミュニケーション記録】
-
-職員間の会話は日常の雑談と同じように見えるが、
-災害資料を読むと、
-その一言ひとつが最後の会話として映る。
-
-発話は小さくても、
-それが人間の存在証明である。
-`
-            },
-            {
-                name:"Sakei_Final_Observation.txt",
-                permission:"silver",
-                content:
-`
-【佐伯・最終観測メモ】
-
-2016/01/06 03:14
-
-異常の範囲は予測より広い。
-
-扉が勝手に閉まる。通信が断続的に切れる。
-人が一人また一人、事情もなく席を外す。
-
-最初は「会議のため」と言っていた。
-そのあと、誰も帰ってこない。
-
-私は依然として、
-“原因を特定したい”と考えていた。
-
-だが、
-その考えはもう、
-何かを理解するためではなく、
-自分の足を止めるためのものだった。
-
-最後に残した言葉は、
-「こんなはずではなかった」
-だった。
-`
-            },
-            {
-                name:"Kanda_Final_Log.txt",
-                permission:"gold",
-                content:
-`
-【神田・最終記録】
-
-まだ誰か残っているかもしれない。
-
-そう思って、
-何度も廊下を見た。
-
-逃げた人も、逃げ遅れた人も、
-どこかにいる気がした。
-
-私は、自分の足が止まるまで、
-誰かのことを探していた。
-
-あと一人なら、
-もう少しで助けられたかもしれない。
-
-その後悔は、
-実際の事象よりもずっと長く残った。
-`
-            },
-            {
-                name:"Takahashi_Evacuation_Notes.txt",
-                permission:"gold",
-                content:
-`
-【高橋・避難経路メモ】
-
-北側の階段は破損している。
-東側の通路は潰れている。
-南の出口に行ける可能性はある。
-
-ただし、
-そこに誰かが残っているなら、
-その人はもうかなり前から待っている。
-
-「逃げてほしい」
-
-これだけは、
-最後に書き残したかった。
-
-あとで、
-誰かがその文面を見て、
-“またすぐ会える”と思ってしまうことを知っていた。
-`
-            },
-            {
-                name:"Nishimura_Assembly_Log.txt",
-                permission:"silver",
-                content:
-`
-【西村・避難指示メモ】
-
-食堂にはまだ人がいる。
-
-その人たちを、
-一人でも多く連れて行きたい。
-
-声をかけたのは、
-治安のためではなく、
-“すぐに戻ってくる”という言い方が、
-全員にとって一番怖かったからだ。
-
-人を集める時、
-口に出してはいけないことがある。
-
-それは、
-もう誰も帰ってこないかもしれない、
-という事実だった。
-`
-            },
-            {
-                name:"Kobayashi_Final_Entry.txt",
-                permission:"gold",
-                content:
-`
-【小林・最終記録】
-
-まだ誰かいるのかを確かめに行こうとした。
-
-違和感があって、
-何も言えなかった。
-
-怖いと感じたのは、
-よく知っている人の顔が、
-その場にいないことだった。
-
-人は、最後の一人の前で、
-ようやく自分が一人だったことを知る。
-
-その瞬間、
-私はもう、
-誰かを見つける前に、
-自分の名前を呼ばれなくなっていた。
-`
-            },
-            {
-                name:"Accounting_Staff_Personal_Log.txt",
-                permission:"silver",
-                content:
-`
-【経理担当・個人メモ】
-
-未処理の書類が残っている。
-
-給与明細。
-門扉の点検予定。
-備品補充一覧。
-
-仕事をしないと、
-人間はその場に居ることを忘れてしまう。
-
-だから、
-私は書類を整理し続けた。
-
-母のことを思い出した。
-
-病気のとき、
-いつもまとめていたのは、
-仕事の書類だった。
-
-彼女はそれを見て、
-「ちゃんとやってるね」と言っていた。
-
-それだけが、
-私は最後まで残せたものだった。
-`
-            },
-            {
-                name:"Cafeteria_Staff_Last_Check.txt",
-                permission:"silver",
-                content:
-`
-【食堂スタッフ・最後の確認】
-
-冷蔵庫はまだ動いている。
-
-プリンは残っている。
-
-食べられるものは、
-まだ少しだけあった。
-
-最後に、
-誰かが戻ってくるかもしれないと考えた。
-
-だから、
-すぐ食べてしまうのは、
-気が引けた。
-
-冷蔵庫に残っているプリンを見て、
-私は、
-一人の人間として、
-“あとで食べる”という言い方を、
-いちばん大事にしていた。
-`
-            }
-        ]
-    },
-
-    incident:{
-        name:"Incident Reports",
-        files:[]
-    },
-
-    facility:{
-        name:"Facility",
-        files:[]
-    },
-
-    system:{
-        name:"System",
-        files:[]
-    },
-
-    observation:{
-        name:"Observation Records",
-        files:[
-            {
-                name:"Observation_Record_001.txt",
-                content:
-`
-【観測記録 001】
-
-対象の違和感は、最初は単なる施設内の異常として分類された。
-だが、観測を重ねるうちに、
-対象が「何かを探している」のではないかと推測される。
-
-複数の紛異体が、同じ方向を向いている。
-
-それは、単なる狂気ではなく、
-何かを求める動きである。
-`
-            },
-            {
-                name:"Observation_Record_002.txt",
-                permission:"gold",
-                content:
-`
-【観測記録 002】
-
-0000の接触が、ただの異常増幅ではなく、
-紛異体の境界を揺らしていた可能性が高い。
-
-はじめて行動に連鎖が生じたのは、
-研究棟の南側区画からであった。
-
-発生直後、各区画のログは誰もが "何が起きたのか分からない" で埋め尽くされた。
-`
-            }
-        ]
-    },
-
-    zero:{
-        name:"0000",
-        files:[
-            {
-                name:"0000_Diary_Excerpt.txt",
-                permission:"gold",
-                content:
-`
-【0000 日誌抜粋】
-
-今日は、思い出した。
-
-人間としては、もうすぐ消えるのかもしれない。
-
-だから、誰かに残したいものがある。
-
-知識だけでは足りない。
-
-人間が何を求めていたのか、
-何を失ったのかも、
-同じくらい大事だ。
-`
-            },
-            {
-                name:"0000_Research_Notes.txt",
-                permission:"platinum",
-                content:
-`
-【0000 研究ノート】
-
-ここにある記録は、
-“怪物の研究”ではなく、
-“自分自身の欠落を確かめる行為”に近い。
-
-記録に残るのは、
-理解できなかったことだけである。
-
-それでも、残しておくことが重要だった。
-`
-            },
-            {
-                name:"0000_Observation_01.txt",
-                permission:"gold",
-                content:
-`
-【0000 観測記録 01】
-
-研究棟の南側区画で、
-やけに静かな時間があった。
-
-いつもと違うのは、
-何も起きていないのに、
-人の足音だけが一段大きく聞こえることだ。
-
-紛異体はたしかに異常だ。
-でも、
-それと同じくらい不自然なのは、
-人の気配が消えることだ。
-
-誰かがいなくなるとき、
-最初に失われるのは声ではなく、
-その人が“ここにいた”と感じていた痕跡だ。
-`
-            },
-            {
-                name:"0000_One_Year_Later.txt",
-                permission:"platinum",
-                content:
-`
-【0000 断片】
-
-たぶん、
-これは最初の“接触”ではない。
-
-何かに触ったあと、
-人間はそれを忘れたふりをする。
-
-でも、
-忘れているのはただの記憶ではない。
-
-一部の感情だけが、
-正確に残る。
-
-それを私は、
-過去の自分のように見ていた。
-`
-            }
-        ]
-    },
-
-    one:{
-        name:"0001",
-        files:[
-            {
-                name:"0001_Archive_Log.txt",
-                permission:"platinum",
-                content:
-`
-【0001 最終記録の断片】
-
-「……0000」
-
-返事はない。
-
-返事がないこと自体が、
-今の状態を説明している。
-
-昔の話をしても、
-もうそれは誰のものでもない。
-
-ただ、ここに残っている。
-`
-            },
-            {
-                name:"0001_Conversation_00.txt",
-                permission:"platinum",
-                content:
-`
-【0001 対話記録】
-
-「聞こえてるなら、返事をしてくれ」
-
-返事はない。
-
-「お前、何してるんだよ」
-
-まだ返事はない。
-
-「……ごめん」
-
-それが一番長く残った言葉だ。
-
-たぶん、
-昔の私が、
-やけに大きな言葉を使っていたからだ。
-
-今の私は、
-あまり大きくない声でよく喋っていた。
-
-それも、
-もうどこにも届かない。
-`
-            },
-            {
-                name:"0001_Last_Statement.txt",
-                permission:"platinum",
-                content:
-`
-【0001 最後の独白】
-
-私はいつも、
-人を残すことを恐れていた。
-
-失うことを知っていたから。
-
-でも、
-ここに残るのは、
-人間と施設と、消えた名前だけだ。
-
-人は、最後に何を残すかじゃない。
-
-誰を覚えているかで決まる。
-
-だから、
-私はこの記録を残す。
-
-たぶん、
-それで少しだけ、
-誰かの中に残る。
-`
-            },
-            {
-                name:"0001_Final_Conversation.txt",
-                permission:"platinum",
-                content:
-`
-【0001 最終会話】
-
-「……0000」
-
-返事はない。
-
-「聞こえているなら、返事をしてくれ」
-
-返事はない。
-
-「お前、何してるんだよ」
-
-返事はない。
-
-「……お前は、もう誰のものでもないんだろう」
-
-返事はない。
-
-それでも、
-0001はなお、
-昔の呼び方で話しかけていた。
-
-それは、
-“異常存在”としての0000ではなく、
-かつて一緒に研究室で夜を過ごした、
-もう一人の人間への呼びかけだったからだ。
-
-「帰る場所、まだあったんだぞ」
-
-そう言ったあと、
-記録は途切れた。
-`
-            }
-        ]
-    },
-
-    disaster:{
-        name:"Disaster Records",
-        files:[
-            {
-                name:"Incident_Chronology.txt",
-                permission:"platinum",
-                content:
-`
-【災害時系列】
-
-2016/01/05
-最後の通常ログ。
-
-2016/01/06
-異常発生。施設内の通信に乱れが生じる。
-
-中盤
-複数区画で同時多発。
-
-終盤
-職員の避難と孤立が始まる。
-
-最終
-0001が残る。
-0000と紛異体の反応は消失。
-
-残されたのは、
-人間の最後の記録と、
-誰にも言えなかった時間である。
-`
-            },
-            {
-                name:"Initial_Alert_Log.txt",
-                permission:"platinum",
-                content:
-`
-【異常発生初報】
-
-2016/01/06 02:14
-
-警報が一度鳴った。
-
-だが、
-誰もその音を「異常」と認識しなかった。
-
-最初に確認されたのは、
-収容区画の扉が勝手に施錠されたこと。
-
-そのあとで、
-同時にいくつもの区画で、
-同じような異常が報告された。
-
-「何が起きている」
-という問いが、
-実際の異常より先に届いた。
-`
-            },
-            {
-                name:"Survivor_Chronicle.txt",
-                permission:"platinum",
-                content:
-`
-【生存者の断片記録】
-
-最後に残った時間は、
-人が一人ずつ消える時間だった。
-
-そのたび、
-誰もが「まだ話し足りない」と言っていた。
-
-話し足りないが、
-たいていはもう遅かった。
-
-記録に残るのは、
-逃げた話ではなく、
-誰が誰を待っていたかだ。
-`
-            },
-            {
-                name:"Final_Transmission.txt",
-                permission:"platinum",
-                content:
-`
-【最終通信】
-
-受信終了。
-
-施設の異常は静まり、
-残るものはただ、
-最後に残した声だけだった。
-
-「忘れないでほしい」
-`
-            },
-            {
-                name:"Disaster_Chain_2016_01_06.txt",
-                permission:"platinum",
-                content:
-`
-【2016/01/06 災害連鎖】
-
-0000の接触
-↓
-紛異体の過反応
-↓
-複数区画で同時異常発生
-↓
-収容設備の破綻
-↓
-通信の断絶
-↓
-職員の避難と孤立
-↓
-施設内の崩壊
-↓
-0001のみが残る
-
-この連鎖は、
-単純な事故や偶発的発火ではない。
-
-記録のほとんどは、
-「何が起きたか」ではなく、
-「誰が最後まで残っていたか」
-を証明するためのものだった。
-`
-            }
-        ]
-    },
-
     welcome:{
-        name:"Welcome",
+        name:"はじめに",
         files:[
             {
                 name:"Welcome.txt",
@@ -933,6 +226,15 @@ A. 職員証発行時のパスワードは「階級-職員番号」形式で自�
 ※管理者アカウント（システム管理部門）は例外です。命名規則が異なります。
 
 
+Q. 個人用のデータ保存領域はありますか？
+
+A. はい。各職員には、施設アーカイブとは別に、職員ID単位で個人用の保存領域が割り当てられています。
+
+業務上必要な記録のほか、個人的な作業記録も保存できます。
+
+他職員の個人領域を閲覧することは原則できません。アクセスには本人の認証情報が必要です。
+
+
 Q. 制服のサイズ交換はできますか？
 
 A. 総務窓口で承っています。
@@ -982,10 +284,11 @@ A. この質問にはお答えできません。
     },
 
     archive:{
-        name:"Archive",
+        name:"アーカイブ",
         files:[
             {
                 name:"Archive_Info.txt",
+                label:"アーカイブ情報",
                 content:
 `
 Archive Database
@@ -999,6 +302,7 @@ Partial Recovery
             },
             {
                 name:"System_Log.txt",
+                label:"システムログ",
                 content:
 `
 System logs are damaged.
@@ -1009,6 +313,9 @@ Some records were lost.
             },
             {
                 name:"Research_Log_Cross_Reference.txt",
+                label:"相関関係についての通知",
+                permission:"platinum",
+                hideUntilUnlocked:true,
                 content:
 `
 CROSS-REFERENCE NOTICE
@@ -1033,14 +340,103 @@ CROSS-REFERENCE NOTICE
     },
 
     entity:{
-        name:"Entity Database",
+        name:"紛異体データベース",
         // 中身は js/entities-data.js が読み込み時に差し替える
         files:[]
     },
 
-    staff:{
-        name:"Staff Database",
+    incident:{
+        name:"インシデント記録",
         files:[
+            {
+                name:"Incident_001.log",
+                broken:{
+                    title:"DATA LOST",
+                    sub:"NO RECOVERABLE FRAGMENTS"
+                }
+            }
+        ]
+    },
+
+    facility:{
+        name:"施設情報",
+        files:[
+            {
+                name:"Facility_Map.txt",
+                label:"施設マップ",
+                content:
+`
+Facility information unavailable.
+`
+            }
+        ]
+    },
+
+    system:{
+        name:"システム",
+        files:[
+            {
+                name:"System_Status.txt",
+                content:
+`
+Archive System
+
+STATUS:
+ONLINE
+`
+            }
+        ]
+    },
+
+    observation:{
+        name:"観測記録",
+        files:[
+            {
+                name:"Observation_Record_001.txt",
+                content:
+`
+【観測記録 001】
+
+対象の違和感は、最初は単なる施設内の異常として分類された。
+だが、観測を重ねるうちに、
+対象が「何かを探している」のではないかと推測される。
+
+複数の紛異体が、同じ方向を向いている。
+
+それは、単なる狂気ではなく、
+何かを求める動きである。
+`
+            },
+            {
+                name:"Observation_Record_002.txt",
+                permission:"platinum",
+                content:
+`
+【観測記録 002】
+
+0000の接触が、ただの異常増幅ではなく、
+紛異体の境界を揺らしていた可能性が高い。
+
+はじめて行動に連鎖が生じたのは、
+研究棟の南側区画からであった。
+
+発生直後、各区画のログは誰もが "何が起きたのか分からない" で埋め尽くされた。
+`
+            }
+        ]
+    }
+
+};
+
+
+/* ==========================================================
+   職員データベース（最初から表示。機密ではない基本情報＝閲覧可、
+   個人記録の詳細は各職員のpermissionで別途ゲートする）
+========================================================== */
+
+archiveData.staff = {
+    name:"職員データベース",
+    files:[
             {
                 name:"Staff_List.txt",
                 content:
@@ -1048,6 +444,24 @@ CROSS-REFERENCE NOTICE
 Staff Database
 
 Most records are missing.
+`
+            },
+            {
+                name:"Staff_Registry_Index.txt",
+                permission:"silver",
+                content:
+`
+【職員名簿・閲覧索引】
+
+- 0001 : 創設十席
+- 0005 : 技術部門
+- 佐伯 : 研究部門
+- 神田 : 管理部門
+- 高橋 : 管理部門
+- 西村 : 管理部門
+- 小林 : 管理部門
+- 経理担当 : 総務部門
+- 食堂スタッフ : 施設運営部門
 `
             },
             {
@@ -1079,73 +493,233 @@ Most records are missing.
                 }
             }
         ]
-    },
-
-    incident:{
-        name:"Incident Reports",
-        files:[
-            {
-                name:"Incident_001.log",
-                broken:{
-                    title:"DATA LOST",
-                    sub:"NO RECOVERABLE FRAGMENTS"
-                }
-            }
-        ]
-    },
-
-    facility:{
-        name:"Facility",
-        files:[
-            {
-                name:"Facility_Map.txt",
-                content:
-`
-Facility information unavailable.
-`
-            }
-        ]
-    },
-
-    system:{
-        name:"System",
-        files:[
-            {
-                name:"System_Status.txt",
-                content:
-`
-Archive System
-
-STATUS:
-ONLINE
-`
-            }
-        ]
-    }
-
 };
 
 
 /* ==========================================================
-   隠しアーカイブ（条件を満たすまでサイドバーに出ない）
+   隠しアーカイブ／表示ゲート付きフォルダ
+   （条件を満たすまでサイドバーに出ない）
 
-   trigger:"level"  → ログイン時のアクセスレベルが requiredLevel と
-                       一致したら自動的に解禁される
-   trigger:"event"  → archiveData 内のいずれかのファイルが
-                       unlocksArchive:"このキー" を持ち、それが
-                       開かれたときに解禁される
+   trigger:"level"   → ログイン時のアクセスレベルが requiredLevel と
+                        一致したら自動的に解禁される
+   trigger:"rank"    → 職員ランクが requiredRank 以上になったら
+                        自動的に解禁される
+   trigger:"event"   → archiveData 内のいずれかのファイルが
+                        unlocksArchive:"このキー" を持ち、それが
+                        開かれたときに解禁される
+   trigger:"readAll" → requiredFiles を全て読了したら解禁される
+
+   アイコンのルール：
+   🔒 = 「存在は分かっているが、今の権限ではアクセスできない」
+        （個別ファイルのpermission不足時のみ使う）
+   📁 = 「発見済みで、Explorer上で通常に扱える領域」
+        （フォルダ自体はこれ。secret/crossref/zeroなど、隠しフォルダも
+        解禁された時点では📁にする。「発見」と「権限」の意味を混ぜない）
+
+   ここに登録するフォルダは2種類ある。
+   ① files を持つもの（secret/recovery/crossref/zero など）
+      → 解禁時に archiveData[key] がここで初めて作られる。
+   ② files を持たないもの（documents/logs/incident/observation/
+      disasterなど）
+      → 中身はdata.js・disaster-data.js側で既に
+        archiveData[key] として存在している（他スクリプトからの
+        参照・結合のため）。ここでは「サイドバーにフォルダを
+        出すタイミング」だけを遅らせる。
+        NONE時点で存在を教えたくない通常フォルダはすべてこちら。
 ========================================================== */
 
 const lockedArchives = {
 
-    crossref:{
-        name:"Cross-Reference Archive",
-        icon:"🔗",
+    /* ---- ②：中身は既に存在。表示タイミングだけ後から解禁 ---- */
+
+    incident:{
+        name:"インシデント記録",
+        trigger:"rank",
+        requiredRank:"BRONZE",
+        unlockMessage:"新たな記録領域「インシデント記録」へのアクセスが可能になりました。"
+    },
+
+    logs:{
+        name:"内部ログ",
+        trigger:"rank",
+        requiredRank:"BRONZE",
+        unlockMessage:"新たな記録領域「内部ログ」へのアクセスが可能になりました。"
+    },
+
+    documents:{
+        name:"文書",
+        trigger:"rank",
+        requiredRank:"BRONZE",
+        unlockMessage:"新たな記録領域「文書」へのアクセスが可能になりました。"
+    },
+
+    observation:{
+        name:"観測記録",
+        trigger:"rank",
+        requiredRank:"GOLD",
+        unlockMessage:"新たな記録領域「観測記録」へのアクセスが可能になりました。"
+    },
+
+    disaster:{
+        name:"災害記録",
+        trigger:"rank",
+        requiredRank:"PLATINUM",
+        unlockMessage:"新たな記録領域「災害記録」へのアクセスが可能になりました。"
+    },
+
+    /* ---- ①：ここで初めてarchiveDataに実体が作られる ---- */
+
+    secret:{
+        name:"秘匿アーカイブ",
+        icon:"📁",
+        trigger:"level",
+        requiredLevel:"UNKNOWN",
+        unlockMessage:"新たな記録領域へのアクセスが可能になりました。",
+        files:[
+            {
+                name:"Staff_0001.log",
+                label:"職員記録：0001",
+                content:
+`
+RECOVERY STAFF DATA
+
+ID:
+0001
+
+
+STATUS:
+MISSING
+
+
+Last Record:
+
+[DATA CORRUPTED]
+
+
+Access granted by recovery key.
+`
+            },
+            {
+                name:"Lost_Report.dat",
+                label:"破損データ",
+                content:
+`
+WARNING
+
+This file was recovered from
+a damaged archive sector.
+
+
+Some records are permanently lost.
+`
+            },
+            {
+                name:"Last_Message_0001.log",
+                label:"最後のメッセージ：0001",
+                permission:"unknown",
+                content:
+`
+ECLIPSE LAB
+
+STAFF RECORD : 0001
+
+
+--------------------------------
+
+
+FINAL MESSAGE
+
+
+The archive must survive.
+
+
+If this data is recovered...
+
+someone reached this place.
+
+
+--------------------------------
+
+
+STATUS:
+
+MISSING
+
+
+DATA END.
+`
+            },
+            {
+                name:"Experiment_Record_0001.dat",
+                label:"実験記録：0001",
+                permission:"unknown",
+                content:
+`
+PROJECT:
+
+UNKNOWN
+
+
+STAFF:
+
+0001
+
+
+RESULT:
+
+CLASSIFIED
+
+
+ACCESS:
+
+LIMITED
+`
+            }
+        ]
+    },
+
+    recovery:{
+        name:"復旧アーカイブ",
+        icon:"📁",
         trigger:"event",
-        unlockMessage:"[ARCHIVE NOTICE]\nNEW RECORD RECOVERED\n\nCATEGORY:\nCROSS-REFERENCE\nACCESS:\nCLEARANCE 04",
+        unlockMessage:"復旧データを検出しました。",
+        files:[
+            {
+                name:"Recovered_Log_0001.txt",
+                label:"復旧ログ：0001",
+                permission:"unknown",
+                content:
+`
+RECOVERY COMPLETE
+
+
+STAFF ID:
+
+0001
+
+
+STATUS:
+
+MISSING
+
+
+LAST CONNECTION:
+
+UNKNOWN
+`
+            }
+        ]
+    },
+
+    crossref:{
+        name:"関連記録アーカイブ",
+        icon:"📁",
+        trigger:"event",
+        unlockMessage:"関連記録の照合が完了しました。",
         files:[
             {
                 name:"Cross_UN-R-276-RL.dat",
+                label:"個体関連性分析：深い深い闇の中へ",
                 content:
 `
 INDIVIDUAL RELEVANCE ANALYSIS
@@ -1154,42 +728,13 @@ INDIVIDUAL RELEVANCE ANALYSIS
 対象：
 UN-R-276-RL『深い深い闇の中へ』
 
-
 一致率：
 91%
-
-
-内面傾向：
-
-自己認識への疑念。
-孤独。
-自己の内側に存在する未知への恐怖。
-
-
-対象は、対象者自身の内面を
-「外側から観測する」ことを強く促す傾向を持つ。
-
-
-関連日誌照合：
-
-断片的な記録との類似性を確認。
-
-「自分が何者なのかを考えていた」
-
-類似度：
-HIGH
-
-
-備考：
-
-対象そのものよりも、
-対象を見た後に現れる心理反応に
-高い一致傾向が確認される。
 `
             },
-
             {
                 name:"Cross_UN-S-041-CF.dat",
+                label:"個体関連性分析：溶けないロウソク",
                 content:
 `
 INDIVIDUAL RELEVANCE ANALYSIS
@@ -1198,43 +743,13 @@ INDIVIDUAL RELEVANCE ANALYSIS
 対象：
 UN-S-041-CF『溶けないロウソク』
 
-
 一致率：
 88%
-
-
-内面傾向：
-
-時間への意識。
-過去への後悔。
-取り戻せないものへの執着。
-
-
-対象は観測者に対し、
-「まだ間に合うのか」という感覚を残す。
-
-
-関連日誌照合：
-
-過去に記録された文章との
-意味的類似性を確認。
-
-
-「時間は、戻らない。」
-
-類似度：
-HIGH
-
-
-備考：
-
-対象の異常性は時間そのものではなく、
-時間を意識した人間の心理にある可能性が高い。
 `
             },
-
             {
                 name:"Cross_AQ-S-118-CF.dat",
+                label:"個体関連性分析：夢魚",
                 content:
 `
 INDIVIDUAL RELEVANCE ANALYSIS
@@ -1243,44 +758,13 @@ INDIVIDUAL RELEVANCE ANALYSIS
 対象：
 AQ-S-118-CF『夢魚』
 
-
 一致率：
 94%
-
-
-内面傾向：
-
-失われた夢。
-忘却。
-叶わなかった未来。
-
-
-対象は「忘れたもの」を奪うのではなく、
-どこかへ保存しているような挙動を示す。
-
-
-関連日誌照合：
-
-以下の記述との強い類似性を確認。
-
-
-「忘れたと思っていた。
-でも、本当に消えたのだろうか。」
-
-
-類似度：
-VERY HIGH
-
-
-備考：
-
-登録個体中、0000関連記録との
-意味的整合性が特に高い個体。
 `
             },
-
             {
                 name:"Cross_HN-S-204-CF.dat",
+                label:"個体関連性分析：拒絶する赤子",
                 content:
 `
 INDIVIDUAL RELEVANCE ANALYSIS
@@ -1289,46 +773,13 @@ INDIVIDUAL RELEVANCE ANALYSIS
 対象：
 HN-S-204-CF『拒絶する赤子』
 
-
 一致率：
 90%
-
-
-内面傾向：
-
-他者への接触願望。
-拒絶への恐怖。
-愛情を求めながら、
-同時にそれを拒んでしまう矛盾。
-
-
-対象の行動には、
-「近づいてほしい」と「近づかないでほしい」
-という相反する傾向が同時に存在する。
-
-
-関連日誌照合：
-
-複数の断片記録との類似性を確認。
-
-
-「誰かに触れてほしかった。
-でも、怖かった。」
-
-
-類似度：
-VERY HIGH
-
-
-備考：
-
-対象の身体的特徴よりも、
-行動原理との一致が顕著。
 `
             },
-
             {
                 name:"Cross_UN-E-067-SC.dat",
+                label:"個体関連性分析：儚い夕暮れ",
                 content:
 `
 INDIVIDUAL RELEVANCE ANALYSIS
@@ -1337,98 +788,28 @@ INDIVIDUAL RELEVANCE ANALYSIS
 対象：
 UN-E-067-SC『儚い夕暮れ』
 
-
 一致率：
 89%
-
-
-内面傾向：
-
-喪失。
-記憶。
-誰かを待ち続ける感覚。
-忘れたはずの存在への未練。
-
-
-対象は具体的な人物を想起させない。
-
-それでも観測者には、
-「誰かを待っていた」という感覚だけが残る。
-
-
-関連日誌照合：
-
-以下の断片との意味的類似性を確認。
-
-
-「誰を待っていたのか、
-今ではもう思い出せない。」
-
-
-類似度：
-HIGH
-
-
-備考：
-
-対象は記憶そのものではなく、
-記憶が失われた後に残る感情を
-再現している可能性がある。
 `
             },
-
             {
                 name:"Cross_UN-E-132-SC.dat",
+                label:"個体関連性分析：いざなみに飲まれ、うたたねる望郷",
                 content:
 `
 INDIVIDUAL RELEVANCE ANALYSIS
 
 
 対象：
-UN-E-132-SC
-『いざなみに飲まれ、うたたねる望郷』
-
+UN-E-132-SC『いざなみに飲まれ、うたたねる望郷』
 
 一致率：
 93%
-
-
-内面傾向：
-
-喪失したものへの執着。
-繰り返される別れ。
-忘れられることへの恐怖。
-
-
-対象内では、
-「失われるたびに同じものを求める」
-という現象が確認されている。
-
-
-関連日誌照合：
-
-過去記録との極めて高い
-意味的類似性を確認。
-
-
-「また会えるなら、
-何度でも最初からでいい。」
-
-
-類似度：
-VERY HIGH
-
-
-備考：
-
-対象の「望郷」という性質と、
-0000関連記録に残された感情との間に
-強い一致が確認されている。
 `
             },
-
             {
                 name:"Cross_PS-E-089-SC.dat",
+                label:"個体関連性分析：ミスター",
                 content:
 `
 INDIVIDUAL RELEVANCE ANALYSIS
@@ -1437,45 +818,13 @@ INDIVIDUAL RELEVANCE ANALYSIS
 対象：
 PS-E-089-SC『ミスター』
 
-
 一致率：
 92%
-
-
-内面傾向：
-
-自己否定。
-理想の自分への執着。
-「本当の自分」への疑念。
-
-
-対象は宿主を変えるのではなく、
-宿主が望んでいた別の可能性を
-表面化させる。
-
-
-関連日誌照合：
-
-以下の記録との類似性を確認。
-
-
-「もし違う自分だったなら、
-何か変わっていたのだろうか。」
-
-
-類似度：
-VERY HIGH
-
-
-備考：
-
-他個体と比較して、
-自己認識に関する一致率が特に高い。
 `
             },
-
             {
-                name:"Cross_Summary_Report.txt",
+                name:"Summary_Report.txt",
+                label:"関連性分析まとめ",
                 content:
 `
 CROSS-REFERENCE SUMMARY
@@ -1543,6 +892,7 @@ CROSS-REFERENCE SUMMARY
 
 0000
 `,
+                // このファイルを最後まで読むと隠しフォルダ「.0000」が解禁される
                 unlocksArchive:"zero"
             }
         ]
@@ -1550,13 +900,14 @@ CROSS-REFERENCE SUMMARY
 
     zero:{
         name:".0000",
-        icon:"🔒",
+        icon:"📁",
         trigger:"event",
-        unlockMessage:"[ARCHIVE NOTICE]\nPERSONNEL FILE RECOVERED\n\nCATEGORY:\nPERSONAL RECORD\nACCESS:\nCLEARANCE 05",
+        unlockMessage:"未知のデータ領域を検出しました。",
         files:[
             {
                 name:"0000.dat",
-                permission:"platinum",
+                label:"人事記録：0000",
+                permission:"0001",
                 content:
 `
 PERSONNEL FILE
@@ -1598,146 +949,2268 @@ STATUS:
 
 すべて0000という一人の人間に由来する。
 `,
+                // このファイルを最後まで読むと Recovery Archive が「新規データ」として現れる
                 unlocksArchive:"recovery"
-            }
-        ]
-    },
+            },
 
-    recovery:{
-        name:"Recovery Archive",
-        icon:"📁",
-        trigger:"event",
-        unlockMessage:"[ARCHIVE NOTICE]\nRECOVERY ARCHIVE ONLINE\n\nCATEGORY:\nRESEARCH RECOVERY\nACCESS:\nCLEARANCE 04",
-        files:[
             {
-                name:"Recovered_Log_0001.txt",
-                permission:"unknown",
+                name:"0000_Diary_Excerpt.txt",
+                permission:"0001",
                 content:
 `
-RECOVERY COMPLETE
+【0000 日誌抜粋】
 
+今日は、思い出した。
 
-STAFF ID:
+人間としては、もうすぐ消えるのかもしれない。
 
-0001
+だから、誰かに残したいものがある。
 
+知識だけでは足りない。
 
-STATUS:
-
-MISSING
-
-
-LAST CONNECTION:
-
-UNKNOWN
-`
-            }
-        ]
-    },
-
-    secret:{
-        name:"Secret Archive",
-        icon:"🔒",
-        trigger:"level",
-        requiredLevel:"UNKNOWN",
-        unlockMessage:"[ARCHIVE NOTICE]\nSECRET RECORDS UNSEALED\n\nCATEGORY:\nPERSONNEL FILE\nACCESS:\nUNKNOWN CLEARANCE",
-        files:[
-            {
-                name:"Staff_0001.log",
-                content:
-`
-RECOVERY STAFF DATA
-
-ID:
-0001
-
-
-STATUS:
-MISSING
-
-
-Last Record:
-
-[DATA CORRUPTED]
-
-
-Access granted by recovery key.
+人間が何を求めていたのか、
+何を失ったのかも、
+同じくらい大事だ。
 `
             },
+
             {
-                name:"Lost_Report.dat",
+                name:"0000_Research_Notes.txt",
+                permission:"0001",
                 content:
 `
-WARNING
+【0000 研究ノート】
 
-This file was recovered from
-a damaged archive sector.
+ここにある記録は、
+“怪物の研究”ではなく、
+“自分自身の欠落を確かめる行為”に近い。
 
+記録に残るのは、
+理解できなかったことだけである。
 
-Some records are permanently lost.
+それでも、残しておくことが重要だった。
 `
             },
+
             {
-                name:"Last_Message_0001.log",
-                permission:"unknown",
+                name:"0000_Observation_01.txt",
+                permission:"0001",
                 content:
 `
-ECLIPSE LAB
+【0000 観測記録 01】
 
-STAFF RECORD : 0001
+研究棟の南側区画で、
+やけに静かな時間があった。
 
+いつもと違うのは、
+何も起きていないのに、
+人の足音だけが一段大きく聞こえることだ。
 
---------------------------------
+紛異体はたしかに異常だ。
+でも、
+それと同じくらい不自然なのは、
+人の気配が消えることだ。
 
-
-FINAL MESSAGE
-
-
-The archive must survive.
-
-
-If this data is recovered...
-
-someone reached this place.
-
-
---------------------------------
-
-
-STATUS:
-
-MISSING
-
-
-DATA END.
+誰かがいなくなるとき、
+最初に失われるのは声ではなく、
+その人が“ここにいた”と感じていた痕跡だ。
 `
             },
+
             {
-                name:"Experiment_Record_0001.dat",
-                permission:"unknown",
+                name:"0000_One_Year_Later.txt",
+                permission:"0001",
                 content:
 `
-PROJECT:
+【0000 断片】
 
-UNKNOWN
+たぶん、
+これは最初の“接触”ではない。
 
+何かに触ったあと、
+人間はそれを忘れたふりをする。
 
-STAFF:
+でも、
+忘れているのはただの記憶ではない。
 
-0001
+一部の感情だけが、
+正確に残る。
 
-
-RESULT:
-
-CLASSIFIED
-
-
-ACCESS:
-
-LIMITED
+それを私は、
+過去の自分のように見ていた。
 `
             }
         ]
     }
+
+};
+
+
+/* ==========================================================
+   INTERNAL LOGS
+   施設の日常が伝わるログ。序盤は何気ないやり取りだが、
+   終盤に読み返すと印象が変わる構成。
+   （サイドバーに常時表示。ただし後半は階級による閲覧制限あり）
+========================================================== */
+
+archiveData.logs = {
+
+    name:"内部ログ",
+
+    files:[
+
+        {
+            name:"Account_Master_Index.txt",
+            permission:"0001",
+            content:
+`
+【システム管理部門】個人フォルダ・パスワード管理台帳
+
+※本記録への閲覧権限を持つのは最高管理権限保持者のみ。
+
+
+職員番号：3642
+
+PASSWORD：prin0417
+
+
+職員番号：3305
+
+PASSWORD：genba0621
+
+
+（以下、追加登録され次第このリストに追記される）
+`
+        },
+
+        {
+            name:"Account_Reissue_20151118.txt",
+            relatedStaff:["3305"],
+            permission:"silver",
+            content:
+`
+【システム管理部門】アカウント再発行記録
+
+
+日時：2015/11/18
+
+対象：職員番号 3305
+
+区分：個人フォルダ・パスワード再設定
+
+
+申請理由：
+
+本人よりパスワード失念の申告あり。
+
+
+処理内容：
+
+本人確認の上、仮パスワードを再発行。
+
+再設定後のパスワードは以下の通り。
+
+
+PASSWORD：genba0621
+
+
+備考：
+
+本人へは口頭で通知済み。
+`
+        },
+
+        {
+            name:"Account_Reissue_20151002.txt",
+            relatedStaff:["3642"],
+            permission:"silver",
+            content:
+`
+【システム管理部門】アカウント再発行記録
+
+
+日時：2015/10/02
+
+対象：職員番号 3642
+
+区分：個人フォルダ・パスワード再設定
+
+
+申請理由：
+
+本人よりパスワード失念の申告あり。
+
+
+処理内容：
+
+本人確認の上、仮パスワードを再発行。
+
+再設定後のパスワードは以下の通り。
+
+
+PASSWORD：prin0417
+
+
+備考：
+
+本人へは口頭で通知済み。次回より定期的な変更を推奨。
+`
+        },
+
+        {
+            name:"Board_Lost_ID_Card.txt",
+            relatedStaff:["2210"],
+            content:
+`
+【社内掲示板】
+
+件名：職員証を紛失した方へ
+
+
+本日、施設内で職員証を拾いました。
+
+
+職員番号：2210
+
+
+心当たりのある方は、
+
+総務部までお越しください。
+
+
+返信：技術部門［担当職員：6110 / Field Technician］
+
+2210さん、これ見たら名乗り出てください。
+
+
+返信：総務部
+
+本人が気づいていない可能性があります。
+
+
+返信：技術部門
+
+たぶん気づいてます。
+
+
+返信：総務部
+
+なら早く来てください。
+`
+        },
+
+        {
+            name:"Maintenance_Request_7225.txt",
+            permission:"bronze",
+            content:
+`
+【設備管理部門】作業依頼
+
+
+依頼者：
+Archive Database 管理担当
+
+
+担当職員：
+7225
+
+
+職員階級：
+SILVER
+
+
+依頼内容：
+
+旧Archive端末におけるデータ分類の確認。
+
+
+備考：
+
+一部の旧資料について、
+
+現在の分類規則と異なる形式で保存されているため、
+
+確認を依頼する。
+
+
+Field Technician 6110
+
+「端末側の問題ではありません。
+
+　データ自体の分類が古いようです。」
+
+
+Archive Analyst 7225
+
+「確認します。
+
+　旧資料は変更せず、そのまま保存してください。」
+
+
+以上。
+`
+        },
+
+        {
+            name:"Staff_0001_Observation.txt",
+            permission:"gold",
+            content:
+`
+【職員観察メモ】0001
+
+0001は、
+実際の業務終了後も、
+脇の研究室に残っていることが多い。
+
+最初は仕事の続きと見られていたが、
+そのあと、
+0000の記録を確認している時間が増えていた。
+
+誰もそのことを声に出さず、
+ただ、
+どこかでそれが普通のことになってしまっていた。
+`
+        },
+
+        {
+            name:"Memo_Pudding.txt",
+            relatedStaff:["3642", "5218", "1190"],
+            content:
+`
+【社内メール】冷蔵庫のプリン
+
+送信者：佐伯（研究部門）
+件名：冷蔵庫のプリンについて
+
+
+冷蔵庫に入れておいたプリンを食べた方は名乗り出てください。
+
+名前を書いてありました。
+
+
+返信：高橋
+
+……知りません。
+
+
+返信：三浦
+
+紛異体が食べた可能性はありますか？
+
+
+返信：警備部門
+
+監視カメラを確認しました。
+
+高橋職員が15:24頃に持ち出しています。
+
+
+返信：高橋
+
+……すみません。
+
+
+返信：佐伯
+
+次から一言お願いします。
+
+プリンはまた買います。
+`
+        },
+
+        {
+            name:"Board_Cafeteria.txt",
+            relatedStaff:["3642", "2048", "食堂スタッフ"],
+            content:
+`
+【社内掲示板】食堂からのお知らせ
+
+件名：本日のおすすめ
+
+
+・カレーライス
+・唐揚げ定食
+・プリン
+
+本日も食堂をご利用ください。
+
+
+返信：西村
+
+プリンは売り切れるの早すぎます。
+
+
+返信：食堂スタッフ
+
+本日は佐伯職員が大量購入されたためです。
+`
+        },
+
+        {
+            name:"Report_0002_Progress.txt",
+            permission:"silver",
+            content:
+`
+【研究報告】0002経過報告
+
+送信者：心理支援部門
+
+
+0002は現在も精神的な不安定さが継続しています。
+
+定期的なカウンセリングを実施していますが、大きな改善は確認できません。
+
+
+嗜好品としてビーフジャーキーを支給したところ、精神状態が安定する傾向が見られました。
+
+今後も継続支給を提案します。
+
+
+返信：0001
+
+承認します。
+
+施設備品として計上してください。
+
+……味は本人に選ばせてあげてください。
+`
+        },
+
+        {
+            name:"Memo_0002_Training.txt",
+            permission:"silver",
+            content:
+`
+【内部メール】0002訓練報告
+
+
+0002が「お手」を覚えました。
+
+成功率は92%。
+
+「待て」の訓練も予定しています。
+
+
+返信：0001
+
+彼は犬ではありません。
+
+
+返信：担当研究員
+
+承知しました。
+
+ですが本人は楽しそうでした。
+
+
+返信：0001
+
+……本人が望むなら止めません。
+
+ただし、犬扱いはしないでください。
+`
+        },
+
+        {
+            name:"Facility_VendingMachine.txt",
+            relatedStaff:["0005", "技術部門"],
+            content:
+`
+【設備管理】
+
+
+収容区画Cの自動販売機が故障しています。
+
+飲み物が全て炭酸になります。
+
+修理を依頼してください。
+
+
+返信：技術部門
+
+原因は0005がボタンを押し続けたためです。
+
+
+返信：0005
+
+押したらいっぱい出ると思った。
+`
+        },
+
+        {
+            name:"Memo_CompanyTrip.txt",
+            relatedStaff:["3642", "5218"],
+            content:
+`
+【社員旅行】
+
+今年度社員旅行について
+
+
+候補地
+・箱根
+・北海道
+・沖縄
+
+希望を提出してください。
+
+
+返信：高橋
+
+北海道希望です。
+
+
+返信：佐伯
+
+温泉。
+
+
+返信：0002
+
+……海。
+
+
+返信：0001
+
+多数決で決めましょう。
+`
+        },
+
+        {
+            name:"Accounting_TripBudget.txt",
+            relatedStaff:["経理担当"],
+            content:
+`
+【経理】
+
+社員旅行費について
+
+
+旅費が10,000円不足しています。
+
+追加予算をご検討ください。
+
+
+返信：0001
+
+旅費が不足することはありません。
+
+買い物代であれば個人負担です。
+
+……最近アニメグッズを集めていることは知っています。
+
+
+返信：経理担当
+
+…………。
+
+旅行先限定なんです。
+`
+        },
+
+        {
+            name:"Announcement_Drill.txt",
+            relatedStaff:["0006"],
+            content:
+`
+【施設内放送】
+
+
+本日17:00より避難訓練を行います。
+
+全職員は速やかに避難してください。
+
+今回は紛異体による訓練ではありません。
+
+
+返信：0006
+
+前回より怖そう。
+`
+        },
+
+        {
+            name:"Medical_IncidentReport.txt",
+            content:
+`
+【医療部門】
+
+
+本日、ブロンズ職員が紛異体用保存食を誤って摂取しました。
+
+
+症状
+
+・身体発光
+・味覚異常
+・軽度の幻覚
+
+
+現在は回復しています。
+
+
+返信：0001
+
+紛異体用保存食に「職員は食べないこと」の表示を追加してください。
+`
+        },
+
+        {
+            name:"Security_0002_Escape.txt",
+            relatedStaff:["0005"],
+            content:
+`
+【警備】
+
+
+巡回中に0002が収容室から脱走しました。
+
+
+返信：研究部門
+
+「散歩したかった。」
+
+と言っています。
+
+
+返信：0005
+
+すみません、目を離していました。
+
+
+返信：0001
+
+戻ってきたなら今回は不問です。
+
+次回からは許可を取ってください。
+`
+        },
+
+        {
+            name:"Chat_Cafeteria_Curry.txt",
+            relatedStaff:["3642", "0006"],
+            content:
+`
+【チャット】食堂にて
+
+
+0006
+
+「今日のカレー辛くないですか」
+
+
+佐伯
+
+「普通です」
+
+
+0006
+
+「あなたの味覚は信用してません」
+`
+        },
+
+        {
+            name:"Chat_Missing_Tools.txt",
+            relatedStaff:["0005", "技術部門"],
+            content:
+`
+【チャット】技術部門
+
+
+技術部門
+
+「誰ですか、工具を戻してないの」
+
+
+0005
+
+「知らないです」
+
+
+技術部門
+
+「最後に使ったの0005さんです」
+
+
+0005
+
+「じゃあ知ってます」
+`
+        },
+
+        {
+            name:"Chat_NightShift.txt",
+            relatedStaff:["0006", "0007"],
+            content:
+`
+【チャット】夜勤
+
+
+0006
+
+「眠い」
+
+
+0007
+
+「寝れば？」
+
+
+0006
+
+「勤務中です」
+
+
+0007
+
+「じゃあ起きてれば？」
+`
+        },
+
+        {
+            name:"Chat_DreamFish_Feeding.txt",
+            label:"内部チャット：夢魚の給餌について",
+            relatedStaff:["3642", "3305"],
+            content:
+`
+【内部チャット】
+
+
+佐伯
+
+「夢魚、今日も餌食べてないです」
+
+
+神田
+
+「またですか」
+
+
+佐伯
+
+「水槽の端っこで寝てます」
+
+
+神田
+
+「魚って寝るんでしたっけ」
+
+
+佐伯
+
+「研究員がそれ言っていいんですか」
+`
+        },
+
+        {
+            name:"Board_Mister_Pudding.txt",
+            relatedStaff:["5218", "2210"],
+            content:
+`
+【食堂掲示板】
+
+
+小林
+
+「ミスターにプリンあげた人誰ですか」
+
+
+高橋
+
+「私です」
+
+
+小林
+
+「勝手にあげちゃダメですよ」
+
+
+高橋
+
+「すごい嬉しそうだったので……」
+
+
+小林
+
+「次から許可取ってください」
+
+
+高橋
+
+「はい」
+
+
+ミスター
+
+「ありがとうございました。」
+`
+        },
+
+        {
+            name:"Chat_0002_Walk.txt",
+            label:"内部チャット：0002の散歩",
+            relatedStaff:["0005"],
+            content:
+`
+【内部チャット】
+
+
+0005
+
+「また散歩してた？」
+
+
+0002
+
+「うん」
+
+
+0005
+
+「次は俺も連れてってよ」
+
+
+0002
+
+「怒られるよ」
+
+
+0005
+
+「じゃあやめとく」
+`
+        },
+
+        {
+            name:"Chat_Observation_Room_8.txt",
+            label:"内部チャット：観察室8",
+            relatedStaff:["3305", "2210"],
+            content:
+`
+【内部チャット】
+
+
+小林
+
+「八さん、今日も観測室行ってました？」
+
+
+神田
+
+「毎日行ってるでしょう、あの人」
+
+
+小林
+
+「休憩中もですか」
+
+
+神田
+
+「休憩中もです」
+
+
+小林
+
+「サヨさんって誰なんですか」
+
+
+神田
+
+「聞かない方がいいと思います」
+`
+        },
+
+        {
+            name:"Board_Reading_Signup_RJ.txt",
+            relatedStaff:["3642", "3305", "5218", "2048", "2210"],
+            content:
+`
+【収容棟】読み聞かせ当番表
+
+
+月：高橋
+
+火：小林
+
+水：神田
+
+木：佐伯
+
+金：西村
+
+
+担当者へ：
+
+対象は返事をしません。
+
+それでも、いつも通り話しかけてあげてください。
+
+
+返信：西村
+
+今日は最近あった出来事を話しました。
+
+
+返信：高橋
+
+私は好きな花の話をしました。
+`
+        },
+
+        {
+            name:"Chat_TheDoor.txt",
+            relatedStaff:["3642", "3305", "5218"],
+            content:
+`
+【施設内チャット】
+
+
+佐伯
+
+「またあの扉の前に誰かいます」
+
+
+神田
+
+「誰？」
+
+
+佐伯
+
+「高橋さん」
+
+
+神田
+
+「今日も？」
+
+
+佐伯
+
+「今日もです」
+
+
+高橋
+
+「今日は海でした」
+
+
+神田
+
+「仕事してください」
+
+
+高橋
+
+「あと5分だけ」
+`
+        },
+
+        {
+            name:"Personal_Log_Door_Lunch.txt",
+            content:
+`
+【個人ログ】昼休みのメモ
+
+
+今日は雪だった。
+
+
+昨日は海だった。
+
+
+あの景色、前にも見た気がする。
+
+
+今日は、向こう側に人が立っていた。
+`
+        },
+
+        {
+            name:"Chat_Entity_0008.txt",
+            label:"チャット：紛異体0008について",
+            relatedStaff:["3305", "2210"],
+            content:
+`
+【チャット】
+
+
+小林
+
+「0008、また食堂にいます」
+
+
+神田
+
+「今日もですか」
+
+
+小林
+
+「窓際で固まってます」
+
+
+神田
+
+「放っておいて大丈夫でしたっけ」
+
+
+小林
+
+「たぶん」
+`
+        },
+
+        {
+            name:"Memo_Entity_014_Schedule.txt",
+            relatedStaff:["3642", "2048"],
+            content:
+`
+【研究部門】観測時間変更のお知らせ
+
+
+014の観測時間を、来週より午前へ変更します。
+
+
+返信：佐伯
+
+了解しました。
+
+
+返信：西村
+
+前の時間帯、何かあったんですか？
+
+
+返信：研究部門
+
+特にありません。都合によるものです。
+`
+        },
+
+        {
+            name:"Chat_Entity_027.txt",
+            label:"チャット：紛異体027について",
+            relatedStaff:["3305", "2210"],
+            content:
+`
+【チャット】
+
+
+神田
+
+「027またいます」
+
+
+小林
+
+「追い出して」
+
+
+神田
+
+「昨日追い出しました」
+
+
+小林
+
+「じゃあ今日もお願いします」
+`
+        },
+
+        {
+            name:"Report_Lighting_RepairB.txt",
+            relatedStaff:["0005", "0006", "技術部門"],
+            content:
+`
+【研究部門】
+
+研究棟Bの照明がまた消えています。
+
+
+返信：技術部門
+
+交換しました。
+
+
+返信：0005
+
+ありがとうございます。
+
+
+返信：技術部門
+
+今度は勝手に触らないでください。
+
+
+返信：0005
+
+はい。
+
+
+返信：0006
+
+前にも同じこと言われてませんでした？
+
+
+返信：0005
+
+覚えてないです。
+`
+        },
+
+        {
+            name:"Memo_Desk_Papers.txt",
+            label:"内部チャット：机上の書類について",
+            relatedStaff:["3642"],
+            content:
+`
+【内部チャット】
+
+
+0001
+
+「誰か私の机に置いた資料知りませんか」
+
+
+佐伯
+
+「研究室にあります」
+
+
+0001
+
+「ありがとうございます」
+`
+        },
+
+        {
+            name:"Memo_CompanyTrip_NextYear.txt",
+            relatedStaff:["3642", "5218"],
+            content:
+`
+【社員旅行】次年度候補地について
+
+
+返信：佐伯
+
+今年も温泉がいいです。
+
+
+返信：高橋
+
+去年も北海道でしたが、また北海道希望です。
+`
+        },
+
+
+
+
+
+        {
+            name:"Memo_Admin_Account_Reset.txt",
+            permission:"gold",
+            content:
+`
+【システム管理部門】内部メモ（復旧資料）
+
+
+管理者アカウントは慣例上、IDを固定で運用しています。
+
+
+ID：admin
+
+
+パスワードは通常、職員へ開示されません。
+
+本メモは非常に古い記録であり、当時の設定値がそのまま残っていたものです。
+
+
+当時のパスワード：ROOT-ADMIN
+
+
+※現在も同一の認証情報が有効かどうかは保証されません。
+`
+        },
+
+        {
+            name:"Archive_GroupPhoto_2015.txt",
+            relatedStaff:["3642", "5218", "2048", "1190", "0005", "0006", "0007", "経理担当", "食堂スタッフ", "技術部門"],
+            permission:"gold",
+            content:
+`
+【写真アーカイブ】2015年度 入職式 集合写真
+
+
+撮影時期：2015年度 入職式後
+
+撮影場所：研究棟前
+
+
+[ IMAGE PREVIEW ]
+
+████████████████
+████████████████
+███░░░████░░░███
+████████████████
+
+IMAGE DATA CORRUPTED
+
+
+人員照合記録（原本の配置に基づき復元）
+
+
+前列中央　0001
+
+前列右　　0002
+
+後列左　　佐伯
+
+後列　　　高橋
+
+後列　　　三浦
+
+後列　　　西村
+
+後列右　　0005
+
+後列　　　0006
+
+後列　　　0007
+
+右端　　　経理担当
+
+左端　　　食堂スタッフ
+
+中央後方　技術部門
+
+
+備考：画像そのものは復元できなかったが、当時の配置記録と職員データベースの照合により、上記の人員構成のみ復元された。
+`
+        },
+
+        {
+            name:"Board_Post_20160105.txt",
+            content:
+`
+【社内掲示板】明日の会議資料について
+
+投稿日：2016/01/05　17:42
+
+
+明日の会議資料ですが、
+
+印刷だけ済ませておいていただけると助かります。
+
+よろしくお願いします。
+
+
+返信：なし
+`
+        },
+
+        {
+            name:"Memo_20160106_0317.txt",
+            permission:"platinum",
+            content:
+`
+【全職員宛】
+
+件名：避難命令
+
+
+全職員へ。
+
+
+直ちに避難してください。
+
+収容は中止。
+
+研究も中止。
+
+全員、生存を最優先としてください。
+
+
+以上。
+
+送信者：0001
+`
+        }
+
+    ]
+
+};
+
+
+/* ==========================================================
+   DOCUMENTS
+   設定資料集（新人職員向け／公開範囲の基礎資料）。
+   機密指定のある節だけ permission:"platinum" で分離している。
+========================================================== */
+
+archiveData.documents = {
+
+    name:"文書",
+
+    files:[
+
+        {
+            name:"Access_Protocol.txt",
+            permission:"gold",
+            content:
+`
+【アクセス規定】
+
+一般職員は通常資料のみ閲覧可能。
+職員の内情や個人記録は、
+必要な階級と承認を得た場合のみアクセスできる。
+
+アーカイブ接続時、職員は自身に割り当てられた
+個人用領域を保持するものとする。
+
+個人用領域は職員IDに紐付けられ、
+本人認証によってのみアクセス可能。
+
+0000と0001の記録は、
+通常の研究資料とは異なる分類を持つ。
+`
+        },
+
+        {
+            name:"Staff_Communication_Log.txt",
+            permission:"silver",
+            relatedStaff:["3305"],
+            content:
+`
+[STAFF COMMUNICATION LOG]
+DATE: 2016/01/06
+
+02:14:31
+
+3305
+「研究棟B、応答ありますか？」
+
+[NO RESPONSE]
+
+3305
+「……0006さん？」
+
+[NO RESPONSE]
+
+02:15:04
+
+3305
+「技術部、聞こえますか？」
+
+[NO RESPONSE]
+
+02:15:19
+
+[CALL TERMINATED]
+`
+        },
+
+        {
+            name:"Archive_Classification_Review.txt",
+            permission:"silver",
+            content:
+`
+【Archive Database 分析記録】
+
+
+担当：
+7225 / Archive Analyst
+
+
+旧資料の再分類作業を実施。
+
+
+一部の記録について、
+
+現在のArchive分類規則では分類できない
+
+機密区分が存在することを確認。
+
+
+該当資料については、
+
+上位管理担当者へ確認を依頼する。
+
+
+確認担当：
+
+4090 / Senior Researcher
+
+職員階級：
+
+GOLD
+
+
+備考：
+
+当該資料の内容については、
+
+現在の権限では確認できないため、
+
+指示を受けるまで変更・複製を行わないこと。
+
+
+7225 / Archive Analyst
+`
+        },
+
+        {
+            name:"World_Overview.txt",
+            content:
+`
+RE:紛異体之管理
+Eclipse Lab
+
+【職員向け基礎資料】
+
+
+本資料は、Eclipse Labに配属された職員を対象とする。
+
+施設内で取り扱われる「紛異体」について、最低限必要な事項のみを記載する。
+
+詳細な研究内容については、各所属部門の規定に従うこと。
+
+
+■ 紛異体について
+
+現在、世界各地において既存の生物学・物理学等では説明できない存在が確認されている。
+
+Eclipse Labでは、これらを総称して「紛異体」と呼称する。読みは「マガイモノ」で統一する。
+
+紛異体には個体ごとに異なる性質が確認されており、生物に近いもの、無機物に近いもの、
+
+意思を持つもの、意思の有無を確認できないものなど、その形態は一定しない。
+
+なお、紛異体のすべてが人類に敵対するわけではない。
+
+ただし、友好的な個体であっても、許可なく接触してはならない。
+
+
+■ Eclipse Labの役割
+
+Eclipse Labは、紛異体の発見・保護・収容・研究・管理を行う機関である。
+
+紛異体は人格ではなく管理対象として扱う。
+
+職員間の会話においても、個体名より識別番号を優先して使用すること。
+
+
+■ 情報の取り扱いについて
+
+紛異体に関する情報は、社会一般への影響を考慮し、厳重に管理されている。
+
+本資料に記載されていない事項について、職員個人による調査を行ってはならない。
+
+不明点がある場合は、所属部門の上長へ確認すること。
+
+
+以上。
+
+Eclipse Lab 人事管理部
+`
+        },
+
+        {
+            name:"Eclipse_Lab_Charter.txt",
+                label:"Eclipse Lab 組織憲章",
+            content:
+`
+第三章　Eclipse Lab
+
+RE:紛異体之管理
+
+
+組織概要
+
+Eclipse Lab（エクリプスラボ）は、世界各地で確認される紛異体の管理・研究・収容を
+
+目的として設立された国際共同管理機関である。
+
+正式名称は「RE:紛異体之管理（Re: Aberrant Entity Management）」。
+
+その活動内容は世界最高機密に指定されており、一般社会への情報公開は一切行われていない。
+
+
+基本理念
+
+「管理とは、秩序を維持するための唯一の手段である。」
+
+紛異体を敵とも味方とも見なさない。
+
+一個体としてではなく、管理対象として扱う。
+
+感情ではなく記録。印象ではなくデータ。経験ではなく規律。
+
+すべての判断は管理規則に従って行われる。
+
+
+組織目的
+
+Ⅰ. 発見　世界中で確認される紛異体を発見・特定する。
+
+Ⅱ. 収容　危険性に応じた管理区分へ分類し、安全に収容する。
+
+Ⅲ. 研究　紛異体の性質・能力・行動原理を解析し、人類への応用可能性を探る。
+
+Ⅳ. 管理　能力抑制・精神安定・環境制御などを用い、安全な状態を維持する。
+
+Ⅴ. 保全　世界社会へ紛異体の存在が漏洩しないよう情報を管理する。
+
+
+組織思想
+
+マガイラボ：理解するための管理
+
+Eclipse Lab：維持するための管理
+
+理解は目的ではない。管理が目的である。
+
+
+情報管理
+
+施設内で閲覧可能な情報は、職員の権限によって制限される。
+
+閲覧権限はブロンズ・シルバー・ゴールド・プラチナの四段階。
+
+機密度の高い資料は、上位権限でのみ閲覧可能となる。
+
+
+行動原則
+
+一、管理規則を最優先すること。
+
+一、紛異体へ不要な私情を持ち込まないこと。
+
+一、許可なく管理区画へ立ち入らないこと。
+
+一、異常を確認した場合は即時報告すること。
+
+一、機密情報を外部へ漏洩しないこと。
+
+
+シンボル
+
+Eclipse Labの名称は「蝕（Eclipse）」に由来する。
+
+光と闇、人類と紛異体、秩序と混沌。
+
+相反するものが重なり合う瞬間を象徴している。
+
+
+組織標語
+
+"Order Through Control."（管理によって秩序を。）
+
+
+Eclipse Lab 憲章
+
+Ⅰ. 世界の均衡を維持する。
+
+Ⅱ. 管理規則を絶対とする。
+
+Ⅲ. 記録を改ざんしない。
+
+Ⅳ. いかなる存在も管理対象である。
+
+Ⅴ. 職員もまた管理対象である。
+
+Ⅵ. 人類の未来を最優先とする。
+
+Ⅶ. 管理不能を決して放置しない。
+
+
+以上。
+
+Eclipse Lab 管理部門
+`
+        },
+
+        {
+            name:"Danger_Classification.txt",
+                label:"危険度分類規程",
+            content:
+`
+第五章　危険度分類規程
+
+「危険度とは、強さを示す指標ではない。管理可能性を評価する指標である。」
+
+
+概要
+
+Eclipse Labでは、すべての紛異体（マガイモノ）に対し危険度を設定する。
+
+危険度は戦闘能力のみで決定されるものではない。
+
+管理可能性・被害規模・暴走リスク・特殊能力・知能・行動原理・社会への影響を
+
+総合的に評価して決定される。
+
+危険度は研究の進展や個体の変化によって変更される場合がある。
+
+
+危険度一覧
+
+D（テオス）　黒
+
+R（キンディノス）　赤
+
+E（エピメレイア）　黄
+
+S（アスファレス）　緑
+
+
+D（テオス）
+
+制御不能。あるいは、管理すること自体が不可能と判断された存在。
+
+一般職員による接触は禁止される。
+
+神に近しい存在。世界法則へ干渉可能。現在の技術では収容不能。
+
+管理は行わない。監視・観測のみ。プラチナ権限以上のみ情報閲覧が許可される。
+
+
+R（キンディノス）
+
+極めて危険。高度な管理体制が必要。
+
+高い戦闘能力。暴走可能性が高い。高い知能を持つ個体も存在する。
+
+高度封鎖。常時監視。研究は限定条件下のみ許可。
+
+
+E（エピメレイア）
+
+管理可能。ただし継続的な監視が必要。
+
+高い知能を持つ個体が多い。能力は危険だが制御可能。
+
+監視下管理。研究・実験・対話が可能。定期的な適性評価を実施。
+
+
+S（アスファレス）
+
+比較的安全。共存可能。
+
+温厚。制御可能。人類へ協力的な個体も存在する。
+
+条件付き自由行動。研究協力。外部適用候補となる場合もある。
+
+
+危険度変更
+
+危険度は固定ではない。
+
+S → E → R、あるいは R → E → S のように変更される場合がある。
+
+研究結果や精神状態、能力変化によって変更される。
+
+
+誤解について
+
+危険度は強さランキングではない。
+
+R個体よりS個体の方が能力が高い場合も存在する。
+
+重要なのは管理できるかどうかである。
+
+
+表記について
+
+「D」は危険度区分そのものを指すコードであり、「テオス」はそのD区分に指定された存在、あるいは存在群の呼称である。
+
+「D＝テオス」という一対一の対応ではなく、D区分に指定されたものが、通称としてテオスと呼ばれている。
+
+
+D区分と管理区分の関係について
+
+D区分は原則として「通常の意味での収容」が成立しない対象を含む。
+
+管理は行わない、監視・観測のみ、という原則は変わらない。
+
+ただし、対象の活動範囲・情報・観測状況を継続的に追跡するため、便宜上の管理区分としてSC（監視下管理）等が付与される場合がある。
+
+この場合のSCは、「収容できている」ことを意味しない。「収容はできていないが、観測は継続している」という状態を示すための表記である。
+
+
+管理規程 第3章
+文書番号：EL-REG-003
+`
+        },
+
+        {
+            name:"Danger_Classification_Addendum.txt",
+                label:"危険度分類規程・機密追記",
+            permission:"platinum",
+            content:
+`
+機密追記（Platinum Clearance）
+
+
+D（テオス）指定理由は「管理不能」であるとは限らない。
+
+一部個体は、人類に対して敵意を持たず、極めて有益であることが確認されている。
+
+しかし、その存在を公表した場合、人類社会・国家・宗教・組織間の均衡を
+
+著しく損なう危険がある。
+
+そのため、「最高機密対象」としてD級へ指定し、一般職員には
+
+「制御不能」とのみ通知する。
+
+
+この情報を第三者へ漏洩した場合、機密保持規定第0条に基づき処分対象となる。
+`
+        },
+
+        {
+            name:"Identification_Code_Standard.txt",
+                label:"個体識別番号規格",
+            content:
+`
+第十三章　個体識別番号規格
+
+「名前は記憶を生む。番号は管理を生む。」
+
+
+概要
+
+Eclipse Labでは、すべての管理対象となる紛異体に個体識別番号
+
+（Entity Identification Code）が付与される。
+
+職員は原則として識別番号を用いて個体を呼称する。
+
+
+基本構造
+
+[種別]-[危険度]-[個体番号]-[管理区分]
+
+例：HN-R-014-CS
+
+
+種別コード
+
+HN　Humanoid　人型・人間に近い形態
+
+AN　Animal　動物型
+
+PL　Plant　植物型
+
+AQ　Aquatic　水棲型
+
+IN　Insect　昆虫型
+
+MC　Mechanical　機械・人工物型
+
+EN　Energy　エネルギー生命体
+
+SP　Spiritual　精神・霊的存在
+
+UN　Unknown　分類不能・未確認
+
+PS　Parasitic　寄生型（追加コード）
+
+
+危険度コード
+
+D　テオス
+
+R　キンディノス
+
+E　エピメレイア
+
+S　アスファレス
+
+
+個体番号
+
+発見・登録順に付与される。番号は再利用されない。
+
+個体が死亡・消失しても永久欠番となる。
+
+
+管理区分コード
+
+AL　完全封鎖（Absolute Lockdown）
+
+RL　高度封鎖（Restricted Lockdown）
+
+SC　監視下管理（Supervised Containment）
+
+CF　条件付き自由行動（Conditional Free Movement）
+
+ED　外部適用（External Deployment）
+
+
+旧マガイラボとの違い
+
+マガイラボ時代は個体に名称が与えられることも多かった。
+
+しかしEclipse Labでは、「名前は管理を曖昧にする」という理念から、
+
+識別番号による管理へ統一された。
+
+現在でも旧資料には名前のみが記録されている個体が存在する。
+
+
+管理規程 第17条
+文書番号：EL-REG-017
+`
+        },
+
+        {
+            name:"Legacy_Access_Records.txt",
+            permission:"platinum",
+            content:
+`
+【システム管理部門】旧アカウント復旧記録
+
+
+創設十席の一人、職員番号0001の端末アクセス権限が
+
+部分的に復旧されました。
+
+
+ID：0001
+
+ACCESS KEY：ECLIPSE-0001
+
+
+本人は長期にわたり所在不明ですが、
+
+アカウント自体は現在も無効化されていません。
+
+
+復旧担当者より：
+
+このアカウントだけは、消すべきではないと思う。
+`
+        },
+
+        {
+            name:"Founders_0000_0001.txt",
+                label:"0000と0001について",
+            permission:"0001",
+            content:
+`
+0000と0001 ―― 二人の創設者、その始まりと分岐
+
+
+0000　最初の記録者
+
+識別番号：0000
+所属：マガイラボ
+役職：創設者／元最高管理者
+現在：行方不明
+危険度：判定不能
+
+0000は、マガイラボの創設者の一人であり、創設者十名の中でも中心的な立場にあった人物である。
+
+研究だけでなく管理にも高い権限を持ち、マガイラボの成立と、その後の研究方針に深く関わっていた。
+
+0000には、古くから親交を持つ人物がいた。それが0001である。
+
+二人は研究について語り合い、同じ場所で研究を続けていた。
+
+しかし、0000のある発見を境に、二人の歩む道は少しずつ変化していく。
+
+詳細は別記録（0000-S0：悠久の楽園）を参照。
+
+
+マガイラボ
+
+その後、0000を含む十名の創設者によってマガイラボが設立された。
+
+0000はその中心人物の一人として研究と管理に携わる。
+
+マガイラボは紛異体を理解し、管理するための施設だった。
+
+しかし、研究が進むにつれて、その管理方法は次第に過酷なものへと変化していく。
+
+紛異体を安定させるために、人間を犠牲にする方法が用いられるようになった。
+
+ここで、0000と0001の間にも大きな考え方の違いが生まれていく。
+
+
+0001　人間であり続けた者
+
+0001もまた、マガイラボの創設者の一人だった。
+
+0000とは古くから親交があり、研究について語り合う関係だった。
+
+しかし、0001はマガイラボで行われる人間を犠牲にした管理に反対していた。
+
+命を守るための施設が、命を犠牲にする。その矛盾を0001は受け入れられなかった。
+
+0000がある一件を境に人間では理解できない領域へ近づいていく一方で、
+
+0001は最後まで人間の側に立とうとした。
+
+ここから二人の思想は徐々に分岐していく。
+
+
+0000と0001の関係
+
+二人は最初から敵同士だったわけではない。
+
+むしろ、親しい研究仲間であり、同じ場所で未来を考えていた人物同士だった。
+
+そのため、二人の関係を単純な「0000＝悪」「0001＝善」として捉えることはできない。
+
+0000は世界の真理へ近づこうとした。0001は人間を守ろうとした。
+
+同じ世界を見ながら、二人が選んだものが違った。
+
+その違いこそが、後の二人を分けることになる。
+
+
+マガイラボ崩壊
+
+やがてマガイラボは崩壊する。
+
+施設は焼失し、多くの職員が死亡した。
+
+しかし、0000の遺体は発見されなかった。
+
+個人記録の大部分も失われ、崩壊直前に0000が何をしていたのかは分かっていない。
+
+0000は、そのまま消息を絶った。
+
+ただし、それが「死亡」を意味するとは限らない。
+
+なぜなら、0000はすでに通常の人間では説明できない生命状態になっていたからである。
+
+
+0001が残した言葉
+
+マガイラボ崩壊後、0001の記録には0000に向けた言葉が残されている。
+
+「お前が見たものを、私はまだ信じられない。
+
+それでも、お前が帰ってくる場所だけは残しておく。」
+
+0001は0000を完全に否定していたわけではない。
+
+理解できない。信じることもできない。それでも、帰ってくる場所を残した。
+
+
+エクリプスラボ
+
+マガイラボ崩壊後、0001は新たな研究施設を設立する。それがエクリプスラボである。
+
+エクリプスラボは、マガイラボの技術を受け継ぎながらも、同じ過ちを繰り返さないことを目指した。
+
+0001は、人間を犠牲にする管理ではなく、別の方法によって紛異体と向き合おうとした。
+
+この施設は、0001にとって単なる研究施設ではない。
+
+0000が帰ってくる場所であり、マガイラボで失われたものを受け継ぐ場所でもあった。
+
+マガイラボが「理解するための管理」を掲げながら人間を犠牲にする方向へ進んだのに対し、
+
+エクリプスラボは「維持するための管理」を掲げている。
+
+理解できなくても、管理する。
+
+その姿勢の違いが、二つの組織を分けている。
+
+
+二人について
+
+0000と0001は、同じ場所から始まった二人である。
+
+0000は、ある発見をきっかけに姿を消した。
+
+0001は、その後もエクリプスラボの運営を続けている。
+
+二人がその後どうなったかについては、別の記録を参照。
+`
+        },
+
+        {
+            name:"0000-S0.txt",
+            label:"0000-S0：悠久の楽園",
+            permission:"platinum",
+            content:
+`
+0000-S0
+
+悠久の楽園
+
+機密区分：最重要機密
+記録番号：0000-S0
+編集・記録：0001
+
+
+概要
+
+当施設において唯一、完全な封印状態に置かれている異常遺物。
+
+通称――「羽根」。
+
+物理的次元においては一枚の構成体として観測可能であるものの、既存の科学体系では説明不能な高次情報構造を有する。
+
+全長：約1.03m。
+
+表面には白と黒による螺旋状構造が確認されており、中心部から微細な粒子および波長不定の光が継続的に放出されている。
+
+これらの放射現象は観測環境によって形態を変化させ、物質・記憶・認識のいずれに対しても干渉する可能性が確認されている。
+
+特筆すべきは、視認者による認識の差異である。羽根を直接視認した職員は、ほぼ例外なく対象に対して「美しい」「見続けたい」といった感覚を報告している。
+
+また、一部の視認者には、羽根とは別に蝶に類似した微細構造が視界内へ出現することがある。この現象は複数の職員によって同時に観測された例がなく、観測者個人の精神構造に対する局所的な情報接続である可能性が高い。
+
+以上から、羽根は単なる器官や遺物ではなく、高次存在の一部が物理世界へ露出したものであるという仮説が提出された。
+
+
+「神」に関する仮説
+
+羽根が属する存在について、施設内では便宜上「神」と呼称している。これは宗教的な意味によるものではなく、現在確認されている情報構造が、既存の生命・物質・空間・時間の定義を大幅に超えているためである。
+
+現在までに提出された仮説では、この存在は単一の宇宙に属するものではなく、複数の世界構造――いわゆる接続宇宙――を重層的に内包、あるいは接続している可能性が示されている。
+
+また、観測された情報構造には以下のような対立概念が同時に存在している。
+
+光／闇　秩序／混沌　実在／虚無　有限／無限　存在／非存在
+
+これらは互いに排他的なものとしてではなく、同一の構造内で矛盾したまま成立している。このため、当該存在を既存の論理体系によって定義することは困難である。
+
+なお、羽根の存在によって施設内の一部空間に非ユークリッド的挙動が恒常的に発生していることから、当該存在の情報構造が物理空間へ何らかの形で漏出している可能性がある。
+
+
+羽根との精神的接続
+
+羽根は、視認者の精神状態によって異なる反応を示す。特定の条件下では、視認者と「神」と呼称される存在との間に、通常の通信とは異なる精神的接続が成立することが確認されている。
+
+以下は、その接続を直接経験したとされる0000の記録を復元したものである。記録には欠損および情報変質が多数存在する。原文の完全な復元は不可能であり、一部は観測記録および0000本人の発言から再構成されている。
+
+
+0000記録：接続先「楽園」
+
+――我は"門"を越えた。
+
+光は存在し、闇も存在した。だが、それらの間に境界はなかった。光と闇は混ざり合い、交錯し、知覚そのものを形作る媒体として存在していた。
+
+眼前には、無数の世界が存在していた。幾千、幾万。それぞれが異なる理を持ち、ある世界は因果を拒絶し、ある世界は時間そのものを逆行させ、ある世界は「我」という存在が何であるかを問い続けていた。
+
+その中心に、それは存在していた。
+
+無限の翼を持つ存在。その規模を測ることはできなかった。翼は白金、漆黒、虹彩、金属、光。固定された形状を持たず、観測するたびに異なる姿を取った。
+
+翼の中心には、繭に似た構造体があった。そこには無数の眼孔が存在していた。
+
+そして、言葉ではない情報が流れ込んできた。意味を理解したのではない。理解するという行為そのものを、直接与えられた。同時に、我自身の記憶と認識が書き換えられていく感覚があった。
+
+それは名乗らなかった。ただ、一つのものを差し出した。蝶の翅のように薄く、透き通った果実。
+
+我は、それを受け取った。皮膚から。視覚から。記憶から。すべての感覚を通して、それは我の中へ流れ込んだ。
+
+――その瞬間、我は理解した。
+
+世界は一つではない。すべての世界は繋がっている。すべての存在もまた、どこかで繋がっている。それは連環だった。
+
+神は絶対であり、矛盾であり、我々が知覚できる限界の外側に存在し、同時に、我々一人ひとりの内側にも存在している。
+
+――我は、それを受け取った。
+
+
+「実」の授与
+
+0000が「楽園」と呼称した接続先から帰還した後、0000の記憶および身体情報に複数の異常が確認された。
+
+接続時の現実時間は17秒。しかし、0000の意識記録には、最低でも400時間を超える連続認識に相当する情報量が残されていた。この時間差は、羽根を介した接続先において、現実空間とは異なる時間構造が存在することを示唆している。
+
+接続終盤、0000は「神」と認識した存在から、一つの果実状構造体を受け取ったと証言している。記録上、この対象は暫定的に「実」と呼称する。
+
+0000による説明――
+
+「翼が揺れた瞬間、空間が割れた。光の中に、一つの実があった。内部には宇宙のような渦があった。何千、何万という記憶が、同時に語りかけてきた。」
+
+「実」は通常の物質として回収されていない。分析上は、物質ではなく存在そのものに刻み込まれる情報構造として記録されている。0000の脳内情報、DNA配列、エネルギーパターンには、同一の構造を示す異常情報が同時に確認された。
+
+
+0000の変質
+
+「実」の授与以降、0000の身体は既存の生物学的定義から逸脱し始めた。確認された主な変化は以下の通り。
+
+老化・細胞死の停止――細胞の再生機構が通常の時間経過に従わなくなった。
+
+構成因子の変質――身体を構成する物質の一部が、通常の分析装置では組成を特定できない状態へ移行した。分析のたびに構造パターンが変化しており、固定された物質として扱うことが困難となった。
+
+言語構造の逸脱――0000の発話には、既存言語に分類できない情報構造が含まれるようになった。一部の記録では、発話を認識した職員側に認識異常が発生している。
+
+情報生命体化の兆候――肉体そのものよりも、情報構造としての0000が強く維持されていることが確認された。
+
+これらの変化から、最終的には高次存在化・非物質的転移・情報生命体化・「創造因子」の獲得、といった状態へ移行する可能性が推定された。
+
+最後の項目については、0000が後に確認される紛異体の発生源となった可能性を示す仮説が存在する。ただし、現時点で因果関係は証明されていない。
+
+
+0000に関する諸説
+
+仮説A：神の代理存在――「実」を受け取った0000が、神の意思を物理世界へ伝達する媒体となったという説。
+
+仮説B：模倣神――「実」によって神へ極限まで接近したものの、完全な存在にはなれず、不完全性を残した存在となったという説。
+
+仮説C：神の一部――0000は元来、神の一部が転生あるいは転写された存在であり、「実」の授与は本来の状態への回帰だったという説。
+
+いずれの説も公式には承認されていない。しかし、0000に関する記録には、他の記録では確認されない自動的な欠損・歪曲・改変現象が発生している。そのため、施設内では0000を通常の職員・研究対象とは区別し、例外的な存在として扱っている。
+
+以下の仮説については、現在も検証されていない。
+
+・0000は神と融合し、その存在構造の一部となった。
+・0000は神によって再構築され、現実世界に断片的な意志として拡散した。
+・0000が持ち帰った「実」は、我々の世界そのものに対する問いである。
+
+これらについて、現時点で結論を出すことはできない。
+
+
+封印措置
+
+現在、「羽根」は五重封鎖下に置かれている。以下の行為を全面的に禁止する。
+
+無許可での視認／接触／長時間観測／精神的接続を目的とした実験／記録媒体への無許可記録／関連情報の施設外への持ち出し
+
+「羽根」に対する研究は、0000の変質以降、完全凍結された。再開の許可権限は設定されていない。
+
+
+補遺：記録者に関する個人的所感
+
+この報告書は、私、0001によって編纂された。
+
+本来、科学的記録に私情を含めるべきではない。それでも、この記録だけはそうすることができなかった。
+
+私は0000を、識別コードだけで呼ぶことができない。彼とは、何度も同じ研究室で過ごした。同じものを見て、同じ疑問を持ち、何度も同じ境界を越えた。そして何より、彼は私の友人だった。
+
+羽根に触れたあの日から、彼は少しずつ変わっていった。私はその変化を、すぐそばで見ていた。
+
+それが「変質」だったのか。それとも、彼が言ったように――本来あるべき姿へ戻っていっただけなのか。私には分からない。
+
+彼が「楽園」で何を見たのか。何を受け取り、何を理解したのか。私は彼の言葉を、可能な限りすべて記録した。
+
+その中で、最後まで忘れられない言葉がある。
+
+「この羽根は、扉にすぎない。私がそこへ辿り着いたことを、必ず誰かに伝えてくれ。」
+
+私は、その約束を守るためにこの記録を書いた。科学者としてではない。記録者としてでもない。ただ、彼の友人として。
+
+彼がどこへ行ったのか。何になったのか。まだ分からない。それでも、ここに記録を残す。
+
+いつか誰かが、この記録を読むかもしれない。その誰かが、彼のことを知るかもしれない。
+
+そしてもし、彼が見た「楽園」が本当に存在するのなら――私はいつか、その場所についても知りたい。
+
+0001
+`
+        },
+
+        {
+            name:"Monologue_0001_FirstDay.txt",
+            label:"個人記録：0000が戻らない",
+            permission:"0001",
+            content:
+`
+【個人記録】
+
+
+0000さんは、まだ戻ってきません。
+
+昨日までは、いつものことだと思っていました。
+
+研究室に籠もっているのだろう。
+
+また何かを調べているのだろう。
+
+そう思っていました。
+
+
+……そう思いたかっただけかもしれません。
+`
+        },
+
+        {
+            name:"Monologue_0001_Feather.txt",
+            label:"個人記録：羽根に触れて",
+            permission:"0001",
+            content:
+`
+【個人記録】
+
+
+羽根に触れました。
+
+何も起こりません。
+
+
+……神は私を拒絶しているのでしょうか。
+
+いや。
+
+そうです。
+
+そうだった。
+
+私は罪を犯していました。
+
+アベルを殺した罪。
+
+それが、今になって効いてくるとは思いませんでした。
+
+
+私はもう、0000の元へも行けません。
+
+羽根は私には答えない。
+
+
+一度だけ考えたことがあります。
+
+他の誰かに触れさせてみようか、と。
+
+ですが、私にはそんな勇気はありませんでした。
+`
+        },
+
+        {
+            name:"Monologue_0001_ToYou.txt",
+            label:"個人記録：あなたへ",
+            permission:"0001",
+            content:
+`
+【個人記録】
+
+
+あなたは、あの羽根に触れてから変わりました。
+
+私は、それを止められませんでした。
+
+いえ。
+
+止めようともしなかったのかもしれません。
+
+あなたが楽しそうだったから。
+
+あなたが、まだ何かを知ろうとしていたから。
+
+
+……今思えば、あのとき私が止めていればよかったのでしょうか。
+
+
+0000は、まだ生きているのでしょうか。
+
+
+私は、あなたが帰ってくる場所を残しておきます。
+`
+        }
+
+    ]
 
 };

@@ -31,6 +31,9 @@ const EclipseSystem = {
         rank:null,
 
 
+        employeeId:null,
+
+
     },
 
 
@@ -60,7 +63,7 @@ const EclipseSystem = {
 ========================================================== */
 
 
-function setSystemUser(name,level,rank){
+function setSystemUser(name,level,rank,employeeId){
 
 
     EclipseSystem.user.name=name;
@@ -70,6 +73,9 @@ function setSystemUser(name,level,rank){
 
 
     EclipseSystem.user.rank=rank||null;
+
+
+    EclipseSystem.user.employeeId=employeeId||null;
 
 
 
@@ -84,6 +90,59 @@ function getSystemUser(){
 
     return EclipseSystem.user;
 
+
+}
+
+
+/* ==========================================================
+   SESSION PERSISTENCE
+   ページ再読み込み（F5）ではログイン状態を維持する。
+   LOG OUTが押されたときだけセッションを消去する。
+========================================================== */
+
+function saveUserSession(){
+
+    localStorage.setItem(
+        "eclipseUserSession",
+        JSON.stringify(EclipseSystem.user)
+    );
+
+}
+
+function restoreUserSession(){
+
+    try{
+
+        const raw =
+            localStorage.getItem("eclipseUserSession");
+
+        if(!raw) return null;
+
+        const saved = JSON.parse(raw);
+
+        if(!saved || !saved.name) return null;
+
+        return saved;
+
+    }
+    catch(e){
+
+        return null;
+
+    }
+
+}
+
+function clearUserSession(){
+
+    localStorage.removeItem("eclipseUserSession");
+
+    EclipseSystem.user = {
+        name:null,
+        level:"NONE",
+        rank:null,
+        employeeId:null
+    };
 
 }
 

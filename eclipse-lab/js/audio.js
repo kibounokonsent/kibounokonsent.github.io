@@ -187,6 +187,31 @@ function setVolume(value){
 
 
 /* ==========================================================
+   MUTE TOGGLE
+========================================================== */
+
+
+let isMuted = false;
+const savedVolume = 0.6;
+
+
+function toggleMute(){
+
+    isMuted = !isMuted;
+
+    setVolume(isMuted ? 0 : savedVolume);
+
+    const button =
+        document.getElementById("mute-toggle");
+
+    if(button){
+        button.textContent = isMuted ? "🔇" : "🔊";
+    }
+
+}
+
+
+/* ==========================================================
    START
 ========================================================== */
 
@@ -201,7 +226,15 @@ window.addEventListener(
         loadAudio();
 
 
-        setVolume(0.6);
+        setVolume(savedVolume);
+
+
+        const muteButton =
+            document.getElementById("mute-toggle");
+
+        if(muteButton){
+            muteButton.addEventListener("click", toggleMute);
+        }
 
 
     }

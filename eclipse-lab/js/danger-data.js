@@ -8,103 +8,85 @@
    画像が無い間は代替のシンボル表示になる。
 ========================================================== */
 
-/* ==========================================================
-   ECLIPSE LAB
-   DANGER LEVEL DATA
-========================================================== */
-
 const dangerLevels = {
 
     theos:{
         label:"テオス",
-        symbol:"./images/T.svg",
-        emoji:"./images/T.svg"
+        symbol:"Θ",
+        emoji:"⚫"
     },
 
     kindynos:{
         label:"キンディノス",
-        symbol:"./images/K.svg",
-        emoji:"./images/K.svg"
+        symbol:"▲",
+        emoji:"🔴"
     },
 
     epimeleia:{
         label:"エピメレイア",
-        symbol:"./images/E.svg",
-        emoji:"./images/E.svg"
+        symbol:"⬡",
+        emoji:"🟡"
     },
 
     asphales:{
         label:"アスファレス",
-        symbol:"./images/A.svg",
-        emoji:"./images/A.svg"
+        symbol:"❖",
+        emoji:"🟢"
     }
 
 };
 
 
 /* ==========================================================
-   危険度アイコン
+   危険度アイコン（imgタグ。読み込めない間はシンボルで代替）
 ========================================================== */
 
 function dangerIconHtml(dangerKey, size){
 
-    const level = dangerLevels[dangerKey];
+    const level =
+        dangerLevels[dangerKey];
 
     if(!level) return "";
 
     const s = size || 24;
 
     return `
-        <span
-            class="danger-icon"
-            style="
-                width:${s}px;
-                height:${s}px;
-            "
-        >
-            <img
-                src="${level.symbol}"
-                alt="${level.label}"
-                width="${s}"
-                height="${s}"
-            >
-        </span>
-    `;
+    <span class="danger-icon" style="width:${s}px;height:${s}px;">
+        <img src="images/${dangerKey}.png" alt="${level.label}"
+             onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
+        <span class="danger-icon-fallback">${level.symbol}</span>
+    </span>`;
+
 }
 
 
 /* ==========================================================
    職員階級（クリアランス）
+
+   ブロンズ < シルバー < ゴールド < プラチナ < 0001
+   各紛異体は、危険度に応じた最低階級以上でのみ
+   全文閲覧できる。
+
+   "0001" は通常の職員階級の延長ではなく、創設十席の一員である
+   0001本人としてログインした場合にのみ到達する特殊な階級。
+   通常の昇格（BRONZE→PLATINUM）を積み重ねても到達できない。
 ========================================================== */
 
 const rankOrder = {
     BRONZE:1,
     SILVER:2,
     GOLD:3,
-    PLATINUM:4
+    PLATINUM:4,
+    "0001":5
 };
-
-
-/* ==========================================================
-   危険度ごとの必要クリアランス
-========================================================== */
 
 const requiredRankByDanger = {
-
     asphales:"BRONZE",
-
     epimeleia:"SILVER",
-
     kindynos:"GOLD",
-
     theos:"PLATINUM"
-
 };
 
-
 function getRankValue(rank){
-
     return rankOrder[rank] || 0;
-
 }
-

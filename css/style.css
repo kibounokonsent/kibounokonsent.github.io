@@ -34,6 +34,23 @@
     --button-border: rgba(255, 255, 255, 0.16);
     --button-text: var(--text-main);
     --button-shadow: rgba(0, 0, 0, 0.18);
+
+    /* ==========================================================
+       背景カスタム設定（ここだけ書き換えればOK）
+       ----------------------------------------------------------
+       --bg-custom-image    : 背景に画像を使いたい場合はここに
+                               url("images/ファイル名.jpg") のように指定。
+                               画像を使わない場合は none にする。
+       --bg-custom-opacity  : 画像の薄さ（0〜1）。数字を大きくするほど
+                               はっきり見える。今は少し薄めの0.35。
+       --bg-custom-size     : contain＝画像全体が見える／
+                               cover＝画面いっぱいに広がる（形が切れることがある）
+       --bg-custom-position : 画像を置く位置（centerでOK）
+    ========================================================== */
+    --bg-custom-image: none;
+    --bg-custom-opacity: 0.9;
+    --bg-custom-size: contain;
+    --bg-custom-position: center;
 }
 
 
@@ -81,6 +98,32 @@ body {
     letter-spacing: 0.03em;
 
     overflow-x: hidden;
+}
+
+
+/* ==========================================================
+   背景カスタム画像レイヤー
+   ----------------------------------------------------------
+   画面全体に固定表示される、独立した背景画像レイヤー。
+   :root の --bg-custom-* を書き換えると見た目が変わる。
+   （JSがbody直下に <div class="bg-layer"> を自動で挿入する）
+========================================================== */
+
+.bg-layer {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    z-index: 0;
+    pointer-events: none;
+
+    background-image: var(--bg-custom-image);
+    background-repeat: no-repeat;
+    background-position: var(--bg-custom-position);
+    background-size: var(--bg-custom-size);
+
+    opacity: var(--bg-custom-opacity);
 }
 
 
@@ -420,6 +463,20 @@ nav a.active {
     margin: 0 auto;
 
     text-align: center;
+}
+
+
+/* トップページのアイコン画像（元画像は722×720pxあり、
+   サイズ指定が無かったため原寸で表示され大きくなりすぎていた） */
+.hero-icon {
+    width: 96px;
+    height: 96px;
+
+    margin: 0 auto 18px;
+
+    border-radius: 20px;
+
+    object-fit: cover;
 }
 
 
@@ -1939,6 +1996,11 @@ nav a.active {
     cursor: zoom-in;
 }
 
+.zoom-image:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
 
 @keyframes imageZoom {
 
@@ -1993,6 +2055,12 @@ nav a.active {
         grid-template-columns: 1fr;
 
         padding-top: 14px;
+    }
+
+
+    .hero-icon {
+        width: 72px;
+        height: 72px;
     }
 
 

@@ -4,8 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>コンセントのポートフォリオ</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="icon" href="images/コンセント.png" type="image/png">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="js/partials.js" defer></script>
+        <meta name="description" content="ベクターイラスト・Web制作・オリジナル世界観づくりに取り組むクリエイター「コンセント」のポートフォリオサイトです。">
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="コンセントのポートフォリオ">
+    <meta property="og:description" content="ベクターイラスト・Web制作・オリジナル世界観づくりに取り組むクリエイター「コンセント」のポートフォリオサイトです。">
+    <meta property="og:image" content="https://kibounokonsent.github.io/images/konsento-icon.png">
+    <meta property="og:url" content="https://kibounokonsent.github.io/">
+    <meta name="twitter:card" content="summary">
+<link rel="icon" href="images/konsento-icon.png" type="image/png">
 </head>
 <body>
     <div class="page-shell">
@@ -16,23 +24,15 @@
                 <p> MOON COREは独立した資料サイトとして移転しました。 今後の更新は新しいサイトで行います。
 </p>
             </div>
-           <a href="https://kibounokonsent.github.io/moon_core/">→ MOON CORE 資料集を見る</a>
+           <a href="https://kibounokonsent.github.io/moon_core/" class="announcement-link" target="_blank" rel="noopener">→ MOON CORE 資料集を見る</a>
         </div>
 
-        <header class="site-header">
-            <div class="brand">コンセント</div>
-            <nav aria-label="メインナビゲーション">
-                <a href="index.html" class="active">ホーム</a>
-                <a href="about.html">私について</a>
-                <a href="illustration.html">イラスト</a>
-                <a href="webworks.html">Web作品</a>
-            </nav>
-        </header>
+        <header class="site-header" id="site-header"></header>
 
         <main>
             <section class="hero">
                 <div class="hero-copy centered-hero">
-                     <img class="zoom-image" src="images/コンセント.png" alt="コンセント" onclick="openImage(this)">
+                     <img class="hero-icon zoom-image" src="images/konsento-icon.png" alt="コンセント" onclick="openImage(this)">
                     <p class="eyebrow">Creative portfolio</p>
                     <h1 class="portfolio-title">
                         <span class="title-line"></span>
@@ -138,5 +138,14 @@
             </section>
         </main>
     </div>
+
+    <div class="image-modal" id="image-modal">
+        <div class="image-modal-inner">
+            <button class="modal-close" id="modal-close" aria-label="閉じる">×</button>
+            <img id="modal-image" src="" alt="">
+        </div>
+    </div>
+
+    <script src="js/sugoi.js"></script>
 </body>
 </html>

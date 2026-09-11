@@ -406,6 +406,15 @@ button{
 
 }
 
+/* 真エンディング既読時：控えめに色味だけ変える（余韻演出） */
+#welcome-screen.archive-closed #welcome-title{
+    color:#a89a7a;
+}
+
+#welcome-screen.archive-closed #welcome-subtitle{
+    color:#a08858;
+}
+
 
 
 
@@ -785,43 +794,21 @@ button{
 
     align-items:center;
 
-    gap:8px;
+    gap:25px;
 
     color:#aaa;
 
 }
 
-#switch-user,
-.notification-show-button{
+#switch-user{
 
-    padding:6px 12px;
+    padding:8px 16px;
 
-    background:transparent;
+    background:#181818;
 
-    color:#b8b8b8;
+    color:white;
 
-    border:1px solid rgba(255,255,255,.15);
-    font-size:9px;
-    letter-spacing:1px;
-    font-weight:600;
-    cursor:pointer;
-    transition:all .15s ease;
-    border-radius:1px;
-
-}
-
-#switch-user:hover,
-.notification-show-button:hover{
-
-    border-color:rgba(255,255,255,.25);
-    color:#d0d0d0;
-    background:rgba(255,255,255,.03);
-
-}
-
-#system-time{
-
-    margin-left:auto;
+    border:1px solid #444;
 
 }
 
@@ -969,6 +956,22 @@ button{
 
     transition:.2s;
 
+    position:relative;
+
+}
+
+.file.has-unread::after{
+
+    content:"";
+    position:absolute;
+    top:50%;
+    right:16px;
+    transform:translateY(-50%);
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#66ff66;
+
 }
 
 .file:hover{
@@ -1082,241 +1085,115 @@ button{
 }
 
 
+/* ==========================================================
+   ADDED: 個人フォルダ（PERSONAL DIRECTORY）
+========================================================== */
+
+.personal-folder-hint{
+
+    cursor:pointer;
+    text-decoration:underline dotted;
+
+}
+
+.personal-folder-hint:hover{
+
+    color:#66ff66;
+
+}
+
+.personal-login-owner{
+
+    color:#888;
+    font-size:13px;
+    margin-bottom:16px;
+    letter-spacing:1px;
+
+}
+
+.personal-login-field{
+
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+    margin-bottom:16px;
+
+}
+
+.personal-login-field label{
+
+    color:#888;
+    font-size:11px;
+    letter-spacing:2px;
+
+}
+
+.personal-login-field input{
+
+    background:#000;
+    border:1px solid #333;
+    color:#eee;
+    padding:10px 12px;
+    font-size:14px;
+
+}
+
+.personal-login-field input:focus{
+
+    outline:none;
+    border-color:#66ff66;
+
+}
+
+#personal-login-submit{
+
+    padding:8px 20px;
+    background:#181818;
+    color:white;
+    border:1px solid #444;
+    cursor:pointer;
+
+}
+
+#personal-login-submit:hover{
+
+    border-color:#66ff66;
+    color:#66ff66;
+
+}
+
+#personal-login-status{
+
+    margin-top:14px;
+    color:#ff4b4b;
+    font-size:12px;
+    min-height:16px;
+
+}
+
+
 
 /* ==========================================================
    NOTIFICATION
 ========================================================== */
 
-.notification-show-button{
-
-    position:relative;
-
-    display:none;
-
-    align-items:center;
-    justify-content:center;
-
-    background:transparent;
-    border:1px solid rgba(255,255,255,.15);
-    color:#b8b8b8;
-
-    padding:6px 12px;
-    letter-spacing:1px;
-    font-size:9px;
-    font-weight:600;
-    cursor:pointer;
-
-    transition:all .15s ease;
-    border-radius:1px;
-    margin:0 8px;
-
-}
-
-.notification-show-button:hover{
-
-    border-color:rgba(255,255,255,.25);
-    color:#d0d0d0;
-    background:rgba(255,255,255,.03);
-
-}
-
-.notification-panel{
+#notification{
 
     position:fixed;
 
-    right:26px;
+    right:25px;
 
-    bottom:26px;
+    top:25px;
 
-    width:340px;
+    width:280px;
 
-    max-height:62vh;
+    background:#111;
 
-    background:rgba(16,16,16,.96);
+    border-left:4px solid white;
 
-    border:1px solid rgba(255,255,255,.12);
+    padding:18px;
 
-    box-shadow:0 0 24px rgba(0,0,0,.6);
-
-    z-index:1000;
-
-    display:flex;
-
-    flex-direction:column;
-
-    backdrop-filter:blur(2px);
-
-    border-radius:1px;
-
-}
-
-.notification-panel.collapsed{
-
-    display:none;
-
-}
-
-.notification-panel-header{
-
-    display:flex;
-
-    justify-content:space-between;
-
-    align-items:center;
-
-    padding:11px 14px;
-
-    border-bottom:1px solid rgba(255,255,255,.1);
-
-    letter-spacing:2px;
-
-    font-size:9px;
-
-    color:#a8a8a8;
-    font-weight:600;
-
-}
-
-.notification-panel-header button{
-
-    background:transparent;
-
-    border:1px solid rgba(255,255,255,.15);
-
-    color:#b8b8b8;
-
-    padding:3px 8px;
-
-    cursor:pointer;
-
-    font-size:9px;
-
-    letter-spacing:1px;
-    transition:all .15s ease;
-
-}
-
-.notification-panel-header button:hover{
-
-    border-color:rgba(255,255,255,.25);
-    color:#d0d0d0;
-
-}
-
-#notification-list{
-
-    display:flex;
-
-    flex-direction:column;
-
-    gap:8px;
-
-    padding:12px 12px 14px;
-
-    overflow:auto;
-
-}
-
-.notification-item{
-
-    width:100%;
-    border:0;
-    border-left:2px solid rgba(255,255,255,.7);
-    background:rgba(255,255,255,.02);
-    padding:10px 12px;
-    color:#f0f0f0;
-    font-size:12px;
-    line-height:1.6;
-    word-break:break-word;
-    white-space:pre-line;
-    text-align:left;
-    cursor:pointer;
-    transition:background .2s ease, transform .2s ease, box-shadow .2s ease;
-    font-family:inherit;
-
-}
-
-.notification-item:hover,
-.notification-item:focus-visible{
-
-    background:rgba(255,255,255,.06);
-    outline:none;
-
-}
-
-.notification-item.notification-focused{
-
-    box-shadow:inset 0 0 0 1px rgba(255,255,255,.3);
-    transform:translateX(1px);
-
-}
-
-.notification-item.system{
-
-    border-left-color:#808080;
-    border-left-width:2px;
-    background:rgba(255,255,255,.03);
-    color:#d0d0d0;
-
-}
-
-.notification-item.system:hover,
-.notification-item.system:focus-visible{
-
-    background:rgba(255,255,255,.06);
-    border-left-color:#a0a0a0;
-
-}
-
-.notification-item.warning{
-
-    border-left-color:#888888;
-    border-left-width:2px;
-    background:rgba(255,255,255,.03);
-    color:#d0d0d0;
-
-}
-
-.notification-item.warning:hover,
-.notification-item.warning:focus-visible{
-
-    background:rgba(255,255,255,.06);
-    border-left-color:#a0a0a0;
-
-}
-
-.notification-item.notice{
-
-    border-left-color:#888888;
-    border-left-width:2px;
-    background:rgba(255,255,255,.04);
-    color:#d8d8d8;
-    font-weight:500;
-
-}
-
-.notification-item.notice:hover,
-.notification-item.notice:focus-visible{
-
-    background:rgba(255,255,255,.08);
-    border-left-color:#a0a0a0;
-
-}
-
-.notification-item.admin{
-
-    border-left-color:#808080;
-    border-left-width:2px;
-    background:rgba(255,255,255,.03);
-    color:#d0d0d0;
-
-}
-
-.notification-item.admin:hover,
-.notification-item.admin:focus-visible{
-
-    background:rgba(255,255,255,.06);
-    border-left-color:#a0a0a0;
+    box-shadow:0 0 20px rgba(0,0,0,.4);
 
 }
 
@@ -2384,6 +2261,268 @@ button{
 
 
 /* ==========================================================
+   ADDED: RELATED LOGS（Staff Database ⇄ Internal Logs）
+========================================================== */
+
+.related-log-list{
+
+    display:flex;
+    flex-direction:column;
+
+}
+
+.related-log-item{
+
+    padding:10px 14px;
+    margin-bottom:6px;
+    border:1px solid #1c1c1c;
+    color:#ccc;
+    font-size:13px;
+    cursor:pointer;
+    transition:.2s;
+
+}
+
+.related-log-item:hover{
+
+    background:#1d1d1d;
+    border-color:#66ff66;
+    color:#66ff66;
+
+}
+
+
+/* ==========================================================
+   ADDED: 通知履歴（ボタン・バッジ・サイドパネル）
+========================================================== */
+
+#notification-history-toggle{
+
+    padding:8px 16px;
+    background:#181818;
+    color:#aaa;
+    border:1px solid #444;
+    cursor:pointer;
+    font-size:12px;
+    position:relative;
+
+}
+
+#notification-history-toggle:hover{
+
+    border-color:#66ff66;
+    color:#66ff66;
+
+}
+
+#notification-history-badge{
+
+    display:none;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#66ff66;
+    margin-left:6px;
+    vertical-align:middle;
+
+}
+
+#notification-history-badge.visible{
+
+    display:inline-block;
+
+}
+
+#notification-history-panel{
+
+    position:fixed;
+    top:0;
+    right:0;
+    width:320px;
+    height:100%;
+    background:#0d0d0d;
+    border-left:1px solid #333;
+    z-index:500;
+    display:flex;
+    flex-direction:column;
+
+}
+
+.notification-history-header{
+
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:16px 18px;
+    border-bottom:1px solid #222;
+    color:#ccc;
+    font-size:13px;
+    letter-spacing:2px;
+
+}
+
+.notification-history-header button{
+
+    background:transparent;
+    border:1px solid #333;
+    color:#888;
+    padding:4px 10px;
+    cursor:pointer;
+    font-size:11px;
+
+}
+
+.notification-history-header button:hover{
+
+    border-color:#66ff66;
+    color:#66ff66;
+
+}
+
+#notification-history-list{
+
+    flex:1;
+    overflow-y:auto;
+    padding:8px;
+
+}
+
+.notification-history-empty{
+
+    color:#555;
+    font-size:12px;
+    padding:20px 10px;
+    text-align:center;
+
+}
+
+.notification-history-item{
+
+    padding:12px 14px;
+    margin-bottom:6px;
+    border:1px solid #1c1c1c;
+    cursor:pointer;
+    transition:.2s;
+    position:relative;
+
+}
+
+.notification-history-item:hover{
+
+    background:#181818;
+    border-color:#333;
+
+}
+
+.notification-history-item.unread{
+
+    border-color:#2a2a2a;
+
+}
+
+.notification-history-item.unread::before{
+
+    content:"";
+    position:absolute;
+    top:14px;
+    left:-3px;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#66ff66;
+
+}
+
+.notification-history-text{
+
+    color:#ccc;
+    font-size:12px;
+    line-height:1.6;
+    white-space:pre-line;
+
+}
+
+.notification-history-time{
+
+    color:#555;
+    font-size:10px;
+    margin-top:6px;
+
+}
+
+
+/* ==========================================================
+   ADDED: 未読バッジ（フォルダに未読ファイルがあることだけを示す）
+========================================================== */
+
+.folder{
+    position:relative;
+}
+
+.folder.has-unread::after{
+
+    content:"";
+    position:absolute;
+    top:10px;
+    right:12px;
+    width:6px;
+    height:6px;
+    border-radius:50%;
+    background:#66ff66;
+
+}
+
+
+/* ==========================================================
+   ADDED: 記録の書き出しボタン
+========================================================== */
+
+#export-file{
+
+    margin-top:10px;
+    padding:6px 12px;
+    background:transparent;
+    border:1px solid #333;
+    color:#888;
+    font-size:12px;
+    cursor:pointer;
+    transition:.2s;
+
+}
+
+#export-file:hover{
+
+    border-color:#66ff66;
+    color:#66ff66;
+
+}
+
+
+/* ==========================================================
+   ADDED: ミュートトグル
+========================================================== */
+
+#mute-toggle{
+
+    background:transparent;
+    border:1px solid #333;
+    color:#888;
+    padding:4px 10px;
+    cursor:pointer;
+    font-size:14px;
+    transition:.2s;
+
+}
+
+#mute-toggle:hover{
+
+    border-color:#66ff66;
+    color:#66ff66;
+
+}
+
+
+/* ==========================================================
    ADDED: CLEARANCE / REDACTED（職員階級による閲覧制限）
 ========================================================== */
 
@@ -2593,5 +2732,12 @@ button{
 
     color:#eafff0;
     border-color:#88ffaa;
+
+}
+
+.clearance-0001{
+
+    color:#f2f2f2;
+    border-color:#ffffff;
 
 }
