@@ -13,7 +13,6 @@
     --bg-deep: #050505;
     --bg-panel: #111111;
     --bg-soft: #171717;
-
     --card-bg: rgba(20, 20, 20, 0.95);
     --card-border: rgba(255, 213, 74, 0.24);
 
@@ -87,6 +86,7 @@ body {
 
     line-height: 1.8;
     letter-spacing: 0.03em;
+
     overflow-x: hidden;
 }
 
@@ -132,6 +132,7 @@ body::before {
         );
 
     background-size: 28px 28px;
+
     pointer-events: none;
     z-index: 0;
 }
@@ -174,6 +175,7 @@ main,
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     gap: 18px;
     flex-wrap: wrap;
 
@@ -190,7 +192,9 @@ main,
 
     border-radius: 18px;
 
-    padding: 18px 22px;
+    padding:
+        18px
+        22px;
 
     box-shadow:
         0 10px 24px
@@ -203,6 +207,7 @@ main,
 .announcement-text {
     display: flex;
     align-items: center;
+
     gap: 16px;
     flex-wrap: wrap;
 }
@@ -211,7 +216,9 @@ main,
 .announcement-tag {
     display: inline-block;
 
-    padding: 6px 10px;
+    padding:
+        6px
+        10px;
 
     border-radius: 999px;
 
@@ -258,7 +265,9 @@ main,
     align-items: center;
     justify-content: center;
 
-    padding: 10px 16px;
+    padding:
+        10px
+        16px;
 
     background:
         linear-gradient(
@@ -274,7 +283,6 @@ main,
     color: var(--text-main);
 
     border-radius: 999px;
-
     text-decoration: none;
     white-space: nowrap;
 
@@ -305,6 +313,7 @@ main,
     display: flex;
     justify-content: space-between;
     align-items: center;
+
     gap: 18px;
     flex-wrap: wrap;
 
@@ -325,6 +334,7 @@ main,
 
     font-size: 1.2rem;
     font-weight: 700;
+
     letter-spacing: 0.16em;
 
     color:
@@ -341,6 +351,7 @@ main,
 nav {
     display: flex;
     flex-wrap: wrap;
+
     gap: 10px;
     justify-content: center;
 }
@@ -351,7 +362,9 @@ nav a {
     align-items: center;
     justify-content: center;
 
-    padding: 10px 16px;
+    padding:
+        10px
+        16px;
 
     border-radius: 999px;
 
@@ -466,6 +479,7 @@ nav a.active {
 
     line-height: 1.25;
     letter-spacing: 0.06em;
+
     text-shadow: none;
 }
 
@@ -592,12 +606,13 @@ nav a.active {
     align-items: center;
     justify-content: center;
 
-    padding: 10px 16px;
+    padding:
+        10px
+        16px;
 
     border-radius: 999px;
 
     text-decoration: none;
-
     font-weight: 600;
     letter-spacing: 0.04em;
 
@@ -706,6 +721,7 @@ nav a.active {
 
     font-size: 0.72rem;
     letter-spacing: 0.14em;
+
     text-transform: uppercase;
 
     color:
@@ -820,10 +836,14 @@ nav a.active {
 
     border-radius: 18px;
 
+    /*
+       カード内側にしっかり余白を確保。
+       本文や画像がカードの端に寄りすぎないようにする。
+    */
     padding:
-        24px
-        26px
-        22px;
+        34px
+        36px
+        50px;
 
     box-shadow:
         0 8px 26px
@@ -881,15 +901,15 @@ nav a.active {
         rgba(var(--theme-rgb), 0.65);
 }
 
-
 /* ==========================================================
    ART CARD TYPOGRAPHY
 ========================================================== */
 
 /* 作品タイトル */
+
 .art-card h3 {
     margin:
-        0 0 12px;
+        0 0 14px;
 
     color:
         var(--theme-color);
@@ -900,9 +920,7 @@ nav a.active {
         sans-serif;
 
     letter-spacing: 0.08em;
-
     font-size: 1.08rem;
-
     line-height: 1.4;
 
     text-shadow:
@@ -912,6 +930,7 @@ nav a.active {
 
 
 /* 通常の小見出し */
+
 .art-card h4 {
     color:
         var(--accent-color);
@@ -925,7 +944,6 @@ nav a.active {
     font-weight: 700;
 
     letter-spacing: 0.06em;
-
     line-height: 1.4;
 
     margin-top: 20px;
@@ -933,23 +951,27 @@ nav a.active {
 
 
 /*
-    段落のすぐ後に来る通常見出しは、
-    前の文章としっかり区切る。
+    本文から通常見出しへ移るところは
+    大きめに空ける。
 */
+
 .art-card p + h4 {
-    margin-top: 32px;
+    margin-top: 36px;
 }
 
 
 /*
-    見出し直後のリストは、
-    見出しと一つのグループとして見えるようにする。
+    見出し直後のリストは
+    ひとつのグループとして近づける。
 */
+
 .art-card h4 + ul {
-    margin-top: 8px;
+    margin-top: 5px;
     margin-bottom: 0;
 }
 
+
+/* 本文 */
 
 .art-card p,
 .contact-card p,
@@ -962,9 +984,17 @@ nav a.active {
     color:
         var(--text-muted);
 
-    margin: 0;
+    margin:
+        0 0 8px;
+
+    line-height: 1.7;
 }
 
+
+/*
+    文章の最後からメタ情報へ移る場合は
+    .work-meta-group 側で大きく区切る。
+*/
 
 .art-card a,
 .contact-card a,
@@ -980,23 +1010,39 @@ nav a.active {
 
 /* ==========================================================
    WORK META
-   制作目的・使用ツール・使用技術
+   制作目的・使用ツール・使用技術・視聴方法
 ========================================================== */
 
 .work-meta-group {
-    margin-top: 30px;
+    /*
+       本文との境界をしっかり作る。
+       「別の情報グループ」に見せるため、
+       本文同士より大きな余白を取る。
+    */
+    margin-top: 36px;
+}
+
+
+/*
+    最初のメタ情報だけは
+    カード上部からの流れを少し強めに区切る。
+*/
+
+.art-card > .work-meta-group:first-of-type {
+    margin-top: 40px;
 }
 
 
 /*
     メタ情報の見出し。
 
-    作品固有のフォント指定よりも優先して
-    全作品で同じフォントにする。
+    作品ごとのフォントではなく、
+    全作品で同じRajdhaniに統一する。
 */
+
 .work-meta-title {
     margin:
-        0 0 5px;
+        0 0 4px;
 
     color:
         var(--accent-color) !important;
@@ -1007,34 +1053,31 @@ nav a.active {
         sans-serif !important;
 
     font-size: 1rem;
-
     font-weight: 700;
 
     line-height: 1.4;
-
     letter-spacing: 0.06em;
 }
 
 
 /* メタ情報の本文 */
+
 .work-meta-group > p {
     margin: 0;
-
     line-height: 1.6;
 }
 
 
 /* メタ情報がリストの場合 */
+
 .work-meta-list {
     margin: 0;
-
     padding-left: 1.4em;
 }
 
 
 .work-meta-list li {
     margin: 0;
-
     line-height: 1.5;
 }
 
@@ -1047,13 +1090,16 @@ nav a.active {
     width: 100%;
 
     height: 300px;
-
     max-width: 600px;
 
     display: block;
 
+    /*
+       画像の上下に少し余裕を作る。
+       本文との間隔も確保する。
+    */
     margin:
-        15px auto 25px;
+        20px auto 30px;
 
     object-fit: contain;
 
@@ -1338,10 +1384,6 @@ nav a.active {
 }
 
 
-/*
-    Cinzelは作品タイトルだけ。
-    「使用ツール」「視聴方法」などには使わない。
-*/
 .kanel h3 {
     font-family:
         'Cinzel',
@@ -1400,9 +1442,6 @@ nav a.active {
 }
 
 
-/*
-    Uncial Antiquaは作品タイトルだけ。
-*/
 .ryu h3 {
     font-family:
         'Uncial Antiqua',
@@ -1431,7 +1470,8 @@ nav a.active {
             rgba(8, 8, 8, 0.98)
         );
 
-    color: #d8d8d8;
+    color:
+        #d8d8d8;
 
     border:
         1px solid
@@ -1476,19 +1516,21 @@ nav a.active {
 }
 
 
-.eclipse h4 {
-    color: #c8c8c8;
-}
-
+/*
+    h4は共通ルールで黄色に統一するため、
+    Eclipse固有のh4カラー指定はしない。
+*/
 
 .eclipse p,
 .eclipse li {
-    color: #bdbdbd;
+    color:
+        #bdbdbd;
 }
 
 
 .eclipse a {
-    color: #d8d8d8;
+    color:
+        #d8d8d8;
 
     border-color:
         rgba(255, 255, 255, 0.16);
@@ -1621,9 +1663,10 @@ nav a.active {
 }
 
 
-.mooncore h4 {
-    color: #9febff;
-}
+/*
+    h4は共通ルールで黄色に統一するため、
+    MOON CORE固有のh4カラー指定はしない。
+*/
 
 
 .mooncore-card {
@@ -1688,7 +1731,8 @@ nav a.active {
     border-radius: 999px;
 
     padding:
-        10px 18px;
+        10px
+        18px;
 
     cursor: pointer;
 
@@ -1819,7 +1863,8 @@ nav a.active {
 
 
 .archive-tag {
-    color: #9fb4c5;
+    color:
+        #9fb4c5;
 }
 
 
@@ -1950,7 +1995,9 @@ nav a.active {
 .notice {
     padding: 10px;
 
-    margin: 15px 0;
+    margin:
+        15px
+        0;
 
     border-left:
         4px solid #888;
@@ -1976,7 +2023,6 @@ nav a.active {
     display: none;
 
     position: fixed;
-
     inset: 0;
 
     z-index: 9999;
@@ -2113,13 +2159,13 @@ nav a.active {
     .announcement-text {
         flex-direction: column;
         align-items: flex-start;
+
         gap: 8px;
     }
 
 
     .hero {
         grid-template-columns: 1fr;
-
         padding-top: 14px;
     }
 
@@ -2162,7 +2208,10 @@ nav a.active {
     .contact-card,
     .mooncore,
     .character {
-        padding: 15px;
+        padding:
+            22px
+            20px
+            20px;
     }
 
 
@@ -2184,11 +2233,28 @@ nav a.active {
 
         border-radius:
             10px;
+
+        margin:
+            16px auto 24px;
     }
 
 
-    /* スマホではメタ情報の余白を少しだけ縮める */
+    /*
+        スマホではメタ情報の余白を少しだけ縮める。
+        ただし本文との区切りは残す。
+    */
+
     .work-meta-group {
-        margin-top: 24px;
+        margin-top: 28px;
+    }
+
+
+    .art-card > .work-meta-group:first-of-type {
+        margin-top: 32px;
+    }
+
+
+    .art-card p + h4 {
+        margin-top: 30px;
     }
 }
