@@ -21,7 +21,6 @@
     --text-muted: #d6d0c4;
 
     --neon-glow: rgba(255, 213, 74, 0.38);
-
     --panel-alt: rgba(16, 16, 16, 0.9);
 
     --button-bg:
@@ -35,18 +34,10 @@
     --button-text: var(--text-main);
     --button-shadow: rgba(0, 0, 0, 0.18);
 
-    /* ==========================================================
-       背景カスタム設定（ここだけ書き換えればOK）
-       ----------------------------------------------------------
-       --bg-custom-image    : 背景に画像を使いたい場合はここに
-                               url("images/ファイル名.jpg") のように指定。
-                               画像を使わない場合は none にする。
-       --bg-custom-opacity  : 画像の薄さ（0〜1）。数字を大きくするほど
-                               はっきり見える。今は少し薄めの0.35。
-       --bg-custom-size     : contain＝画像全体が見える／
-                               cover＝画面いっぱいに広がる（形が切れることがある）
-       --bg-custom-position : 画像を置く位置（centerでOK）
-    ========================================================== */
+    /* ======================================================
+       背景カスタム設定
+    ====================================================== */
+
     --bg-custom-image: none;
     --bg-custom-opacity: 0.9;
     --bg-custom-size: contain;
@@ -96,25 +87,18 @@ body {
 
     line-height: 1.8;
     letter-spacing: 0.03em;
-
     overflow-x: hidden;
 }
 
 
 /* ==========================================================
-   背景カスタム画像レイヤー
-   ----------------------------------------------------------
-   画面全体に固定表示される、独立した背景画像レイヤー。
-   :root の --bg-custom-* を書き換えると見た目が変わる。
-   （JSがbody直下に <div class="bg-layer"> を自動で挿入する）
+   BACKGROUND IMAGE
 ========================================================== */
 
 .bg-layer {
     content: "";
-
     position: fixed;
     inset: 0;
-
     z-index: 0;
     pointer-events: none;
 
@@ -133,7 +117,6 @@ body {
 
 body::before {
     content: "";
-
     position: fixed;
     inset: 0;
 
@@ -149,7 +132,6 @@ body::before {
         );
 
     background-size: 28px 28px;
-
     pointer-events: none;
     z-index: 0;
 }
@@ -175,7 +157,6 @@ main,
 
 .page-shell {
     max-width: 1100px;
-
     margin: 0 auto;
 
     padding:
@@ -191,11 +172,10 @@ main,
 
 .announcement-bar {
     display: flex;
-
     justify-content: space-between;
     align-items: center;
-
     gap: 18px;
+    flex-wrap: wrap;
 
     background:
         linear-gradient(
@@ -222,11 +202,8 @@ main,
 
 .announcement-text {
     display: flex;
-
     align-items: center;
-
     gap: 16px;
-
     flex-wrap: wrap;
 }
 
@@ -249,11 +226,8 @@ main,
         rgba(255, 213, 74, 0.34);
 
     font-size: 0.72rem;
-
     letter-spacing: 0.12em;
-
     text-transform: uppercase;
-
     font-weight: 700;
 }
 
@@ -268,24 +242,19 @@ main,
         clamp(1rem, 1.5vw, 1.5rem);
 
     font-weight: 700;
-
     letter-spacing: 0.04em;
 }
 
 
 .announcement-text p {
     margin: 0;
-
-    color:
-        var(--text-muted);
-
+    color: var(--text-muted);
     font-size: 0.95rem;
 }
 
 
 .announcement-link {
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
 
@@ -302,13 +271,11 @@ main,
         1px solid
         rgba(255, 213, 74, 0.34);
 
-    color:
-        var(--text-main);
+    color: var(--text-main);
 
     border-radius: 999px;
 
     text-decoration: none;
-
     white-space: nowrap;
 
     transition:
@@ -319,8 +286,7 @@ main,
 
 
 .announcement-link:hover {
-    transform:
-        translateY(-1px);
+    transform: translateY(-1px);
 
     box-shadow:
         0 8px 18px
@@ -337,12 +303,9 @@ main,
 
 .site-header {
     display: flex;
-
     justify-content: space-between;
     align-items: center;
-
     gap: 18px;
-
     flex-wrap: wrap;
 
     padding:
@@ -361,9 +324,7 @@ main,
         sans-serif;
 
     font-size: 1.2rem;
-
     font-weight: 700;
-
     letter-spacing: 0.16em;
 
     color:
@@ -379,18 +340,14 @@ main,
 
 nav {
     display: flex;
-
     flex-wrap: wrap;
-
     gap: 10px;
-
     justify-content: center;
 }
 
 
 nav a {
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
 
@@ -459,23 +416,19 @@ nav a.active {
 
 .centered-hero {
     max-width: 760px;
-
     margin: 0 auto;
-
     text-align: center;
 }
 
 
-/* トップページのアイコン画像（元画像は722×720pxあり、
-   サイズ指定が無かったため原寸で表示され大きくなりすぎていた） */
 .hero-icon {
     width: 96px;
     height: 96px;
 
-    margin: 0 auto 18px;
+    margin:
+        0 auto 18px;
 
     border-radius: 20px;
-
     object-fit: cover;
 }
 
@@ -485,7 +438,6 @@ nav a.active {
         var(--accent-color);
 
     letter-spacing: 0.18em;
-
     text-transform: uppercase;
 
     font-size: 0.8rem;
@@ -513,9 +465,7 @@ nav a.active {
         var(--text-main);
 
     line-height: 1.25;
-
     letter-spacing: 0.06em;
-
     text-shadow: none;
 }
 
@@ -525,14 +475,12 @@ nav a.active {
         clamp(2.2rem, 4vw, 4rem);
 
     font-weight: 700;
-
     text-transform: none;
 }
 
 
 .portfolio-title {
     display: flex;
-
     align-items: center;
     justify-content: center;
 
@@ -551,7 +499,6 @@ nav a.active {
         1 1 0;
 
     height: 2px;
-
     min-width: 42px;
 
     background:
@@ -583,9 +530,7 @@ nav a.active {
         clamp(1.3rem, 2vw, 2.6rem);
 
     font-weight: 700;
-
     letter-spacing: 0.08em;
-
     white-space: nowrap;
 
     text-shadow:
@@ -606,6 +551,7 @@ nav a.active {
         0 auto;
 }
 
+
 /* ==========================================================
    DETAIL
 ========================================================== */
@@ -614,9 +560,11 @@ nav a.active {
     display: none;
 }
 
+
 .detail.open {
     display: block;
 }
+
 
 /* ==========================================================
    BUTTON
@@ -624,7 +572,6 @@ nav a.active {
 
 .cta-row {
     display: flex;
-
     flex-wrap: wrap;
 
     gap: 14px;
@@ -642,7 +589,6 @@ nav a.active {
 .mooncore-link,
 .work-link {
     display: inline-flex;
-
     align-items: center;
     justify-content: center;
 
@@ -653,7 +599,6 @@ nav a.active {
     text-decoration: none;
 
     font-weight: 600;
-
     letter-spacing: 0.04em;
 
     transition:
@@ -728,7 +673,6 @@ nav a.active {
 
 .hero-panel {
     display: grid;
-
     gap: 16px;
 }
 
@@ -761,9 +705,7 @@ nav a.active {
     display: block;
 
     font-size: 0.72rem;
-
     letter-spacing: 0.14em;
-
     text-transform: uppercase;
 
     color:
@@ -815,7 +757,6 @@ nav a.active {
 .learning > h2,
 .goal > h2,
 .section-block > h2 {
-
     color:
         var(--accent-color);
 
@@ -830,7 +771,6 @@ nav a.active {
         0 0 14px;
 
     letter-spacing: 0.14em;
-
     text-transform: uppercase;
 
     line-height: 1.4;
@@ -862,18 +802,8 @@ nav a.active {
    ART CARD
 ========================================================== */
 
-/*
-    各カードが
-    --theme-color
-    --theme-rgb
-
-    を持つことで、
-    カードごとに色を変更できる。
-*/
-
 .art-card,
 .contact-card {
-
     --theme-color: #ffd54a;
     --theme-rgb: 255, 213, 74;
 
@@ -900,22 +830,18 @@ nav a.active {
         rgba(0, 0, 0, 0.25);
 
     position: relative;
-
     overflow: hidden;
 }
 
 
 .art-card::before,
 .contact-card::before {
-
     content: "";
 
     position: absolute;
 
     left: 0;
-
     top: 12px;
-
     bottom: 12px;
 
     width: 3px;
@@ -936,7 +862,6 @@ nav a.active {
 
 
 .art-card {
-
     transition:
         transform .2s ease,
         box-shadow .2s ease,
@@ -945,7 +870,6 @@ nav a.active {
 
 
 .art-card:hover {
-
     transform:
         translateY(-3px);
 
@@ -958,8 +882,12 @@ nav a.active {
 }
 
 
-.art-card h3 {
+/* ==========================================================
+   ART CARD TYPOGRAPHY
+========================================================== */
 
+/* 作品タイトル */
+.art-card h3 {
     margin:
         0 0 12px;
 
@@ -983,12 +911,43 @@ nav a.active {
 }
 
 
+/* 通常の小見出し */
 .art-card h4 {
-
     color:
-        rgba(var(--theme-rgb), 0.85);
+        var(--accent-color);
+
+    font-family:
+        'Rajdhani',
+        'Segoe UI',
+        sans-serif;
+
+    font-size: 1rem;
+    font-weight: 700;
+
+    letter-spacing: 0.06em;
+
+    line-height: 1.4;
 
     margin-top: 20px;
+}
+
+
+/*
+    段落のすぐ後に来る通常見出しは、
+    前の文章としっかり区切る。
+*/
+.art-card p + h4 {
+    margin-top: 32px;
+}
+
+
+/*
+    見出し直後のリストは、
+    見出しと一つのグループとして見えるようにする。
+*/
+.art-card h4 + ul {
+    margin-top: 8px;
+    margin-bottom: 0;
 }
 
 
@@ -1000,7 +959,6 @@ nav a.active {
 .learning li,
 .goal p,
 .gallery p {
-
     color:
         var(--text-muted);
 
@@ -1013,7 +971,6 @@ nav a.active {
 .watch-button,
 .mooncore-link,
 .work-link {
-
     margin-top: 16px;
 
     color:
@@ -1022,17 +979,71 @@ nav a.active {
 
 
 /* ==========================================================
+   WORK META
+   制作目的・使用ツール・使用技術
+========================================================== */
+
+.work-meta-group {
+    margin-top: 30px;
+}
+
+
+/*
+    メタ情報の見出し。
+
+    作品固有のフォント指定よりも優先して
+    全作品で同じフォントにする。
+*/
+.work-meta-title {
+    margin:
+        0 0 5px;
+
+    color:
+        var(--accent-color) !important;
+
+    font-family:
+        'Rajdhani',
+        'Segoe UI',
+        sans-serif !important;
+
+    font-size: 1rem;
+
+    font-weight: 700;
+
+    line-height: 1.4;
+
+    letter-spacing: 0.06em;
+}
+
+
+/* メタ情報の本文 */
+.work-meta-group > p {
+    margin: 0;
+
+    line-height: 1.6;
+}
+
+
+/* メタ情報がリストの場合 */
+.work-meta-list {
+    margin: 0;
+
+    padding-left: 1.4em;
+}
+
+
+.work-meta-list li {
+    margin: 0;
+
+    line-height: 1.5;
+}
+
+
+/* ==========================================================
    IMAGE
 ========================================================== */
 
-/*
-    作品画像の表示領域を統一。
-    元画像の縦横比は維持しつつ、
-    すべて同じ高さの領域に収める。
-*/
-
 .art-card img {
-
     width: 100%;
 
     height: 300px;
@@ -1061,7 +1072,6 @@ nav a.active {
 
 
 .art-card img:hover {
-
     transform:
         scale(1.03);
 
@@ -1081,7 +1091,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-purple {
-
     --theme-color: #b875ff;
     --theme-rgb: 184, 117, 255;
 
@@ -1099,7 +1108,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-monochrome {
-
     --theme-color: #ffffff;
     --theme-rgb: 255, 255, 255;
 
@@ -1117,7 +1125,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-redyellow {
-
     --theme-color: #ffd84a;
     --theme-rgb: 255, 190, 40;
 
@@ -1135,7 +1142,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-whiteyellow {
-
     --theme-color: #ffe978;
     --theme-rgb: 255, 232, 120;
 
@@ -1153,7 +1159,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-green {
-
     --theme-color: #54e67a;
     --theme-rgb: 84, 230, 122;
 
@@ -1171,7 +1176,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-white {
-
     --theme-color: #ffffff;
     --theme-rgb: 255, 255, 255;
 
@@ -1189,7 +1193,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-black {
-
     --theme-color: #e8e8e8;
     --theme-rgb: 232, 232, 232;
 
@@ -1210,7 +1213,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-blue {
-
     --theme-color: #62dfff;
     --theme-rgb: 98, 223, 255;
 
@@ -1228,7 +1230,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-pastel-green {
-
     --theme-color: #b8e8bd;
     --theme-rgb: 184, 232, 189;
 
@@ -1246,7 +1247,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-whiteblack {
-
     --theme-color: #ffffff;
     --theme-rgb: 255, 255, 255;
 
@@ -1264,7 +1264,6 @@ nav a.active {
 ------------------------- */
 
 .art-card.theme-pastel {
-
     --theme-color: #d8e7d5;
     --theme-rgb: 216, 231, 213;
 
@@ -1282,7 +1281,6 @@ nav a.active {
 ========================================================== */
 
 .character {
-
     border-radius: 12px;
 
     padding: 25px;
@@ -1297,11 +1295,10 @@ nav a.active {
 
 /* ==========================================================
    KANEL
-   ※既存デザインを維持
+   作品タイトルだけCinzel
 ========================================================== */
 
 .kanel {
-
     --theme-color: #ff2020;
     --theme-rgb: 255, 32, 32;
 
@@ -1321,13 +1318,13 @@ nav a.active {
     box-shadow:
         0 0 0 1px
         rgba(255, 80, 80, 0.12) inset,
+
         0 8px 28px
         rgba(0, 0, 0, 0.35);
 }
 
 
 .kanel::before {
-
     background:
         linear-gradient(
             180deg,
@@ -1341,35 +1338,29 @@ nav a.active {
 }
 
 
-.kanel h3,
-.kanel h4 {
-
+/*
+    Cinzelは作品タイトルだけ。
+    「使用ツール」「視聴方法」などには使わない。
+*/
+.kanel h3 {
     font-family:
         'Cinzel',
         serif;
 
     letter-spacing:
         0.08em;
-}
 
-
-.kanel h3 {
-    color: #ff2020;
-}
-
-
-.kanel h4 {
-    color: #ff5050;
+    color:
+        #ff2020;
 }
 
 
 /* ==========================================================
    RYU
-   ※既存デザインを維持
+   作品タイトルだけUncial Antiqua
 ========================================================== */
 
 .ryu {
-
     --theme-color: #ffffff;
     --theme-rgb: 255, 255, 255;
 
@@ -1389,13 +1380,13 @@ nav a.active {
     box-shadow:
         0 0 0 1px
         rgba(255, 255, 255, 0.08) inset,
+
         0 8px 28px
         rgba(0, 0, 0, 0.35);
 }
 
 
 .ryu::before {
-
     background:
         linear-gradient(
             180deg,
@@ -1409,30 +1400,24 @@ nav a.active {
 }
 
 
-.ryu h3,
-.ryu h4 {
-
+/*
+    Uncial Antiquaは作品タイトルだけ。
+*/
+.ryu h3 {
     font-family:
         'Uncial Antiqua',
         serif;
 
     letter-spacing:
         0.06em;
+
+    color:
+        #ffffff;
 }
 
-
-.ryu h3 {
-    color: #ffffff;
-}
-
-
-.ryu h4 {
-    color: #bdbdbd;
-}
 
 /* ==========================================================
    ECLIPSE LAB
-   ※作品紹介用
 ========================================================== */
 
 .eclipse {
@@ -1455,9 +1440,11 @@ nav a.active {
     box-shadow:
         0 0 0 1px
         rgba(255, 255, 255, 0.025) inset,
+
         0 10px 28px
         rgba(0, 0, 0, 0.4);
 }
+
 
 .eclipse::before {
     background:
@@ -1471,6 +1458,7 @@ nav a.active {
         0 0 10px
         rgba(255, 255, 255, 0.12);
 }
+
 
 .eclipse h3 {
     color: #eeeeee;
@@ -1487,14 +1475,17 @@ nav a.active {
         rgba(255, 255, 255, 0.12);
 }
 
+
 .eclipse h4 {
     color: #c8c8c8;
 }
+
 
 .eclipse p,
 .eclipse li {
     color: #bdbdbd;
 }
+
 
 .eclipse a {
     color: #d8d8d8;
@@ -1510,6 +1501,7 @@ nav a.active {
         );
 }
 
+
 .eclipse a:hover {
     border-color:
         rgba(255, 255, 255, 0.32);
@@ -1518,6 +1510,7 @@ nav a.active {
         0 8px 20px
         rgba(255, 255, 255, 0.06);
 }
+
 
 .eclipse-card {
     background:
@@ -1530,6 +1523,7 @@ nav a.active {
     border-color:
         rgba(255, 255, 255, 0.16);
 }
+
 
 .eclipse-card::before {
     background:
@@ -1544,18 +1538,17 @@ nav a.active {
         rgba(255, 255, 255, 0.12);
 }
 
+
 .eclipse-card h3 {
     color: #f0f0f0;
 }
 
 
 /* ==========================================================
-   MOONCORE
-   ※既存デザインを維持
+   MOON CORE
 ========================================================== */
 
 .mooncore {
-
     --button-bg:
         linear-gradient(
             135deg,
@@ -1589,6 +1582,7 @@ nav a.active {
     box-shadow:
         0 0 0 1px
         rgba(0, 229, 255, 0.14) inset,
+
         0 10px 28px
         rgba(0, 0, 0, 0.28);
 
@@ -1597,15 +1591,12 @@ nav a.active {
 
 
 .mooncore::before {
-
     content: "";
 
     position: absolute;
 
     left: 0;
-
     top: 8px;
-
     bottom: 8px;
 
     width: 4px;
@@ -1636,7 +1627,6 @@ nav a.active {
 
 
 .mooncore-card {
-
     --button-bg:
         linear-gradient(
             135deg,
@@ -1666,7 +1656,6 @@ nav a.active {
 
 
 .mooncore-card::before {
-
     background:
         linear-gradient(
             180deg,
@@ -1686,7 +1675,6 @@ nav a.active {
 
 
 .mooncore button {
-
     background:
         var(--button-bg);
 
@@ -1705,7 +1693,6 @@ nav a.active {
     cursor: pointer;
 
     font-size: 15px;
-
     font-weight: 600;
 
     box-shadow:
@@ -1720,7 +1707,6 @@ nav a.active {
 
 
 .mooncore button:hover {
-
     transform:
         translateY(-2px);
 
@@ -1734,7 +1720,6 @@ nav a.active {
 ========================================================== */
 
 .logo-card {
-
     background:
         linear-gradient(
             180deg,
@@ -1749,13 +1734,13 @@ nav a.active {
     box-shadow:
         inset 0 0 0 1px
         rgba(255, 255, 255, 0.06),
+
         0 12px 26px
         rgba(0, 0, 0, 0.4);
 }
 
 
 .logo-card::before {
-
     background:
         linear-gradient(
             180deg,
@@ -1770,7 +1755,6 @@ nav a.active {
 
 
 .logo-card h3 {
-
     color:
         #e8e8e8;
 
@@ -1780,7 +1764,6 @@ nav a.active {
 
 
 .logo-card p {
-
     color:
         #c8c8c8;
 }
@@ -1791,9 +1774,7 @@ nav a.active {
 ========================================================== */
 
 .archive-meta {
-
     display: flex;
-
     flex-wrap: wrap;
 
     gap: 8px;
@@ -1813,14 +1794,12 @@ nav a.active {
         #b0b0b0;
 
     text-transform: uppercase;
-
     letter-spacing:
         0.08em;
 }
 
 
 .archive-badge {
-
     padding:
         4px
         10px;
@@ -1845,7 +1824,6 @@ nav a.active {
 
 
 .logo-card .image-grid {
-
     border:
         1px solid
         rgba(255, 255, 255, 0.08);
@@ -1860,7 +1838,6 @@ nav a.active {
 
 
 .logo-card .image-grid img {
-
     border-radius: 10px;
 
     filter:
@@ -1874,7 +1851,6 @@ nav a.active {
 ========================================================== */
 
 .image-grid {
-
     display: grid;
 
     grid-template-columns:
@@ -1887,9 +1863,7 @@ nav a.active {
 
 
 .image-grid img {
-
     width: 100%;
-
     max-width: none;
 }
 
@@ -1907,20 +1881,17 @@ nav a.active {
 .tools,
 .learning,
 .goal {
-
     margin-top: 0;
 }
 
 
 .skills .art-card,
 .works .art-card {
-
     margin-bottom: 15px;
 }
 
 
 .gallery > .art-card {
-
     margin-bottom: 32px;
 }
 
@@ -1930,7 +1901,6 @@ nav a.active {
 ========================================================== */
 
 .watch-button {
-
     display: inline-block;
 
     padding:
@@ -1964,7 +1934,6 @@ nav a.active {
 
 
 .watch-button:hover {
-
     transform:
         translateY(-3px);
 
@@ -1979,7 +1948,6 @@ nav a.active {
 ========================================================== */
 
 .notice {
-
     padding: 10px;
 
     margin: 15px 0;
@@ -1995,9 +1963,7 @@ nav a.active {
 
 
 .update-date {
-
     font-size: 0.85rem;
-
     color: #888;
 }
 
@@ -2007,7 +1973,6 @@ nav a.active {
 ========================================================== */
 
 .image-modal {
-
     display: none;
 
     position: fixed;
@@ -2020,7 +1985,6 @@ nav a.active {
         rgba(0, 0, 0, 0.92);
 
     justify-content: center;
-
     align-items: center;
 
     padding: 20px;
@@ -2033,31 +1997,25 @@ nav a.active {
 
 
 .image-modal-inner {
-
     position: relative;
 
     width: 95vw;
-
     height: 95vh;
 
     display: flex;
 
     justify-content: center;
-
     align-items: center;
 }
 
 
 #modal-image {
-
     display: block;
 
     max-width: 95vw;
-
     max-height: 95vh;
 
     width: auto;
-
     height: auto;
 
     object-fit: contain;
@@ -2074,19 +2032,15 @@ nav a.active {
 
 
 #modal-image[src$=".svg"] {
-
     width: 90vw;
-
     height: 90vh;
 }
 
 
 .modal-close {
-
     position: absolute;
 
     top: 10px;
-
     right: 10px;
 
     z-index: 2;
@@ -2094,7 +2048,6 @@ nav a.active {
     border: none;
 
     width: 40px;
-
     height: 40px;
 
     border-radius: 50%;
@@ -2114,16 +2067,18 @@ nav a.active {
     cursor: zoom-in;
 }
 
+
 .zoom-image:focus-visible {
-    outline: 2px solid var(--accent-color);
+    outline:
+        2px solid
+        var(--accent-color);
+
     outline-offset: 3px;
 }
 
 
 @keyframes imageZoom {
-
     from {
-
         transform:
             scale(.85);
 
@@ -2131,7 +2086,6 @@ nav a.active {
     }
 
     to {
-
         transform:
             scale(1);
 
@@ -2147,29 +2101,23 @@ nav a.active {
 @media screen and (max-width: 760px) {
 
     .announcement-bar {
-
         padding:
             16px
             18px;
 
         flex-direction: column;
-
         align-items: flex-start;
     }
 
 
     .announcement-text {
-
         flex-direction: column;
-
         align-items: flex-start;
-
         gap: 8px;
     }
 
 
     .hero {
-
         grid-template-columns: 1fr;
 
         padding-top: 14px;
@@ -2184,13 +2132,11 @@ nav a.active {
 
     .card-grid,
     .card-grid.two-col {
-
         grid-template-columns: 1fr;
     }
 
 
     .site-header {
-
         justify-content: center;
     }
 }
@@ -2199,7 +2145,6 @@ nav a.active {
 @media screen and (max-width: 600px) {
 
     .page-shell {
-
         padding:
             16px
             12px
@@ -2208,9 +2153,7 @@ nav a.active {
 
 
     .hero {
-
         padding-left: 0;
-
         padding-right: 0;
     }
 
@@ -2219,13 +2162,11 @@ nav a.active {
     .contact-card,
     .mooncore,
     .character {
-
         padding: 15px;
     }
 
 
     .brand {
-
         letter-spacing:
             0.1em;
     }
@@ -2233,17 +2174,21 @@ nav a.active {
 
     .main-title h1,
     .hero h1 {
-
         font-size:
             1.8rem;
     }
 
 
     .art-card img {
-
         height: 260px;
 
         border-radius:
             10px;
+    }
+
+
+    /* スマホではメタ情報の余白を少しだけ縮める */
+    .work-meta-group {
+        margin-top: 24px;
     }
 }
