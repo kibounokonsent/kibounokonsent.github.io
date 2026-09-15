@@ -2264,7 +2264,12 @@ nav a.active {
 ========================================================== */
 
 @media print {
-    html,
+    html {
+        background: #050505 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
     body {
         background: #050505 !important;
         color: #f5f5f0 !important;
@@ -2272,23 +2277,47 @@ nav a.active {
         print-color-adjust: exact !important;
     }
 
-    body {
-        background:
-            linear-gradient(
-                135deg,
-                #050505,
-                #111111
-            ) !important;
+    .page-shell,
+    main,
+    section {
+        background: transparent !important;
+        color: #f5f5f0 !important;
     }
 
+    /* カードの背景を単色にして軽量化 */
     .art-card,
     .contact-card {
-        background:
-            #141414 !important;
-
+        background: #141414 !important;
         color: #f5f5f0 !important;
+
+        box-shadow: none !important;
 
         -webkit-print-color-adjust: exact !important;
         print-color-adjust: exact !important;
+    }
+
+    /* 左側の光るラインも軽量化 */
+    .art-card::before,
+    .contact-card::before {
+        box-shadow: none !important;
+        background: var(--theme-color) !important;
+    }
+
+    /* 画像の影を削除 */
+    .art-card img {
+        box-shadow: none !important;
+    }
+
+    /* ボタンなどの影も削除 */
+    .button,
+    .art-card a,
+    .contact-card a {
+        box-shadow: none !important;
+    }
+
+    .art-card p,
+    .art-card li,
+    .contact-card p {
+        color: #d6d0c4 !important;
     }
 }
