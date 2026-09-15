@@ -2258,3 +2258,37 @@ nav a.active {
         margin-top: 30px;
     }
 }
+
+/* ==========================================================
+   PRINT / PDF
+========================================================== */
+
+@media print {
+    html,
+    body {
+        background: #050505 !important;
+        color: #f5f5f0 !important;
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+
+    body {
+        background:
+            linear-gradient(
+                135deg,
+                #050505,
+                #111111
+            ) !important;
+    }
+
+    .art-card,
+    .contact-card {
+        background:
+            #141414 !important;
+
+        color: #f5f5f0 !important;
+
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+    }
+}
