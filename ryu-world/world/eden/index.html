@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>悠久の楽園 ― 龍の世界</title>
+
+    <link rel="stylesheet" href="../../assets/css/eden.css">
+</head>
+
+<body>
+
+    <!-- ==================================================
+         楽園と龍（Scratch作品を軽量プレイヤーで再生）
+         ================================================== -->
+
+    <canvas id="eden-canvas" aria-hidden="true"></canvas>
+
+    <!-- 龍の眼：資料を読み進めるほど、こちらを見てくる -->
+    <div id="dragon-eyes" aria-hidden="true">
+        <span class="eye"></span>
+        <span class="eye"></span>
+    </div>
+
+    <div id="eden-veil" aria-hidden="true"></div>
+
+
+    <!-- ==================================================
+         操作
+         ================================================== -->
+
+    <a id="back-to-map" href="../index.html">世界地図へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">歓喜の歌</span>
+    </button>
+
+    <!-- 歓喜の歌（フリーBGMとして無料配布されている音源） -->
+    <audio id="music" src="../../assets/eden/joy.mp3" loop preload="none"></audio>
+
+
+    <!-- ==================================================
+         資料
+         ================================================== -->
+
+    <main id="eden-page">
+
+        <section id="eden-hero">
+            <p class="hero-en">ETERNAL EDEN</p>
+            <h1>悠久の楽園</h1>
+            <p class="hero-scroll" aria-hidden="true">読む</p>
+        </section>
+
+        <article id="eden-lore">
+
+            <p class="lore-quote">
+                「案ずるな。<br>
+                我は常に汝の傍に在り。<br>
+                光と闇を抱く者よ。<br>
+                共に還ろう、悠久の地へ。」
+                <span>― 楽園に眠る龍の言葉</span>
+            </p>
+
+            <section class="lore-block">
+                <h2>楽園</h2>
+                <p>楽園はすべての中心なり。<br>楽園はすべての外側なり。</p>
+                <p>そこに時は流れず。<br>過去も未来もなく、<br>ただ在るのみ。</p>
+                <p>龍は楽園に眠る。</p>
+                <p>天使たちはその傍らを巡り、<br>静かに見守る。</p>
+            </section>
+
+            <section class="lore-block">
+                <h2>還る場所</h2>
+                <p>死せる者は楽園へ還る。</p>
+                <p>迷える魂も、<br>傷ついた魂も、<br>最後には楽園へ辿り着く。</p>
+                <p>ゆえに人は言う。</p>
+                <p>「死は終わりにあらず。」<br>「還る時なり。」</p>
+            </section>
+
+            <section class="lore-block">
+                <h2>失われし楽園</h2>
+                <p>はじめ、<br>人と竜は楽園に住んでいた。</p>
+                <p>されど血は流れ、<br>楽園は静かに乱れた。</p>
+                <p>ゆえに神は、<br>人と竜を楽園より離した。</p>
+                <p>されど見捨てはしなかった。<br>魂はなお、<br>死の後に楽園へ還る。</p>
+            </section>
+
+            <section class="lore-block lore-last" id="lore-last">
+                <h2>帰郷</h2>
+                <p>魂あるものは皆、<br>最後には楽園へ辿り着く。</p>
+                <p>ゆえに恐れるな。<br>死は終わりにあらず。<br>それは帰郷なり。</p>
+                <p class="lore-voice">
+                    「我は汝であり。<br>汝は我なり。」<br>
+                    「光と闇を抱く者よ。」<br>
+                    「さあ、帰ろう。」<br>
+                    「悠久の地、エターナル・エデンへ。」
+                </p>
+            </section>
+
+            <p class="lore-source">― 龍の書より</p>
+
+            <!-- 音楽のクレジット（配布元の表記ルールに合わせて書き換える） -->
+            <p class="lore-credit">音楽：ベートーヴェン「交響曲第9番 第4楽章（歓喜の歌）」 フリーBGM</p>
+
+        </article>
+
+    </main>
+
+
+    <script src="../../assets/eden/project.js"></script>
+    <script src="../../assets/js/eden-player.js"></script>
+    <script src="../../assets/js/eden-page.js"></script>
+
+</body>
+
+</html>

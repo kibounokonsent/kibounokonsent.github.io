@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>龍の世界</title>
+
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+
+    <!-- ==================================================
+         龍（冒頭〜第三章の終わりまで存在し続ける背景レイヤー）
+         ================================================== -->
+
+    <div id="global-dragon">
+        <img
+            src="assets/images/dragon-soft.png"
+            alt=""
+        >
+    </div>
+
+    <div id="ambient-light" aria-hidden="true"></div>
+
+    <!-- 章が進むごとに、世界全体がゆっくり明るくなっていく -->
+    <div id="world-tone" aria-hidden="true"></div>
+
+    <!-- 四つの川がそれぞれの色で世界を照らす光
+         （1枚の背景を毎フレーム描き直すのではなく、
+         固定の4枚のopacityだけを動かす＝GPU合成で軽い） -->
+    <div id="river-glow-wash" aria-hidden="true">
+        <div class="glow-wash" data-river="life"></div>
+        <div class="glow-wash" data-river="knowledge"></div>
+        <div class="glow-wash" data-river="creation"></div>
+        <div class="glow-wash" data-river="soul"></div>
+    </div>
+
+    <!-- 「無数の世界」が生まれる粒子。JSが動的に生成する。
+         章の中ではなく画面（viewport）に固定することで、
+         スクロール位置に関係なく必ず視界の中で生まれる -->
+    <div id="world-sparks" aria-hidden="true"></div>
+
+
+    <main id="creation">
+
+        <!-- 世界の闇。opacityだけをスクロールで動かす -->
+        <div id="creation-dark" aria-hidden="true"></div>
+
+        <!-- ==================================================
+             冒頭
+             ================================================== -->
+
+        <section id="opening">
+
+            <div id="opening-quote">
+
+                <p>
+                    「案ずるな。
+                </p>
+
+                <p>
+                    我は常に汝の傍に在り。
+                </p>
+
+                <p>
+                    光と闇を抱く者よ。
+                </p>
+
+                <p>
+                    共に還ろう、悠久の地へ。」
+                </p>
+
+                <span>
+                    ― 楽園に眠る龍の言葉
+                </span>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             第一章　悠久の龍
+             ================================================== -->
+
+        <section id="chapter-one" class="creation-section">
+
+            <div class="chapter-title">
+
+                <span>第一章</span>
+
+                <h1>
+                    悠久の龍
+                </h1>
+
+            </div>
+
+            <div class="chapter-text">
+
+                <p>
+                    はじめに龍は在った。
+                </p>
+
+                <p id="line-light">
+                    龍は光なり。
+                </p>
+
+                <p id="line-dark">
+                    龍は闇なり。
+                </p>
+
+                <p>
+                    光尽きぬ限り、<br>
+                    龍は滅びず。
+                </p>
+
+                <p>
+                    闇失われぬ限り、<br>
+                    龍は去らず。
+                </p>
+
+                <p id="line-god">
+                    龍は神なり。<br>
+                    神は龍なり。
+                </p>
+
+                <p id="line-infinite">
+                    二つにして一つ。<br>
+                    一つにして無数なり。
+                </p>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             第二章　楽園
+             ================================================== -->
+
+        <section id="chapter-two" class="creation-section">
+
+            <div class="chapter-title">
+
+                <span>第二章</span>
+
+                <h1>
+                    楽園
+                </h1>
+
+            </div>
+
+            <div class="chapter-text">
+
+                <p id="line-center">
+                    楽園はすべての中心なり。
+                </p>
+
+                <p id="line-outside">
+                    楽園はすべての外側なり。
+                </p>
+
+                <p id="line-timeless">
+                    そこに時は流れず。
+                </p>
+
+                <p>
+                    過去も未来もなく、<br>
+                    ただ在るのみ。
+                </p>
+
+                <p id="line-sleep">
+                    龍は楽園に眠る。
+                </p>
+
+                <div
+                    id="eden-image"
+                    class="creation-image"
+                >
+                    <img
+                        src="assets/images/eden.png"
+                        alt=""
+                    >
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             第三章　原初の戦
+             ================================================== -->
+
+        <section id="chapter-three" class="creation-section">
+
+            <div class="chapter-title">
+
+                <span>第三章</span>
+
+                <h1>
+                    原初の戦
+                </h1>
+
+            </div>
+
+            <div class="chapter-text">
+
+                <p id="line-boundless">
+                    はじめ、<br>
+                    世界に境界は無かった。
+                </p>
+
+                <p id="line-wander">
+                    外なるものは自由に歩み、<br>
+                    世界は未だ定まらず。
+                </p>
+
+            </div>
+
+            <!-- ==========================================
+                 重要場面：画面に留めて一文ずつ進める
+                 （速くスクロールしても必ず一文ずつ画面に出る）
+                 ========================================== -->
+
+            <div class="scene" id="battle-scene" data-base="0.7">
+
+                <div class="scene-stage">
+
+                    <!-- CSSのみで表現する、一瞬の「ずれ」演出用レイヤー -->
+                    <div id="chapter-three-crack" aria-hidden="true">
+                        <span></span>
+                        <span></span>
+                        <span></span>
+                    </div>
+
+                    <!-- 「争い」〜「砕かれた」の間、光と闇が押し合う揺らぎ -->
+                    <div id="chapter-three-unstable" aria-hidden="true"></div>
+
+                    <!-- 「光は裂け。」で一度だけ画面を横切る光 -->
+                    <div id="light-tear" class="light-tear" aria-hidden="true"></div>
+
+                    <div class="chapter-text scene-lines">
+
+                        <p class="scene-line" id="line-conflict">
+                            その頃、<br>
+                            大いなる争いが起きた。
+                        </p>
+
+                        <p class="scene-line">
+                            後の世で、<br>
+                            それは原初の戦と呼ばれる。
+                        </p>
+
+                        <p class="scene-line" id="line-fought">
+                            龍は戦った。
+                        </p>
+
+                        <p class="scene-line" id="line-light-tear">
+                            光は裂け。
+                        </p>
+
+                        <p class="scene-line" id="line-dark-burn">
+                            闇は燃えた。
+                        </p>
+
+                        <p class="scene-line" id="crack-trigger">
+                            世界は幾度も砕かれた。
+                        </p>
+
+                        <p class="scene-line">
+                            やがて龍は力を尽くし、<br>
+                            深き眠りへと落ちた。
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+
+        </section>
+
+
+        <!-- ==================================================
+             第四章　四つの流れ
+             ================================================== -->
+
+        <section id="chapter-four" class="creation-section">
+
+            <div class="chapter-title">
+
+                <span>第四章</span>
+
+                <h1>
+                    四つの流れ
+                </h1>
+
+            </div>
+
+            <div class="scene" id="rivers-scene" data-base="0.85">
+
+                <div class="scene-stage">
+
+                    <!-- 四つの流れ。1本ごとに別のSVGにして、呼吸の明滅を
+                         SVG要素のopacity（GPU合成）で行う。線の伸びは
+                         スクロール位置からJSが --progress を書く -->
+
+                    <div id="four-rivers" aria-hidden="true">
+
+                        <svg
+                            class="river-svg"
+                            data-river="life"
+                            viewBox="0 0 1000 1000"
+                            preserveAspectRatio="xMidYMid slice"
+                        >
+                            <g class="river-group" data-river="life">
+                            <path class="river-glow" d="M -50,180 C 200,120 480,300 1050,420" />
+                            <path class="river-body" d="M -50,180 C 200,120 480,300 1050,420" />
+                            <path class="river-light" d="M -50,180 C 200,120 480,300 1050,420" />
+                            </g>
+                        </svg>
+
+                        <svg
+                            class="river-svg"
+                            data-river="knowledge"
+                            viewBox="0 0 1000 1000"
+                            preserveAspectRatio="xMidYMid slice"
+                        >
+                            <g class="river-group" data-river="knowledge">
+                            <path class="river-glow" d="M -50,420 C 250,500 550,380 1050,620" />
+                            <path class="river-body" d="M -50,420 C 250,500 550,380 1050,620" />
+                            <path class="river-light" d="M -50,420 C 250,500 550,380 1050,620" />
+                            </g>
+                        </svg>
+
+                        <svg
+                            class="river-svg"
+                            data-river="creation"
+                            viewBox="0 0 1000 1000"
+                            preserveAspectRatio="xMidYMid slice"
+                        >
+                            <g class="river-group" data-river="creation">
+                            <path class="river-glow" d="M -50,700 C 320,560 560,640 1050,380" />
+                            <path class="river-body" d="M -50,700 C 320,560 560,640 1050,380" />
+                            <path class="river-light" d="M -50,700 C 320,560 560,640 1050,380" />
+                            </g>
+                        </svg>
+
+                        <svg
+                            class="river-svg"
+                            data-river="soul"
+                            viewBox="0 0 1000 1000"
+                            preserveAspectRatio="xMidYMid slice"
+                        >
+                            <g class="river-group" data-river="soul">
+                            <path class="river-glow" d="M -50,880 C 300,760 620,820 1050,300" />
+                            <path class="river-body" d="M -50,880 C 300,760 620,820 1050,300" />
+                            <path class="river-light" d="M -50,880 C 300,760 620,820 1050,300" />
+                            </g>
+                        </svg>
+
+                    </div>
+
+                    <div class="chapter-text scene-lines">
+
+                        <p class="scene-line" id="rivers-seed-trigger">
+                            龍は四つの流れと<br>
+                            三枚の羽根を残した。
+                        </p>
+
+                        <p class="scene-line" id="rivers-flow-trigger">
+                            四つの流れは世界へと注ぎ。
+                        </p>
+
+                        <p class="scene-line river-line" data-river="life">
+                            一つは命を育み。
+                        </p>
+
+                        <p class="scene-line river-line" data-river="knowledge">
+                            一つは知を授け。
+                        </p>
+
+                        <p class="scene-line river-line" data-river="creation">
+                            一つは創造を芽吹かせ。
+                        </p>
+
+                        <p class="scene-line river-line" data-river="soul">
+                            一つは魂の還る道となった。
+                        </p>
+
+                        <p class="scene-line">
+                            人はそれらを川と呼んだ。
+                        </p>
+
+                        <p class="scene-line" id="river-names-trigger">
+                            <span class="river-name" data-river="life">ラプラタ。</span><br>
+                            <span class="river-name" data-river="knowledge">ナイル。</span><br>
+                            <span class="river-name" data-river="creation">ドナウ。</span><br>
+                            <span class="river-name" data-river="soul">ガンジス。</span>
+                        </p>
+
+                        <p class="scene-line" id="world-birth-trigger">
+                            流れはやがて無数の世界を生み出した。
+                        </p>
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- ==================================================
+             世界への入口
+             ================================================== -->
+
+        <section id="world-entry">
+
+            <div class="entry-text">
+
+                <p>
+                    そして、
+                </p>
+
+                <h1>
+                    龍の世界
+                </h1>
+
+                <p>
+                    世界は今も続いている。
+                </p>
+
+            </div>
+
+            <a
+                href="world/index.html"
+                id="world-enter"
+            >
+                世界を見る
+            </a>
+
+        </section>
+
+    </main>
+
+
+    <script src="assets/js/script.js"></script>
+
+</body>
+
+</html>

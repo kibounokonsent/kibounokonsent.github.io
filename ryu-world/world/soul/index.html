@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>魂界 ― 龍の世界</title>
+
+    <link rel="stylesheet" href="../../assets/css/realm.css">
+</head>
+
+<!-- data-realm で、どの世界のページかを指定する（中身は works.js から組み立てる） -->
+<body data-realm="soul">
+
+    <main id="realm-page">
+
+        <a id="back-to-map" href="../index.html">世界地図へ戻る</a>
+
+        <header id="realm-header">
+            <p id="realm-title-en"></p>
+            <h1 id="realm-name"></h1>
+            <p id="realm-lead"></p>
+        </header>
+
+        <section id="realm-works" aria-label="作品"></section>
+
+        <!-- 作品の情報パネル -->
+        <aside id="work-panel" aria-hidden="true" aria-live="polite">
+            <div id="work-panel-inner">
+                <button type="button" id="work-close" aria-label="閉じる">×</button>
+                <p id="work-eyebrow"></p>
+                <h2 id="work-name"></h2>
+                <div id="work-summary"></div>
+                <a id="work-link" href="#">作品を見る</a>
+                <p id="work-soon">作品ページは準備中です</p>
+            </div>
+        </aside>
+
+    </main>
+
+    <script src="../../assets/js/works.js"></script>
+    <script src="../../assets/js/realm.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,472 @@
+/* =========================================================
+   龍の世界 / 悠久の楽園
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+html,
+body {
+    margin: 0;
+
+    background: #000;
+    color: #f2f0ea;
+
+    font-family:
+        "Noto Serif JP",
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+}
+
+/* 楽園と龍：画面いっぱいに固定し、資料はその上を流れる */
+/*
+ * Scratchのステージ（4:3）をそのまま、画面に収まる最大の大きさで中央に置く。
+ * ステージの外は元の作品でも見えない部分なので映さず、左右（または上下）は
+ * 闇へ柔らかく溶かす。
+ */
+#eden-canvas {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+
+    width: min(100vw, 133.333vh);
+    height: min(75vw, 100vh);
+
+    transform: translate(-50%, -50%);
+
+    display: block;
+
+    -webkit-mask-image:
+        linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+    mask-image:
+        linear-gradient(90deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+}
+
+@media (max-aspect-ratio: 4/3) {
+    #eden-canvas {
+        -webkit-mask-image:
+            linear-gradient(180deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+        mask-image:
+            linear-gradient(180deg, transparent 0, #000 6%, #000 94%, transparent 100%);
+    }
+}
+
+/* 資料を読むときに、絵を少し沈めて文字を読みやすくする層 */
+#eden-veil {
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    background:
+        linear-gradient(
+            90deg,
+            transparent 30%,
+            rgba(0, 0, 0, 0.55) 62%,
+            rgba(0, 0, 0, 0.72)
+        );
+
+    opacity: var(--veil, 0);
+}
+
+
+/* =========================================================
+   龍の眼
+   ========================================================= */
+
+#dragon-eyes {
+    position: fixed;
+    inset: 0;
+
+    pointer-events: none;
+
+    mix-blend-mode: screen;
+
+    opacity: var(--awareness, 0);
+}
+
+.eye {
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    width: 26px;
+    height: 26px;
+    margin: -13px 0 0 -13px;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            #ffffff 0%,
+            rgba(255, 255, 255, 0.85) 16%,
+            rgba(255, 255, 255, 0.25) 40%,
+            transparent 70%
+        );
+
+    will-change: transform;
+}
+
+/* 読み終えたとき、一度だけ強く見開く */
+#dragon-eyes.is-flare .eye {
+    animation: eyeFlare 2.4s ease-out;
+}
+
+@keyframes eyeFlare {
+    0% { filter: brightness(1); }
+    25% { filter: brightness(3) drop-shadow(0 0 18px #fff); }
+    100% { filter: brightness(1); }
+}
+
+
+/* =========================================================
+   操作
+   ========================================================= */
+
+#back-to-map {
+    position: fixed;
+    top: clamp(1rem, 3vh, 1.8rem);
+    left: clamp(1rem, 3vw, 2rem);
+
+    z-index: 5;
+
+    padding: 0.35rem 0.7rem;
+
+    color: inherit;
+    text-decoration: none;
+
+    font-size: 0.72rem;
+    letter-spacing: 0.25em;
+
+    background: rgba(0, 0, 0, 0.35);
+
+    opacity: 0.7;
+
+    transition: opacity 0.4s ease;
+}
+
+#back-to-map::before {
+    content: "← ";
+}
+
+#back-to-map:hover,
+#back-to-map:focus-visible {
+    opacity: 1;
+}
+
+#music-toggle {
+    position: fixed;
+    top: clamp(1rem, 3vh, 1.8rem);
+    right: clamp(1rem, 3vw, 2rem);
+
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    padding: 0.45rem 0.9rem;
+
+    border: 1px solid rgba(255, 255, 255, 0.35);
+    background: rgba(0, 0, 0, 0.4);
+    color: inherit;
+
+    font: inherit;
+    font-size: 0.72rem;
+    letter-spacing: 0.2em;
+
+    cursor: pointer;
+
+    transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+#music-toggle:hover,
+#music-toggle:focus-visible {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.7);
+}
+
+/* 音の印：鳴っているときは小さな波が揺れる */
+.music-icon {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+
+    width: 14px;
+    height: 12px;
+}
+
+.music-icon::before,
+.music-icon::after {
+    content: "";
+
+    width: 3px;
+    height: 4px;
+
+    background: currentColor;
+}
+
+#music-toggle[aria-pressed="true"] .music-icon::before {
+    animation: bar 0.9s ease-in-out infinite;
+}
+
+#music-toggle[aria-pressed="true"] .music-icon::after {
+    animation: bar 0.9s ease-in-out infinite 0.3s;
+}
+
+#music-toggle[aria-pressed="false"] .music-label::after {
+    content: "（消音）";
+    opacity: 0.6;
+}
+
+/* 自動再生が止められたときだけ、そっと誘う */
+#music-toggle.is-inviting {
+    animation: invite 2.4s ease-in-out infinite;
+}
+
+@keyframes bar {
+    0%, 100% { height: 4px; }
+    50% { height: 12px; }
+}
+
+@keyframes invite {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(255, 255, 255, 0); }
+    50% { box-shadow: 0 0 0 6px rgba(255, 255, 255, 0.12); }
+}
+
+
+/* =========================================================
+   資料
+   ========================================================= */
+
+#eden-page {
+    position: relative;
+    z-index: 2;
+}
+
+/* 最初の一画面は、絵だけを見せる */
+#eden-hero {
+    height: 100vh;
+    height: 100svh;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-end;
+
+    padding-bottom: 9vh;
+
+    text-align: center;
+
+    text-shadow: 0 0 18px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.9);
+
+    opacity: 0;
+
+    transition: opacity 2.4s ease;
+}
+
+body.is-arrived #eden-hero {
+    opacity: 1;
+}
+
+.hero-en {
+    margin: 0 0 0.8rem;
+
+    font-size: 0.66rem;
+    letter-spacing: 0.55em;
+
+    opacity: 0.8;
+}
+
+#eden-hero h1 {
+    margin: 0;
+
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+    font-weight: 400;
+    letter-spacing: 0.4em;
+}
+
+.hero-scroll {
+    margin: 2.4rem 0 0;
+
+    font-size: 0.68rem;
+    letter-spacing: 0.4em;
+
+    opacity: 0.7;
+}
+
+.hero-scroll::after {
+    content: "";
+
+    display: block;
+
+    width: 1px;
+    height: 34px;
+    margin: 0.8rem auto 0;
+
+    background: linear-gradient(to bottom, #fff, transparent);
+
+    animation: scrollHint 2.4s ease-in-out infinite;
+}
+
+@keyframes scrollHint {
+    0%, 100% { transform: translateY(0); opacity: 0.4; }
+    50% { transform: translateY(8px); opacity: 1; }
+}
+
+#eden-lore {
+    width: min(440px, 88vw);
+    margin: 0 clamp(1.5rem, 7vw, 7rem) 0 auto;
+    padding: 6vh 0 40vh;
+
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+.lore-quote {
+    margin: 0 0 14vh;
+
+    font-size: 1rem;
+    line-height: 2.3;
+    letter-spacing: 0.16em;
+}
+
+.lore-quote span {
+    display: block;
+
+    margin-top: 1.4rem;
+
+    font-size: 0.72rem;
+
+    opacity: 0.7;
+}
+
+.lore-block {
+    margin-bottom: 16vh;
+}
+
+.lore-block h2 {
+    margin: 0 0 2.4rem;
+
+    font-size: 0.78rem;
+    font-weight: 400;
+    letter-spacing: 0.5em;
+
+    opacity: 0.75;
+}
+
+.lore-block h2::before {
+    content: "";
+
+    display: inline-block;
+
+    width: 1.6rem;
+    height: 1px;
+    margin-right: 0.9rem;
+
+    vertical-align: middle;
+
+    background: currentColor;
+}
+
+.lore-block p {
+    margin: 0 0 2.2rem;
+
+    font-size: 0.98rem;
+    line-height: 2.3;
+    letter-spacing: 0.14em;
+}
+
+.lore-voice {
+    margin-top: 3rem !important;
+
+    font-size: 1.05rem !important;
+}
+
+.lore-credit {
+    margin-top: 6rem;
+
+    font-size: 0.62rem;
+    letter-spacing: 0.15em;
+
+    opacity: 0.45;
+}
+
+.lore-source {
+    font-size: 0.72rem;
+    letter-spacing: 0.3em;
+
+    opacity: 0.6;
+}
+
+/* 一文ずつ浮かび上がる */
+.has-reveal .lore-block p,
+.has-reveal .lore-block h2,
+.has-reveal .lore-quote {
+    transition: opacity 1.6s ease, transform 1.6s ease;
+}
+
+.has-reveal .lore-block p:not(.is-visible),
+.has-reveal .lore-block h2:not(.is-visible),
+.has-reveal .lore-quote:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+
+/* =========================================================
+   読み込み中
+   ========================================================= */
+
+body::before {
+    content: "";
+
+    position: fixed;
+    inset: 0;
+
+    z-index: 10;
+
+    background: #000;
+
+    pointer-events: none;
+
+    transition: opacity 1.2s ease;
+}
+
+body.is-ready::before {
+    opacity: 0;
+}
+
+
+/* =========================================================
+   スマートフォン
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    #eden-veil {
+        background: rgba(0, 0, 0, 0.6);
+    }
+
+    #eden-lore {
+        margin: 0 auto;
+    }
+
+}
+
+
+/* =========================================================
+   モーション低減設定
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .hero-scroll::after,
+    #music-toggle.is-inviting,
+    #dragon-eyes.is-flare .eye {
+        animation: none;
+    }
+
+}

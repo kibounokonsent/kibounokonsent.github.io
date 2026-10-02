@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>世界地図 ― 龍の世界</title>
+
+    <link rel="stylesheet" href="../assets/css/world.css">
+</head>
+
+<body>
+
+    <main id="world-page">
+
+        <!-- ==================================================
+             見出し
+             ================================================== -->
+
+        <header id="world-header">
+            <p id="world-header-en">THE WORLD OF RYŪ</p>
+            <h1>龍の世界</h1>
+        </header>
+
+
+        <!-- ==================================================
+             世界地図（立体）
+             --------------------------------------------------
+             エイリアスワールドという厚みのある「大地」の上に
+             各世界が立ち、真下に刹那の奈落が口を開けている。
+             縦の軸：悠久の楽園 → フロンズ → ミスセオ
+                     → エイリアス → 刹那の奈落
+             真上から見ると、楽園を中心とした同心円になる。
+
+             形はすべて world.js が組み立てる
+             （各世界の位置・形の設定もそちらに集約）。
+             ================================================== -->
+
+        <div id="world-stage" aria-hidden="true">
+            <div id="world-space"></div>
+
+            <!-- 楽園の光：3D空間の外に描き、楽園の位置に毎フレーム合わせる
+                 （3Dの中に大きな光を置くと、奥行きの計算で切れてしまうため） -->
+            <div id="eden-light">
+                <!-- 普段は控えめに灯り、カーソルを合わせる（または選ぶ）と光り輝く -->
+                <div class="eden-aura">
+                    <div class="eden-glow"></div>
+                    <div class="eden-rays"></div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- キーボード・読み上げ用の世界一覧（画面上は地図そのものが操作対象） -->
+        <nav id="world-index" aria-label="世界一覧">
+            <button type="button" data-world="eden">悠久の楽園</button>
+            <button type="button" data-world="fronz">フロンズワールド</button>
+            <button type="button" data-world="misseo">ミスセオワールド</button>
+            <button type="button" data-world="other">その他の世界</button>
+            <button type="button" data-world="soul">魂界</button>
+            <button type="button" data-world="alias">エイリアスワールド</button>
+            <button type="button" data-world="abyss">刹那の奈落</button>
+        </nav>
+
+
+        <!-- カーソルを合わせた世界の名前 -->
+        <div id="world-tip" aria-hidden="true"></div>
+
+        <!-- 操作のヒント（最初に触れたら消える） -->
+        <p id="world-hint" aria-hidden="true">ドラッグで傾ける・回す</p>
+
+        <a id="back-to-creation" href="../index.html">はじまりへ戻る</a>
+
+
+        <!-- ==================================================
+             世界情報パネル
+             ================================================== -->
+
+        <aside id="world-panel" aria-hidden="true" aria-live="polite">
+
+            <div id="world-panel-inner">
+
+                <button type="button" id="panel-close" aria-label="閉じる">×</button>
+
+                <p id="panel-eyebrow"></p>
+
+                <h2 id="panel-name"></h2>
+
+                <p id="panel-desc"></p>
+
+                <a id="panel-link" href="#">
+                    世界について知る
+                </a>
+
+                <p id="panel-soon" hidden>この世界のページは準備中です</p>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+
+    <script src="../assets/js/world.js"></script>
+
+</body>
+
+</html>
