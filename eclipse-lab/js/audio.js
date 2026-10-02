@@ -14,11 +14,11 @@ const EclipseAudio = {
 
 
     powerOn:
-        "audio/power_click.mp3",
+        "audio/powerOn.mp3",
 
 
     shortBeep:
-        "audio/short_beep.mp3",
+        "audio/shortBeep.mp3",
 
 
     latch:
@@ -34,11 +34,11 @@ const EclipseAudio = {
 
 
     fileOpen:
-        "audio/file_open.mp3",
+        "audio/fileOpen.mp3",
 
 
     folder:
-        "audio/folder_open.mp3",
+        "audio/folder.mp3",
 
 
     hover:
@@ -46,39 +46,23 @@ const EclipseAudio = {
 
 
     loginFail:
-        "audio/login_fail.mp3",
+        "audio/loginFail.mp3",
 
 
     loginSuccess:
-        "audio/login_success.mp3",
+        "audio/loginSuccess.mp3",
 
 
     notification:
         "audio/notification.mp3",
 
 
-    popup:
-        "audio/popup.mp3",
-
-
     recover:
-        "audio/recover.mp3",
+        "audio/recover.wav",
 
 
     secret:
-        "audio/secret.mp3",
-
-
-    shutdown:
-        "audio/shutdown.mp3",
-
-
-    type:
-        "audio/type.mp3",
-
-
-    warning:
-        "audio/warning.mp3"
+        "audio/secret.mp3"
 
 
 };

@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>魔天楼 ARCHIVE</title>
+<link rel="icon" href="assets/img/logo.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho+B1:wght@500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div class="atmos" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+<div class="depth-rail" aria-hidden="true"><span class="top">天</span><span class="mk"></span><span class="bot">魔</span></div>
+<header class="site-header">
+  <div class="wrap">
+    <a class="brand" href="#/" aria-label="魔天楼 トップへ"><span id="brand-mark"></span><b>魔天楼</b></a>
+    <nav class="nav" id="nav" aria-label="カテゴリー"></nav>
+    <div class="header-tools">
+      <div class="search">
+        <span id="search-ico"></span>
+        <input id="q" type="search" placeholder="名を探す" aria-label="この書から名を探す" autocomplete="off">
+        <div class="suggest" id="suggest" hidden></div>
+      </div>
+      <button class="btn-icon" id="theme" type="button" aria-label="テーマ切替"></button>
+    </div>
+  </div>
+</header>
+
+<main id="app"></main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <span id="foot-mark"></span>
+    <span class="foot-txt"><b>魔天楼</b><i>Turris inter Caelum et Infernum</i><small>創作作品『魔天楼』の設定資料集です。記されていることは、すべて作中の設定です。</small></span>
+  </div>
+</footer>
+
+<!-- データ（記事を増やすときは js/data/ にファイルを足して、ここに1行追加） -->
+<script src="js/data/00-categories.js"></script>
+<script src="js/data/articles-world.js"></script>
+<script src="js/data/articles-angel.js"></script>
+<script src="js/data/articles-demon.js"></script>
+<script src="js/data/articles-contract.js"></script>
+<script src="js/data/articles-rank.js"></script>
+<script src="js/data/articles-org.js"></script>
+<script src="js/data/articles-dungeon-battle.js"></script>
+<script src="js/data/characters.js"></script>
+<script src="js/data/glossary.js"></script>
+<script src="js/data/tower.js"></script>
+<script src="js/data/world.js"></script>
+<!-- プログラム -->
+<script src="js/icons.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>

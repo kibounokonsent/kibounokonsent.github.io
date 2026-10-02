@@ -19,7 +19,7 @@
 const oldRecordsFiles = [
 
 {
-            name:"Old_Records_Phase1_Friends.txt",
+            name:"Personal_Log_1993-1994.txt",
             permission:"0001",
             content:
 `
@@ -185,7 +185,7 @@ const oldRecordsFiles = [
         },
 
 {
-            name:"Old_Records_Phase2_Feather.txt",
+            name:"Personal_Log_1994-1995.txt",
             permission:"0001",
             content:
 `
@@ -305,7 +305,7 @@ const oldRecordsFiles = [
         },
 
 {
-            name:"Old_Records_Phase3_AfterTouch.txt",
+            name:"Personal_Log_1996-1997.txt",
             permission:"0001",
             content:
 `
@@ -536,7 +536,7 @@ const oldRecordsFiles = [
         },
 
 {
-            name:"Old_Records_Phase4_Disappearance.txt",
+            name:"Personal_Log_199704.txt",
             permission:"0001",
             content:
 `

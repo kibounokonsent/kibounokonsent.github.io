@@ -29,9 +29,18 @@
     <!-- Favicon -->
     <link rel="icon" href="./images/logo.svg" type="image/svg+xml">
 
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=Courier+Prime:wght@400;700&family=Zen+Old+Mincho:wght@400;600&display=swap">
+
     <link
         rel="stylesheet"
         href="style.css">
+
+    <!-- 見た目の再設計（style.cssより後に読み込み、上書きする） -->
+    <link
+        rel="stylesheet"
+        href="theme.css">
 
 </head>
 
@@ -315,29 +324,14 @@ EXPLORER
 
         <div class="header-left">
 
-            <div id="header-logo"></div>
+            <img id="header-logo" src="./images/logo.svg" alt="">
 
-            <div>
-
-                <h2>
-
-                    ECLIPSE LAB
-
-                </h2>
-
-                <small>
-
-                    ARCHIVE MODE
-
-                </small>
-
-                <div id="clearance-topbar">
-
-                    CLEARANCE : NONE
-
-                </div>
-
+            <div class="header-title">
+                <h2>ECLIPSE LAB</h2>
+                <small>Archive Mode</small>
             </div>
+
+            <div id="clearance-topbar">CLEARANCE : NONE</div>
 
         </div>
 
@@ -345,150 +339,96 @@ EXPLORER
 
             <button id="notification-history-toggle" type="button">通知履歴<span id="notification-history-badge"></span></button>
 
-            <button id="mute-toggle" type="button" title="サウンドのON/OFF">🔊</button>
+            <button id="mute-toggle" type="button" title="サウンドのON/OFF" aria-label="サウンドのON/OFF">🔊</button>
 
-            <button id="switch-user">
+            <button id="switch-user" type="button">ログアウト</button>
 
-                LOG OUT
-
-            </button>
-
-            <div id="system-time">
-
-                00:00:00
-
-            </div>
+            <div id="system-time" aria-label="現在時刻">00:00:00</div>
 
         </div>
 
     </div>
 
 
+    <nav id="navigation-bar">
 
-    <div id="navigation-bar">
+        <button id="nav-back" type="button" aria-label="前に開いた記録へ戻る" disabled>戻る</button>
 
-        <button>
+        <button id="nav-forward" type="button" aria-label="次の記録へ進む" disabled>進む</button>
 
-            BACK
+        <span id="path">Archive</span>
 
-        </button>
-
-        <button>
-
-            FORWARD
-
-        </button>
-
-        <span id="path">
-
-            Archive /
-
-        </span>
-
-    </div>
-
+    </nav>
 
 
     <div id="explorer-main">
 
         <aside id="sidebar">
 
-            <h3>
+            <div class="folder-group" id="group-base">
 
-                ARCHIVE FOLDERS
+                <h3>アーカイブ</h3>
 
-            </h3>
+                <div class="group-items" id="sidebar-base">
 
-            <div
-                class="folder"
-                data-folder="welcome">
+                    <div class="folder" data-folder="welcome"><span class="folder-name">はじめに</span></div>
+                    <div class="folder" data-folder="archive"><span class="folder-name">アーカイブ</span></div>
+                    <div class="folder" data-folder="entity"><span class="folder-name">紛異体データベース</span></div>
+                    <div class="folder" data-folder="facility"><span class="folder-name">施設情報</span></div>
+                    <div class="folder" data-folder="system"><span class="folder-name">システム</span></div>
+                    <div class="folder" data-folder="staff"><span class="folder-name">職員データベース</span></div>
 
-                📁 はじめに
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="archive">
-
-                📁 アーカイブ
+                </div>
 
             </div>
 
-            <div
-                class="folder"
-                data-folder="entity">
-
-                📁 紛異体データベース
-
+            <div class="folder-group" id="group-found">
+                <h3>見つかった記録領域</h3>
+                <div class="group-items" id="sidebar-found"></div>
             </div>
 
-            <div
-                class="folder"
-                data-folder="facility">
-
-                📁 施設情報
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="system">
-
-                📁 システム
-
-            </div>
-
-            <div
-                class="folder"
-                data-folder="staff">
-
-                📁 職員データベース
-
+            <div class="folder-group" id="group-personal">
+                <h3>個人領域</h3>
+                <div class="group-items" id="sidebar-personal"></div>
             </div>
 
         </aside>
 
 
-
         <div id="workspace">
 
-            <section id="file-list">
+            <section id="file-pane">
 
-                <!-- JS -->
+                <header id="file-list-header">
+                    <div id="file-list-title">はじめに</div>
+                    <div id="file-list-meta"></div>
+                </header>
+
+                <div id="file-list">
+                    <!-- JS -->
+                </div>
 
             </section>
 
 
-
             <section id="viewer">
+
+                <button id="viewer-back" type="button">一覧に戻る</button>
 
                 <div id="viewer-header">
 
-                    <h2 id="viewer-title">
+                    <div id="viewer-kicker"></div>
 
-                        Welcome.txt
+                    <h2 id="viewer-title">Welcome.txt</h2>
 
-                    </h2>
+                    <div id="file-id"></div>
 
-                    <div id="file-id">
-
-                        Archive / Welcome.txt
-
-                    </div>
-
-                    <button id="export-file" type="button" style="display:none;">この記録を書き出す</button>
+                    <button id="export-file" type="button" style="display:none;">テキストで書き出す</button>
 
                 </div>
 
                 <div id="file-content">
-
-                    <div id="viewer-content">
-
-                        Eclipse Lab Archiveへようこそ。
-
-                    </div>
-
+                    <div id="viewer-content"></div>
                 </div>
 
             </section>
@@ -498,29 +438,13 @@ EXPLORER
     </div>
 
 
-
     <div id="status-bar">
 
-        <span>
+        <span>STATUS : ARCHIVE MODE</span>
 
-            STATUS :
-            ARCHIVE MODE
+        <span>ACCESS LEVEL : ARCHIVE</span>
 
-        </span>
-
-        <span>
-
-            ACCESS LEVEL :
-            ARCHIVE
-
-        </span>
-
-        <span id="clearance-badge">
-
-            CLEARANCE :
-            NONE
-
-        </span>
+        <span id="clearance-badge">CLEARANCE : NONE</span>
 
     </div>
 
@@ -655,6 +579,8 @@ CRT EFFECT
 SCRIPT
 ========================================================== -->
 
+<script src="js/storage-shim.js"></script>
+
 <script src="js/system.js"></script>
 
 <script src="js/audio.js"></script>
@@ -668,7 +594,6 @@ SCRIPT
 <script src="js/danger-data.js"></script>
 
 <script src="js/entities-data.js"></script>
-<script src="js/staff-records-data.js"></script>
 <script src="js/old-records-data.js"></script>
 <script src="js/founders-data.js"></script>
 <script src="js/disaster-data.js"></script>
@@ -680,6 +605,8 @@ SCRIPT
 <script src="js/console.js"></script>
 
 <script src="js/login.js"></script>
+
+<script src="js/staff-records-data.js"></script>
 
 <script src="js/explorer.js"></script>
 

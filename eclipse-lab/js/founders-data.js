@@ -8,6 +8,7 @@
 
    解禁条件（trigger:"readAll"、explorer.jsのcheckReadAllUnlocksが判定）：
    ・Old Records（old-records-data.js）全4本を読了していること
+   ・.0000フォルダ（data.js lockedArchives.zero）の全記録を読了していること
    ・かつ、現在 staffDatabase["0001"] としてログイン中であること
    （＝「昔の二人を知ってから、0001本人の独白に辿り着く」という
    　体験の順序を、コード側でも保証している）
@@ -21,7 +22,11 @@ lockedArchives.one = {
     icon:"📁",
     trigger:"readAll",
     requiredLevel:"UNKNOWN",
-    requiredFiles: OLD_RECORDS_FILENAMES,
+    // 昔の二人（Old Records）と、0000自身の記録（.0000）の両方を
+    // 読み終えて初めて解禁される。
+    requiredFiles: OLD_RECORDS_FILENAMES.concat(
+        lockedArchives.zero.files.map(f=> f.name)
+    ),
     unlockMessage:"すべての記録が、ひとつに繋がりました。",
 
     files:[
@@ -120,6 +125,8 @@ lockedArchives.one = {
 
 「帰る場所、まだあったんだぞ」
 
+「……昼食は、食べたか」
+
 記録終了
 
 私は、彼がまだそこにいると信じていたかった。
@@ -180,6 +187,15 @@ lockedArchives.one = {
 
 それだけは、
 忘れないでほしい。
+
+
+この記録は、あの夜に見つけた領域に置いておく。
+
+一覧には出ない、私の番号の付いた場所。
+
+誰が作ったのか、あのときは分からなかった。
+
+今なら、少し分かる気がする。
 
 `
         }

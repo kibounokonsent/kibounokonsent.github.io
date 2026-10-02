@@ -129,8 +129,8 @@ OWNER: admin
 
         "3642":{
         name:"佐伯",
-        key:"prin0417",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
         rank:"SILVER",
@@ -215,8 +215,8 @@ OWNER: admin
 
     "3305":{
         name:"神田",
-        key:"genba0621",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
         rank:"SILVER",
@@ -229,11 +229,11 @@ OWNER: admin
 
         personalArchive:[
             {
-                name:"Diary_20151110.txt",
+                name:"Diary_20151124.txt",
                 isPersonal:true,
                 content:
 `
-2015.11.10
+2015.11.24
 
 
 高橋さんから、佐伯さん宛の資料を預かった。
@@ -289,8 +289,8 @@ OWNER: admin
 
     "5218":{
         name:"高橋",
-        key:"ama0826",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
         rank:"SILVER",
@@ -376,8 +376,8 @@ OWNER: admin
 
     "2048":{
         name:"西村",
-        key:"nishi0319",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
         rank:"SILVER",
@@ -455,12 +455,12 @@ OWNER: admin
 
     "2210":{
         name:"小林",
-        key:"koba0724",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
-        rank:"GOLD",
-        permission:"gold",
+        rank:"SILVER",
+        permission:"silver",
 
         employeeId:"2210",
         department:"管理部門",
@@ -493,9 +493,9 @@ OWNER: admin
 2015.11.16
 
 
-職員証を一度どこに置いたか分からなくなった。
+職員証をどこかに落としたらしい。
 
-結局、自分の机の引き出しに入っていた。
+気づいたら総務に届いていて、掲示板にまで載っていた。
 
 西村さんに「ちゃんとしてください」と言われた。
 
@@ -536,8 +536,8 @@ OWNER: admin
 
     "1190":{
         name:"三浦",
-        key:"miura1103",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
         rank:"SILVER",
@@ -613,12 +613,12 @@ OWNER: admin
 
     "0005":{
         name:"0005",
-        key:"tool0505",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
-        rank:"PLATINUM",
-        permission:"platinum",
+        rank:"GOLD",
+        permission:"gold",
 
         employeeId:"0005",
         department:"技術部門",
@@ -709,12 +709,12 @@ OWNER: admin
 
     "0006":{
         name:"0006",
-        key:"lab0616",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
-        rank:"PLATINUM",
-        permission:"platinum",
+        rank:"GOLD",
+        permission:"gold",
 
         employeeId:"0006",
         department:"研究部門",
@@ -789,12 +789,12 @@ OWNER: admin
 
     "0007":{
         name:"0007",
-        key:"note0712",
-        status:"active",
+        key:null,   // 端末ログイン不可（個人フォルダ用パスワードとは別）
+        status:"no_response",
 
         level:"ARCHIVE",
-        rank:"PLATINUM",
-        permission:"platinum",
+        rank:"GOLD",
+        permission:"gold",
 
         employeeId:"0007",
         department:"研究部門",
@@ -925,6 +925,16 @@ function authorize(){
         return;
     }
 
+    /*
+        2016/01/06以降応答のない職員 → アカウント凍結。
+        個人フォルダのパスワードは端末ログインの鍵ではない。
+        職員の個人フォルダには、職員データベースの各職員ページから入る。
+    */
+    if(staff.status === "no_response"){
+        loginError("ACCOUNT LOCKED — NO RESPONSE SINCE 2016/01/06");
+        return;
+    }
+
     if(key !== staff.key){
         loginError("INVALID ACCESS KEY");
         return;
@@ -997,5 +1007,22 @@ window.addEventListener("load", ()=>{
     }
 
     button.addEventListener("click", authorize);
+
+    // どちらの入力欄でも Enter で送信できる
+    ["staff-id", "access-key"].forEach(id=>{
+
+        const input =
+            document.getElementById(id);
+
+        if(input){
+            input.addEventListener("keydown", e=>{
+                if(e.key === "Enter"){
+                    e.preventDefault();
+                    authorize();
+                }
+            });
+        }
+
+    });
 
 });

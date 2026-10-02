@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="ja" data-sanity="high" data-fx="on">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>狂乱病院</title>
+  <meta name="description" content="狂った患者と医者が集う、狂った病院の記録。">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&family=Special+Elite&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- ▼ 背景演出（触らなくてOK） -->
+  <div class="fx" aria-hidden="true">
+    <div class="fx-tiles"></div>
+    <div class="fx-stains"></div>
+    <div class="fx-flicker"></div>
+    <div class="fx-grain"></div>
+    <div class="fx-vignette"></div>
+    <div id="whispers"></div>
+  </div>
+  <!-- ▼ 狂気の演出（精神ゲージが減ると動き出す） -->
+  <div id="noise" class="noise" aria-hidden="true">
+    <div class="noise-grain"></div>
+    <div class="tear"></div><div class="tear"></div><div class="tear"></div>
+  </div>
+  <div id="blames" class="blames" aria-hidden="true"></div>
+  <!-- ▼ 精神ゲージ 0 のとき：画面を伝う血・飛び散る血・残りの記録数 -->
+  <div id="bleed" class="bleed" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i><i></i></div>
+  <div id="gore" class="gore" aria-hidden="true"></div>
+  <div id="wreck-hud" class="wreck-hud" role="status" hidden></div>
+
+  <header class="site-header">
+    <div class="header-in">
+      <a class="brand" href="#/" aria-label="トップへ">
+        <span class="brand-cross" aria-hidden="true">✚</span>
+        <span id="logo-slot"></span>
+      </a>
+      <nav class="nav" aria-label="メイン">
+        <a href="#/">受付</a>
+        <a href="#/all">全記録</a>
+      </nav>
+      <form id="search-form" class="search" role="search">
+        <span id="search-icon" class="search-icon"></span>
+        <input id="search-input" type="search" placeholder="記録を検索" aria-label="記録を検索" autocomplete="off">
+      </form>
+      <button id="mode-btn" class="mode-btn" type="button" aria-label="ネタバレモードの切り替え"></button>
+      <div class="sanity-wrap">
+        <button id="sanity" class="sanity" type="button" aria-label="精神ゲージ">
+          <span class="sanity-label">精神</span>
+          <span class="sanity-bar"><span class="sanity-fill"></span></span>
+          <span id="sanity-num" class="sanity-num">100</span>
+          <span id="sanity-lock-icon" class="sanity-lock-icon" title="精神安定剤 投与中" hidden>✚</span>
+        </button>
+        <div id="sanity-pop" class="sanity-pop" hidden>
+          <p class="sanity-pop-h">精神ゲージ</p>
+          <p>記録を読むたび、読み続けるほど、黒塗りを覗くほど、精神は削れていきます。減るほど画面は荒れ、0 になると……。</p>
+          <div class="sanity-pop-actions">
+            <button id="sanity-lock" class="btn btn--ghost btn--sm" type="button">精神安定剤を投与（減らなくなる）</button>
+            <button id="sanity-reset" class="btn btn--ghost btn--sm" type="button">正気に戻る（100 に回復）</button>
+          </div>
+          <p class="sanity-pop-note">画面の荒れ・点滅そのものを止めたいときは、いちばん下の「演出：OFF」へ。</p>
+        </div>
+      </div>
+    </div>
+    <svg class="drips" viewBox="0 0 1200 40" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 0H1200V6C1180 6 1176 9 1172 22 1168 34 1160 34 1158 22 1155 8 1120 7 1060 7 1030 7 1024 10 1022 15 1019 24 1012 24 1011 15 1009 7 960 6 900 6 860 6 852 10 850 28 848 44 838 44 836 28 834 10 800 6 720 6 650 6 644 9 642 14 640 19 634 19 633 14 631 8 560 6 480 6 430 6 424 10 422 24 420 36 411 36 410 24 408 10 380 6 300 6 240 6 232 9 230 18 228 26 221 26 220 18 218 9 160 6 100 6 70 6 64 10 62 30 60 46 50 46 49 30 47 10 30 6 0 6Z"/>
+    </svg>
+  </header>
+
+  <main id="app" class="main"></main>
+
+  <footer class="site-footer">
+    <svg class="ecg" viewBox="0 0 600 60" preserveAspectRatio="none" aria-hidden="true">
+      <path d="M0 30H120l10-14 10 28 12-50 12 56 10-20h80l8-10 8 20 10-36 10 40 8-10H420l8-6 10 12 6-6H600"/>
+    </svg>
+    <div class="footer-in">
+      <p class="footer-title">狂乱病院 ARCHIVE</p>
+      <p class="footer-note">この記録は創作作品の設定資料です。</p>
+      <p class="footer-row"><button id="fx-toggle" class="fx-toggle" type="button">演出：ON</button><span>© <span id="year"></span></span></p>
+    </div>
+  </footer>
+
+  <!-- ▼ 設定 -->
+  <script src="js/data/config.js"></script>
+  <script src="js/data/categories.js"></script>
+
+  <!-- ▼ 記事データ（カテゴリーファイルを新しく作ったら、ここに1行足す） -->
+  <script src="js/data/articles/overview.js"></script>
+  <script src="js/data/articles/people.js"></script>
+  <script src="js/data/articles/staff.js"></script>
+  <script src="js/data/articles/patients.js"></script>
+  <script src="js/data/articles/oldrange.js"></script>
+  <script src="js/data/articles/facility.js"></script>
+  <script src="js/data/articles/system.js"></script>
+  <script src="js/data/articles/routes.js"></script>
+  <script src="js/data/articles/glossary.js"></script>
+  <script src="js/data/articles/madness.js"></script>
+
+  <!-- ▼ 本体（触らなくてOK） -->
+  <script src="js/core/app.js"></script>
+</body>
+</html>

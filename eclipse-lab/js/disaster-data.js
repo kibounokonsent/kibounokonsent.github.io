@@ -121,16 +121,10 @@ DATE: 2016/01/06
 0006
 「……警報？」
 
-0007
-「何の？」
-
 [DOOR LOCK]
 
 0006
 「ちょっと待って。これ、開かない。」
-
-0007
-「え？」
 
 02:14:52
 
@@ -140,15 +134,14 @@ DATE: 2016/01/06
 [NO RESPONSE]
 
 0006
-「……管理部？」
+「……0007、まだ近くにいる？」
+
+[NO RESPONSE]
 
 02:15:31
 
-0007
-「別の回線は？」
-
 0006
-「今、確認する。」
+「別の回線……今、確認する。」
 
 [NOISE]
 
@@ -260,12 +253,12 @@ DATE: 2016/01/06
 
 02:15:04
 
-0005
+0005 [無線]
 「……この配線、さっきから反応がおかしい」
 
 「どっちの系統？」
 
-0005
+0005 [無線]
 「収容区画側」
 
 [NOISE]
@@ -276,12 +269,12 @@ DATE: 2016/01/06
 
 [ALARM]
 
-0005
+0005 [無線]
 「切り替える。ちょっと待って」
 
 「間に合う？」
 
-0005
+0005 [無線]
 「今やってる」
 
 [NOISE]
@@ -290,17 +283,16 @@ DATE: 2016/01/06
 
 02:24:10
 
-0005
+0005 [無線]
 「……止まった」
 
 「直った？」
 
-0005
+0005 [無線]
 「いや、止まっただけ」
 
 [NOISE]
 
-0005
 「管理部、こちら技術部門。応答願います」
 
 [NO RESPONSE]
@@ -309,7 +301,7 @@ DATE: 2016/01/06
 
 02:29:55
 
-0005
+0005 [無線]
 「……もう一回だけ」
 
 [NOISE]
@@ -561,7 +553,7 @@ DATE: 2016/01/06
 LOCATION: ARCHIVE-01
 DATE: 2016/01/06
 
-01:58:22
+01:41:22
 
 [KEYBOARD INPUT]
 
@@ -575,7 +567,7 @@ DATE: 2016/01/06
 
 ―――――――――――
 
-02:07:14
+01:47:14
 
 0001
 「この領域は、通常の一覧には出ないはずだ。」
@@ -587,7 +579,7 @@ DATE: 2016/01/06
 
 ―――――――――――
 
-02:09:03
+01:49:03
 
 [TERMINAL ACCESS]
 
@@ -602,7 +594,7 @@ STATUS: UNINDEXED
 
 ―――――――――――
 
-02:10:41
+01:50:41
 
 [FOOTSTEPS]
 
@@ -639,11 +631,13 @@ NO RESPONSE
 5218
 2048
 2210
+1190
 0005
 0006
 0007
 
 UNCONFIRMED
+0002
 経理担当
 食堂スタッフ
 
@@ -690,7 +684,7 @@ Only explicitly identified personnel are linked to Staff Database records.
         /* ---------- 個人別 最終記録 ---------- */
 
         {
-            name:"Sakei_Final_Observation.txt",
+            name:"Saeki_Final_Observation.txt",
             permission:"silver",
             relatedStaff:["3642"],
             content:
@@ -723,14 +717,14 @@ Only explicitly identified personnel are linked to Staff Database records.
 そちらの区画は確認したか。
 まだ動ける人はいないか。
 
-自分のことより先に、
-それを確認していた。
+自分は後でいい。
+先に、そっちを。
 `
         },
 
         {
             name:"Takahashi_Evacuation_Notes.txt",
-            permission:"gold",
+            permission:"silver",
             relatedStaff:["5218"],
             content:
 `
@@ -748,7 +742,7 @@ Only explicitly identified personnel are linked to Staff Database records.
 
         {
             name:"Nishimura_Assembly_Log.txt",
-            permission:"gold",
+            permission:"silver",
             relatedStaff:["2048"],
             content:
 `
@@ -766,7 +760,7 @@ Only explicitly identified personnel are linked to Staff Database records.
 
         {
             name:"Kobayashi_Final_Entry.txt",
-            permission:"gold",
+            permission:"silver",
             relatedStaff:["2210"],
             content:
 `
@@ -788,6 +782,9 @@ Only explicitly identified personnel are linked to Staff Database records.
             content:
 `
 【夜勤ログ】0005→技術部門
+無線記録（0005携帯端末側）　2016/01/06
+
+02:12:48
 
 0005
 「技術部門、聞こえますか」
@@ -816,14 +813,19 @@ Only explicitly identified personnel are linked to Staff Database records.
 「……あとで話します」
 
 技術部門
-「……あなたのパスワードが、私の誕生日であること、実に面白いと思っていました。私の誕生日、貴方と同じ 5 、ですからね。」
+「……あなたの個人フォルダのパスワード、0505。私の誕生日ですよね。5月5日。」
+
+技術部門
+「あなたの番号と同じ5が並んでいるからだ、と言い張るんでしょうけど。」
 
 0005
-「……いうなよ、そんなこと。今。」
+「……言うなよ、そんなこと。今。」
 
 [通信終了]
 
 ―――――――――――
+
+02:33:40
 
 0005
 「技術部門、聞こえてますか？」
