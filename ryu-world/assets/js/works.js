@@ -56,7 +56,12 @@ const WORKS = [
             "その力を手にしたとき、悲しみの連鎖を続けるのか。それとも、断ち切るのか。",
         url: ""
     },
-    { world: "fronz", era: 7, title: "未来世界", summary: "", url: "" },
+    { world: "fronz", era: 7, title: "MOON CORE", 
+        summary: 
+        "この世界は理想郷でも、終末世界でもない。\n\n" +
+        "便利になったからこそ、新たな問題を抱えた人類の未来。\n\n" +
+        "それが、この『未来世界』である。",
+        url: "https://kibounokonsent.github.io/moon_core/#/" },
     { world: "fronz", era: 7, title: "ハーネンス", summary: "", url: "" },
     { world: "fronz", era: 8, title: "終末世界", tentative: true, summary: "", url: "" },
 

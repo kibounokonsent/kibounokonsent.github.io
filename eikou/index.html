@@ -419,13 +419,19 @@ footer .links{display:flex;gap:16px}
    ========================================================= */
 main{view-transition-name:page}
 header{view-transition-name:hdr}
+.fx{view-transition-name:fx}
+::view-transition-group(fx){animation:none}
+::view-transition-old(fx){display:none}
+::view-transition-new(fx){animation:none}
 ::view-transition-group(hdr){animation:none}
 ::view-transition-old(page),::view-transition-new(page){animation-duration:.5s;animation-timing-function:cubic-bezier(.3,.7,.2,1)}
-/* 爪痕（通常） */
-:root[data-vt="claw"]::view-transition-old(page){animation:vtOut .26s ease both}
-:root[data-vt="claw"]::view-transition-new(page){animation:vtClaw .62s cubic-bezier(.3,.7,.2,1) .12s both}
-@keyframes vtOut{to{opacity:0;transform:translateY(-10px)}}
-@keyframes vtClaw{from{opacity:0;transform:translateY(16px);clip-path:polygon(70% 0,100% 0,100% 0,40% 100%,40% 100%)}to{opacity:1;transform:none;clip-path:polygon(-60% 0,100% 0,100% 100%,40% 100%,-100% 100%)}}
+/* 翼（通常）：翼が横切ったあとに次のページ */
+:root[data-vt="wing"]::view-transition-old(page){animation:vtHide .15s linear .3s both}
+:root[data-vt="wing"]::view-transition-new(page){animation:vtShow .2s linear .42s both}
+@keyframes vtHide{to{opacity:0}}
+@keyframes vtShow{from{opacity:0}to{opacity:1}}
+@keyframes vtOut{to{opacity:0;transform:translateY(-6px)}}
+@keyframes vtWing{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
 /* 光の側：左上から光が広がる */
 :root[data-vt="light"]::view-transition-old(page){animation:vtLightOut .32s ease both}
 :root[data-vt="light"]::view-transition-new(page){animation:vtLight .8s cubic-bezier(.25,.8,.25,1) both}
@@ -452,11 +458,51 @@ header{view-transition-name:hdr}
 .fx{position:fixed;inset:0;z-index:40;pointer-events:none;display:none}
 .fx.go{display:block}
 .fx svg{width:100%;height:100%}
-.fx-claw path{fill:none;stroke:var(--acc-t);stroke-width:.55;vector-effect:non-scaling-stroke;stroke-width:3px;stroke-linecap:round;stroke-dasharray:140;stroke-dashoffset:140;animation:claw .36s cubic-bezier(.6,0,.3,1) forwards, clawFade .5s ease .4s forwards}
-.fx-claw path:nth-child(2){animation-delay:.05s,.45s}
-.fx-claw path:nth-child(3){animation-delay:.1s,.5s}
-@keyframes claw{to{stroke-dashoffset:0}}
-@keyframes clawFade{to{opacity:0}}
+/* 翼：画面の外の肩を軸に弧を描いて閉じ、影の中で二度はばたき、また開いていく */
+.wingfx{position:absolute;inset:0;overflow:hidden;color:var(--wc);--T:1.4s}
+.wingfx .shade{position:absolute;inset:0;background:radial-gradient(ellipse 120% 90% at 50% 45%,color-mix(in oklab,var(--wc),#000 30%),color-mix(in oklab,var(--wc),#000 62%));animation:shade var(--T) ease both}
+@keyframes shade{0%,16%{opacity:0}30%{opacity:1}72%{opacity:1}86%,100%{opacity:0}}
+.wingfx .arm{position:absolute;top:30vh;width:0;height:0}
+.wingfx .arm.l{left:-14vw;animation:armL var(--T) both}
+.wingfx .arm.r{right:-14vw;animation:armR var(--T) both}
+.wingfx .arm svg{position:absolute;top:-60vh;height:200vh;width:auto;display:block;overflow:visible;
+  filter:drop-shadow(0 18px 40px rgba(0,0,0,.35)) drop-shadow(0 0 24px color-mix(in oklab,var(--wg) 60%,transparent))}
+.wingfx .arm.l svg{left:0;transform-origin:0 30%}
+.wingfx .arm.r svg{right:0;transform-origin:100% 30%}
+.wingfx .arm.back{color:color-mix(in oklab,var(--wc),#000 38%);animation-delay:.05s}
+.wingfx .arm.back svg{filter:none}
+.wingfx .arm.l.back{transform:rotate(6deg)} .wingfx .arm.r.back{transform:rotate(-6deg)}
+.wingfx .arm:not(.back) svg{color:color-mix(in oklab,var(--wc),#fff 10%)}
+/* 外 → 閉じる（勢いよく、最後はやわらかく）→ ふぁさ → ふぁさ → 開いて外へ */
+@keyframes armL{
+  0%{transform:translate(0,-10vh) rotate(-35deg);opacity:0;animation-timing-function:cubic-bezier(.2,.75,.3,1)}
+  8%{opacity:1}
+  30%{transform:translate(0,0) rotate(0);animation-timing-function:ease-in-out}
+  40%{transform:translate(-1.5vw,-2.5vh) rotate(-7deg);animation-timing-function:ease-in-out}
+  51%{transform:translate(0,0) rotate(1deg);animation-timing-function:ease-in-out}
+  61%{transform:translate(-1.5vw,-2.5vh) rotate(-7deg);animation-timing-function:ease-in-out}
+  72%{transform:translate(0,0) rotate(0);animation-timing-function:cubic-bezier(.55,0,.75,.3)}
+  90%{opacity:1}
+  100%{transform:translate(0,-10vh) rotate(-35deg);opacity:0}}
+@keyframes armR{
+  0%{transform:translate(0,-10vh) rotate(35deg);opacity:0;animation-timing-function:cubic-bezier(.2,.75,.3,1)}
+  8%{opacity:1}
+  30%{transform:translate(0,0) rotate(0);animation-timing-function:ease-in-out}
+  40%{transform:translate(1.5vw,-2.5vh) rotate(7deg);animation-timing-function:ease-in-out}
+  51%{transform:translate(0,0) rotate(-1deg);animation-timing-function:ease-in-out}
+  61%{transform:translate(1.5vw,-2.5vh) rotate(7deg);animation-timing-function:ease-in-out}
+  72%{transform:translate(0,0) rotate(0);animation-timing-function:cubic-bezier(.55,0,.75,.3)}
+  90%{opacity:1}
+  100%{transform:translate(0,-10vh) rotate(35deg);opacity:0}}
+/* はばたくときは翼の膜もすこしたたむ */
+.wingfx .arm.l svg{animation:foldL var(--T) ease-in-out both}
+.wingfx .arm.r svg{animation:foldR var(--T) ease-in-out both}
+.wingfx .arm.back svg{animation-delay:.05s}
+@keyframes foldL{0%{transform:translateX(-108%) scaleX(.7)}30%{transform:none}40%{transform:scaleX(.86)}51%{transform:scaleX(1.02)}61%{transform:scaleX(.86)}72%{transform:none}100%{transform:translateX(-108%) scaleX(.7)}}
+@keyframes foldR{0%{transform:translateX(108%) scaleX(.7)}30%{transform:none}40%{transform:scaleX(.86)}51%{transform:scaleX(1.02)}61%{transform:scaleX(.86)}72%{transform:none}100%{transform:translateX(108%) scaleX(.7)}}
+.wingfx.tail .arm svg{height:150vh;top:-75vh}
+.wingfx.tail .arm.l svg{transform-origin:50% 50%;animation:none;transform:rotate(-90deg)}
+.wingfx.tail .arm.r svg{transform-origin:50% 50%;animation:none;transform:rotate(90deg)}
 .fx-light{background:radial-gradient(ellipse 90% 80% at 0% 0%,color-mix(in oklab,var(--G) 70%,#fff) 0%,color-mix(in oklab,var(--G) 40%,transparent) 30%,color-mix(in oklab,var(--G) 12%,transparent) 60%,transparent 80%);mix-blend-mode:multiply;animation:flare .95s ease forwards}
 :root[data-theme="dark"] .fx-light{mix-blend-mode:screen}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .fx-light{mix-blend-mode:screen}}
@@ -1404,23 +1450,35 @@ document.body.insertAdjacentHTML('afterbegin', DRAGON_SYMBOLS);
    dark   … 闇の側（デイテッド）の記録：右から闇が満ち、赤い縁を残して開く
    chapter… 物語の章：章の色の帯が横切る
    novel  … 小説：灯りが落ち、一行ずつ浮かび上がる
-   claw   … それ以外：三本の爪痕が走り、その向こうに次のページ
+   wing   … それ以外：あなたの種族の翼（翼のない種族はしっぽ）が属性の色でふぁさっと横切り、その後ろから次のページ
    ========================================================= */
 function transitionFor(h){
   if(h.startsWith('a-')){ const a = ARTICLES.find(x=>x.id===h.slice(2));
     if(a && visible(a)){ if(a.side) return {t:a.side}; if(a.ch) return {t:'chapter', c:a.ch}; } }
   if(h.startsWith('novel-')){ const n = NOVEL.find(x=>String(x.id)===h.slice(6)); return {t:'novel', c:n&&n.ch}; }
-  return {t:'claw'};
+  return {t:'wing'};
 }
 const fx = document.getElementById('fx');
+function wingFx(){
+  // 画面の外にある肩から、翼が弧を描いて閉じてくる。翼の下に影が落ち、二度はばたいて、また外へ開いていく
+  const d = (me && dragonByName(me.sp)) || DRAGONS[0];
+  const g = me ? GEMS[me.el] : null;
+  const style = g ? `--wc:${g.c};--wg:${g.g}` : `--wc:var(--ink);--wg:transparent`;
+  const hasWing = d.parts.includes('wr');
+  const R = hasWing ? `<svg viewBox="${d.x+d.w/2} ${d.y} ${d.w/2} ${d.h*0.8}"><g fill="currentColor"><use href="#dgp-${d.k}-wr"/></g></svg>`
+                    : `<svg class="tl" viewBox="${d.x} ${d.y} ${d.w} ${d.h}"><g fill="currentColor"><use href="#dgp-${d.k}-body"/></g></svg>`;
+  const L = hasWing ? `<svg viewBox="${d.x} ${d.y} ${d.w/2} ${d.h*0.8}"><g fill="currentColor"><use href="#dgp-${d.k}-wl"/></g></svg>`
+                    : `<svg class="tr" viewBox="${d.x} ${d.y} ${d.w} ${d.h}"><g fill="currentColor"><use href="#dgp-${d.k}-body"/></g></svg>`;
+  return `<div class="wingfx${hasWing?'':' tail'}" style="${style}"><i class="shade"></i>
+    <div class="arm l back">${R}</div><div class="arm r back">${L}</div>
+    <div class="arm l">${R}</div><div class="arm r">${L}</div></div>`;
+}
 function playFx(v){
   fx.className = 'fx'; fx.style.removeProperty('--fxc');
   if(v.c) fx.style.setProperty('--fxc', v.c);
-  fx.innerHTML = v.t==='claw'
-    ? `<svg viewBox="0 0 100 100" preserveAspectRatio="none"><path d="M78 -6 L30 106"/><path d="M88 -6 L40 106"/><path d="M98 -6 L50 106"/></svg>`
-    : v.t==='chapter' ? '<i></i>' : '';
+  fx.innerHTML = v.t==='wing' ? wingFx() : v.t==='chapter' ? '<i></i>' : '';
   void fx.offsetWidth; fx.classList.add('fx-'+v.t, 'go');
-  clearTimeout(playFx.tm); playFx.tm = setTimeout(()=>{ fx.className = 'fx'; fx.innerHTML = ''; }, 1300);
+  clearTimeout(playFx.tm); playFx.tm = setTimeout(()=>{ fx.className = 'fx'; fx.innerHTML = ''; }, 1600);
 }
 function navigate(){
   const h = (location.hash||'').replace('#','');
