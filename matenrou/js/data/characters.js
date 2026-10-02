@@ -1,40 +1,38 @@
 /* =========================================================
    キャラクターデータ
-   type: 'angel'（天使シート・金）／'demon'（悪魔シート・赤）／'human'（一般人シート・緑）
-   シート上の位置：
-     名前 = name ／ 右上 = 天使・一般人は「所属」(affiliation)、悪魔は「契約」(contract)
-     中央上 = 階級 (rank) ／ 中央下 = 天使は階位 (hierarchy)、悪魔は種類 (kind)
-     見た目 = image（画像パス）＋ appearance（文章）／ 設定 = setting
-   sample:true のものは記入例です。実際のキャラクターを追加したら削除してください。
+   type: 'angel'（天使）／'demon'（悪魔）／'human'（人）
+   ・シートの配置は元のキャラシと同じ：
+     左上＝名前／右上＝天使・人は「所属」(affiliation)、悪魔は「契約」(contract)
+     中央＝階級 (rank) と紋章、その下＝天使は「階位」(hierarchy)、悪魔は「種類」(kind)
+     左下＝見た目（画像と文章 appearance）／右下＝設定 (setting)
+   ・forms：階級ごとに姿が変わるとき。{ rank, image } を低い順に並べる
+     current：最初に表示する姿（0から数える。省略すると最後＝いちばん高い階級）
+   ・空欄の項目は「まだ記されていない」と表示されます
+   ・spoiler: true を付けると、ネタバレなしの人には「伏せられた記録」として表示されます
    ========================================================= */
 CHARACTERS.push(
 {
-  id: 'sample-angel', type: 'angel', sample: true,
-  name: '（天使の名前）', reading: 'Exemplum',
-  affiliation: '（所属組織）',
-  rank: '王級', hierarchy: '',
-  image: '',
-  appearance: 'ここに見た目の説明を書きます。画像を入れる場合は assets/characters/ に置いて image にパスを書きます。',
-  setting: 'ここに設定を書きます。長い文章はシートの下の「プロフィール」にも全文表示されます。',
-  related: ['angel']
+  id: 'mortus', type: 'angel',
+  name: 'モルツゥス',
+  rank: '司級', hierarchy: '',
+  affiliation: '',
+  image: 'assets/characters/mortus.svg',
+  appearance: '',
+  setting: '',
+  related: ['angel', 'rank-tsukasa', 'angel-hierarchy']
 },
 {
-  id: 'sample-human', type: 'human', sample: true,
-  name: '（一般人の名前）', reading: 'Exemplum',
-  affiliation: '（所属）',
-  image: '',
-  appearance: 'ここに見た目の説明を書きます。',
-  setting: 'ここに設定を書きます。',
-  related: ['academy']
-},
-{
-  id: 'sample-demon', type: 'demon', sample: true,
-  name: '（悪魔の名前）', reading: 'Exemplum',
-  contract: '（契約者の名前）',
-  rank: '霊級', kind: '憤怒',
-  image: '',
-  appearance: 'ここに見た目の説明を書きます。',
-  setting: 'ここに設定を書きます。',
-  related: ['demon', 'wrath']
+  id: 'dornelahid', type: 'demon',
+  name: 'ドルネラヒド',
+  contract: '', kind: '',
+  forms: [
+    { rank: '霊級', image: 'assets/characters/dornelahid-rei.svg' },
+    { rank: '命級', image: 'assets/characters/dornelahid-mei.svg' },
+    { rank: '王級', image: 'assets/characters/dornelahid-ou.svg' },
+    { rank: '司級', image: 'assets/characters/dornelahid-shi.svg' }
+  ],
+  appearance: '',
+  setting: '',
+  related: ['demon', 'rank-system', 'contract']
 }
 );

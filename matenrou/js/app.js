@@ -40,7 +40,7 @@
   function side(catId) { return 'side-' + (SIDE[catId] || 'none'); }
   function catIcon(c, cls) { return icon(c.icon, cls); }
   function byDateDesc(a, b) { return (b.updated || '').localeCompare(a.updated || '') || a.title.localeCompare(b.title, 'ja'); }
-  function articlesIn(catId) { return ARTICLES.filter(function (a) { return a.cat === catId && (!a.deep || (window.__W && window.__W.deep)); }); }
+  function articlesIn(catId) { var w = window.__W || {}; return ARTICLES.filter(function (a) { return a.cat === catId && (!a.deep || (w.deep && w.spoil === true)) && (!a.spoiler || w.spoil === true); }); }
   function pad(n) { return ('00' + n).slice(-3); }
   /* 章と節：カテゴリーが「章」、記事が「節」。漢数字で振る */
   function kan(n) { var d = ['', '一', '二', '三', '四', '五', '六', '七', '八', '九']; if (n < 10) return d[n]; if (n < 20) return '十' + d[n - 10]; return d[Math.floor(n / 10)] + '十' + d[n % 10]; }
@@ -223,11 +223,11 @@
   function particles(kind, n) {
     var s = '<div class="particles ' + kind + '" aria-hidden="true">';
     for (var i = 0; i < n; i++) {
-      var fe = kind === 'feathers' || kind === 'blackfeathers';
+      var fe = kind === 'feathers' || kind === 'blackfeathers' || kind === 'feathermass';
       var x = (rnd(i + 1) * 100).toFixed(1), dl = (rnd(i + 7) * -18).toFixed(1), du = (12 + rnd(i + 3) * 14).toFixed(1), sz = (fe ? 14 + rnd(i + 5) * 22 : 2 + rnd(i + 5) * 3).toFixed(1);
       // 羽根はいただいた羽根の素材（白い羽根は黒い羽根から作ったもの）
       s += '<i style="--x:' + x + '%;--d:' + dl + 's;--u:' + du + 's;--s:' + sz + 'px;--r:' + Math.round(rnd(i + 9) * 360) + 'deg">' +
-        (fe ? '<img src="' + (kind === 'feathers' ? ART.featherWhite : ART.featherBlack) + '" alt="">' : '') + '</i>';
+        (fe ? '<img src="' + (kind === 'blackfeathers' ? ART.featherBlack : ART.featherWhite) + '" alt="">' : '') + '</i>';
     }
     return s + '</div>';
   }
@@ -252,8 +252,8 @@
       ? '<div class="gate-stage heaven-stage">' + particles('feathers', 16) + wings('heaven') + gateShape('heaven') + '</div>'
       : '<div class="gate-stage abyss-stage">' + particles('embers', 26) + '<span class="smoke s1"></span><span class="smoke s2"></span><span class="smoke s3"></span>' + wings('abyss') + gateShape('abyss') + '</div>';
     var text = '<div class="latin">' + esc(g.latin) + '</div><h2>' + esc(g.name) + '</h2><p>' + esc(g.text) + '</p>' + floorLinks(g.links) +
-      '<p class="gate-state ' + (W.deep ? 'open' : '') + '">' + esc(W.deep ? WD.deep.openText : WD.deep.lockedText) + '</p>' +
-      (W.deep ? '<a class="link-arrow ' + (kind === 'heaven' ? 'up' : 'down') + '" href="#/deep"><span class="dir">' + (kind === 'heaven' ? '↑' : '↓') + '</span>門の向こうへ</a>' : '') +
+      '<p class="gate-state ' + (deepOpen() ? 'open' : '') + '">' + esc(deepOpen() ? WD.deep.openText : (W.deep ? '核心を伏せて読んでいるため、門は閉ざされている。' : WD.deep.lockedText)) + '</p>' +
+      (deepOpen() ? '<a class="link-arrow ' + (kind === 'heaven' ? 'up' : 'down') + '" href="#/deep"><span class="dir">' + (kind === 'heaven' ? '↑' : '↓') + '</span>門の向こうへ</a>' : '') +
       (kind === 'heaven' ? actions('angel') : actions('demon'));
     return '<section class="gate ' + kind + '-gate" id="fl-gate" data-floor="gate">' + (kind === 'heaven' ? stage + text : text + stage) + '</section>';
   }
@@ -334,12 +334,39 @@
         '<span class="who"><span class="badge side-heaven ' + (r.angel ? '' : 'off') + '">天使</span><span class="badge side-abyss ' + (r.demon ? '' : 'off') + '">悪魔</span></span></a>';
     }).join('') + '</div>';
   }
+  /* キャラクター：元のキャラシの配置（名前・所属/契約・階級と紋章・種類・見た目・設定）を、サイトの空気に合わせて引き直したもの */
+  function forms(ch) { return ch.forms && ch.forms.length ? ch.forms : [{ rank: ch.rank || '', image: ch.image || '' }]; }
+  function curForm(ch) { var f = forms(ch); return ch.current != null ? ch.current : f.length - 1; }
+  function val(v) { return v ? esc(v) : '<span class="unwritten">まだ記されていない</span>'; }
+  function csheet(ch, fi) {
+    var t = TYPE[ch.type] || TYPE.human, fs = forms(ch), f = fs[fi] || fs[0];
+    var top = ch.type === 'demon' ? ['契約', 'Pactum', ch.contract] : ['所属', 'Ordo', ch.affiliation];
+    var low = ch.type === 'demon' ? ['種類', 'Genus', ch.kind] : ch.type === 'angel' ? ['階位', 'Chorus', ch.hierarchy] : null;
+    return '<div class="csheet side-' + t.side + ' t-' + ch.type + '">' +
+      '<div class="cs-cell cs-name"><span class="lb">名前<i>Nomen</i></span><b>' + esc(ch.name) + '</b></div>' +
+      '<div class="cs-band">' + emblem(ch.type === 'demon' ? 'orn-demon' : ch.type === 'angel' ? 'orn-angel' : 'orn-human', 'orn') +
+        (ch.type === 'human' ? '' : '<span class="lb">階級</span><b class="cs-rank">' + val(f.rank) + '</b>') +
+        '<span class="cs-seal">' + emblem(ch.type) + '</span>' +
+        (low ? '<span class="lb">' + low[0] + '</span><b>' + val(low[2]) + '</b>' : '') +
+        emblem(ch.type === 'demon' ? 'orn-demon' : ch.type === 'angel' ? 'orn-angel' : 'orn-human', 'orn flip') + '</div>' +
+      '<div class="cs-cell cs-aff"><span class="lb">' + top[0] + '<i>' + top[1] + '</i></span><b>' + val(top[2]) + '</b></div>' +
+      '<div class="cs-cell cs-look"><span class="lb">見た目<i>Species</i></span>' +
+        (f.image ? '<figure><img class="cs-img" src="' + esc(f.image) + '" alt="' + esc(ch.name) + '（' + esc(f.rank) + '）の姿"></figure>' : '') +
+        (ch.appearance ? '<p>' + esc(ch.appearance) + '</p>' : (f.image ? '' : '<p>' + val('') + '</p>')) + '</div>' +
+      '<div class="cs-cell cs-set"><span class="lb">設定<i>Historia</i></span><p>' + val(ch.setting) + '</p></div>' +
+    '</div>';
+  }
   function characterList() {
-    var f = '<div class="ch-filter" role="group" aria-label="種別で絞り込む"><button type="button" data-type="" aria-pressed="true">すべて</button>' +
-      ['angel', 'human', 'demon'].map(function (k) { return '<button type="button" data-type="' + k + '" aria-pressed="false">' + TYPE[k].name + '</button>'; }).join('') + '</div>';
-    if (!CHARACTERS.length) return f + '<div class="empty">まだキャラクターがいません。js/data/characters.js に追加してください。</div>';
+    var types = ['angel', 'human', 'demon'].filter(function (k) { return CHARACTERS.some(function (c) { return c.type === k; }); });
+    var f = types.length > 1 ? '<div class="ch-filter" role="group" aria-label="種別で絞り込む"><button type="button" data-type="" aria-pressed="true">すべて</button>' +
+      types.map(function (k) { return '<button type="button" data-type="' + k + '" aria-pressed="false">' + TYPE[k].name + '</button>'; }).join('') + '</div>' : '';
+    if (!CHARACTERS.length) return '<div class="empty">まだ、この塔に名を残すものはいない。</div>';
     return f + '<div class="ch-grid">' + CHARACTERS.map(function (ch) {
-      return '<a class="ch-card" data-type="' + ch.type + '" href="#/ch/' + ch.id + '"><div class="cap"><b>' + esc(ch.name) + '</b><span>' + (ch.sample ? '<span class="badge sample">記入例</span> ' : '') + '<span class="badge side-' + TYPE[ch.type].side + '">' + TYPE[ch.type].name + '</span></span></div>' + sheet(ch) + '</a>';
+      var t = TYPE[ch.type] || TYPE.human, fs = forms(ch), fm = fs[curForm(ch)];
+      if (ch.spoiler && !spoilOK()) return '<div class="ch-card veiled"><figure></figure><div class="cap"><b>伏せられた名</b><span class="badge">核心</span></div></div>';
+      return '<a class="ch-card side-' + t.side + '" data-type="' + ch.type + '" href="#/ch/' + ch.id + '"><figure>' + (fm.image ? '<img src="' + esc(fm.image) + '" alt="">' : emblem(ch.type)) + '</figure>' +
+        '<div class="cap"><b>' + esc(ch.name) + '</b><span class="badge side-' + t.side + '">' + t.name + (fm.rank ? '・' + esc(fm.rank) : '') + '</span></div>' +
+        (fs.length > 1 ? '<small class="forms-note">' + fs.map(function (x) { return esc(x.rank); }).join(' → ') + '</small>' : '') + '</a>';
     }).join('') + '</div>';
   }
   var KANA = [['あ', 'あ-お'], ['か', 'か-ご'], ['さ', 'さ-ぞ'], ['た', 'た-ど'], ['な', 'な-の'], ['は', 'は-ぽ'], ['ま', 'ま-も'], ['や', 'ゃ-よ'], ['ら', 'ら-ろ'], ['わ', 'ゎ-ん']];
@@ -382,7 +409,9 @@
   function renderArticle(id) {
     var a = artById[id]; if (!a) return renderNotFound();
     var c = catById[a.cat] || {};
+    if ((a.spoiler && !spoilOK()) || (a.deep && !deepOpen())) { app.innerHTML = crumbs([{ t: c.name, href: '#/c/' + c.id }, { t: '伏せられた節' }]) + '<section class="wrap section"><div class="empty">この節は、物語の核心に触れるため伏せられている。</div></section>'; return; }
     var sections = (a.sections || []).map(function (s) {
+      if (s.spoiler && !spoilOK()) return '<div class="veiled-sec"><span class="latin">Velatum</span><b>伏せられた記述</b><p>ここから先には、物語の核心が記されている。</p></div>';
       var h = '';
       if (s.h) h += '<h2>' + esc(s.h) + '</h2>';
       (s.p || []).forEach(function (p) { h += '<p>' + rich(p) + '</p>'; });
@@ -404,33 +433,40 @@
         '<header class="article-head">' + sigil(SIDE[a.cat]) + '<div class="meta"><span class="code">' + recCode(a) + '</span><span>' + esc(c.name) + '<i class="latin"> ' + esc(c.la || '') + '</i></span><span>' + esc(a.updated) + ' 記</span></div>' +
         '<h1>' + esc(a.title) + '</h1>' + (a.reading ? '<div class="reading">' + esc(a.reading) + '</div>' : '') +
         '<p class="summary">' + rich(a.summary) + '</p></header>' +
-        '<div class="article-body">' + sections + actions(ctxOf(a.cat, a.id)) + '</div>' + info +
+        '<div class="article-body">' + sections + actions(ctxOf(a.cat, a.id)) + '</div>' + info + '</article>' +
+      // 関連と前後は本文の段組みの外に置く（右の情報欄と重ならないように）
+      '<div class="wrap article-foot ' + side(a.cat) + '">' +
         (rel.length ? '<section class="related"><h2>この節と結ばれた節</h2><div class="list">' + rel.map(listRow).join('') + '</div></section>' : '') +
         '<nav class="pager" aria-label="同じカテゴリーの前後の記事">' +
           (prev ? '<a href="#/a/' + prev.id + '"><small>← 前の節</small><b>' + esc(prev.title) + '</b></a>' : '<span></span>') +
           (next ? '<a class="next" href="#/a/' + next.id + '"><small>次の節 →</small><b>' + esc(next.title) + '</b></a>' : '<span></span>') +
-        '</nav></article>';
+        '</nav></div>';
   }
 
   /* ---------- キャラクター ---------- */
   function renderCharacter(id) {
     var ch = chById[id]; if (!ch) return renderNotFound();
-    var t = TYPE[ch.type] || TYPE.human, c = catById.character;
-    var rows = [['種別', t.name]];
-    if (ch.type === 'demon') rows.push(['契約', ch.contract || '—']); else rows.push(['所属', ch.affiliation || '—']);
-    if (ch.type !== 'human') rows.push(['階級', ch.rank || '—']);
-    if (ch.type === 'angel' && ch.hierarchy) rows.push(['階位', ch.hierarchy]);
-    if (ch.type === 'demon') rows.push(['種類', ch.kind || '—']);
+    if (ch.spoiler && !spoilOK()) { app.innerHTML = crumbs([{ t: 'キャラクター', href: '#/c/character' }, { t: '伏せられた名' }]) + '<section class="wrap section"><div class="empty">この名は、物語の核心に触れるため伏せられている。</div></section>'; return; }
+    var t = TYPE[ch.type] || TYPE.human, c = catById.character, fs = forms(ch), fi = curForm(ch);
     var rel = (ch.related || []).map(function (r) { return artById[r]; }).filter(Boolean);
+    var tabs = fs.length > 1 ? '<div class="form-tabs" role="tablist" aria-label="階級ごとの姿">' + fs.map(function (f, i) {
+      return '<button type="button" role="tab" data-fi="' + i + '" aria-selected="' + (i === fi) + '"><b>' + esc(f.rank) + '</b><small>' + ROMAN[i + 1] + '</small></button>';
+    }).join('<span class="arrow">→</span>') + '</div>' : '';
     app.innerHTML = crumbs([{ t: c.name, href: '#/c/character' }, { t: ch.name }]) +
       '<div class="wrap ch-page side-' + t.side + '">' +
-        '<header class="article-head" style="padding-bottom:20px">' + sigil(t.side) + '<div class="meta"><span class="code">' + chapter('character') + '　第' + kan(CHARACTERS.indexOf(ch) + 1) + '名</span><span>' + t.name + '</span>' + (ch.sample ? '<span class="badge sample">記入例</span>' : '') + '</div><h1>' + esc(ch.name) + '</h1>' + (ch.reading ? '<div class="reading">' + esc(ch.reading) + '</div>' : '') + '</header>' +
-        sheet(ch) +
-        '<div class="profile"><aside class="infobox"><div class="ib-head">' + emblem(ch.type) + '<b>' + esc(ch.name) + '</b></div><dl>' +
-          rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('') + '</dl></aside>' +
-        '<div class="body article-body"><h2>見た目</h2><p>' + esc(ch.appearance || '—') + '</p><h2>設定</h2><p>' + esc(ch.setting || '—') + '</p></div></div>' +
-        (rel.length ? '<section class="related"><h2>この節と結ばれた節</h2><div class="list">' + rel.map(listRow).join('') + '</div></section>' : '') +
+        '<header class="article-head">' + sigil(t.side) + '<div class="meta"><span class="code">' + chapter('character') + '　第' + kan(CHARACTERS.indexOf(ch) + 1) + '名</span><span>' + t.name + '</span></div>' +
+          '<h1>' + esc(ch.name) + '</h1>' + (ch.reading ? '<div class="reading">' + esc(ch.reading) + '</div>' : '') +
+          (fs.length > 1 ? '<p class="summary">階級が上がるにつれて、その姿は変わっていく。</p>' : '') + '</header>' +
+        tabs + '<div id="csheet-slot">' + csheet(ch, fi) + '</div>' +
+        (rel.length ? '<section class="related"><h2>この名と結ばれた節</h2><div class="list">' + rel.map(listRow).join('') + '</div></section>' : '') +
       '</div>';
+    app.querySelectorAll('.form-tabs button').forEach(function (b) {
+      b.addEventListener('click', function () {
+        var i = +b.dataset.fi;
+        app.querySelectorAll('.form-tabs button').forEach(function (x) { x.setAttribute('aria-selected', x === b); });
+        var slot = $('#csheet-slot'); slot.innerHTML = csheet(ch, i); slot.firstChild.classList.add('swap');
+      });
+    });
   }
 
   /* ---------- 全記事一覧 ---------- */
@@ -455,7 +491,7 @@
     var idx = [];
     ARTICLES.forEach(function (a) {
       var body = (a.sections || []).map(function (s) { return [s.h, (s.p || []).join(' '), (s.list || []).join(' '), s.table ? s.table.rows.join(' ') : '', s.warn, s.note].join(' '); }).join(' ');
-      idx.push({ deep: !!a.deep, kind: '節', side: side(a.cat), href: '#/a/' + a.id, title: a.title, sub: stripRefs(a.summary),
+      idx.push({ deep: !!a.deep, spoiler: !!a.spoiler, kind: '節', side: side(a.cat), href: '#/a/' + a.id, title: a.title, sub: stripRefs(a.summary),
         key: a.title + ' ' + (a.reading || ''), keywords: (a.keywords || []).join(' ') + ' ' + (a.info || []).join(' '), body: stripRefs(body) });
     });
     GLOSSARY.forEach(function (g) {
@@ -469,7 +505,7 @@
   var INDEX = buildIndex();
   function search(q) {
     q = q.trim().toLowerCase(); if (!q) return [];
-    return INDEX.filter(function (e) { return !e.deep || W.deep; }).map(function (e) {
+    return INDEX.filter(function (e) { return (!e.deep || deepOpen()) && (!e.spoiler || spoilOK()); }).map(function (e) {
       var s = 0, k = e.key.toLowerCase();
       if (k.indexOf(q) === 0) s += 100; else if (k.indexOf(q) >= 0) s += 60;
       if (e.keywords.toLowerCase().indexOf(q) >= 0) s += 30;
@@ -589,19 +625,52 @@
   var WD = window.WORLD;
   var KINDS = [['lust', '色欲'], ['gluttony', '暴食'], ['greed', '強欲'], ['wrath', '憤怒'], ['pride', '傲慢'], ['envy', '嫉妬'], ['sloth', '怠惰']];
   var W = (function () {
-    var d = { form: 'human', reborn: false, fallen: false, pact: null, time: WD.clock.start, event: null, deep: false };
+    var d = { form: 'human', reborn: false, fallen: false, pact: null, time: WD.clock.start, event: null, deep: false, spoil: null };
     try { var s = JSON.parse(localStorage.getItem('matenrou-world') || 'null'); if (s) for (var k in d) if (k in s) d[k] = s[k]; } catch (e) {}
     return d;
   })();
   window.__W = W;
   function saveW() { window.__W = W; try { localStorage.setItem('matenrou-world', JSON.stringify(W)); } catch (e) {} paintWorld(); }
-  function resetW() { W = { form: 'human', reborn: false, fallen: false, pact: null, time: WD.clock.start, event: null, deep: false }; saveW(); route(); }
+  function resetW() { W = { form: 'human', reborn: false, fallen: false, pact: null, time: WD.clock.start, event: null, deep: false, spoil: W.spoil }; saveW(); route(); }
+  function spoilOK() { return W.spoil === true; }
+  function deepOpen() { return W.deep && spoilOK(); }
   function kindName(id) { for (var i = 0; i < KINDS.length; i++) if (KINDS[i][0] === id) return KINDS[i][1]; return ''; }
   function priceOf(id) { var a = artById[id]; return a && a.info && a.info[0] ? a.info[0][1] : ''; }
+
+  /* --- 入口の門：ネタバレの有無を選んでからサイトに入る --- */
+  function entryGate() {
+    if ($('.entry')) return;
+    var ov = document.createElement('div'); ov.className = 'entry'; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', '入口の門');
+    ov.innerHTML = '<div class="entry-sky"></div><div class="entry-gate">' + gateShape('heaven') + '</div>' +
+      '<div class="entry-body"><div class="entry-logo">' + logoSvg() + '</div>' +
+      '<p class="entry-q">この塔には、物語の核心も記されている。<br>どのように読む？</p>' +
+      '<div class="entry-choices">' +
+        '<button type="button" data-spoil="1"><span class="latin">Omnia</span><b>すべてを知る</b><small>ネタバレあり ── 核心も含めて読む</small></button>' +
+        '<button type="button" data-spoil="0"><span class="latin">Velatum</span><b>核心を伏せる</b><small>ネタバレなし ── 核心に触れる記述は伏せる</small></button>' +
+      '</div><p class="entry-note">あとから、右上の「いまの身」からいつでも変えられる。</p></div>';
+    document.body.appendChild(ov);
+    document.documentElement.classList.add('gate-open');
+    ov.querySelector('.entry-choices').addEventListener('click', function (e) {
+      var b = e.target.closest('button'); if (!b) return;
+      W.spoil = b.dataset.spoil === '1'; saveW();
+      ov.classList.add('pass');
+      setTimeout(function () { ov.classList.add('out'); document.documentElement.classList.remove('gate-open'); route(); }, 1500);
+      setTimeout(function () { ov.remove(); }, 2600);
+    });
+  }
 
   /* --- ヘッダーの「いまの身」と歩み --- */
   function paintWorld() {
     var b = document.body;
+    // 天使になると白みがかり端から白い翼が、悪魔になると黒みがかり端から黒い翼がのぞく
+    var ew = $('#edge-wings');
+    if (ew && ew.dataset.form !== W.form) { ew.remove(); ew = null; }
+    if (!ew && W.form !== 'human') {
+      ew = document.createElement('div'); ew.id = 'edge-wings'; ew.dataset.form = W.form; ew.setAttribute('aria-hidden', 'true');
+      var src = W.form === 'angel' ? WING.angel : WING.demon;
+      ew.innerHTML = ['p1', 'p2', 'p3', 'p4'].map(function (k) { return '<span class="ew ' + k + '"><img src="' + src + '" alt=""></span>'; }).join('');
+      document.body.insertBefore(ew, document.body.firstChild);
+    }
     ['human', 'angel', 'demon'].forEach(function (f) { b.classList.toggle('form-' + f, W.form === f); });
     b.classList.toggle('ev-apocalypse', W.event === 'apocalypse');
     b.classList.toggle('ev-ragnarok', W.event === 'ragnarok');
@@ -619,7 +688,7 @@
     if (es && es.dataset.ev !== (W.event || '')) { es.remove(); es = null; }
     if (W.event && !es) {
       es = document.createElement('div'); es.id = 'event-sky'; es.dataset.ev = W.event; es.setAttribute('aria-hidden', 'true');
-      es.innerHTML = W.event === 'ragnarok' ? wingStorm(14, 'linger') : clash(14);
+      es.innerHTML = W.event === 'ragnarok' ? seraph('linger') + particles('feathers', 26) : clash(14);
       document.body.insertBefore(es, document.body.firstChild);
     }
     var ash = $('#ash');
@@ -635,6 +704,8 @@
     return '<div class="jp-head"><span class="latin">Iter</span><b>あなたの歩み</b></div><ol>' + steps.map(function (s) { return '<li class="' + (s[1] ? 'done' : '') + '">' + s[0] + '</li>'; }).join('') + '</ol>' +
       '<p class="jp-now">いまの身：<b>' + WD.forms[W.form] + '</b>' + (W.pact ? '　契約：<b>' + (W.pact === 'human' ? '人と' : kindName(W.pact)) + '</b>' : '') + '</p>' +
       '<a class="jp-next" href="' + next[1] + '">次は ── ' + next[0] + '</a>' +
+      '<p class="jp-now">読み方：<b>' + (W.spoil ? 'すべてを知る（ネタバレあり）' : '核心を伏せる（ネタバレなし）') + '</b></p>' +
+      '<button type="button" class="jp-reset" id="jp-regate">門をくぐり直す（読み方を変える）</button><br>' +
       '<button type="button" class="jp-reset" id="jp-reset">人の身に戻り、最初から読む</button>';
   }
   function setupStatus() {
@@ -647,6 +718,7 @@
     btn.addEventListener('click', function (e) {
       e.stopPropagation();
       if (jp.hidden) { jp.innerHTML = journeyPanel(); jp.hidden = false; btn.setAttribute('aria-expanded', 'true');
+        $('#jp-regate').onclick = function () { jp.hidden = true; entryGate(); };
         var r = $('#jp-reset'); r.onclick = function () { if (r.dataset.sure) { jp.hidden = true; resetW(); location.hash = '#/'; } else { r.dataset.sure = 1; r.textContent = 'もう一度押すと、すべての歩みが消える'; } };
       } else { jp.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
     });
@@ -804,6 +876,20 @@
     }
     return h + '</div>';
   }
+  // 幾千の翼を持つもの：天使の翼を同心円に重ねて一つの姿にする
+  function seraph(cls, rings) {
+    rings = rings || [[6, 170, 1], [9, 260, .85], [12, 350, .6], [18, 430, .32]];
+    var h = '<div class="seraph ' + (cls || '') + '" aria-hidden="true"><span class="halo"></span>';
+    rings.forEach(function (r, ri) {
+      h += '<div class="ring" style="--dir:' + (ri % 2 ? -1 : 1) + ';--sp:' + (80 + ri * 40) + 's;opacity:' + r[2] + '">';
+      for (var i = 0; i < r[0]; i++) {
+        var a = (360 / r[0]) * i + (ri % 2 ? 180 / r[0] : 0);
+        h += '<span style="--a:' + a.toFixed(1) + 'deg;--w:' + r[1] + 'px"><b style="animation-delay:' + (-rnd(i + ri * 40) * 3).toFixed(2) + 's"><img src="' + WING.angel + '" alt=""></b></span>';
+      }
+      h += '</div>';
+    });
+    return h + '<span class="core"></span></div>';
+  }
   // 戦いの筋：上から白（天使）、下から赤（人と悪魔）
   function clash(n) {
     var h = '<div class="clash" aria-hidden="true">';
@@ -815,9 +901,11 @@
   }
   function eventRite(ev) {
     var ov = document.createElement('div'); ov.className = 'rite ev-rite ev-' + ev.id; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', ev.title);
+    var mini = [[5, 70, 1], [7, 105, .6]];
     var scene = ev.id === 'ragnarok'
-      ? '<span class="god"></span>' + wingStorm(70, 'descend') + particles('feathers', 30)
-      : wingStorm(26, 'invade') + clash(60) + particles('embers', 40) + '<span class="front"></span>';
+      ? '<span class="god"></span>' + seraph('descend') + particles('feathermass', 150)
+      : '<div class="host">' + [0, 1, 2, 3, 4].map(function (k) { return '<div class="invader iv' + k + '">' + seraph('mini', mini) + '</div>'; }).join('') + '</div>' +
+        particles('feathers', 40) + clash(60) + particles('embers', 40) + '<span class="front"></span>';
     ov.innerHTML = '<div class="rite-sky"></div>' + scene +
       '<div class="rite-lines"><p class="rite-latin latin">' + esc(ev.latin) + '</p><h2 class="rite-title">' + esc(ev.title) + '</h2><p class="rite-line">' + esc(ev.text) + '</p>' + (ev.sub ? '<p class="rite-line sub">' + esc(ev.sub) + '</p>' : '') + '</div>';
     document.body.appendChild(ov);
@@ -833,11 +921,12 @@
   }
 
   /* --- 深層 --- */
-  function renderDeep() {
+  function renderDeep() { setTimeout(function () { var g = $('#regate'); if (g) g.onclick = entryGate; }, 0); renderDeep2(); }
+  function renderDeep2() {
     var list = ARTICLES.filter(function (a) { return a.deep; });
     app.innerHTML = crumbs([{ t: WD.deep.title }]) +
-      '<header class="wrap page-head">' + sigil('abyss') + '<div><div class="code">' + esc(WD.deep.latin) + '<i>' + esc(WD.deep.title) + '</i></div><h1>' + esc(WD.deep.title) + '</h1><p>' + esc(W.deep ? WD.deep.openText : WD.deep.lockedText) + '</p></div></header>' +
-      '<section class="wrap">' + (!W.deep ? '<div class="empty">' + esc(WD.deep.lockedText) + '<br><button type="button" class="jp-open" onclick="document.getElementById(\'status\').click()">あなたの歩みを見る</button></div>'
+      '<header class="wrap page-head">' + sigil('abyss') + '<div><div class="code">' + esc(WD.deep.latin) + '<i>' + esc(WD.deep.title) + '</i></div><h1>' + esc(WD.deep.title) + '</h1><p>' + esc(deepOpen() ? WD.deep.openText : WD.deep.lockedText) + '</p></div></header>' +
+      '<section class="wrap">' + (W.deep && !spoilOK() ? '<div class="empty">深層には物語の核心が記されている。<br>いまは核心を伏せて読んでいるため、門は開かない。<br><button type="button" class="jp-open" id="regate">門をくぐり直す</button></div>' : !W.deep ? '<div class="empty">' + esc(WD.deep.lockedText) + '<br><button type="button" class="jp-open" onclick="document.getElementById(\'status\').click()">あなたの歩みを見る</button></div>'
         : list.length ? '<div class="list">' + list.map(listRow).join('') + '</div>' : '<div class="empty">' + esc(WD.deep.emptyText) + '</div>') + '</section>';
   }
 
@@ -890,4 +979,5 @@
   setupChrome(); setupTheme(); setupSearch(); setupAtmosphere(); setupStatus();
   window.addEventListener('hashchange', route);
   route();
+  if (W.spoil === null) entryGate();
 })();
