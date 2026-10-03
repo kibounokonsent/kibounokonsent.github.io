@@ -327,13 +327,21 @@ footer .links{display:flex;gap:16px}
 
 /* ネタバレ選択（人の世界：普通のWebサイトの顔） */
 .modes{display:grid;grid-template-columns:1fr 1fr;gap:12px;text-align:left}
+.modes.three{grid-template-columns:repeat(3,1fr)}
+.qopts{display:grid;gap:10px;max-width:520px;margin:0 auto;text-align:left}
+.qprog{font-size:12px;color:var(--mute);letter-spacing:.2em;margin-bottom:10px}
+.qbar{height:2px;background:var(--line);max-width:520px;margin:0 auto 22px}
+.qbar i{display:block;height:100%;background:var(--ac,var(--ink));transition:width .35s}
+.rline{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,5.4vw,34px);letter-spacing:.2em;margin:10px 0;min-height:1.4em}
+.rline.sm{font-size:13px;font-weight:400;letter-spacing:.1em;color:var(--mute)}
 .mode{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:22px 20px;background:var(--panel);border:1px solid var(--line);transition:border-color .2s,transform .2s}
 .mode:hover,.mode:focus-visible{border-color:var(--ink);transform:translateY(-2px)}
 .mode .big{font-family:var(--f-display);font-weight:800;font-size:24px}
 .mode .who{font-size:13px;font-weight:700}
 .mode .txt{font-size:13px;color:var(--mute);line-height:1.7}
 .mode .warn{align-self:flex-start;font-size:11px;border:1px solid var(--Rt);color:var(--Rt);padding:1px 8px;margin-top:4px}
-@media (max-width:560px){.modes{grid-template-columns:1fr}}
+@media (max-width:560px){.modes{grid-template-columns:1fr}
+  .modes.three{grid-template-columns:1fr}}
 
 /* あなたは何者？ */
 .attrs{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;text-align:left}
@@ -1042,10 +1050,13 @@ function closeSuggest(){ sugEl.hidden = true; qEl.blur(); }
 /* =========================================================
    あなた（属性と竜の種族）
    ========================================================= */
+const COMPOUND = {火:'溶岩', 水:'氷', 風:'嵐', 雷:'磁気'};   // 自然＋火／水／風／雷。闇・光・歪とは重ならない
 let me = null;            // {el:'水', sp:'ワイバーン'}
 try{ me = JSON.parse(store.get('eikou-who')||'null'); }catch(e){ me = null; }
 if(me && !ATTRS.find(a=>a.k===me.el)) me = null;
+if(me && me.cx && !Object.values(COMPOUND).includes(me.cx)){ delete me.cx; delete me.mix; }
 const attrOf = k => ATTRS.find(a=>a.k===k);
+const elLabel = m => m.cx || m.el;   // 自然の複合は「溶岩」「氷」「嵐」「磁気」と呼ぶ
 const isPlainColor = c => /^#/.test(c);
 function applyMe(){
   if(me){ root.style.setProperty('--acc', attrOf(me.el).c.replace('var(--R)','#cc1a31').replace('var(--G)','#e2a90b')); root.dataset.awake=''; }
@@ -1057,11 +1068,11 @@ const gemIc = el => { const g = GEMS[el]; const fill = g.facets ? `url(#gemIri)`
 const whoBtn = document.getElementById('whoBtn');
 function paintWho(){
   if(me){
-    whoBtn.innerHTML = `${gemIc(me.el)}<span class="lbl-long">${me.el}・${me.sp}</span>`;
-    whoBtn.setAttribute('aria-label', `あなた：${me.el}属性の${me.sp}（属性を選び直す）`);
+    whoBtn.innerHTML = `${gemIc(me.el)}<span class="lbl-long">${elLabel(me)}・${me.sp}</span>`;
+    whoBtn.setAttribute('aria-label', `あなた：${elLabel(me)}属性の${me.sp}（選び直す）`);
   } else {
     whoBtn.innerHTML = `<svg class="gem-ic" viewBox="-40 -52 80 104" aria-hidden="true"><path d="M0-48 26-26 32 2 22 30 0 50-22 30-32 2-26-26z" fill="none" stroke="currentColor" stroke-width="5"/></svg><span class="lbl-long">あなたは何者？</span>`;
-    whoBtn.setAttribute('aria-label', 'あなたは何者？（属性を選ぶ）');
+    whoBtn.setAttribute('aria-label', 'あなたは何者？（選ぶ・ランダム・診断）');
   }
 }
 
@@ -1123,6 +1134,53 @@ function gemSVG(el){
   </svg>`;
 }
 
+
+/* =========================================================
+   診断：質問への答えからポイントを貯めて、属性と種族を決める
+   闇・光・歪、龍、腐食竜・骨竜の出やすさは未決定。いまは adjustRare で素通し（あとで条件を入れる）
+   ========================================================= */
+const QA = (t, a, b) => ({t, a, b});   // a＝主属性(2点)、b＝副属性(1点)
+const Q_EL = [
+ {q:'知らない場所で目が覚めたら？', o:[QA('高い所へ登って、まず見渡す',   '風','光'), QA('足もとの草や水、土の様子を確かめる','自然','水'), QA('考える前に走り出して、確かめに行く','雷','火'), QA('物陰に身をひそめて、様子をうかがう','闇','歪')]},
+ {q:'危険が迫ったら？',           o:[QA('正面から迎え撃つ',               '火','雷'), QA('受け流して、流れを変える',          '水','風'),   QA('みんなを守れる位置に立つ',        '光','自然'), QA('決まりごとの外にある手を探す',  '歪','闇')]},
+ {q:'誰かに助けを求められたら？', o:[QA('理由はあとで、まず手を貸す',     '火','雷'), QA('そっと寄り添って、立ち直るのを待つ','自然','水'), QA('痛みを癒す方法を探す',            '光','水'),   QA('本当に助けるべきか見極めてから動く','闇','風')]},
+ {q:'大切なものを失ったら？',     o:[QA('立ち止まらず、遠くへ旅に出る',   '風','歪'), QA('悲しむ間もなく、体を動かし続ける',  '雷','火'),   QA('涙を流して、静かに受け止める',    '水','自然'), QA('「失った」という前提を疑って、ありえない方法を探す','歪','闇')]},
+ {q:'自分と正反対の考えを持つ人がいたら？', o:[QA('真っ向からぶつかって、決着をつける','火','雷'), QA('違いは違いのまま、そっとしておく','自然','風'), QA('理解して、同じほうへ導こうとする','光','水'), QA('受け入れて、自分の考えを塗り替えてみる','歪','水')]},
+ {q:'何かを選ぶとき、何を基準にする？', o:[QA('縛られず、そのとき自由だと思えるほう','風','歪'), QA('直感。ひらめいた瞬間','雷','火'), QA('周りへの影響と、場の流れ','水','自然'), QA('損得と、確かな結果','闇','風')]},
+];
+// 自然だったときの追加判定（何と重なるか）
+const Q_MIX = [
+ {q:'力があふれそうなとき、あなたの中で何が起きる？', o:[{t:'熱を帯びて、燃えるように熱くなる',a:'火'},{t:'冷え切って、凍りつくように静かになる',a:'水'},{t:'気持ちが荒れて、嵐のようにざわつく',a:'風'},{t:'体の芯がしびれて、引き合うような感覚になる',a:'雷'}]},
+ {q:'争いのなかで、あなたはどう動く？', o:[{t:'熱に任せて、押し切る',a:'火'},{t:'冷静に、相手の動きを止める',a:'水'},{t:'大きくかき乱して、場を荒らす',a:'風'},{t:'相手を引き寄せて、離さない',a:'雷'}]},
+];
+// 種族：身体・行動・戦い方・生き方から
+const SP = (t, s) => ({t, s});
+const Q_SP = [
+ {q:'どこへ行きたい？', o:[SP('空',{ワイバーン:2,アストラ:1,オルニス:1}), SP('水の中',{水竜:3}), SP('地面の下',{ワーム:3}), SP('大地を駆けまわる',{ダイナソー:2,獣:1,ドラゴン:1})]},
+ {q:'どう戦いたい？', o:[SP('空中から、一気に攻める',{ワイバーン:2,アストラ:1}), SP('場所を選ばず、力で圧倒する',{ドラゴン:3}), SP('地に足をつけて、どっしり構える',{ダイナソー:2,獣:1}), SP('足もとから、不意をつく',{ワーム:2,水竜:1})]},
+ {q:'どんな身体がいい？', o:[SP('大きな翼で、長く滑空できる',{ワイバーン:2,ドラゴン:1}), SP('鋭い爪と、ふさふさの毛並み',{獣:3}), SP('羽根をまとった、軽やかな身体',{オルニス:3}), SP('自然に溶けこむ、しなやかな身体',{フィーシ:3})]},
+ {q:'どう生きたい？', o:[SP('誰よりも速く、遠くへ',{アストラ:3}), SP('強く、堂々と',{ドラゴン:2,ダイナソー:1}), SP('自然の流れに身をまかせて',{フィーシ:2,水竜:1}), SP('仲間と群れて、本能のままに',{獣:2,オルニス:1})]},
+ {q:'倒れたとき、どうなりたい？', o:[SP('何度でも、立ち上がる',{腐食竜:2,骨竜:2,ダイナソー:1}), SP('静かに、土に還る',{ワーム:1,フィーシ:1,獣:1}), SP('空へ、昇っていく',{アストラ:1,ワイバーン:1,オルニス:1}), SP('水へ、溶けていく',{水竜:2,フィーシ:1})]},
+];
+const topOf = sc => { const m = Math.max(...Object.values(sc)); const t = Object.keys(sc).filter(k=>sc[k]===m); return t[Math.floor(Math.random()*t.length)]; };
+const adjustRare = sc => sc;   // 闇・光・歪を通常の質問でどこまで出すかは未決定。決まったらここで調整する
+function diagnose(ans, forcedMain){   // ans: {el:[選択index...], mix:[...], sp:[...]}
+  const el = Object.fromEntries(ATTRS.map(a=>[a.k,0]));
+  ans.el.forEach((i,n)=>{ const o = Q_EL[n].o[i]; el[o.a]+=2; el[o.b]+=1; });
+  const main = forcedMain || topOf(adjustRare(el));
+  let cx = null, mix = null;
+  if(main==='自然'){
+    const m = {火:0,水:0,風:0,雷:0};
+    ans.mix.forEach((i,n)=>{ m[Q_MIX[n].o[i].a]+=1; });
+    mix = topOf(m); cx = COMPOUND[mix];
+  }
+  const sc = {};
+  ans.sp.forEach((i,n)=>{ const s = Q_SP[n].o[i].s; for(const k in s) sc[k]=(sc[k]||0)+s[k]; });
+  const pool = pickPool(main);   // 龍は対象外。腐食竜・骨竜は闇のときだけ
+  const ps = Object.fromEntries(pool.map(d=>[d.n, sc[d.n]||0]));
+  return { el: main, cx, mix, sp: dragonByName(topOf(ps)) };
+}
+
 /* =========================================================
    入口の流れ
    ========================================================= */
@@ -1153,36 +1211,131 @@ function stepSpoiler(){
     </div></div>`;
   stage.querySelector(`[data-mode="${spoilMode==='full'?'full':'safe'}"]`).focus();
 }
+let pend = null;   // 決まりかけの結果 {el, cx, mix, sp}
+const setAcc = el => root.style.setProperty('--acc', attrOf(el).c.replace('var(--R)','#cc1a31').replace('var(--G)','#e2a90b'));
 function stepWho(){
+  pend = null;
   skipBtn.hidden = false; skipBtn.textContent = me ? '閉じる' : '竜の世界に入らず、資料だけ見る';
+  stage.innerHTML = `<div class="fade-in">
+    <p class="q">あなたは何者？</p>
+    <p class="sub">決めかたを選んでください</p>
+    <div class="modes three">
+      <button class="mode" type="button" data-how="pick"><span class="big">自分で決める</span><span class="txt">属性を選ぶ。種族は運に任せる。</span></button>
+      <button class="mode" type="button" data-how="random"><span class="big">ランダム</span><span class="txt">属性も種族も、運に任せる。</span></button>
+      <button class="mode" type="button" data-how="quiz"><span class="big">診断で決める</span><span class="txt">質問に答える。属性も種族も、あなたの答えから決まる。</span></button>
+    </div></div>`;
+  stage.querySelector('[data-how]').focus();
+}
+function stepPick(){
   stage.innerHTML = `<div class="fade-in">
     <p class="q">あなたは何者？</p>
     <p class="sub">ひとつ選んでください</p>
     <div class="attrs" id="attrs">${ATTRS.map(a=>`<button class="attr" type="button" data-el="${a.k}" style="--ac:${a.c}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">${a.i}</svg>
-      <b>${a.k}</b><span>${a.t}</span></button>`).join('')}</div></div>`;
+      <b>${a.k}</b><span>${a.t}</span></button>`).join('')}</div>
+    <p class="sub" style="margin-top:18px"><button type="button" class="cta" style="background:none;color:var(--mute);border-color:var(--line);margin:0;font-size:12px;padding:6px 16px" data-how="back">決めかたに戻る</button></p></div>`;
   stage.querySelector('.attr').focus();
+}
+function stepRandom(){
+  const el = ATTRS[Math.floor(Math.random()*ATTRS.length)].k;
+  const sp = pickSpecies(el);
+  pend = { el, sp };
+  setAcc(el); skipBtn.textContent = 'とばす';
+  stage.innerHTML = `<div class="fade-in"><p class="q">運に任せる</p><p class="sub">……</p></div>`;
+  later(1200, ()=>stepGem(el, { sp }));
+}
+/* 診断：質問を一問ずつ。属性（6問）→ 自然なら追加（2問）→ 種族（5問） */
+let dq = null;
+function stepQuiz(){
+  dq = { n:0, ans:{ el:[], mix:[], sp:[] } };
+  quizAsk('el');
+}
+function quizAsk(phase){
+  const list = phase==='el' ? Q_EL : phase==='mix' ? Q_MIX : Q_SP;
+  const i = dq.ans[phase].length, item = list[i];
+  const total = Q_EL.length + Q_SP.length + (dq.mixed ? Q_MIX.length : 0);
+  stage.innerHTML = `<div class="fade-in">
+    <p class="qprog latin">${dq.n+1} / ${total}${dq.mixed?'':'＋'}</p>
+    <div class="qbar"><i style="width:${(dq.n/total*100).toFixed(0)}%"></i></div>
+    <p class="q" style="font-size:clamp(19px,4.4vw,26px);margin-bottom:22px">${item.q}</p>
+    <div class="qopts">${item.o.map((o,k)=>`<button class="mode" type="button" data-qa="${phase}" data-i="${k}"><span class="txt" style="color:var(--ink);font-size:14px">${o.t}</span></button>`).join('')}</div></div>`;
+  stage.querySelector('[data-qa]').focus();
+}
+function quizAnswer(phase, k){
+  dq.ans[phase].push(k); dq.n++;
+  if(phase==='el'){
+    if(dq.ans.el.length < Q_EL.length) return quizAsk('el');
+    // 属性が自然なら、ここで追加判定を挟む
+    const el = Object.fromEntries(ATTRS.map(a=>[a.k,0]));
+    dq.ans.el.forEach((i,n)=>{ const o = Q_EL[n].o[i]; el[o.a]+=2; el[o.b]+=1; });
+    dq.main = topOf(adjustRare(el));
+    dq.mixed = dq.main==='自然';
+    return dq.mixed ? quizAsk('mix') : quizAsk('sp');
+  }
+  if(phase==='mix') return dq.ans.mix.length < Q_MIX.length ? quizAsk('mix') : quizAsk('sp');
+  if(dq.ans.sp.length < Q_SP.length) return quizAsk('sp');
+  quizResult();
+}
+function quizResult(){
+  // 主属性は属性の質問が終わった時点で確定済み（同点のランダムでぶれないよう、それを使う）
+  const r = diagnose(dq.ans, dq.main);
+  pend = { el:r.el, cx:r.cx, mix:r.mix, sp:r.sp };
+  setAcc(r.el); skipBtn.textContent = 'とばす';
+  const elText = r.cx ? `【自然属性】` : `【${r.el}属性】`;
+  stage.innerHTML = `<div>
+    <p class="rline fade-in" style="letter-spacing:.3em">あなたは――</p>
+    <p class="rline fade-in" style="animation-delay:1.1s">${elText}</p>
+    ${r.cx?`<p class="rline sm fade-in" style="animation-delay:1.8s">複合：${r.mix}　→　性質：<b>${r.cx}</b></p>`:''}
+    <p class="rline fade-in" style="animation-delay:${r.cx?2.6:1.9}s">【${r.sp.n}】</p></div>`;
+  later(r.cx?5200:4400, ()=>stepGem(r.el, { sp:r.sp, cx:r.cx, mix:r.mix, fixed:true }));
 }
 function chooseAttr(el, btn){
   const a = attrOf(el);
   btn.classList.add('chosen'); document.getElementById('attrs').classList.add('locked');
   // UI全体が属性の色に染まる
-  root.style.setProperty('--acc', a.c.replace('var(--R)','#cc1a31').replace('var(--G)','#e2a90b'));
+  pend = { el };
+  setAcc(el);
   skipBtn.textContent = 'とばす';
-  later(1500, ()=>stepGem(el));
+  later(el==='自然' ? 900 : 1500, ()=> el==='自然' ? stepNatureMix() : stepGem(el));
 }
-function stepGem(el){
+// 自然を選んだら、そのまま（岩・草・氷・毒・煙）か、ほかの属性と重ねるかを選ぶ
+const NAT_MIX = [
+  {mix:null, label:'自然のまま', t:'岩・草・氷・毒・煙。'},
+  {mix:'火', label:'溶岩', t:'自然＋火。熱と大地を併せ持つ。'},
+  {mix:'水', label:'氷',   t:'自然＋水。'},
+  {mix:'風', label:'嵐',   t:'自然＋風。'},
+  {mix:'雷', label:'磁気', t:'自然＋雷。'},
+];
+function stepNatureMix(){
+  stage.innerHTML = `<div class="fade-in">
+    <p class="q">自然は、ほかの力と重なる</p>
+    <p class="sub">重ねるなら、ひとつ選んでください</p>
+    <div class="attrs" id="mixes" style="--ac:${attrOf('自然').c}">${NAT_MIX.map(m=>`<button class="attr" type="button" data-nmix="${m.mix||''}" style="--ac:${attrOf('自然').c}">
+      <b>${m.label}</b><span>${m.t}</span></button>`).join('')}</div>
+    <p class="sub" style="margin-top:18px"><button type="button" class="cta" style="background:none;color:var(--mute);border-color:var(--line);margin:0;font-size:12px;padding:6px 16px" data-how="pick">属性を選び直す</button></p></div>`;
+  stage.querySelector('[data-nmix]').focus();
+}
+function chooseNatureMix(mix, btn){
+  btn.classList.add('chosen'); document.getElementById('mixes').classList.add('locked');
+  const cx = mix ? COMPOUND[mix] : null;
+  pend = cx ? { el:'自然', cx, mix } : { el:'自然' };
+  later(1200, ()=>stepGem('自然', cx ? { cx, mix } : undefined));
+}
+function stepGem(el, opt){
   stage.innerHTML = `<div>
     <div class="gemwrap gem-in" id="gem" style="--gem:${GEMS[el].c};--gemg:${GEMS[el].g}"><div class="rays"></div><div class="halo"></div>${gemSVG(el)}</div>
     <p class="line1" id="l1"></p><p class="line2" id="l2"></p></div>`;
   const l1 = document.getElementById('l1');
   later(900, ()=>{ l1.textContent = 'アクセサリーが現れた'; l1.classList.add('fade-in'); });
   later(2000, ()=>{ document.getElementById('gem').classList.add('glow'); l1.textContent = '──光る。'; });
-  later(4300, ()=>stepDragon(el));
+  later(4300, ()=>stepDragon(el, opt));
+}
+function pickPool(el){
+  // 龍は抽選から外す。腐食竜・骨竜は闇属性によって生まれるため、闇のときだけ候補に入れる
+  return DRAGONS.filter(d=>!d.special && (el==='闇' || (d.n!=='腐食竜' && d.n!=='骨竜')));
 }
 function pickSpecies(el){
-  // 龍は抽選から外す。腐食竜・骨竜は闇属性によって生まれるため、闇のときだけ候補に入れる
-  const pool = DRAGONS.filter(d=>!d.special && (el==='闇' || (d.n!=='腐食竜' && d.n!=='骨竜')));
+  const pool = pickPool(el);
   return pool[Math.floor(Math.random()*pool.length)];
 }
 function dragonParts(d, cls){
@@ -1190,29 +1343,31 @@ function dragonParts(d, cls){
   const order = ['body','other','head','wl','wr'].filter(p=>d.parts.includes(p));
   return `<svg class="${cls||''}" viewBox="${d.x} ${d.y} ${d.w} ${d.h}" aria-hidden="true"><g fill="currentColor">${order.map(p=>`<g class="pt pt-${p}"><use href="#dgp-${d.k}-${p}"/></g>`).join('')}</g></svg>`;
 }
-function stepDragon(el){
-  const sp = pickSpecies(el);
+function stepDragon(el, opt){
+  const sp = (opt && opt.sp) || pickSpecies(el);
+  const cx = opt && opt.cx, mix = opt && opt.mix;
+  const fixed = !!(opt && opt.fixed);   // 診断：種族はもう決まっているので、切り替わる演出なしで組み上げる
   const pool = DRAGONS.filter(d=>!d.special);
   stage.innerHTML = `<div>
-    <div class="dragon-stage rolling" id="ds" style="--gem:${GEMS[el].c};--gemg:${GEMS[el].g}"><div class="halo"></div><svg class="roll" viewBox="0 0 10 10" aria-hidden="true"><use id="dsUse" href="#dg-00"/></svg></div>
+    <div class="dragon-stage${fixed?'':' rolling'}" id="ds" style="--gem:${GEMS[el].c};--gemg:${GEMS[el].g}"><div class="halo"></div>${fixed?'':'<svg class="roll" viewBox="0 0 10 10" aria-hidden="true"><use id="dsUse" href="#dg-00"/></svg>'}</div>
     <p class="line1" id="l1">竜化</p><p class="line2" id="l2">あなたの中の竜が、目を覚ます</p></div>`;
   const ds = document.getElementById('ds'), roll = ds.querySelector('svg.roll'), use = document.getElementById('dsUse');
   const show = d => { roll.setAttribute('viewBox', `0 0 ${d.w} ${d.h}`); use.setAttribute('href', `#dg-${d.k}`); };
   let t = 0, i = 0;
-  const steps = reduce() ? 0 : 12;
+  const steps = (reduce() || fixed) ? 0 : 12;
   for(let s=0; s<steps; s++){ t += 70 + s*s*2.6; later(t, ()=>show(pool[(i++)%pool.length])); }
-  later(t + 200, ()=>{
+  later(t + (fixed ? 600 : 200), ()=>{
     // 決まった種族を、パーツから組み上げる
-    roll.remove(); ds.classList.remove('rolling'); ds.insertAdjacentHTML('beforeend', dragonParts(sp, 'build'));
-    me = { el, sp: sp.n }; store.set('eikou-who', JSON.stringify(me)); store.set('eikou-skip', '');
+    if(roll) roll.remove(); ds.classList.remove('rolling'); ds.insertAdjacentHTML('beforeend', dragonParts(sp, 'build'));
+    me = cx ? { el, cx, mix, sp: sp.n } : { el, sp: sp.n }; store.set('eikou-who', JSON.stringify(me)); store.set('eikou-skip', '');
   });
-  later(t + 2100, ()=>{
+  later(t + (fixed ? 600 : 200) + 1900, ()=>{
     ds.classList.add('done');
     flash.classList.remove('on'); void flash.offsetWidth; if(!reduce()) flash.classList.add('on');
     document.getElementById('l1').textContent = sp.n;
-    document.getElementById('l2').textContent = `${el}属性の${sp.n}として、竜の世界へ`;
+    document.getElementById('l2').textContent = `${cx||el}属性の${sp.n}として、竜の世界へ`;
   });
-  later(t + 4300, stepReveal);
+  later(t + (fixed ? 600 : 200) + 4100, stepReveal);
 }
 function stepReveal(){
   skipBtn.hidden = true;
@@ -1220,17 +1375,18 @@ function stepReveal(){
   stage.innerHTML = `<div class="reveal" style="padding-bottom:min(20vh,140px)">
     <p class="q fade-in">見えるようになった。</p>
     <p class="sub fade-in" style="animation-delay:.8s">竜は、最初からそこにいた。</p>
-    <div class="fade-in" style="animation-delay:1.6s"><span class="idcard">${gemIc(me.el)}${me.el}属性 ／ ${me.sp}</span><br>
+    <div class="fade-in" style="animation-delay:1.6s"><span class="idcard">${gemIc(me.el)}${elLabel(me)}属性 ／ ${me.sp}</span><br>
     <button class="cta" type="button" id="enter">資料集へ進む</button></div></div>`;
   later(1700, ()=>document.getElementById('enter')?.focus());
 }
 function finishNow(){
   // とばす：その時点で決まっていない部分はその場で決めて、見えるようになった画面へ
   clearTimers();
-  const chosen = document.querySelector('.attr.chosen');
-  const el = me?.el && !chosen ? me.el : (chosen?.dataset.el || null);
-  if(!el){ store.set('eikou-skip','1'); closeIntro(); return; }
-  if(!me || me.el !== el || !stage.querySelector('.build')){ me = { el, sp: pickSpecies(el).n }; store.set('eikou-who', JSON.stringify(me)); }
+  const p = pend || (me ? { el:me.el, cx:me.cx, mix:me.mix, sp:me.sp } : null);
+  if(!p){ store.set('eikou-skip','1'); closeIntro(); return; }
+  me = { el:p.el, sp: p.sp ? (p.sp.n||p.sp) : pickSpecies(p.el).n };
+  if(p.cx){ me.cx = p.cx; me.mix = p.mix; }
+  store.set('eikou-who', JSON.stringify(me)); setAcc(me.el);
   stepReveal();
 }
 
@@ -1238,8 +1394,14 @@ intro.addEventListener('click', e=>{
   const m = e.target.closest('[data-mode]');
   if(m){ spoilMode = m.dataset.mode; store.set('eikou-spoiler', spoilMode); paintSpoil();
     if(afterSpoiler==='who'){ afterSpoiler = null; stepWho(); } else closeIntro(); return; }
+  const h = e.target.closest('[data-how]');
+  if(h){ const v = h.dataset.how; if(v==='pick') stepPick(); else if(v==='random') stepRandom(); else if(v==='quiz') stepQuiz(); else stepWho(); return; }
+  const qa = e.target.closest('[data-qa]');
+  if(qa){ quizAnswer(qa.dataset.qa, +qa.dataset.i); return; }
+  const nm = e.target.closest('[data-nmix]');
+  if(nm && !nm.closest('.locked')){ chooseNatureMix(nm.dataset.nmix, nm); return; }
   const a = e.target.closest('.attr');
-  if(a && !a.closest('.locked')){ chooseAttr(a.dataset.el, a); return; }
+  if(a && !a.closest('.locked') && a.dataset.el){ chooseAttr(a.dataset.el, a); return; }
   if(e.target.id === 'enter'){ closeIntro(); location.hash = ''; return; }
 });
 skipBtn.addEventListener('click', ()=>{
