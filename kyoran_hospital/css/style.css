@@ -212,9 +212,9 @@ button { font: inherit; color: inherit; }
 /* トップのSVGロゴ（差し替え可：assets/images/logo/logo.svg） */
 .hero-logo--svg { padding: 0 12px; }
 .hl { position: relative; display: inline-block; width: min(880px, 100%); line-height: 0; isolation: isolate;
-  filter: drop-shadow(0 0 30px rgba(200,20,28,.4)) drop-shadow(0 0 80px rgba(120,5,10,.45)); animation: jitter 6s infinite; }
+  filter: drop-shadow(0 0 30px rgba(200,20,28,.4)) drop-shadow(0 0 80px rgba(120,5,10,.45)); }
+.hl-body { animation: jitter 6s infinite; transform-box: view-box; transform-origin: 50% 50%; } /* 英字は動かさない */
 .hl svg, .hl .hl-img { display: block; width: 100%; height: auto; }
-.hl .hl-img { filter: drop-shadow(3px 3px 0 var(--blood)); }
 .hl-main { position: relative; z-index: 1; }
 .hl-ghost { position: absolute; inset: 0; pointer-events: none; }
 .hl-ghost * { fill: currentColor !important; }

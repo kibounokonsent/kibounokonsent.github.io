@@ -232,13 +232,25 @@
         const ghost = (cls) => {
           const c = main.cloneNode(true);
           c.classList.remove('hl-main'); c.classList.add('hl-ghost', cls);
-          c.querySelectorAll('#kh-top, #kh-sub, [data-role="fx"]').forEach((n) => n.remove());
+          c.querySelectorAll('[data-role="fx"], [data-role="junk"]').forEach((n) => n.remove());
+          if (cls === 'hl-shadow') c.querySelectorAll('[data-role="top"], [data-role="sub"]').forEach((n) => n.remove()); /* 赤い下ずれは英字に付けない */
           c.querySelectorAll('[filter], [mask]').forEach((n) => { n.removeAttribute('filter'); n.removeAttribute('mask'); });
           c.querySelectorAll('defs').forEach((n) => n.remove());
           c.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
           return c;
         };
-        box.replaceChildren(ghost('hl-shadow'), main, ghost('hl-a'), ghost('hl-b'));
+        /* ゆれ（jitter）はロゴ全体（英字も）にかける */
+        const wrapIn = (svg) => {
+          const els = [...svg.children].filter((n) => n.tagName !== 'defs');
+          if (!els.length) return;
+          const g = document.createElementNS('http://www.w3.org/2000/svg', 'g');
+          g.setAttribute('class', 'hl-body');
+          svg.insertBefore(g, els[0]); els.forEach((n) => g.appendChild(n));
+        };
+        this.junk = [...main.querySelectorAll('[data-role="junk"] > path')].map((n) => n.cloneNode(true));
+        wrapIn(main);
+        const ghosts = ['hl-shadow', 'hl-a', 'hl-b'].map((c) => { const g = ghost(c); wrapIn(g); return g; });
+        box.replaceChildren(ghosts[0], main, ghosts[1], ghosts[2]);
         box.classList.add('is-live');
       } catch (e) { /* 読み込めない（file:// で開いた等）ときは <img> のまま表示 */ }
     },
@@ -262,6 +274,46 @@
         });
         box.dataset['m' + i] = '1'; set(true);
         setTimeout(() => { set(false); delete box.dataset['m' + i]; }, rnd(minMs, maxMs));
+      });
+      this.mojiEn(box, main, count, minMs, maxMs);
+    },
+    /* 英字：1文字ずつ別の記号に化けさせる（#kh-top / #kh-sub が1文字1pathのときだけ） */
+    mojiEn(box, main, count, minMs, maxMs) {
+      if (!this.junk || !this.junk.length) return;
+      if (!this.en) {
+        this.en = [];
+        ['top', 'sub'].forEach((role) => {
+          const grp = main.querySelector(`[data-role="${role}"]`);
+          if (!grp || grp.children.length < 5) return;
+          const kids = [...grp.children];
+          const bbs = kids.map((n) => n.getBBox());
+          const hs = bbs.map((b) => b.height).sort((x, y) => x - y);
+          const cap = hs[Math.floor(hs.length / 2)];
+          const ys = bbs.map((b) => b.y + b.height / 2).sort((x, y) => x - y);
+          const cy = ys[Math.floor(ys.length / 2)];
+          kids.forEach((n, k) => this.en.push({ role, k, cx: bbs[k].x + bbs[k].width / 2, cy, cap, fill: n.getAttribute('fill') }));
+        });
+      }
+      if (!this.en.length) return;
+      const n = Math.min(this.en.length, 1 + Math.floor(Math.random() * count * 1.5));
+      [...this.en].sort(() => Math.random() - 0.5).slice(0, n).forEach((L) => {
+        const key = `e${L.role}${L.k}`;
+        if (box.dataset[key]) return;
+        const tpl = this.junk[Math.floor(Math.random() * this.junk.length)];
+        const added = [];
+        box.querySelectorAll('svg').forEach((svg) => {
+          const grp = svg.querySelector(`[data-role="${L.role}"]`);
+          if (!grp) return;
+          const orig = [...grp.children].filter((c) => !c.classList.contains('hl-junk'))[L.k];
+          if (!orig) return;
+          const j = tpl.cloneNode(true);
+          j.removeAttribute('id'); j.classList.add('hl-junk');
+          if (L.fill) j.setAttribute('fill', L.fill);
+          j.setAttribute('transform', `translate(${L.cx} ${L.cy}) scale(${L.cap})`);
+          orig.style.display = 'none'; grp.appendChild(j); added.push([orig, j]);
+        });
+        box.dataset[key] = '1';
+        setTimeout(() => { added.forEach(([o, j]) => { o.style.display = ''; j.remove(); }); delete box.dataset[key]; }, rnd(minMs, maxMs));
       });
     },
   };
