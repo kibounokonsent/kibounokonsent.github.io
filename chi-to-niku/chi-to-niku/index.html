@@ -1,0 +1,1007 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>血と肉 事件資料</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=BIZ+UDPGothic:wght@400;700&family=Shippori+Mincho:wght@500;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: ①署の机（卓上ランプに照らされた木の机）に捜査資料のフォルダ → 開くと事件概要の紙 → 人物資料の紙が並ぶ
+   ②「御身神山」の資料の中のボタンで山へ → 一人称の山道（左右に木、中央に道、奥は霧）を「進む」で下から進む
+   ③「気になる点……」に触れると紙の報告書。読んだ資料は資料一覧に綴じられる。
+   単一の世界観（夜の署・霧の山）なので、配色は明示指定。 */
+:root{
+  --night:#141311; --ink:#1d1f22; --sub:#5d6268; --paper:#f7f5ef; --paper2:#f3ede6; --rule:#c9c6bd;
+  --stamp:#a8302b; --navy:#1f3a64; --lamp:#f3d9a4; --hud:#ece6dc; --hud-sub:#b7afa3;
+  --f-body:"BIZ UDPGothic","Hiragino Kaku Gothic ProN","Yu Gothic",sans-serif;
+  --f-disp:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{background:var(--night)}
+body{color:var(--hud);font-family:var(--f-body);font-size:15px;line-height:1.8;margin:0;padding-inline:0;padding-block:0}
+button{font-family:inherit}
+:focus-visible{outline:2px solid #e0a46a;outline-offset:3px}
+
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:10;background:rgba(20,19,17,.92);border-bottom:1px solid #2c2925;
+  padding:9px 16px;display:flex;gap:8px 14px;align-items:center;flex-wrap:wrap}
+.top .name{font-family:var(--f-disp);font-weight:700;font-size:17px;letter-spacing:.16em;display:flex;align-items:center}
+.logo-s{height:30px;width:auto;display:block;filter:drop-shadow(0 1px 2px rgba(0,0,0,.5))}
+.logo-h{margin:6px 0 10px!important}
+.logo-h img{height:96px;width:auto;max-width:100%;display:block}
+.top .case{font-family:var(--f-mono);font-size:10px;letter-spacing:.12em;color:var(--hud-sub)}
+.top .sp{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.chip{font-family:var(--f-mono);font-size:11px;letter-spacing:.04em;border:1px solid #3d3832;padding:3px 9px;color:var(--hud-sub);background:transparent;cursor:pointer;border-radius:2px}
+.chip:hover{color:var(--hud);border-color:#6a6157}
+.chip b{color:var(--hud);font-weight:500}
+.retreat{font-size:12px;color:#d9c39a;background:none;border:0;cursor:pointer;padding:2px 0;text-decoration:underline;text-underline-offset:3px}
+.retreat:disabled{color:#c25a4f;text-decoration:line-through;cursor:not-allowed}
+
+/* ===================== 机 ===================== */
+.desk{position:relative;min-height:calc(100vh - 46px);padding:28px 16px 60px;overflow:hidden;
+  background-color:#3a2a1e;background-size:520px 520px}
+.desk::before{content:"";position:absolute;inset:0;pointer-events:none;
+  background:radial-gradient(ellipse 70% 60% at 50% 30%,rgba(255,214,150,.20),transparent 60%),radial-gradient(ellipse 120% 90% at 50% 40%,transparent 50%,rgba(0,0,0,.6))}
+.desk-inner{position:relative;max-width:980px;margin:0 auto}
+
+.folder{display:block;margin:7vh auto 0;width:min(420px,100%);aspect-ratio:1.38;position:relative;border:0;padding:0;cursor:pointer;background:none}
+.folder .back{position:absolute;inset:0;background:#c9a467;border-radius:3px 10px 3px 3px;box-shadow:0 18px 30px rgba(0,0,0,.5)}
+.folder .tab{position:absolute;left:0;top:-18px;width:38%;height:22px;background:#c9a467;border-radius:6px 6px 0 0}
+.folder .front{position:absolute;inset:6px 0 0 0;background:linear-gradient(180deg,#d8b778,#cfae6e);border-radius:2px 8px 3px 3px;
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:6px;color:#3b2a14;transition:transform .9s ease;transform-origin:bottom}
+.folder .lbl{background:#f4efe2;padding:10px 22px;box-shadow:0 1px 2px rgba(0,0,0,.2);text-align:center}
+.folder .lbl small{display:block;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;color:#6b5a3f}
+.folder .lbl b{font-family:var(--f-disp);font-size:22px;letter-spacing:.14em}
+.folder .secret{font-family:var(--f-disp);font-weight:700;color:var(--stamp);border:2px solid var(--stamp);padding:0 8px;letter-spacing:.3em;transform:rotate(-6deg);opacity:.8;margin-top:6px}
+.folder:hover .front{transform:perspective(900px) rotateX(8deg)}
+.folder.opening .front{transform:perspective(900px) rotateX(78deg);opacity:.0;transition:transform .9s ease,opacity .9s ease .3s}
+.desk-hint{text-align:center;color:var(--lamp);opacity:.75;font-size:13px;margin-top:22px;letter-spacing:.1em}
+
+/* 机の上の紙 */
+.paper{background:var(--paper);color:var(--ink);position:relative;
+  background-image:radial-gradient(rgba(120,110,90,.06) 1px,transparent 1px);background-size:3px 3px;
+  box-shadow:0 1px 1px rgba(0,0,0,.2),0 10px 22px rgba(0,0,0,.45)}
+.lead{width:min(620px,100%);margin:2vh auto 0;padding:34px 34px 30px;animation:rise .9s ease both}
+.lead.small{animation:none}
+@keyframes rise{from{opacity:0;transform:translateY(40px) rotate(-1deg)}to{opacity:1;transform:none}}
+@keyframes drop{from{opacity:0;transform:translateY(-30px) scale(1.04) rotate(var(--r,0deg))}to{opacity:1;transform:rotate(var(--r,0deg))}}
+
+.zone{margin-top:30px}
+.zone-label{display:inline-block;font-family:var(--f-mono);font-size:11px;letter-spacing:.16em;color:#2b2416;background:#e9dfc4;padding:2px 10px;transform:rotate(-1deg);box-shadow:0 2px 6px rgba(0,0,0,.4)}
+.people{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:22px 18px;margin-top:16px}
+.person{border:0;text-align:left;cursor:pointer;padding:14px 14px 16px;background:var(--paper2);transform:rotate(var(--r,0deg));
+  animation:drop .7s ease both;transition:transform .2s,box-shadow .2s;min-width:0;display:flex;flex-direction:column;gap:8px}
+.person:hover{transform:rotate(0deg) translateY(-4px);box-shadow:0 1px 1px rgba(0,0,0,.2),0 16px 26px rgba(0,0,0,.5)}
+.photo{aspect-ratio:3/4;background:#d9d6cf;border:1px solid #bdb8ae;position:relative;overflow:hidden}
+.photo::before{content:"";position:absolute;left:50%;top:22%;width:38%;aspect-ratio:1;border-radius:50%;background:#b1aca2;transform:translateX(-50%)}
+.photo::after{content:"";position:absolute;left:50%;bottom:-18%;width:80%;height:46%;border-radius:50% 50% 0 0;background:#b1aca2;transform:translateX(-50%)}
+.photo span{position:absolute;left:6px;top:4px;font-family:var(--f-mono);font-size:9px;color:#7d786e;letter-spacing:.1em;z-index:1}
+.clip{position:absolute;top:-10px;left:22px;width:14px;height:34px;border:2px solid #9aa1a6;border-radius:8px;border-bottom-color:transparent;z-index:2}
+.person .nm{font-family:var(--f-disp);font-weight:700;font-size:19px;letter-spacing:.06em;line-height:1.3}
+.person .rb{font-size:11px;color:var(--sub);letter-spacing:.1em}
+.person .ln{font-size:12px;color:#3b3f44;line-height:1.6}
+.person .age{font-family:var(--f-mono);font-size:11px;color:var(--sub)}
+
+.docs{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:24px 18px;margin-top:16px}
+.sheet{border:0;text-align:left;cursor:pointer;padding:16px 16px 18px;min-height:170px;transform:rotate(var(--r,0deg));animation:drop .7s ease both;
+  transition:transform .2s;min-width:0;display:flex;flex-direction:column;gap:6px}
+.sheet:hover{transform:rotate(0deg) translateY(-4px)}
+.sheet .no{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;color:#6a6f76}
+.sheet .t{font-family:var(--f-disp);font-weight:700;font-size:18px;line-height:1.4}
+.sheet .x{font-size:12px;color:#4a4f55;line-height:1.6}
+.sheet .k{font-size:11px;color:#6a6f76;margin-top:auto;border-top:1px solid #dcd8cf;padding-top:6px}
+.tag{position:absolute;right:-6px;top:18px;background:#e8c75b;color:#3b2f0a;font-size:11px;padding:3px 10px 3px 12px;transform:rotate(4deg);box-shadow:0 2px 4px rgba(0,0,0,.3);letter-spacing:.08em}
+.done::after{content:"済";position:absolute;right:10px;bottom:10px;font-family:var(--f-disp);font-size:12px;color:var(--stamp);border:1.5px solid var(--stamp);border-radius:50%;width:24px;height:24px;display:grid;place-items:center;opacity:.75}
+
+/* ===================== 山 ===================== */
+.forest{position:relative;height:calc(100vh - 46px);min-height:460px;overflow:hidden;background:#59625a}
+.forest canvas{position:absolute;inset:0;width:100%;height:100%;display:block}
+.hud-tl{position:absolute;left:16px;top:14px;z-index:3;text-shadow:0 1px 4px rgba(0,0,0,.7)}
+.hud-tl .lb{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:var(--hud-sub)}
+.hud-tl .pl{font-family:var(--f-disp);font-size:clamp(22px,4vw,32px);letter-spacing:.14em;line-height:1.3}
+.hud-tr{position:absolute;right:16px;top:14px;z-index:3;background:rgba(14,13,12,.55);border:1px solid rgba(255,255,255,.08);padding:9px 12px;font-size:12px;min-width:150px;backdrop-filter:blur(2px)}
+.hud-tr .row{display:flex;justify-content:space-between;gap:12px}
+.hud-tr .ng{color:#e0665a;font-weight:700}
+.hud-tr .sep{border-top:1px solid rgba(255,255,255,.1);margin:6px 0}
+.hud-tr .ppl{font-size:12px;line-height:1.6}
+.hud-tr .ppl span{margin-right:8px;display:inline-block}
+.hud-tr .ppl s{color:#e0665a}
+.hud-tr .ppl .gone{animation:fade 1.8s ease forwards}
+@keyframes fade{to{opacity:0}}
+.caption{position:absolute;left:50%;bottom:96px;transform:translateX(-50%);z-index:3;width:min(560px,calc(100% - 32px));text-align:center;
+  font-size:15px;letter-spacing:.06em;text-shadow:0 1px 6px rgba(0,0,0,.9);line-height:1.9}
+.caption p{margin:0;animation:fadein 1.4s ease both}
+.caption p:nth-child(2){animation-delay:.7s}
+@keyframes fadein{from{opacity:0}to{opacity:1}}
+.walk{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);z-index:4;background:rgba(14,13,12,.6);color:var(--hud);
+  border:1px solid rgba(255,255,255,.18);padding:10px 30px 12px;letter-spacing:.3em;font-size:14px;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:0}
+.walk::after{content:"";width:9px;height:9px;border-right:1.5px solid currentColor;border-bottom:1.5px solid currentColor;transform:rotate(45deg);margin-top:2px}
+.walk:hover{background:rgba(30,28,25,.75)}
+.walk:disabled{opacity:.3;cursor:default}
+.spot{position:absolute;z-index:3;transform:translate(-50%,-50%);background:none;border:0;cursor:pointer;color:#f1e7d6;display:flex;align-items:center;gap:8px;padding:6px;animation:fadein 1.2s ease both}
+.spot i{width:16px;height:16px;border-radius:50%;border:1.5px solid #f1e7d6;position:relative;flex:none}
+.spot i::after{content:"";position:absolute;inset:-7px;border-radius:50%;border:1px solid rgba(241,231,214,.5);animation:ping 2.4s ease-out infinite}
+@keyframes ping{from{transform:scale(.6);opacity:1}to{transform:scale(1.5);opacity:0}}
+.spot span{font-size:12px;letter-spacing:.12em;text-shadow:0 1px 4px rgba(0,0,0,.9);white-space:nowrap}
+.spot.seen{opacity:.45}
+.spot.seen i::after{display:none}
+.blackout{position:absolute;inset:0;z-index:6;background:#050404;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:24px;padding:24px;animation:fadein 2.4s ease both}
+.blackout .last{font-family:var(--f-disp);font-size:clamp(20px,4.4vw,28px);letter-spacing:.12em;margin:0;color:#e4dad2;animation:fadein 2s ease 2s both}
+.blackout .fin{font-family:var(--f-mono);font-size:11px;letter-spacing:.26em;color:#7d726c;animation:fadein 2s ease 4s both}
+.blackout .again{animation:fadein 1s ease 7s both}
+
+/* ===================== 報告書 ===================== */
+.reader{position:fixed;inset:0;z-index:30;background:rgba(6,6,5,.7);display:flex;justify-content:center;align-items:flex-start;
+  padding:calc(env(safe-area-inset-top,0px) + 28px) 16px 40px;overflow-y:auto}
+.report{width:100%;max-width:640px;padding:32px 34px 36px;animation:rise .45s ease both}
+.report.person-doc{background-color:var(--paper2)}
+.report .close{position:absolute;right:10px;top:8px;background:none;border:0;font-size:12px;color:var(--sub);cursor:pointer;padding:6px}
+.report .backlist{background:none;border:0;font-size:12px;color:var(--navy);cursor:pointer;padding:0;margin-bottom:10px;text-decoration:underline}
+.rhead{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.1em;color:var(--sub);border-bottom:2px solid var(--ink);padding-bottom:6px;margin-bottom:14px}
+.report h3{font-family:var(--f-disp);font-weight:700;font-size:24px;letter-spacing:.08em;margin:0 0 4px;text-wrap:balance}
+.report .ruby{font-size:12px;color:var(--sub);letter-spacing:.12em;margin:0 0 14px}
+.rbody{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}
+.rbody.with-photo{grid-template-columns:112px minmax(0,1fr)}
+.report table{width:100%;border-collapse:collapse;font-size:14px;margin:0}
+.report th,.report td{border:1px solid #bdb9b0;padding:6px 10px;vertical-align:top;text-align:left}
+.report th{width:7em;background:#ebe8e0;font-weight:400;color:#4a4f55;white-space:nowrap}
+.report td{color:var(--ink)}
+.report td.ng{color:var(--stamp);font-weight:700}
+.report p{margin:.5em 0;max-width:36em}
+.report .sec{font-family:var(--f-disp);font-size:16px;font-weight:700;margin:20px 0 4px;letter-spacing:.06em;border-left:3px solid var(--ink);padding-left:8px}
+.report .sp{font-size:10px;letter-spacing:.1em;color:var(--stamp);border:1px solid var(--stamp);padding:0 5px;margin-left:8px;vertical-align:2px;font-weight:400}
+.report .note{font-size:12px;color:var(--sub)}
+.fig{margin:0 0 16px;background:#e4e1da;border:1px solid #bdb9b0;padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.fig img{height:220px;width:auto;max-width:100%;object-fit:contain}
+.fig figcaption{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;color:var(--sub)}
+/* ---- 汚染・二周目 ---- */
+.stain{position:absolute;inset:0;pointer-events:none;background-size:100% 100%;background-repeat:no-repeat;mix-blend-mode:multiply;z-index:2}
+.report.jolt{animation:jolt .38s steps(2) both;opacity:1}
+@keyframes jolt{0%{transform:translate(6px,-3px) skewX(-4deg);filter:contrast(1.8) hue-rotate(-20deg)}35%{transform:translate(-8px,2px);filter:invert(.85)}70%{transform:translate(3px,0) skewX(3deg);filter:none}100%{transform:none}}
+body.ruin .top{border-bottom-color:#4a1512;background:rgba(14,6,6,.94)}
+body.ruin .top .name{color:#c98f86}
+.desk.ruin{background-color:#1d130d}
+.desk.ruin::before{background:radial-gradient(ellipse 60% 50% at 45% 28%,rgba(255,190,140,.13),transparent 60%),radial-gradient(ellipse 110% 90% at 50% 40%,transparent 35%,rgba(0,0,0,.82));animation:flicker 7s infinite}
+@keyframes flicker{0%,100%{opacity:1}41%{opacity:1}42%{opacity:.25}43%{opacity:.9}44%{opacity:.3}46%{opacity:1}78%{opacity:1}79%{opacity:.55}80%{opacity:1}}
+.desk-blood{position:absolute;inset:0;pointer-events:none;background-size:cover;background-position:center;mix-blend-mode:multiply;opacity:.95}
+.desk.ruin .desk-inner{z-index:1}
+.desk.ruin .person,.desk.ruin .sheet{transform:translate(var(--dx,0),var(--dy,0)) rotate(var(--r,0deg))}
+.desk.ruin .person:hover,.desk.ruin .sheet:hover{transform:translate(var(--dx,0),var(--dy,0)) rotate(0deg) translateY(-4px)}
+.desk.ruin .paper{background-color:#ece6dc;filter:sepia(.25) brightness(.92)}
+.torn1{clip-path:polygon(0 0,100% 0,100% 82%,93% 86%,88% 83%,80% 90%,71% 86%,64% 93%,55% 89%,47% 96%,38% 91%,30% 97%,21% 92%,12% 98%,5% 94%,0 97%)}
+.torn2{clip-path:polygon(0 3%,8% 0,100% 0,100% 100%,0 100%,3% 74%,0 62%,4% 50%,1% 38%,5% 22%)}
+.torn3{clip-path:polygon(0 0,62% 0,70% 6%,78% 2%,88% 9%,100% 5%,100% 100%,0 100%)}
+.photo.void{background:#0b0909}
+.photo.void::before,.photo.void::after{background:#1a1414}
+.nm s{text-decoration-color:#8a1010;text-decoration-thickness:3px}
+.go.broken{letter-spacing:.5em;transform:skewX(-8deg) rotate(-1.5deg);background:#3a1210;color:#e6c7c0;animation:jitter 2.6s infinite}
+.go.broken span{display:inline-block}
+@keyframes jitter{0%,92%,100%{transform:skewX(-8deg) rotate(-1.5deg)}93%{transform:skewX(14deg) translateX(6px)}95%{transform:skewX(-20deg) translateX(-8px)}97%{transform:skewX(4deg)}}
+.files.pile li{border:0;margin:-3px 0;background:#f2ede5;box-shadow:0 2px 5px rgba(0,0,0,.25);transform:rotate(var(--r,0deg)) translateX(var(--dx,0));position:relative}
+.files.pile button{padding:9px 10px}
+.flash{position:fixed;inset:0;background:#000;z-index:60;pointer-events:none;animation:flash .5s steps(3) both}
+@keyframes flash{0%{opacity:1}60%{opacity:1}100%{opacity:0}}
+.forest canvas.nz{pointer-events:none;z-index:2}
+.reset{background:none;border:0;color:var(--sub);font-size:11px;text-decoration:underline;cursor:pointer;padding:0;margin-top:10px}
+.hanko{position:absolute;right:30px;top:124px;font-family:var(--f-disp);font-weight:700;color:var(--stamp);border:2px solid var(--stamp);padding:2px 9px;font-size:13px;letter-spacing:.2em;transform:rotate(-6deg);opacity:.8}
+.report .foot{margin-top:26px;padding-top:8px;border-top:1px solid var(--rule);font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;color:#80858b}
+.go{display:block;margin:26px auto 0;background:#2c3a30;color:#ecefe6;border:0;padding:13px 30px;font-family:var(--f-disp);font-size:17px;letter-spacing:.22em;cursor:pointer;box-shadow:0 6px 14px rgba(0,0,0,.3)}
+.go:hover{background:#3a4c3f}
+.drop{color:transparent!important;user-select:all}
+.files{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.files li{border-bottom:1px solid var(--rule)}
+.files button{background:none;border:0;padding:8px 2px;color:var(--ink);cursor:pointer;text-align:left;width:100%;display:flex;gap:12px;font-size:15px}
+.files button:hover{color:var(--navy)}
+.files .n{font-family:var(--f-mono);font-size:11px;color:var(--sub);width:5.2em;flex:none;padding-top:3px}
+.files .lock{color:#8c9096;font-size:13px;padding:8px 2px}
+.files-h{font-family:var(--f-mono);font-size:10px;letter-spacing:.18em;color:var(--sub);margin:18px 0 2px}
+
+/* 開始・感染 */
+.veil{position:fixed;inset:0;z-index:40;display:flex;align-items:center;justify-content:center;padding:24px 16px;background:var(--night)}
+.choice{max-width:520px;width:100%;padding:30px 28px}
+.choice .no{font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--sub)}
+.choice h1{font-family:var(--f-disp);font-size:30px;letter-spacing:.22em;margin:4px 0 6px}
+.choice p{font-size:14px;color:var(--sub);margin:0 0 18px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.opts button{text-align:left;background:transparent;border:1px solid var(--rule);color:var(--ink);padding:12px 14px;cursor:pointer}
+.opts button:hover{border-color:var(--navy)}
+.opts b{display:block;font-size:15px}
+.opts span{display:block;font-size:12px;color:var(--sub);line-height:1.6}
+.infect{background:#0b0707;flex-direction:column;gap:36px}
+.infect p{font-family:var(--f-disp);font-size:clamp(22px,5vw,34px);letter-spacing:.18em;margin:0;color:#e4d3cd;opacity:0;animation:fadein 3.2s ease .6s forwards}
+.infect button{opacity:0;animation:fadein 1.2s ease 3.8s forwards;background:transparent;color:#c9a49c;border:1px solid #5a3a36;padding:8px 18px;letter-spacing:.12em;cursor:pointer}
+
+@media (max-width:640px){
+  .lead{padding:26px 20px 24px}
+  .report{padding:28px 18px 30px}
+  .rbody.with-photo{grid-template-columns:minmax(0,1fr)}
+  .rbody.with-photo .photo{width:110px}
+  .hanko{position:static;display:inline-block;margin:0 0 10px}
+  .opts{grid-template-columns:1fr}
+  .people{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 14px}
+  .docs{grid-template-columns:repeat(2,minmax(0,1fr));gap:18px 12px}
+  .sheet{min-height:150px;padding:14px 12px}
+  .hud-tr{min-width:0;font-size:11px;padding:7px 9px}
+  .caption{bottom:90px;font-size:14px}
+}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.01s!important;animation-delay:0s!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <span class="name" id="logoTop"><img src="img/logo.svg" alt="血と肉" class="logo-s" onerror="this.replaceWith(document.createTextNode('血と肉'))"></span>
+  <span class="case">御身神山事案</span>
+  <div class="sp">
+    <button class="retreat" id="retreat" type="button" hidden>署へ戻る</button>
+    <button class="chip" id="filesBtn" type="button">資料一覧 <b id="fileCount">0</b></button>
+    <button class="chip" id="spoilBtn" type="button">ネタバレ：<b>なし</b></button>
+  </div>
+</header>
+
+<main id="app"></main>
+<div class="reader" id="reader" hidden></div>
+
+<div class="veil" id="start" hidden>
+  <div class="choice paper">
+    <span class="no">閲覧前確認</span>
+    <h1 class="logo-h"><img src="img/logo.svg" alt="血と肉" onerror="this.replaceWith(document.createTextNode('血と肉'))"></h1>
+    <p>閲覧方法を選んでください。あとから画面上部で切り替えられます。</p>
+    <div class="opts">
+      <button type="button" data-mode="off"><b>ネタバレなし</b><span>飯田と同じだけの情報で読む。核心は伏せられたまま。</span></button>
+      <button type="button" data-mode="on"><b>ネタバレあり</b><span>作中で判明する情報をすべて読む。</span></button>
+    </div>
+  </div>
+</div>
+<div class="veil infect" id="infect" hidden>
+  <p>あなたは感染した……</p>
+  <button type="button" id="infectGo">資料を開く</button>
+</div>
+
+<script>
+/* ======================= DATA SECTION =======================
+   資料はここに書き足せば増える。
+   fields: [項目, 値, 赤字なら1]   body: 段落。{x} の文字は欠落して見える。
+   {spoiler:true, t:'…'} の段落は「ネタバレあり」のときだけ出る。 {sec:'見出し'} は小見出し。
+   ============================================================ */
+const on = () => S.mode === 'on';
+
+const PEOPLE = [
+  { id:'iida',   name:'飯田 春樹', ruby:'いいだ はるき', age:31, line:'警察官。年齢の割に若々しく、20代に見える。', r:'-1.5deg' },
+  { id:'kanda',  name:'神田 五十嵐', ruby:'かんだ いがらし', age:43, line:'警察官。飯田の先輩・上司・相棒。煙草を吸う。', r:'1.2deg' },
+  { id:'hanae',  name:'飯田 花恵', ruby:'いいだ はなえ', age:null, line:'飯田春樹の妻。御身神村に住む。', r:'-.6deg' },
+  { id:'haruko', name:'飯田 晴子', ruby:'いいだ はるこ', age:null, line:'飯田春樹の娘。御身神村に住む。', r:'1.8deg' },
+  { id:'streamer', name:'配信者', ruby:'氏名 ○○', age:null, line:'御身神山に入った動画配信者。行方不明。', r:'-1deg' },
+];
+
+const DOCS = {
+  /* ---- 署の資料 ---- */
+  case: { no:'資料 01', title:'事件概要', kind:'捜査資料',
+    fields:()=>[['件名','御身神山における行方不明事案'],['対象','動画配信者 1名'],['場所','御身神山'],['状況','山に入ったまま帰らない','1']],
+    body:()=>['御身神山に入った動画配信者が、行方不明となっている。','配信・録画された映像が残っており、山の中で何か異常なものに遭遇した可能性がある。','以上を受け、御身神山の捜索・調査を行う。'] },
+  video: { no:'資料 02', title:'配信映像についての報告書', kind:'報告書',
+    fields:()=>[['対象','御身神山で撮影された配信・録画映像'],['状態','映像のみ残る'],['反響','映像が話題になっている']],
+    body:()=>['配信者は、噂のある山として御身神山を探索していた。','配信の途中で、異常が起こる。映像には、人型の異常な存在が映っている。','この映像により、御身神山で何か異常なことが起きていると認識された。'] },
+  mountain: { no:'資料 03', title:'御身神山', kind:'地域資料', go:true,
+    fields:()=>[['区分','山'],['経路','山道 → 村への道 → 御身神村'],['集落','御身神村（飯田春樹の故郷）'],['備考','噂のある山。配信者が入った山']],
+    body:()=>['配信者が入り、行方が分からなくなった山。','山の先に御身神村があり、村へは山道を通って向かう。'] },
+
+  /* ---- 人物 ---- */
+  iida: { no:'人物 01', title:'飯田 春樹', ruby:'いいだ はるき', kind:'人物資料', person:true,
+    fields:()=>[['年齢','31歳'],['職業','警察官'],['家族','妻・花恵　娘・晴子'],['故郷','御身神村']],
+    body:()=>['年齢の割に若々しく、20代に見える。そのことで、神田からは嫉妬されている。','神田の煙草は嫌い。どちらかと言うと、酒が好き。','御身神山の先、御身神村に妻と娘がいる。'] },
+  kanda: { no:'人物 02', title:'神田 五十嵐', ruby:'かんだ いがらし', kind:'人物資料', person:true,
+    fields:()=>[['年齢','43歳'],['職業','警察官'],['関係','飯田の先輩・上司・相棒']],
+    body:()=>['非常に優秀な警察官。煙草を吸う。帽子と髭が似合う。','飯田が年齢の割に若々しいことを、羨ましがっている。'] },
+  hanae: { no:'人物 03', title:'飯田 花恵', ruby:'いいだ はなえ', kind:'人物資料', person:true,
+    fields:()=>[['続柄','飯田春樹の妻'],['居住','御身神村']], body:()=>[] },
+  haruko: { no:'人物 04', title:'飯田 晴子', ruby:'いいだ はるこ', kind:'人物資料', person:true,
+    fields:()=>[['続柄','飯田春樹の娘'],['居住','御身神村']], body:()=>[] },
+  streamer: { no:'人物 05', title:'配信者', ruby:'氏名 ○○', kind:'人物資料', person:true,
+    fields:()=>[['職業','動画配信者'],['経緯','噂のある山として御身神山を探索'],['現在','行方不明','1']],
+    body:()=>['配信中に異常が起こり、以後の行方は知れない。'] },
+
+  /* ---- 山で見つける資料 ---- */
+  enter: { no:'記録 01', title:'入山', kind:'捜査記録',
+    fields:()=>[['位置','御身神山'],['人員','6名'],['車両','使用可'],['通信','良好']],
+    body:()=>['捜索のため、車で御身神山へ入る。','同行は飯田、神田ほか4名。'] },
+  comm: { no:'記録 02', title:'通信途絶', kind:'捜査記録',
+    fields:()=>[['位置','御身神山 山道'],['通信','接続不能','1'],['外部連絡','不可','1']],
+    body:()=>['山道に入ってから、インターネット・通信が繋がらない。','外部との連絡が取れないまま、捜索を続ける。'] },
+  slide: { no:'記録 03', title:'土砂', kind:'捜査記録',
+    fields:()=>[['位置','御身神山 山道'],['車両','使用不能','1'],['帰路','通行不能','1']],
+    body:()=>['土砂災害が発生した。乗ってきた車両は土砂により壊れた。','来た道も土砂で塞がれ、引き返すことはできない。'] },
+  trace: { no:'記録 04', title:'捜索状況', kind:'捜査記録',
+    fields:()=>[['位置','御身神山 山中'],['配信者','発見に至らず'],['所見','配信映像の経路と重なる']],
+    body:()=>['現在の進路は、配信映像に映っていた山道と同じ経路上にあると思われる。','配信者の行方は、依然知れない。'] },
+  meet: { no:'記録 05', title:'遭遇', kind:'捜査記録',
+    fields:()=>[['位置','御身神山 山中'],['接触','人型の異常な存在','1'],['人員','4名']],
+    body:()=>['山中で、人型の異常な存在と遭遇した。配信映像に映っていたものと同種と思われる。','同行者2名の所在が分からなくなった。'] },
+  way: { no:'記録 06', title:'村への道', kind:'捜査記録',
+    fields:()=>[['位置','村への道'],['人員','2名','1']],
+    body:()=>['さらに2名の所在が分からなくなった。','残っているのは飯田、神田の2名。','2名は、御身神村へたどり着いた。'] },
+  village: { no:'資料 04', title:'御身神村', kind:'地域資料', decay:true,
+    fields:()=>[['区分','集落（飯田春樹の故郷）'],['住民', on()?'感染':'不明','1'],['施設情報','{記}{載}{途}{切}れ'],['飯田宅', on()?'マザーが形成されている':'内部に何かが形成されている']],
+    body:()=>['ここは飯田の{故}郷である。','村の様子が、以前と{違}う。人の姿をしたものがいるが、元の人間とはかけ離れている。',
+      {spoiler:true, t:'村全体が巨大な感染地帯になっている。村人も、近所の住民も、山中で所在が分からなくなった警察官たちも、感染している。'},
+      '飯田が帰ろうと{し}ていた場所は、'] },
+  chitoniku: { no:'資料 05', title:'血と肉', kind:'異常存在', hanko:'閲覧可', figure:true,
+    fields:()=>[['区分','人型の異常な存在'],['確認地点','御身神山、御身神村'],['性質','人や生物に感染する'],['閲覧条件','感染']],
+    body:()=>['配信映像に映り、御身神山および御身神村で確認された異常な存在。','感染した人や生物は、元の姿とはかけ離れたものになる。',
+      {sec:'種類'}, ...KINDS.filter(k=>!k.spoiler||on()).map(k=>({t:`<b>${k.name}</b>　${k.text}`, spoiler:k.spoiler})),
+      {sec:'個体記録'}, '確認された個体は No.01 から No.10 として記録している。資料一覧の「血と肉」から閲覧できる。'] },
+  mother: { no:'資料 06', title:'マザー', kind:'異常存在',
+    fields:()=>[['確認地点','御身神村 飯田宅'],['正体', on()?'飯田花恵・晴子が融合した存在':'不明', on()?'1':'']],
+    body:()=>['御身神村の飯田宅に形成された存在。', on()?null:'正体は分からない。',
+      {spoiler:true, t:'飯田の妻・花恵と娘・晴子が融合したもの。'},
+      {spoiler:true, t:'マザーは、純粋種を絶えず生み続けている。'}] },
+  /* ---- ネタバレなしルート（引き返す）用 ---- */
+  traceOff: { no:'記録 03', title:'捜索状況', kind:'捜査記録',
+    fields:()=>[['位置','御身神山 山中'],['配信者','発見に至らず'],['所見','配信映像の経路と重なる']],
+    body:()=>['現在の進路は、配信映像に映っていた山道と同じ経路上にあると思われる。','配信者の行方は、依然知れない。'] },
+  glimpseOff: { no:'記録 04', title:'人影', kind:'捜査記録',
+    fields:()=>[['位置','御身神山 山中'],['目視','人型の何か','1'],['距離','遠い']],
+    body:()=>['道の先に、人影のようなものが見えた。','配信映像に映っていたものに似ている。','こちらに気づいたかどうかは分からない。'] },
+  backOff: { no:'記録 05', title:'判断', kind:'捜査記録',
+    fields:()=>[['位置','村への道'],['目視','人型の何か（複数）','1'],['判断','撤退']],
+    body:()=>['村へ続く道の脇にも、同じような人影が立っている。','動いてはいない。だが、あれが何なのかは分からない。','これ以上進むのは危険と判断し、引き返す。','飯田の家族は、この先の村にいる。応援を呼べる状態で、改めて向かう。'] },
+  kandaFall: { no:'記録 07', title:'神田', kind:'捜査記録',
+    fields:()=>[['位置','御身神村'],['人員','1名','1']],
+    body:()=>['村の中で、神田が感染した。','神田は倒れた。'] },
+};
+
+/* 血と肉の絵。SVGファイルの場所を書く（例：'img/chitoniku.svg'）。
+   空のままなら黒い人影（仮）が表示される。山道の人影と「血と肉」の報告書の両方に使われる。 */
+const CHITONIKU_IMG = 'img/chitoniku.svg';
+
+/* 山道に立つ血と肉の絵（ここから順番に使われる） */
+const CREATURE_IMGS = ['img/no01.svg','img/no02.svg','img/no03.svg','img/no04.svg'];
+
+/* 家と木の絵（あとで差し替え）。SVGファイルの場所を書く（例：'img/house.svg'）。空なら仮の図形で描く */
+const HOUSE_IMG = '';
+const TREE_IMG  = '';   // 1枚だけ使いたいときはここ。TREE_IMGS より優先される
+
+/* 木と草むらの絵（いただいた素材を1本ずつ切り出したもの）。暗い色に落として霧の中に並べる */
+const TREE_IMGS = ['img/tree1.svg','img/tree2.svg','img/tree3.svg'];
+const BUSH_IMGS = ['img/bush1.svg','img/bush2.svg'];
+
+/* 血と肉 No.01〜No.10。名称・種類・確認地点・説明・絵の場所を書き込む。
+   kind：'感染種' か '純粋種'（純粋種はネタバレなしだと「不明」と表示）
+   text：説明の段落。空なら「記述なし」
+   img ：その個体のSVG（例：'img/no01.svg'）。空なら CHITONIKU_IMG か仮の黒い人影 */
+const SPECIMENS = [
+  { name:'', kind:'', place:'', text:[], img:'img/no01.svg' },   // No.01
+  { name:'', kind:'', place:'', text:[], img:'img/no02.svg' },   // No.02
+  { name:'', kind:'', place:'', text:[], img:'img/no03.svg' },   // No.03
+  { name:'', kind:'', place:'', text:[], img:'img/no04.svg' },   // No.04
+  { name:'', kind:'', place:'', text:[], img:'' },   // No.05
+  { name:'', kind:'', place:'', text:[], img:'' },   // No.06
+  { name:'', kind:'', place:'', text:[], img:'' },   // No.07
+  { name:'', kind:'', place:'', text:[], img:'' },   // No.08
+  { name:'', kind:'', place:'', text:[], img:'' },   // No.09
+  { name:'', kind:'', place:'', text:[], img:'' },   // No.10
+];
+
+/* 机に並ぶ捜査資料（この順で並ぶ）。人物資料は PEOPLE に足す。 */
+const DESK_DOCS = ['case','video','mountain'];
+
+/* 血と肉の種類。spoiler:true は「ネタバレあり」のみ */
+const KINDS = [
+  { name:'感染種', text:'人や生物が感染したもの。もともと人間や生物だったものが、感染することで生まれる。' },
+  { name:'純粋種', text:'マザーから生まれた種類。感染したものとは違い、マザーから生み出される。', spoiler:true },
+];
+
+/* 山道。上から順に1歩ずつ進む。
+   spots   = 気になる点。doc に DOCS の名前、x・y は画面に対する位置（0〜1）
+   figures = 血と肉の人影。z = その地点からの奥行き（大きいほど遠い）、x = 道からの左右（マイナスで左）
+   comm/car/ret = 通信・車両・帰路が途切れる、gone = 消える人数、fall = 神田が倒れる
+   village = ここから村、infect = ここへ進む前に感染演出、end = 終幕（必ず最後） */
+const STEPS_ON = [
+  { place:'御身神山', text:['車で山へ入る。','配信者が入った山。'], spots:[{doc:'enter',x:.30,y:.62}] },
+  { place:'山道', text:['木が深くなってきた。','携帯の電波が無い。'], spots:[{doc:'comm',x:.70,y:.58}], comm:1 },
+  { place:'山道', text:['土砂が崩れた。','車は壊れ、来た道も塞がれた。'], spots:[{doc:'slide',x:.34,y:.66}], car:1, ret:1 },
+  { place:'山道', text:['歩いて進む。','この道は、映像で見た道に似ている。'], spots:[{doc:'trace',x:.62,y:.55}], figures:[{z:18,x:1.5}] },
+  { place:'山中', text:['何かがいる。'], spots:[{doc:'meet',x:.40,y:.50}], figures:[{z:7,x:-1.5},{z:11,x:2.4}], gone:2 },
+  { place:'村への道', text:['二人になった。'], spots:[{doc:'way',x:.64,y:.62}], figures:[{z:9,x:-3}], gone:2 },
+  { place:'御身神村', text:['{故}郷に着いた。'], spots:[{doc:'village',x:.36,y:.56}], figures:[{z:6,x:3},{z:9,x:-2.5},{z:13,x:1}], village:1 },
+  { place:'御身神村', text:['……'], spots:[{doc:'chitoniku',x:.30,y:.58},{doc:'mother',x:.68,y:.50}], figures:[{z:5,x:-2.3},{z:8,x:2.6},{z:10.5,x:-.8},{z:13,x:3.5}], infect:1 },
+  { place:'御身神村', text:['神田さん。'], spots:[{doc:'kandaFall',x:.50,y:.60}], figures:[{z:5,x:1.9},{z:8,x:-2.8}], fall:1 },
+  { place:'', text:['飯田は村から逃げた。'], end:1 },
+];
+/* ネタバレなしの山道。土砂は起きず、帰路は通れる。村の手前で血と肉がちらっと見え、引き返す。
+   back:1 の地点では「進む」が「引き返す」になる（必ず最後に置く） */
+const STEPS_OFF = [
+  { place:'御身神山', text:['車で山へ入る。','配信者が入った山。'], spots:[{doc:'enter',x:.30,y:.62}] },
+  { place:'山道', text:['木が深くなってきた。','携帯の電波が無い。'], spots:[{doc:'comm',x:.70,y:.58}], comm:1 },
+  { place:'山道', text:['道は、少しずつ細くなっていく。','この道は、映像で見た道に似ている。'], spots:[{doc:'traceOff',x:.62,y:.55}] },
+  { place:'山中', text:['道の先に、何かが立っている。'], spots:[{doc:'glimpseOff',x:.40,y:.52}], figures:[{z:16,x:1.8}] },
+  { place:'村への道', text:['村はもうすぐだ。','だが、道の脇にも何かがいる。','これ以上は危険だ。戻ろう。'], spots:[{doc:'backOff',x:.64,y:.60}], figures:[{z:12,x:-2.4},{z:18,x:2.2}], back:1 },
+];
+/* ============================================================ */
+
+let STEPS=STEPS_ON, VILLAGE_I=0, END_I=0, VILLAGE_D=0, END_D=0, FIELD_DOCS=[], TREES=[], FIGS=[];
+const pad2=n=>String(n).padStart(2,'0');
+const SPEC_IDS=SPECIMENS.map((_,i)=>'no'+pad2(i+1));
+SPECIMENS.forEach((sp,i)=>{
+  DOCS[SPEC_IDS[i]]={ no:'血と肉 No.'+pad2(i+1), title:'No.'+pad2(i+1)+(sp.name?'　'+sp.name:''), kind:'個体記録', figure:true, img:sp.img,
+    fields:()=>[['名称', sp.name||'（未記入）'],['種類', sp.kind==='純粋種'&&!on()?'不明':(sp.kind||'—')],['確認地点', sp.place||'—']],
+    body:()=>sp.text&&sp.text.length?sp.text:['（記述なし）'] };
+});
+
+const KEY='chitoniku-v3';
+let S={mode:null, view:'desk', desk:0, step:-1, read:[], found:[], cleared:false, max:-1};
+try{const s=JSON.parse(localStorage.getItem(KEY)||'null'); if(s) S=Object.assign(S,s);}catch(e){}
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}};
+const $=id=>document.getElementById(id);
+const g=t=>String(t).replace(/\{(.)\}/g,'<span class="drop">$1</span>');
+const sum=k=>STEPS.slice(0,S.step+1).reduce((a,s)=>a+(s[k]||0),0);
+const infected=()=>STEPS.slice(0,S.step+1).some(s=>s.infect);
+
+/* ---------- 木目（机）を一度だけ描く ---------- */
+function woodTexture(){
+  const c=document.createElement('canvas'); c.width=c.height=520; const x=c.getContext('2d');
+  x.fillStyle='#3d2b1d'; x.fillRect(0,0,520,520);
+  let seed=7; const R=()=>(seed=(seed*16807)%2147483647)/2147483647;
+  for(let i=0;i<260;i++){
+    const y=R()*520, a=.04+R()*.08, w=.6+R()*2.2;
+    x.strokeStyle=R()>.5?`rgba(20,12,6,${a})`:`rgba(120,82,50,${a})`; x.lineWidth=w; x.beginPath();
+    for(let px=0;px<=520;px+=20){ x.lineTo(px, y+Math.sin(px/90+i)*4+Math.sin(px/23+i*3)*1.2); } x.stroke();
+  }
+  return c.toDataURL('image/jpeg',.8);
+}
+const WOOD=woodTexture();
+
+/* ---------- 汚染（血・欠落・ノイズ） ---------- */
+function hashStr(t){ let h=2166136261; for(const c of t){ h^=c.charCodeAt(0); h=Math.imul(h,16777619); } return h>>>0; }
+function srand(n){ let s=(n%2147483646)+1; return ()=>(s=(s*16807)%2147483647)/2147483647; }
+/* 汚れの段階：0=無傷 … 4=記録終了後（二周目） */
+function level(){
+  if(S.cleared) return 4;
+  const m=Math.max(S.max??-1,S.step);
+  if(!on()) return m>=2?1:0;
+  if(m>=STEPS.length-2) return 3;
+  if(m>=VILLAGE_I) return 2.5;
+  if(m>=4) return 2;
+  if(m>=2) return 1;
+  return 0;
+}
+const STAIN_CACHE={};
+const BLOOD=[[132,10,10],[116,8,8],[100,12,9],[86,14,9],[70,10,7]];
+const bcol=(R,a)=>{ const c=BLOOD[R()*BLOOD.length|0]; return `rgba(${c[0]},${c[1]},${c[2]},${Math.max(0,a).toFixed(3)})`; };
+function shape(x,R,cx,cy,r,irr=.4){ // なめらかで不規則な輪郭
+  const n=9+(R()*7|0), pts=[];
+  for(let i=0;i<n;i++){ const t=i/n*Math.PI*2+R()*.3, rr=r*(1-irr/2+R()*irr); pts.push([cx+Math.cos(t)*rr, cy+Math.sin(t)*rr*(.8+R()*.35)]); }
+  x.beginPath(); for(let i=0;i<=n;i++){ const p=pts[i%n], q=pts[(i+1)%n], mx=(p[0]+q[0])/2, my=(p[1]+q[1])/2; i?x.quadraticCurveTo(p[0],p[1],mx,my):x.moveTo(mx,my); } x.closePath();
+}
+function pool(x,R,cx,cy,r,a){ // 溜まり：乾いて縁が濃くなる
+  shape(x,R,cx,cy,r); const gr=x.createRadialGradient(cx,cy,r*.05,cx,cy,r*1.15);
+  gr.addColorStop(0,bcol(R,a*.72)); gr.addColorStop(.7,bcol(R,a*.85)); gr.addColorStop(1,bcol(R,a));
+  x.fillStyle=gr; x.fill(); x.lineWidth=Math.max(.8,r*.03); x.strokeStyle=`rgba(60,8,6,${(a*.5).toFixed(3)})`; x.stroke();
+}
+function soak(x,R,cx,cy,r,a){ // 紙の端から染み込む：輪郭は柔らかく、内側ほど濃い
+  shape(x,R,cx,cy,r,.5); const gr=x.createRadialGradient(cx,cy,0,cx,cy,r);
+  gr.addColorStop(0,bcol(R,a)); gr.addColorStop(.55,bcol(R,a*.7)); gr.addColorStop(.9,bcol(R,a*.25)); gr.addColorStop(1,'rgba(100,10,8,0)');
+  x.fillStyle=gr; x.fill();
+}
+function spatter(x,R,cx,cy,r,a){ // 飛沫：一方向へ飛び、遠いものほど小さく細長い
+  const dir=R()*Math.PI*2, spread=Math.PI*(.35+R()*.7), n=30+R()*50;
+  for(let i=0;i<n;i++){ const t=dir+(R()-.5)*spread, k=Math.pow(R(),.7), d=r*(.2+k*3.2), s=Math.max(.7,r*(.1-.075*k)*(.5+R()));
+    x.save(); x.translate(cx+Math.cos(t)*d, cy+Math.sin(t)*d); x.rotate(t);
+    x.beginPath(); x.ellipse(0,0,s*(1+k*1.8),s*.75,0,0,Math.PI*2); x.fillStyle=bcol(R,a*(.55+R()*.45)); x.fill(); x.restore(); }
+}
+function drip(x,R,cx,cy,len,w,a){ // 細く垂れ、先に玉
+  let px=cx, py=cy; x.strokeStyle=bcol(R,a); x.lineCap='round'; const n=14;
+  for(let i=0;i<n;i++){ const nx=px+(R()-.5)*1.1, ny=py+len/n; x.lineWidth=w*(1-i/(n*1.6)); x.beginPath(); x.moveTo(px,py); x.lineTo(nx,ny); x.stroke(); px=nx; py=ny; }
+  x.fillStyle=bcol(R,a); x.beginPath(); x.ellipse(px,py+w*.25,w*.55,w*.8,0,0,Math.PI*2); x.fill();
+}
+function smear(x,R,x0,y0,x1,y1,wid,a){ // 拭った跡：かすれた筋の束
+  const n=24, nx=-(y1-y0), ny=x1-x0, L=Math.hypot(nx,ny)||1;
+  for(let i=0;i<n;i++){ const u=i/n-.5, off=u*wid, al=a*(.2+R()*.8)*(1-Math.abs(u)*1.4); if(al<=0) continue;
+    const ox=nx/L*off, oy=ny/L*off, e=.55+R()*.45;
+    x.strokeStyle=bcol(R,al); x.lineWidth=wid/n*(1+R()*1.6); x.lineCap='round'; x.beginPath(); x.moveTo(x0+ox,y0+oy);
+    x.quadraticCurveTo((x0+x1)/2+ox+(R()-.5)*14,(y0+y1)/2+oy+(R()-.5)*14, x0+(x1-x0)*e+ox, y0+(y1-y0)*e+oy); x.stroke(); }
+}
+function fingers(x,R,cx,cy,len,ang,a){ // 指で引きずった跡
+  for(let i=0;i<4;i++){ const o=(i-1.5)*15, ox=Math.cos(ang+Math.PI/2)*o, oy=Math.sin(ang+Math.PI/2)*o, l=len*(.65+R()*.45);
+    smear(x,R,cx+ox,cy+oy,cx+ox+Math.cos(ang)*l,cy+oy+Math.sin(ang)*l,10+R()*4,a); }
+}
+function stainURL(key,lv){
+  lv=Math.round(lv*2)/2; if(lv<=0) return '';
+  const k=key+'@'+lv; if(STAIN_CACHE[k]) return STAIN_CACHE[k];
+  const W=600,H=800,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d'); const R=srand(hashStr(key)+7);
+  try{ x.filter='blur(0.6px)'; }catch(e){}
+  const ex=()=>R()<.5?R()*W*.3:W-R()*W*.3;
+  if(lv>=1){ for(let i=0;i<2+R()*3;i++) pool(x,R,ex(),R()*H,2.5+R()*5,.6); spatter(x,R,ex(),R()*H,8+R()*6,.55); }
+  if(lv>=2){ const px=ex(), py=R()*H*.7; pool(x,R,px,py,9+R()*12,.7); spatter(x,R,px,py,18+R()*16,.65); if(R()<.7) drip(x,R,px,py+6,40+R()*110,3+R()*2,.6); }
+  if(lv>=2.5){ const y0=R()*H; smear(x,R,-10,y0,W*(.4+R()*.5),y0+(R()-.5)*160,30+R()*30,.32); }
+  if(lv>=3){ soak(x,R,R()*W,H+30,190+R()*90,.5); for(let i=0;i<2+R()*2;i++) drip(x,R,R()*W,R()*60,70+R()*200,2.5+R()*3,.55);
+    const px=R()*W, py=R()*H*.6; spatter(x,R,px,py,26+R()*20,.7); pool(x,R,px,py,10+R()*10,.75); }
+  if(lv>=4){ fingers(x,R,W*(.2+R()*.6),H*(.15+R()*.5),140+R()*120,Math.PI*(.35+R()*.3),.42);
+    soak(x,R,R()<.5?-20:W+20,R()*H*.4,170+R()*90,.55); for(let i=0;i<3;i++) drip(x,R,R()*W,0,120+R()*320,2+R()*3.5,.55);
+    const px=R()*W, py=R()*H; spatter(x,R,px,py,34+R()*24,.75); pool(x,R,px,py,14+R()*12,.8); }
+  return STAIN_CACHE[k]=c.toDataURL('image/png');
+}
+const stainSpan=(key,lv=level())=>{ const u=stainURL(key,lv); return u?`<span class="stain" style="background-image:url(${u})" aria-hidden="true"></span>`:''; };
+let DESK_BLOOD='';
+function deskBlood(){
+  if(DESK_BLOOD) return DESK_BLOOD;
+  const W=1400,H=1000,c=document.createElement('canvas'); c.width=W; c.height=H; const x=c.getContext('2d'); const R=srand(4242);
+  try{ x.filter='blur(0.8px)'; }catch(e){}
+  for(let i=0;i<2;i++){ const y=200+R()*600; smear(x,R,-40,y,W+40,y+(R()-.5)*300,90+R()*70,.5); }   // 引きずった跡
+  for(let i=0;i<4;i++){ const px=R()*W, py=R()*H; pool(x,R,px,py,40+R()*70,.6); spatter(x,R,px,py,50+R()*50,.6); }
+  for(let i=0;i<3;i++) fingers(x,R,R()*W,R()*H,160+R()*140,R()*Math.PI*2,.45);
+  for(let i=0;i<10;i++) pool(x,R,R()*W,R()*H,3+R()*8,.6);
+  x.filter='none'; x.strokeStyle='rgba(12,6,4,.45)'; x.lineWidth=1.6; // 引っかき傷
+  for(let i=0;i<5;i++){ const sx=R()*W, sy=R()*H, a=R()*Math.PI; for(let j=0;j<4;j++){ x.beginPath(); x.moveTo(sx+j*8,sy+j*3); x.lineTo(sx+j*8+Math.cos(a)*(120+R()*80),sy+j*3+Math.sin(a)*(120+R()*80)); x.stroke(); } }
+  return DESK_BLOOD=c.toDataURL('image/png');
+}
+/* 文字の欠落：割合 ratio の文字を {x} にする */
+function decay(t,ratio,seed){
+  if(!ratio) return t; const R=srand(hashStr(String(t))+seed); let out='', inBrace=false, inTag=false;
+  for(const ch of String(t)){
+    if(ch==='<') inTag=true; if(ch==='{') inBrace=true;
+    if(!inTag && !inBrace && ch.trim() && !'。、'.includes(ch) && R()<ratio) out+='{'+ch+'}'; else out+=ch;
+    if(ch==='>') inTag=false; if(ch==='}') inBrace=false;
+  }
+  return out;
+}
+function decayOf(d){
+  if(!d.decay) return S.cleared?.04:0;
+  if(S.cleared) return .18;
+  const k=Math.max(S.max??-1,S.step)-VILLAGE_I; return k<0?0:Math.min(.24,.05+k*.07);
+}
+const flash=()=>{ const f=document.createElement('div'); f.className='flash'; document.body.appendChild(f); setTimeout(()=>f.remove(),520); };
+
+/* ---------- 報告書 ---------- */
+function reportHTML(id, opts={}){
+  const d=DOCS[id]; const dr=decayOf(d), D=t=>g(decay(t,dr,3));
+  const rows=d.fields().map(([k,v,b])=>`<tr><th>${k}</th><td${b?' class="ng"':''}>${D(v)}</td></tr>`).join('');
+  const body=d.body().filter(Boolean).map(p=>{
+    if(typeof p==='string') return `<p>${D(p)}</p>`;
+    if(p.sec) return `<div class="sec">${p.sec}</div>`;
+    if(p.spoiler && !on()) return '';
+    return `<p>${D(p.t)}${p.spoiler?'<span class="sp">ネタバレ</span>':''}</p>`;
+  }).join('');
+  const head = opts.inline ? '' : `<button class="close" type="button" data-close>閉じる ✕</button>
+    ${opts.fromList?'<button class="backlist" type="button" data-list>← 資料一覧</button>':''}`;
+  const inner = `${head}
+    <div class="rhead"><span>${d.no}</span><span>${d.kind}</span></div>
+    <h3>${d.title}</h3>${d.ruby?`<p class="ruby">${d.ruby}</p>`:'<div style="height:10px"></div>'}
+    ${d.hanko?`<span class="hanko">${d.hanko}</span>`:''}
+    ${d.figure?(()=>{const src=d.img||CHITONIKU_IMG; return `<figure class="fig"><img src="${src||PLACEHOLDER}" alt="${d.title}"><figcaption>${src?d.title:d.title+'（図版・仮）'}</figcaption></figure>`;})():''}
+    <div class="rbody${d.person?' with-photo':''}">${d.person?`<div class="photo${photoState(id)}"><span>PHOTO</span></div>`:''}<div style="min-width:0"><table>${rows}</table></div></div>
+    ${body}
+    ${d.go && S.view==='desk' ? goButton() :''}
+    <div class="foot">御身神山事案 ／ ${d.no}</div>`;
+  return opts.inline ? inner : `<article class="report paper${d.person?' person-doc':''}${S.cleared?' '+tornOf(id):''}" role="dialog" aria-label="${d.title}">${stainSpan(id)}${inner}</article>`;
+}
+function goButton(){
+  const label=S.cleared?'御身神山へ向かう':(S.step>=0?'御身神山へ戻る':'御身神山へ向かう');
+  if(!S.cleared) return `<button class="go" type="button" data-go>${label}</button>`;
+  const R=srand(9); return `<button class="go broken" type="button" data-go aria-label="${label}">${[...label].map(c=>`<span style="transform:translate(${(R()*6-3)|0}px,${(R()*8-4)|0}px) rotate(${(R()*20-10)|0}deg)">${c}</span>`).join('')}</button>`;
+}
+function tornOf(id){ const n=hashStr(id)%4; return n?'torn'+n:''; }
+function photoState(id){
+  if(!S.cleared) return '';
+  return id==='iida'?'':' void';
+}
+function openDoc(id, opts){
+  if(S.view==='desk' && !S.read.includes(id)){S.read.push(id); save();}
+  if(S.view==='forest' && !S.found.includes(id)){S.found.push(id); save();}
+  $('reader').innerHTML=reportHTML(id,opts); $('reader').hidden=false;
+  wireReader(); $('reader').querySelector('[data-close]').focus(); updateTop();
+  if(S.cleared || (S.view==='forest' && S.step>=3)){ const a=$('reader').querySelector('.report'); a.classList.add('jolt'); if(F) glitch(.5,160); }
+}
+function wireReader(){
+  const r=$('reader');
+  r.querySelectorAll('[data-close]').forEach(b=>b.onclick=closeReader);
+  r.querySelectorAll('[data-list]').forEach(b=>b.onclick=openFiles);
+  r.querySelectorAll('[data-doc]').forEach(b=>b.onclick=()=>openDoc(b.dataset.doc,{fromList:true}));
+  r.querySelectorAll('[data-go]').forEach(b=>b.onclick=goMountain);
+}
+function closeReader(){ $('reader').hidden=true; S.view==='desk' ? renderDesk() : refreshSpots(); updateTop(); }
+$('reader').addEventListener('click',e=>{ if(e.target.id==='reader') closeReader(); });
+document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('reader').hidden) closeReader(); });
+
+function collected(){
+  const all=[...DESK_DOCS, ...PEOPLE.map(p=>p.id)];
+  const spec=(S.cleared||infected())?SPEC_IDS.slice():[];
+  if(S.cleared) return {desk:all, field:FIELD_DOCS.slice(), spec};
+  return {desk:all.filter(id=>S.read.includes(id)), field:S.found.filter(id=>!SPEC_IDS.includes(id)), spec};
+}
+function openFiles(){
+  if(S.cleared && !openFiles.busy){ openFiles.busy=true; flash(); setTimeout(()=>{ openFiles.busy=false; openFilesNow(); },260); return; }
+  openFilesNow();
+}
+function openFilesNow(){
+  const c=collected(); const n=c.desk.length+c.field.length+c.spec.length; const R=srand(77);
+  const li=id=>`<li${S.cleared?` style="--r:${(R()*5-2.5).toFixed(1)}deg;--dx:${(R()*14-7)|0}px"`:''}>${S.cleared?stainSpan(id+'-tab',1):''}<button type="button" data-doc="${id}"><span class="n">${DOCS[id].no}</span><span>${DOCS[id].title}</span></button></li>`;
+  const pile=S.cleared?' pile':'';
+  $('reader').innerHTML=`<article class="report paper" role="dialog" aria-label="資料一覧">${stainSpan('index')}
+    <button class="close" type="button" data-close>閉じる ✕</button>
+    <div class="rhead"><span>INDEX</span><span>綴じられた資料 ${n}件</span></div>
+    <h3>資料一覧</h3><div style="height:6px"></div>
+    <div class="files-h">署の資料</div><ul class="files${pile}">${c.desk.map(li).join('')||'<li class="lock">まだありません。</li>'}</ul>
+    <div class="files-h">現地の報告書</div><ul class="files${pile}">${c.field.map(li).join('')||'<li class="lock">まだありません。</li>'}
+      </ul>
+    <div class="files-h">血と肉</div><ul class="files${pile}">${c.spec.length?c.spec.map(li).join(''):'<li class="lock">【血と肉】この資料は現在閲覧できません。</li>'}</ul>
+    <p class="note" style="margin-top:16px">${S.cleared?'記録終了 ／ すべての資料を閲覧できます。':'閲覧区分：'+(infected()?'<b style="color:#a8302b">感染</b>':'一般')}</p>
+    ${S.cleared?'<button class="reset" type="button" id="wipe">記録を消して、最初の状態に戻す</button>':''}</article>`;
+  $('reader').hidden=false; wireReader();
+  const w=$('wipe'); if(w) w.onclick=()=>{ S={mode:S.mode, view:'desk', desk:0, step:-1, read:[], found:[], cleared:false, max:-1}; save(); $('reader').hidden=true; document.body.classList.remove('ruin'); renderDesk(); updateTop(); };
+}
+
+/* ---------- 上部 ---------- */
+function updateTop(){
+  const c=collected();
+  $('fileCount').textContent=c.desk.length+c.field.length+c.spec.length;
+  $('spoilBtn').innerHTML='ネタバレ：<b>'+(on()?'あり':'なし')+'</b>';
+  document.body.classList.toggle('ruin',!!S.cleared);
+  const r=$('retreat'); r.hidden=S.view!=='forest';
+  if(S.cleared){ r.disabled=false; r.textContent=S.view==='forest'?garble('署へ戻る'):'署へ戻る'; return; }   // 二周目はなかなか戻れない
+  r.disabled=sum('ret')>0; r.textContent=r.disabled?'帰路：通行不能':'署へ戻る';
+}
+
+/* ---------- 机 ---------- */
+function renderDesk(anim){
+  stopForest();
+  const ruin=!!S.cleared; if(ruin) S.desk=2;
+  const RR=srand(31);
+  const mess=(r)=>ruin?`--r:${(parseFloat(r)*3+(RR()*8-4)).toFixed(1)}deg;--dx:${(RR()*30-15)|0}px;--dy:${(RR()*24-8)|0}px;`:`--r:${r};`;
+  let h=`<section class="desk${ruin?' ruin':''}" style="background-image:url(${WOOD})">${ruin?`<div class="desk-blood" style="background-image:url(${deskBlood()})"></div>`:''}<div class="desk-inner">`;
+  if(S.desk===0){
+    h+=`<button class="folder" id="folder" type="button" aria-label="捜査資料を開く">
+      <span class="back"></span><span class="tab"></span>
+      <span class="front"><span class="lbl"><small>捜査資料</small><b>御身神山事案</b></span><span class="secret">部外秘</span></span></button>
+      <p class="desk-hint">資料を開く</p>`;
+  }else if(S.desk===1){
+    h+=`<div class="paper lead report" style="max-width:620px">${reportHTML('case',{inline:true})}
+      <button class="go" id="toPeople" type="button" style="background:#1f3a64">関係者の資料を見る</button></div>`;
+  }else{
+    h+=`<div class="zone"><span class="zone-label">関係者</span>
+      <div class="people">${PEOPLE.map((p,i)=>`<button type="button" class="paper person${S.read.includes(p.id)&&!ruin?' done':''}${ruin?' '+tornOf(p.id+'c'):''}" data-doc="${p.id}" style="${mess(p.r)}animation-delay:${anim?i*.18:0}s">
+        ${stainSpan(p.id+'-card')}<span class="clip"></span><span class="photo${photoState(p.id)}"><span>PHOTO</span></span>
+        <span><span class="nm">${ruin&&p.id==='kanda'?`<s>${p.name}</s>`:p.name}</span><br><span class="rb">${p.ruby}</span></span>
+        ${p.age?`<span class="age">${p.age}歳</span>`:''}<span class="ln">${p.line}</span></button>`).join('')}</div></div>
+      <div class="zone" style="margin-top:40px"><span class="zone-label">捜査資料</span>
+      <div class="docs">${DESK_DOCS.map((id,i)=>{const d=DOCS[id];const rr=['-.8deg','1deg','-1.6deg'][i];
+        return `<button type="button" class="paper sheet${S.read.includes(id)&&!ruin?' done':''}${ruin?' '+tornOf(id+'s'):''}" data-doc="${id}" style="${mess(rr)}animation-delay:${anim?(PEOPLE.length*.18+i*.2):0}s">${stainSpan(id+'-sheet')}
+        ${d.go?'<span class="tag">現地へ</span>':''}<span class="no">${d.no}</span><span class="t">${d.title}</span>
+        <span class="x">${g(typeof d.body()[0]==='string'?d.body()[0]:'')}</span><span class="k">${d.kind}</span></button>`;}).join('')}</div></div>`;
+  }
+  h+='</div></section>';
+  $('app').innerHTML=h;
+  const f=$('folder'); if(f) f.onclick=()=>{ f.classList.add('opening'); setTimeout(()=>{ S.desk=1; if(!S.read.includes('case')) S.read.push('case'); save(); renderDesk(); updateTop(); },850); };
+  const tp=$('toPeople'); if(tp) tp.onclick=()=>{ S.desk=2; save(); renderDesk(true); window.scrollTo({top:0}); };
+  $('app').querySelectorAll('[data-doc]').forEach(b=>b.onclick=()=>openDoc(b.dataset.doc));
+}
+function goMountain(){
+  $('reader').hidden=true; S.view='forest';
+  if(S.step<0) S.step=0;
+  save(); updateTop(); renderForest(); window.scrollTo(0,0);
+}
+
+/* ---------- 森（一人称の山道） ---------- */
+const STEP_LEN=7;
+const pathX=d=>Math.sin(d*0.11)*2.2+Math.sin(d*0.043+1)*1.6;
+let F=null;
+function rng(n){ let s=(n*9301+49297)%233280; return ()=>((s=(s*9301+49297)%233280)/233280); }
+function buildTrees(){ TREES=(()=>{ const t=[]; for(let k=1;k<Math.ceil(END_D/0.55)+80;k++){ const r=rng(k*13+5); const d=k*0.55;
+  const n=1+Math.floor(r()*2);
+  for(let j=0;j<n;j++){ const side=r()>.5?1:-1; const X=side*(1.7+Math.pow(r(),1.6)*9);
+    t.push({d:d+r()*.5, X, w:.22+r()*.28, h:9+r()*7, lean:(r()-.5)*.08, f:r(), house: d>VILLAGE_D && d<END_D-3 && r()<.22 && Math.abs(X)>2.5 && Math.abs(X)<7}); }
+    if(r()<.7){ const side=r()>.5?1:-1; t.push({d:d+r()*.5, X:side*(1.35+r()*4), bush:true, h:.9+r()*1.1, f:r()}); } }
+  return t; })(); }
+/* 歩くたびに少しずつ暗く、赤くなる（1歩目 → 最後）。STEPS より段数が多くても少なくても自動で割り振る */
+const KEYPAL=[
+  {sky:'#5f6a58',fog:'#b3bcad',ground:'#39402f',path:'#766e5a',trunk:'#22241d',leaf:'#2a3322',k:6.2,vig:.48,red:0},
+  {sky:'#4a5047',fog:'#8c9187',ground:'#2f3328',path:'#615a4c',trunk:'#1c1d18',leaf:'#23291d',k:5.0,vig:.6,red:0},
+  {sky:'#3c3834',fog:'#6c645e',ground:'#2a2622',path:'#524840',trunk:'#181614',leaf:'#1f1d18',k:4.4,vig:.68,red:.05},
+  {sky:'#322624',fog:'#5a4844',ground:'#271d1b',path:'#4b3a35',trunk:'#161010',leaf:'#1f1614',k:4.0,vig:.75,red:.1},
+  {sky:'#261211',fog:'#4b2622',ground:'#220f0e',path:'#472622',trunk:'#120808',leaf:'#210e0c',k:3.6,vig:.8,red:.16},
+  {sky:'#1a0909',fog:'#3c1714',ground:'#1b0a09',path:'#3c1b18',trunk:'#0e0505',leaf:'#1a0807',k:3.2,vig:.86,red:.22},
+];
+const hex=h=>[1,3,5].map(i=>parseInt(h.slice(i,i+2),16));
+const mix=(a,b,t)=>{const A=hex(a),B=hex(b);return '#'+A.map((v,i)=>Math.round(v+(B[i]-v)*t).toString(16).padStart(2,'0')).join('');};
+function lerpPal(a,b,t){ const o={}; for(const k in a) o[k]= typeof a[k]==='number' ? a[k]+(b[k]-a[k])*t : mix(a[k],b[k],t); return o; }
+const RUIN={sky:'#140505',fog:'#3e100d',ground:'#1a0707',path:'#3a1411',trunk:'#0c0303',leaf:'#190605',k:3.4,vig:.88,red:.28};
+function palAt(step){
+  if(S.cleared){ const t=Math.max(0,step)/Math.max(1,END_I); return lerpPal(lerpPal(KEYPAL[3],KEYPAL[5],.6),RUIN,t); }
+  const u=Math.max(0,step)/Math.max(1,END_I)*(KEYPAL.length-1)*(on()?1:.5), i=Math.min(KEYPAL.length-2,Math.floor(u));
+  return lerpPal(KEYPAL[i],KEYPAL[i+1],u-i);
+}
+function phaseOf(step){ if(STEPS.slice(0,step+1).some(s=>s.infect)) return 'infected'; if(step>=VILLAGE_I) return 'village'; return 'mountain'; }
+
+/* 血と肉の人影 */
+const PLACEHOLDER='data:image/svg+xml,'+encodeURIComponent(`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 160"><g fill="#070404"><ellipse cx="31" cy="16" rx="10" ry="13"/><path d="M20 30 Q30 26 41 31 L46 70 Q50 90 44 97 L40 72 L41 100 L44 157 L36 157 L31 108 L27 157 L18 157 L21 100 L20 74 L14 104 Q9 96 13 78 Z"/></g></svg>`);
+const FIG_IMG=new Image(); FIG_IMG.onload=()=>{ if(F) draw(); }; FIG_IMG.onerror=()=>{ if(FIG_IMG.src!==PLACEHOLDER) FIG_IMG.src=PLACEHOLDER; };
+FIG_IMG.src=CHITONIKU_IMG||PLACEHOLDER;
+function buildFigs(){
+  FIGS=STEPS.flatMap((s,i)=>(s.figures||[]).map(f=>({d:i*STEP_LEN+f.z, X:f.x, from:i, h:f.h||1.8, fig:true})));
+  FIGS.forEach((f,i)=>{ if(CREATURE_IMGS.length) f.img=CREATURE_IMGS[i%CREATURE_IMGS.length]; });
+}
+/* ネタバレの有無で山道（STEPS）を切り替える */
+function setRoute(){
+  STEPS=on()?STEPS_ON:STEPS_OFF;
+  FIELD_DOCS=STEPS.flatMap(s=>(s.spots||[]).map(x=>x.doc));
+  const vi=STEPS.findIndex(s=>s.village);
+  VILLAGE_I=vi<0?Infinity:vi; END_I=STEPS.length-1;
+  VILLAGE_D=VILLAGE_I*STEP_LEN-3; END_D=END_I*STEP_LEN+5;
+  buildTrees(); buildFigs();
+}
+/* ---------- 二周目：血と肉に汚染された村（あなたも血と肉として歩く） ---------- */
+const STEPS2=SPEC_IDS.map((id,i)=>({ spots:[{doc:id, x:[.3,.68,.42,.6,.35,.7,.46,.28,.64,.5][i], y:[.6,.55,.66,.5,.58,.62,.52,.64,.57,.6][i]}] }));
+const PLACES2=['御身神村','御身神山','山道','村への道','御身神村','飯田宅','御身神村','山中','御身神村','御身神村'];
+const LEN2=STEPS2.length*STEP_LEN+12;
+const WORLD2=(()=>{ const R=srand(919), a=[];
+  for(let d=.6; d<LEN2+42; d+=.5+R()*.4){ const side=R()<.5?-1:1, far=Math.pow(R(),1.3);
+    const house=R()<.36; a.push({d, X:side*(house?2.6+far*6:1.8+far*8), w:.2+R()*.25, h:8+R()*6, lean:(R()-.5)*.1, f:R(), house, wrap:true});
+    if(R()<.5) a.push({d:d+R()*.3, X:(R()<.5?-1:1)*(1.35+R()*4), bush:true, h:.8+R()*1.2, f:R()}); }
+  for(let d=3; d<LEN2+42; d+=1.2+R()*1.6){ const onPath=R()<.25; a.push({d, X:onPath?(R()-.5)*1.6:(R()<.5?-1:1)*(1.3+R()*5), h:1.5+R()*.6, fig:true, img:(()=>{ const pool=SPECIMENS.map(x=>x.img).filter(Boolean).concat(CREATURE_IMGS); return pool.length?pool[(R()*pool.length)|0]:''; })()}); }
+  return a; })();
+/* 文字化け：UTF-8 を Shift_JIS として読んだ形にする */
+const MOJI='縺繧繝螟譁蟄鬮荳莠蛻遘譛隱髢ｯｮｰｱｲｳｴｵｶｷｸｹｺｻｼｽ竊･・';
+function garble(t,seed=1){
+  try{ const out=new TextDecoder('shift_jis').decode(new TextEncoder().encode(t)); if(out && out!==t) return out.replace(/[\ufffd\u0000-\u001f\u007f-\u009f]/g,'・'); }catch(e){}
+  const R=srand(hashStr(t)+seed); let o=''; for(let i=0;i<t.length*1.5;i++) o+=MOJI[(R()*MOJI.length)|0]; return o;
+}
+const esc=t=>String(t).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'})[c]);
+const IMGS={};
+function imgOf(src){ if(!src) return FIG_IMG; if(IMGS[src]) return IMGS[src]; const im=new Image(); im.onload=()=>{ if(F) draw(); }; im.src=src; return IMGS[src]=im; }
+const HOUSE_I=HOUSE_IMG?imgOf(HOUSE_IMG):null;
+/* 明るい緑のままだと浮くので、一度だけ暗い色に描き直して使う */
+function sprite(src,filter){
+  const sp={c:null}; const im=new Image();
+  im.onload=()=>{ const H=420, W=Math.max(1,Math.round(H*im.naturalWidth/im.naturalHeight)); const c=document.createElement('canvas'); c.width=W; c.height=H;
+    const x=c.getContext('2d'); try{ x.filter=filter; }catch(e){} x.drawImage(im,0,0,W,H); sp.c=c; if(F) draw(); };
+  im.src=src; return sp;
+}
+const TREE_SP=(TREE_IMG?[TREE_IMG]:TREE_IMGS).map(src=>sprite(src,'brightness(.36) saturate(.42) contrast(1.1)'));
+const BUSH_SP=BUSH_IMGS.map(src=>sprite(src,'brightness(.32) saturate(.4) contrast(1.1)'));
+/* 葉の色を、今いる場所の色（だんだん暗く赤く）に寄せる。色は粗く丸めて使い回す */
+function tinted(sp,color){
+  const q=hex(color).map(v=>Math.round(v/12)*12), key=q.join(','); sp.t=sp.t||{};
+  if(sp.t[key]) return sp.t[key];
+  const c=document.createElement('canvas'); c.width=sp.c.width; c.height=sp.c.height; const x=c.getContext('2d');
+  x.drawImage(sp.c,0,0); x.globalCompositeOperation='source-atop'; x.fillStyle=`rgba(${q.join(',')},.72)`; x.fillRect(0,0,c.width,c.height);
+  const ks=Object.keys(sp.t); if(ks.length>40) delete sp.t[ks[0]];
+  return sp.t[key]=c;
+}
+const ready=im=>im&&im.complete&&im.naturalWidth;
+
+function renderForest(){
+  const lap2=!!S.cleared;
+  if(lap2 && (S.step<0||S.step>=STEPS2.length)) S.step=0;
+  $('app').innerHTML=`<section class="forest" id="forest">
+    <canvas id="cv" aria-label="山道の景色" role="img"></canvas><canvas id="nz" class="nz" aria-hidden="true"></canvas>
+    <div class="hud-tl"><div class="lb">現在地</div><div class="pl" id="place"></div></div>
+    <div class="hud-tr" id="hud"></div>
+    <div id="spots"></div>
+    <div class="caption" id="cap"></div>
+    <button class="walk" id="walk" type="button">進む</button>
+  </section>`;
+  const cv=$('cv');
+  F={cv, ctx:cv.getContext('2d'), cam:S.step*STEP_LEN, bob:0, anim:false, ro:null, lap2, tries:0, pal:lap2?RUIN:palAt(S.step)};
+  if(lap2){ $('forest').querySelector('.lb').textContent=garble('現在地'); $('cv').setAttribute('aria-label','汚染された村'); }
+  F.nz=$('nz');
+  F.ro=new ResizeObserver(()=>{ sizeCanvas(); draw(); }); F.ro.observe($('forest'));
+  F.nzT=setInterval(drawNoise,90);
+  if(S.cleared){ const loop=()=>{ if(!F) return; glitch(.35+Math.random()*.4,90+Math.random()*180); F.gT=setTimeout(loop,2200+Math.random()*4200); }; F.gT=setTimeout(loop,1500); }
+  sizeCanvas(); draw(); arrive(false);
+  $('walk').onclick=advance;
+}
+function stopForest(){ if(F){ F.ro&&F.ro.disconnect(); clearInterval(F.nzT); clearTimeout(F.gT); } F=null; }
+/* ノイズ：段階が進むほど画面の端に残り、歩くたび一瞬乱れる */
+const NZ=(()=>{ const c=document.createElement('canvas'); c.width=c.height=192; const x=c.getContext('2d'); const im=x.createImageData(192,192);
+  for(let i=0;i<im.data.length;i+=4){ const v=Math.random()*255|0; im.data[i]=im.data[i+1]=im.data[i+2]=v; im.data[i+3]=255; } x.putImageData(im,0,0); return c; })();
+function noiseBase(){ if(S.cleared) return .13; return Math.max(0,(S.step-1)/Math.max(1,END_I-1))*.11*(on()?1:.5); }
+function drawNoise(){
+  if(!F||!F.nz) return; const c=F.nz, x=c.getContext('2d'), W=F.W, H=F.H; x.clearRect(0,0,W,H);
+  const burst=F.burst&&performance.now()<F.burst.until ? F.burst.s : 0;
+  const base=noiseBase(); if(base<=0 && !burst) return;
+  const pat=x.createPattern(NZ,'repeat'); x.save(); x.translate(-Math.random()*192,-Math.random()*192);
+  x.globalAlpha=Math.min(.5,base+burst*.35); x.fillStyle=pat; x.fillRect(0,0,W+192,H+192); x.restore();
+  if(!burst){ // 中心は消して端だけ残す
+    const inner=Math.min(W,H)*(S.cleared?.18:.42-.2*Math.min(1,S.step/END_I));
+    const gr=x.createRadialGradient(W/2,H/2,inner,W/2,H/2,Math.max(W,H)*.62); gr.addColorStop(0,'rgba(0,0,0,1)'); gr.addColorStop(1,'rgba(0,0,0,0)');
+    x.globalCompositeOperation='destination-out'; x.fillStyle=gr; x.fillRect(0,0,W,H); x.globalCompositeOperation='source-over';
+  } else { // ずれた帯
+    for(let i=0;i<2+burst*6;i++){ const y=Math.random()*H, h=4+Math.random()*30; try{ x.drawImage(F.cv,0,y*F.dpr,F.cv.width,h*F.dpr,(Math.random()-.5)*60*burst,y,W,h);}catch(e){} }
+    x.fillStyle=`rgba(0,0,0,${burst*.3})`; x.fillRect(0,0,W,H);
+  }
+}
+function glitch(s,ms){ if(!F) return; F.burst={s,until:performance.now()+ms}; }
+function sizeCanvas(){ const r=F.cv.getBoundingClientRect(), dpr=Math.min(2,window.devicePixelRatio||1);
+  F.W=r.width; F.H=r.height; F.dpr=dpr; F.cv.width=Math.round(r.width*dpr); F.cv.height=Math.round(r.height*dpr); F.ctx.setTransform(dpr,0,0,dpr,0,0);
+  if(F.nz){ F.nz.width=r.width; F.nz.height=r.height; } }
+
+function draw(){
+  if(!F) return;
+  const {ctx,W,H,cam,pal}=F; const hz=H*0.44+F.bob, camH=1.55;
+  const f=Math.min((H-hz)/2.6, W/3.2);
+  const cx=pathX(cam);
+  const P=(X,Y,z)=>[W/2+(X-cx)*f/z, hz+(camH-Y)*f/z];
+  const fogA=z=>1-Math.exp(-z/pal.k);
+  // 空と霧
+  let gr=ctx.createLinearGradient(0,0,0,hz); gr.addColorStop(0,pal.sky); gr.addColorStop(1,pal.fog);
+  ctx.fillStyle=gr; ctx.fillRect(0,0,W,hz+1);
+  // 地面（崖の先は無い）
+  const endZ=END_D-cam;
+  const edge = !F.lap2 && on();
+  const groundTop = (edge && S.step>=STEPS.length-1 && endZ>0) ? P(0,0,endZ)[1] : hz;
+  ctx.fillStyle=pal.fog; ctx.fillRect(0,hz,W,H-hz);
+  gr=ctx.createLinearGradient(0,groundTop,0,H); gr.addColorStop(0,pal.fog); gr.addColorStop(.35,mix(pal.ground,pal.fog,.4)); gr.addColorStop(1,pal.ground);
+  ctx.fillStyle=gr; ctx.fillRect(0,groundTop,W,H-groundTop);
+  // 道
+  const L=[],Rr=[]; const zMax=!edge?40:Math.min(40,endZ>0?endZ:40);
+  for(let z=0.35; z<zMax; z*=1.08){ const d=cam+z, X=pathX(d); L.push(P(X-1.15,0,z)); Rr.unshift(P(X+1.15,0,z)); }
+  if(L.length){ ctx.beginPath(); ctx.moveTo(...L[0]); L.forEach(p=>ctx.lineTo(...p)); Rr.forEach(p=>ctx.lineTo(...p)); ctx.closePath();
+    gr=ctx.createLinearGradient(0,L[L.length-1][1],0,H); gr.addColorStop(0,pal.fog); gr.addColorStop(.5,mix(pal.path,pal.fog,.3)); gr.addColorStop(1,pal.path);
+    ctx.fillStyle=gr; ctx.fill(); }
+  // 木と家（奥から）
+  const world=F.lap2?WORLD2:[...TREES,...FIGS.filter(q=>S.step>=q.from)], lim=!edge?Infinity:END_D;
+  const vis=world.filter(t=>{const z=t.d-cam; return z>0.3 && z<42 && t.d<lim;}).sort((a,b)=>b.d-a.d);
+  for(const t of vis){
+    const z=t.d-cam, X=t.X+pathX(t.d), fa=fogA(z);
+    if(!t.fig && Math.abs(t.X)<(t.bush?1.3:1.6)) continue;
+    const [bx,by]=P(X,0,z);
+    if(bx<-400||bx>W+400) continue;
+    if(t.fig){
+      let im=imgOf(t.img||''); if(!ready(im)) im=FIG_IMG; if(!ready(im)) continue;
+      // 描いた絵は元の大きさの比率で立たせる（いちばん背の高い絵 ≒ 2m）
+      const hw = im===FIG_IMG ? t.h : Math.max(.45, im.naturalHeight/150*2.0)*(t.h/1.8);
+      const hh=hw*f/z, ww=hh*(im.naturalWidth/im.naturalHeight||.375);
+      ctx.globalAlpha=Math.max(.04,1-fa*.92); if(im!==FIG_IMG) ctx.filter='brightness(.72)'; ctx.drawImage(im,bx-ww/2,by-hh,ww,hh); ctx.filter='none'; ctx.globalAlpha=1;
+      continue;
+    }
+    if(t.bush){
+      const bsp=BUSH_SP.length?BUSH_SP[Math.floor(t.f*991)%BUSH_SP.length]:null; if(!bsp||!bsp.c||z<.9) continue;
+      const hh=t.h*f/z, w=hh*bsp.c.width/bsp.c.height;
+      ctx.globalAlpha=Math.max(.04,1-fa); ctx.drawImage(tinted(bsp,pal.leaf),bx-w/2,by-hh*.92,w,hh); ctx.globalAlpha=1; continue;
+    }
+    if(t.house && ready(HOUSE_I)){ const w=3.6*f/z, hh=w*(HOUSE_I.naturalHeight/HOUSE_I.naturalWidth);
+      ctx.globalAlpha=Math.max(.05,1-fa*.95); ctx.drawImage(HOUSE_I,bx-w/2,by-hh,w,hh); ctx.globalAlpha=1; continue; }
+    if(t.house){
+      const w=3.2*f/z, hh=2.4*f/z, roof=1.6*f/z;
+      ctx.fillStyle=mix(pal.trunk,pal.fog,fa*.95);
+      ctx.fillRect(bx-w/2,by-hh,w,hh);
+      ctx.beginPath(); ctx.moveTo(bx-w/2-w*.1,by-hh); ctx.lineTo(bx,by-hh-roof); ctx.lineTo(bx+w/2+w*.1,by-hh); ctx.fill();
+      continue;
+    }
+    if(F.lap2 ? t.f<.4 : (t.d>VILLAGE_D && t.f<.6)) continue;
+    const tsp=TREE_SP.length?TREE_SP[Math.floor(t.f*997)%TREE_SP.length]:null;
+    if(tsp&&tsp.c){ const hh=(6.5+t.f*4.5)*f/z, w=hh*tsp.c.width/tsp.c.height, lean=t.lean*.6;
+      ctx.globalAlpha=Math.max(.04,1-fa); ctx.save(); ctx.translate(bx,by); ctx.rotate(lean); ctx.drawImage(tinted(tsp,pal.leaf),-w/2,-hh,w,hh); ctx.restore(); ctx.globalAlpha=1; continue; }
+    const tw=t.w*f/z, top=P(X,t.h,z)[1];
+    ctx.fillStyle=mix(pal.trunk,pal.fog,fa);
+    ctx.beginPath(); ctx.moveTo(bx-tw*.6,by); ctx.lineTo(bx+tw*.6,by); ctx.lineTo(bx+tw*.35+t.lean*(by-top),top); ctx.lineTo(bx-tw*.35+t.lean*(by-top),top); ctx.fill();
+    // 葉（近すぎる木は幹だけ）
+    if(z>2.4){
+    ctx.fillStyle=mix(pal.leaf,pal.fog,fa);
+    const ly=P(X,t.h*0.62,z)[1], lr=(1.6+t.f*1.4)*f/z;
+    ctx.beginPath(); ctx.ellipse(bx+t.lean*(by-ly),ly,lr*1.1,lr*1.5,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(bx+t.lean*(by-ly)-lr*.6,ly+lr*.9,lr*.9,lr*1.1,0,0,Math.PI*2); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(bx+t.lean*(by-ly)+lr*.7,ly+lr*.6,lr*.8,lr*1.2,0,0,Math.PI*2); ctx.fill();
+    }
+    // 下草
+    if(z>1.6 && z<14){ ctx.fillStyle=mix(pal.leaf,pal.fog,fa*.9); ctx.beginPath(); ctx.ellipse(bx,by,tw*3,tw*1.1,0,Math.PI,0); ctx.fill(); }
+  }
+  // 樹冠の暗がりと周辺減光
+  gr=ctx.createLinearGradient(0,0,0,H*.45); gr.addColorStop(0,'rgba(0,0,0,.55)'); gr.addColorStop(1,'rgba(0,0,0,0)'); ctx.fillStyle=gr; ctx.fillRect(0,0,W,H*.45);
+  gr=ctx.createRadialGradient(W/2,H*.55,Math.min(W,H)*.22,W/2,H*.55,Math.max(W,H)*.75); gr.addColorStop(0,'rgba(0,0,0,0)'); gr.addColorStop(1,`rgba(0,0,0,${pal.vig})`);
+  ctx.fillStyle=gr; ctx.fillRect(0,0,W,H);
+  if(pal.red>0){ ctx.fillStyle=`rgba(120,10,6,${pal.red})`; ctx.globalCompositeOperation='multiply'; ctx.fillRect(0,0,W,H); ctx.globalCompositeOperation='source-over';
+    gr=ctx.createRadialGradient(W/2,H*.5,Math.min(W,H)*.3,W/2,H*.5,Math.max(W,H)*.8); gr.addColorStop(0,'rgba(90,0,0,0)'); gr.addColorStop(1,`rgba(90,0,0,${pal.red*1.6})`);
+    ctx.fillStyle=gr; ctx.fillRect(0,0,W,H); }
+}
+
+function hud(){
+  const comm=sum('comm'), car=sum('car'), ret=sum('ret'), gone=sum('gone'), fell=sum('fall');
+  const names=['飯田','神田','○○','○○','○○','○○']; const left=6-gone;
+  const justGone=STEPS[S.step].gone||0;
+  $('hud').innerHTML=`<div class="row"><span>通信</span><span class="${comm?'ng':''}">${comm?'接続不能':'良好'}</span></div>
+    <div class="row"><span>車両</span><span class="${car?'ng':''}">${car?'使用不能':'使用可'}</span></div>
+    <div class="row"><span>帰路</span><span class="${ret?'ng':''}">${ret?'通行不能':'通行可'}</span></div>
+    <div class="sep"></div><div class="ppl">${names.slice(0,left+justGone).map((n,i)=>
+      i>=left?`<span class="gone">${n}</span>`:(i===1&&fell?`<s>${n}</s>`:`<span>${n}</span>`)).join('')}</div>`;
+}
+function refreshSpots(){
+  if(!F||F.anim) return;
+  const st=(F.lap2?STEPS2:STEPS)[S.step];
+  const label=s=>F.lap2 ? esc(garble(S.found.includes(s.doc)?DOCS[s.doc].title:'気になる点……',hashStr(s.doc))) : (S.found.includes(s.doc)?DOCS[s.doc].title:'気になる点……');
+  $('spots').innerHTML=(st.spots||[]).map(s=>`<button type="button" class="spot${S.found.includes(s.doc)?' seen':''}" data-doc="${s.doc}" style="left:${s.x*100}%;top:${s.y*100}%" aria-label="${DOCS[s.doc].title}"><i></i><span>${label(s)}</span></button>`).join('');
+  $('spots').querySelectorAll('[data-doc]').forEach(b=>b.onclick=()=>openDoc(b.dataset.doc));
+}
+function arrive2(){
+  const i=S.step;
+  $('place').textContent=garble(PLACES2[i%PLACES2.length]);
+  const rows=[['通信','接続不能'],['車両','使用不能'],['帰路','通行不能']];
+  $('hud').innerHTML=rows.map(([a,b])=>`<div class="row"><span>${esc(garble(a))}</span><span class="ng">${esc(garble(b))}</span></div>`).join('')
+    +`<div class="sep"></div><div class="ppl"><span style="color:#e0665a">${esc(garble('飯田'))}</span></div><div class="ppl" style="margin-top:4px;color:#e0665a">あなた　血と肉</div>`;
+  const echo=STEPS[(i*3+1)%STEPS.length].text;
+  $('cap').innerHTML=echo.map(t=>`<p>${esc(garble(t.replace(/[{}]/g,'')))}</p>`).join('');
+  const w=$('walk'); w.hidden=false; w.innerHTML=esc(garble('進む')); w.setAttribute('aria-label','進む');
+  refreshSpots(); updateTop();
+}
+function arrive(fresh){
+  if(F&&F.lap2) return arrive2();
+  const st=STEPS[S.step];
+  document.body.dataset.phase=phaseOf(S.step);
+  $('place').innerHTML=g(st.place);
+  hud(); updateTop();
+  $('cap').innerHTML=st.text.map(t=>`<p>${g(decay(t,S.cleared?.12:0,5))}</p>`).join('');
+  refreshSpots();
+  const w=$('walk'); w.hidden=!!st.end; w.textContent=st.back?'引き返す':'進む'; w.setAttribute('aria-label',w.textContent);
+  if(st.end){
+    setTimeout(()=>{ if(!F) return;
+      const b=document.createElement('div'); b.className='blackout';
+      b.innerHTML='<p class="last">飯田は崖から落ちた。</p><div class="fin">— 記録終了 —</div><div class="again"><button class="retreat" type="button" id="restart">署へ戻る</button></div>';
+      $('forest').appendChild(b);
+      S.cleared=true; save(); updateTop();
+      $('restart').onclick=()=>{ S={mode:S.mode, view:'desk', desk:2, step:-1, read:S.read, found:[], cleared:true, max:S.max}; save(); flash(); document.body.dataset.phase=''; renderDesk(); updateTop(); };
+    }, fresh?3200:600);
+  }
+}
+function turnBack(){
+  if(!F||$('forest').querySelector('.blackout')) return;
+  const b=document.createElement('div'); b.className='blackout';
+  b.innerHTML='<p class="last">飯田と神田は、引き返した。</p><div class="fin">— 調査中断 —</div><p class="fin" style="letter-spacing:.12em;font-size:12px;animation-delay:5.2s">ネタバレありに切り替えると、最初から続きを読めます。</p><div class="again"><button class="retreat" type="button" id="restart">署へ戻る</button></div>';
+  $('forest').appendChild(b);
+  $('restart').onclick=()=>{ S.view='desk'; S.step=-1; S.max=-1; save(); flash(); document.body.dataset.phase=''; renderDesk(); updateTop(); };
+}
+function advance(){
+  if(F&&F.lap2){ if(!F.anim) walk(); return; }
+  if(F&&!F.anim&&STEPS[S.step]&&STEPS[S.step].back){ turnBack(); return; }
+  if(!F||F.anim||S.step>=STEPS.length-1) return;
+  if(STEPS[S.step+1].infect){ $('infect').hidden=false; $('infectGo').focus(); return; }
+  walk();
+}
+function walk(){
+  if(F.lap2 && S.step+1>=STEPS2.length){ // さまよい続ける：村の入口へ戻る
+    flash(); glitch(.9,500); S.step=0; F.cam=0; save(); draw(); arrive(true); return; }
+  const from=S.step*STEP_LEN; S.step++; if(!F.lap2) S.max=Math.max(S.max??-1,S.step); save();
+  const tt=S.step/END_I; if(S.cleared||S.step>=2) glitch(S.cleared?.6:.12+.5*tt, S.cleared?260:50+260*tt);
+  const to=S.step*STEP_LEN, dur=matchMedia('(prefers-reduced-motion: reduce)').matches?10:2200, t0=performance.now();
+  F.anim=true; $('spots').innerHTML=''; $('cap').innerHTML=''; $('walk').disabled=true;
+  const oldPal=F.lap2?RUIN:palAt(S.step-1), newPal=F.lap2?RUIN:palAt(S.step);
+  const tick=now=>{ if(!F) return;
+    const p=Math.min(1,(now-t0)/dur), e=p<.5?2*p*p:1-Math.pow(-2*p+2,2)/2;
+    F.cam=from+(to-from)*e; F.bob=Math.sin(p*Math.PI*8)*2.2;
+    if((S.cleared||S.step>=5) && Math.random()<(S.cleared?.03:.012)) glitch(.4,70);
+    F.pal=lerpPal(oldPal,newPal,e);
+    draw();
+    if(p<1) requestAnimationFrame(tick); else { F.bob=0; F.anim=false; draw(); $('walk').disabled=false; arrive(true); }
+  };
+  requestAnimationFrame(tick);
+}
+$('infectGo').onclick=()=>{ $('infect').hidden=true; walk(); };
+$('retreat').onclick=()=>{
+  if(S.cleared && S.view==='forest'){ if(F && ++F.tries<3){ flash(); glitch(.8,400); return; } flash(); S.view='desk'; save(); renderDesk(); updateTop(); return; }
+  if(sum('ret')) return; S.view='desk'; save(); document.body.dataset.phase=''; renderDesk(); updateTop(); };
+$('filesBtn').onclick=openFiles;
+/* ネタバレの切り替えは、最初からやり直し（山道もルートごと変わる） */
+function setMode(m){
+  if(S.mode===m) return;
+  const started=S.step>=0||S.read.length||S.found.length||S.cleared;
+  if(S.mode && started && !confirm('ネタバレの切り替えをすると、最初からになります。よろしいですか？')) return;
+  S={mode:m, view:'desk', desk:0, step:-1, read:[], found:[], cleared:false, max:-1};
+  save(); stopForest(); $('reader').hidden=true; document.body.classList.remove('ruin'); document.body.dataset.phase='';
+  setRoute(); renderDesk(); updateTop();
+}
+$('spoilBtn').onclick=()=>setMode(on()?'off':'on');
+document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ setMode(b.dataset.mode); $('start').hidden=true; updateTop(); });
+
+/* 起動 */
+setRoute();
+if(!S.cleared && S.step>=STEPS.length){ S.step=-1; S.max=-1; S.view='desk'; }
+if(S.view==='forest' && S.step>=0) renderForest(); else { S.view='desk'; renderDesk(); }
+updateTop();
+if(!S.mode) $('start').hidden=false;
+</script>
+
+</body>
+</html>

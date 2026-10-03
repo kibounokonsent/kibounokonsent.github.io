@@ -209,6 +209,20 @@ button { font: inherit; color: inherit; }
 @keyframes glitchA { 0%, 93%, 97%, 100% { opacity: 0; } 94% { opacity: .8; transform: translate(-6px, 2px); clip-path: inset(10% 0 55% 0); } 95% { opacity: .8; transform: translate(5px, -2px); clip-path: inset(60% 0 8% 0); } }
 @keyframes glitchB { 0%, 93%, 97%, 100% { opacity: 0; } 94.5% { opacity: .5; transform: translate(6px, 0); clip-path: inset(40% 0 30% 0); } 95.5% { opacity: .5; transform: translate(-4px, 1px); clip-path: inset(5% 0 80% 0); } }
 
+/* トップのSVGロゴ（差し替え可：assets/images/logo/logo.svg） */
+.hero-logo--svg { padding: 0 12px; }
+.hl { position: relative; display: inline-block; width: min(880px, 100%); line-height: 0; isolation: isolate;
+  filter: drop-shadow(0 0 30px rgba(200,20,28,.4)) drop-shadow(0 0 80px rgba(120,5,10,.45)); animation: jitter 6s infinite; }
+.hl svg, .hl .hl-img { display: block; width: 100%; height: auto; }
+.hl .hl-img { filter: drop-shadow(3px 3px 0 var(--blood)); }
+.hl-main { position: relative; z-index: 1; }
+.hl-ghost { position: absolute; inset: 0; pointer-events: none; }
+.hl-ghost * { fill: currentColor !important; }
+.hl-shadow { z-index: 0; color: var(--blood); transform: translate(0, 1.6%); }
+.hl-a { z-index: 2; color: var(--blood-hi); opacity: 0; animation: glitchA 6s infinite; }
+.hl-b { z-index: 2; color: var(--sick); opacity: 0; animation: glitchB 6s infinite; }
+html[data-fx="on"][data-sanity="zero"] .hl-main #kh-title *, html[data-fx="on"][data-sanity="zero"] .hl-main #kh-alts * { fill: var(--blood-hi); }
+
 .hero-sub { font-family: var(--f-type); color: var(--dim); letter-spacing: .42em; font-size: 13px; margin: 26px 0 0; }
 .hero-tag { font-family: var(--f-title); font-size: clamp(18px, 2.6vw, 24px); margin: 22px 0 0; color: var(--text); letter-spacing: .18em; }
 .hero-actions { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; margin-top: 36px; }

@@ -15,6 +15,12 @@ const SITE = {
   logo: '',
   logoSmall: '',
 
+  /* ── トップのロゴ（SVG・グリッチ／文字化け演出つき） ─────────
+     assets/images/logo/logo.svg を差し替えるだけで、ロゴを入れ替えられます。
+     SVGの中の id の付け方は logo.svg 冒頭のコメントを参照。
+     空文字 '' にすると、従来の文字タイトル表示に戻ります。 */
+  heroLogo: 'assets/images/logo/logo.svg',
+
   /* ── 演出 ──────────────────────────────────
      entryGate     : 初回アクセス時の「入院同意」画面（ネタバレモードの選択）
      sanityGauge   : 記事を開くたびに減る精神ゲージ（演出のみ）

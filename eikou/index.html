@@ -426,8 +426,8 @@ header{view-transition-name:hdr}
 ::view-transition-group(hdr){animation:none}
 ::view-transition-old(page),::view-transition-new(page){animation-duration:.5s;animation-timing-function:cubic-bezier(.3,.7,.2,1)}
 /* 翼（通常）：翼が横切ったあとに次のページ */
-:root[data-vt="wing"]::view-transition-old(page){animation:vtHide .15s linear .3s both}
-:root[data-vt="wing"]::view-transition-new(page){animation:vtShow .2s linear .42s both}
+:root[data-vt="wing"]::view-transition-old(page){animation:vtHide .12s linear .34s both}
+:root[data-vt="wing"]::view-transition-new(page){animation:vtShow .15s linear .46s both}
 @keyframes vtHide{to{opacity:0}}
 @keyframes vtShow{from{opacity:0}to{opacity:1}}
 @keyframes vtOut{to{opacity:0;transform:translateY(-6px)}}
@@ -458,48 +458,22 @@ header{view-transition-name:hdr}
 .fx{position:fixed;inset:0;z-index:40;pointer-events:none;display:none}
 .fx.go{display:block}
 .fx svg{width:100%;height:100%}
-/* 翼：画面の外の肩を軸に弧を描いて閉じ、影の中で二度はばたき、また開いていく */
-.wingfx{position:absolute;inset:0;overflow:hidden;color:var(--wc);--T:1.4s}
-.wingfx .shade{position:absolute;inset:0;background:radial-gradient(ellipse 120% 90% at 50% 45%,color-mix(in oklab,var(--wc),#000 30%),color-mix(in oklab,var(--wc),#000 62%));animation:shade var(--T) ease both}
-@keyframes shade{0%,16%{opacity:0}30%{opacity:1}72%{opacity:1}86%,100%{opacity:0}}
+/* 翼：静かに閉じて画面を覆い、ひと呼吸だけ揺れて、静かに開く */
+.wingfx{position:absolute;inset:0;overflow:hidden;color:var(--wc);--T:1.05s}
+.wingfx .shade{position:absolute;inset:0;background:color-mix(in oklab,var(--wc),#000 45%);animation:shade var(--T) ease-in-out both}
+@keyframes shade{0%,18%{opacity:0}40%,62%{opacity:1}84%,100%{opacity:0}}
 .wingfx .arm{position:absolute;top:30vh;width:0;height:0}
 .wingfx .arm.l{left:-14vw;animation:armL var(--T) both}
 .wingfx .arm.r{right:-14vw;animation:armR var(--T) both}
-.wingfx .arm svg{position:absolute;top:-60vh;height:200vh;width:auto;display:block;overflow:visible;
-  filter:drop-shadow(0 18px 40px rgba(0,0,0,.35)) drop-shadow(0 0 24px color-mix(in oklab,var(--wg) 60%,transparent))}
-.wingfx .arm.l svg{left:0;transform-origin:0 30%}
-.wingfx .arm.r svg{right:0;transform-origin:100% 30%}
-.wingfx .arm.back{color:color-mix(in oklab,var(--wc),#000 38%);animation-delay:.05s}
-.wingfx .arm.back svg{filter:none}
-.wingfx .arm.l.back{transform:rotate(6deg)} .wingfx .arm.r.back{transform:rotate(-6deg)}
-.wingfx .arm:not(.back) svg{color:color-mix(in oklab,var(--wc),#fff 10%)}
-/* 外 → 閉じる（勢いよく、最後はやわらかく）→ ふぁさ → ふぁさ → 開いて外へ */
-@keyframes armL{
-  0%{transform:translate(0,-10vh) rotate(-35deg);opacity:0;animation-timing-function:cubic-bezier(.2,.75,.3,1)}
-  8%{opacity:1}
-  30%{transform:translate(0,0) rotate(0);animation-timing-function:ease-in-out}
-  40%{transform:translate(-1.5vw,-2.5vh) rotate(-7deg);animation-timing-function:ease-in-out}
-  51%{transform:translate(0,0) rotate(1deg);animation-timing-function:ease-in-out}
-  61%{transform:translate(-1.5vw,-2.5vh) rotate(-7deg);animation-timing-function:ease-in-out}
-  72%{transform:translate(0,0) rotate(0);animation-timing-function:cubic-bezier(.55,0,.75,.3)}
-  90%{opacity:1}
-  100%{transform:translate(0,-10vh) rotate(-35deg);opacity:0}}
-@keyframes armR{
-  0%{transform:translate(0,-10vh) rotate(35deg);opacity:0;animation-timing-function:cubic-bezier(.2,.75,.3,1)}
-  8%{opacity:1}
-  30%{transform:translate(0,0) rotate(0);animation-timing-function:ease-in-out}
-  40%{transform:translate(1.5vw,-2.5vh) rotate(7deg);animation-timing-function:ease-in-out}
-  51%{transform:translate(0,0) rotate(-1deg);animation-timing-function:ease-in-out}
-  61%{transform:translate(1.5vw,-2.5vh) rotate(7deg);animation-timing-function:ease-in-out}
-  72%{transform:translate(0,0) rotate(0);animation-timing-function:cubic-bezier(.55,0,.75,.3)}
-  90%{opacity:1}
-  100%{transform:translate(0,-10vh) rotate(35deg);opacity:0}}
-/* はばたくときは翼の膜もすこしたたむ */
-.wingfx .arm.l svg{animation:foldL var(--T) ease-in-out both}
-.wingfx .arm.r svg{animation:foldR var(--T) ease-in-out both}
-.wingfx .arm.back svg{animation-delay:.05s}
-@keyframes foldL{0%{transform:translateX(-108%) scaleX(.7)}30%{transform:none}40%{transform:scaleX(.86)}51%{transform:scaleX(1.02)}61%{transform:scaleX(.86)}72%{transform:none}100%{transform:translateX(-108%) scaleX(.7)}}
-@keyframes foldR{0%{transform:translateX(108%) scaleX(.7)}30%{transform:none}40%{transform:scaleX(.86)}51%{transform:scaleX(1.02)}61%{transform:scaleX(.86)}72%{transform:none}100%{transform:translateX(108%) scaleX(.7)}}
+.wingfx .arm svg{position:absolute;top:-60vh;height:200vh;width:auto;display:block;overflow:visible;color:var(--wc);
+  filter:drop-shadow(0 10px 30px rgba(0,0,0,.25))}
+.wingfx .arm.l svg{left:0;transform-origin:0 30%;animation:foldL var(--T) both}
+.wingfx .arm.r svg{right:0;transform-origin:100% 30%;animation:foldR var(--T) both}
+/* 外 → 閉じる → ひと呼吸 → 開く。どの区間もゆっくり入ってゆっくり止まる */
+@keyframes armL{0%{transform:rotate(-22deg);opacity:0;animation-timing-function:cubic-bezier(.4,0,.2,1)}12%{opacity:1}40%{transform:rotate(0);animation-timing-function:ease-in-out}51%{transform:rotate(-3deg);animation-timing-function:ease-in-out}62%{transform:rotate(0);animation-timing-function:cubic-bezier(.4,0,.2,1)}88%{opacity:1}100%{transform:rotate(-22deg);opacity:0}}
+@keyframes armR{0%{transform:rotate(22deg);opacity:0;animation-timing-function:cubic-bezier(.4,0,.2,1)}12%{opacity:1}40%{transform:rotate(0);animation-timing-function:ease-in-out}51%{transform:rotate(3deg);animation-timing-function:ease-in-out}62%{transform:rotate(0);animation-timing-function:cubic-bezier(.4,0,.2,1)}88%{opacity:1}100%{transform:rotate(22deg);opacity:0}}
+@keyframes foldL{0%{transform:translateX(-105%);animation-timing-function:cubic-bezier(.4,0,.2,1)}40%{transform:none;animation-timing-function:ease-in-out}51%{transform:scaleX(.95)}62%{transform:none;animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:translateX(-105%)}}
+@keyframes foldR{0%{transform:translateX(105%);animation-timing-function:cubic-bezier(.4,0,.2,1)}40%{transform:none;animation-timing-function:ease-in-out}51%{transform:scaleX(.95)}62%{transform:none;animation-timing-function:cubic-bezier(.4,0,.2,1)}100%{transform:translateX(105%)}}
 .wingfx.tail .arm svg{height:150vh;top:-75vh}
 .wingfx.tail .arm.l svg{transform-origin:50% 50%;animation:none;transform:rotate(-90deg)}
 .wingfx.tail .arm.r svg{transform-origin:50% 50%;animation:none;transform:rotate(90deg)}
@@ -1470,7 +1444,6 @@ function wingFx(){
   const L = hasWing ? `<svg viewBox="${d.x} ${d.y} ${d.w/2} ${d.h*0.8}"><g fill="currentColor"><use href="#dgp-${d.k}-wl"/></g></svg>`
                     : `<svg class="tr" viewBox="${d.x} ${d.y} ${d.w} ${d.h}"><g fill="currentColor"><use href="#dgp-${d.k}-body"/></g></svg>`;
   return `<div class="wingfx${hasWing?'':' tail'}" style="${style}"><i class="shade"></i>
-    <div class="arm l back">${R}</div><div class="arm r back">${L}</div>
     <div class="arm l">${R}</div><div class="arm r">${L}</div></div>`;
 }
 function playFx(v){
@@ -1478,7 +1451,7 @@ function playFx(v){
   if(v.c) fx.style.setProperty('--fxc', v.c);
   fx.innerHTML = v.t==='wing' ? wingFx() : v.t==='chapter' ? '<i></i>' : '';
   void fx.offsetWidth; fx.classList.add('fx-'+v.t, 'go');
-  clearTimeout(playFx.tm); playFx.tm = setTimeout(()=>{ fx.className = 'fx'; fx.innerHTML = ''; }, 1600);
+  clearTimeout(playFx.tm); playFx.tm = setTimeout(()=>{ fx.className = 'fx'; fx.innerHTML = ''; }, 1250);
 }
 function navigate(){
   const h = (location.hash||'').replace('#','');

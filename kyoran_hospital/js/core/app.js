@@ -97,6 +97,11 @@
     return `<span class="logo-text logo-text--${kind}" data-text="${esc(SITE.title)}">${esc(SITE.title)}</span>`;
   }
 
+  /* トップ用ロゴ：まず <img> で表示し、読み込めたらインラインSVGに置き換えて演出をかける */
+  function heroLogoHTML() {
+    return `<span class="hl" role="img" aria-label="${esc(SITE.title)} ${esc(SITE.subtitle || '')}"><img class="hl-img" src="${esc(SITE.heroLogo)}" alt=""></span>`;
+  }
+
   /* ───────── sanity gauge ───────── */
   const FX = Object.assign({ entryGate: true, sanityGauge: true, sanityLoss: 6, sanityDrain: { seconds: 15, amount: 1 }, redactLoss: 3, whispers: true, corruption: true, zeroRot: 0.22, destroy: true, destroyHits: 7, jumpscare: true, sound: true, soundVolume: 0.7 }, SITE.effects || {});
   let effectsOn = local.get('kh-effects', true);
@@ -199,6 +204,68 @@
   const rnd = (a, b) => a + Math.random() * (b - a);
   const pick = (arr) => arr[Math.floor(Math.random() * arr.length)];
 
+  /* トップのロゴ（インラインSVG化・赤ずれ/グリッチ用の複製・文字化け） */
+  const heroLogo = {
+    cache: null,
+    async mount() {
+      const box = document.querySelector('.hl');
+      if (!box || !SITE.heroLogo) return;
+      try {
+        if (!this.cache) {
+          const r = await fetch(SITE.heroLogo);
+          if (!r.ok) throw new Error('logo');
+          this.cache = await r.text();
+        }
+        const doc = new DOMParser().parseFromString(this.cache, 'image/svg+xml');
+        const root = doc.documentElement;
+        if (doc.querySelector('parsererror') || root.nodeName.toLowerCase() !== 'svg') throw new Error('svg');
+        root.querySelectorAll('script, foreignObject').forEach((n) => n.remove());
+        if (!box.isConnected) return;
+        const main = document.importNode(root, true);
+        main.removeAttribute('width'); main.removeAttribute('height');
+        main.setAttribute('aria-hidden', 'true'); main.removeAttribute('role'); main.removeAttribute('aria-label');
+        main.classList.add('hl-main');
+        main.querySelectorAll('[id]').forEach((el) => {
+          let m = el.id.match(/^kh-g(\d+)$/); if (m) el.setAttribute('data-i', m[1]);
+          m = el.id.match(/^kh-alt-(\d+)-(\d+)$/); if (m) { el.setAttribute('data-alt-i', m[1]); if (!el.getAttribute('display')) el.style.display = 'none'; }
+        });
+        const ghost = (cls) => {
+          const c = main.cloneNode(true);
+          c.classList.remove('hl-main'); c.classList.add('hl-ghost', cls);
+          c.querySelectorAll('#kh-top, #kh-sub, [data-role="fx"]').forEach((n) => n.remove());
+          c.querySelectorAll('[filter], [mask]').forEach((n) => { n.removeAttribute('filter'); n.removeAttribute('mask'); });
+          c.querySelectorAll('defs').forEach((n) => n.remove());
+          c.querySelectorAll('[id]').forEach((n) => n.removeAttribute('id'));
+          return c;
+        };
+        box.replaceChildren(ghost('hl-shadow'), main, ghost('hl-a'), ghost('hl-b'));
+        box.classList.add('is-live');
+      } catch (e) { /* 読み込めない（file:// で開いた等）ときは <img> のまま表示 */ }
+    },
+    /* 化け字に一瞬だけ差し替えて、元に戻す */
+    moji(count, minMs, maxMs) {
+      const box = document.querySelector('.hl.is-live');
+      if (!box) return;
+      const main = box.querySelector('.hl-main');
+      const slots = [...new Set([...main.querySelectorAll('[data-alt-i]')].map((n) => n.getAttribute('data-alt-i')))];
+      if (!slots.length) return;
+      const n = Math.min(slots.length, 1 + Math.floor(Math.random() * count));
+      [...slots].sort(() => Math.random() - 0.5).slice(0, n).forEach((i) => {
+        if (box.dataset['m' + i]) return;
+        const alts = [...main.querySelectorAll(`[data-alt-i="${i}"]`)];
+        const v = Math.floor(Math.random() * alts.length);
+        const set = (on) => box.querySelectorAll('svg').forEach((svg) => {
+          const g = svg.querySelector(`[data-i="${i}"]`);
+          const a = svg.querySelectorAll(`[data-alt-i="${i}"]`)[v];
+          if (g) g.style.display = on ? 'none' : '';
+          if (a) a.style.display = on ? 'inline' : 'none';
+        });
+        box.dataset['m' + i] = '1'; set(true);
+        setTimeout(() => { set(false); delete box.dataset['m' + i]; }, rnd(minMs, maxMs));
+      });
+    },
+  };
+
   const corrupt = {
     timers: [],
     nodes: [],
@@ -241,6 +308,7 @@
           node.__kh = false;
         }, rnd(minMs, maxMs));
       }
+      if (Math.random() < 0.4) heroLogo.moji(count, minMs, maxMs); // ロゴの文字も化ける
     },
     /* ノイズ：画面が裂けて色がずれる */
     noise() {
@@ -875,9 +943,9 @@
     return `
       <section class="hero">
         <div class="hero-light" aria-hidden="true"></div>
-        <p class="hero-label">PRIVATE MEDICAL ARCHIVE</p>
-        <h1 class="hero-logo">${logoHTML('large')}</h1>
-        <p class="hero-sub">${esc(SITE.subtitle)}</p>
+        ${SITE.heroLogo ? '' : '<p class="hero-label">PRIVATE MEDICAL ARCHIVE</p>'}
+        <h1 class="hero-logo${SITE.heroLogo ? ' hero-logo--svg' : ''}">${SITE.heroLogo ? heroLogoHTML() : logoHTML('large')}</h1>
+        ${SITE.heroLogo ? '' : `<p class="hero-sub">${esc(SITE.subtitle)}</p>`}
         <p class="hero-tag">${esc(zero ? 'もう、平常ではいられない。' : SITE.tagline)}</p>
         <div class="hero-actions">
           <a class="btn btn--blood" href="#/article/kyoran-byouin">作品概要を読む</a>
@@ -1088,6 +1156,7 @@
     if (wreck.active()) { decorate(); if (FX.corruption) rot(); }
     hud();
     corrupt.scan();
+    heroLogo.mount();
     if (readingId) sanity.visit(arg);
   }
 
