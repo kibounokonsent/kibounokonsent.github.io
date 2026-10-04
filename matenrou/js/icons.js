@@ -23,7 +23,9 @@ function icon(name, cls) {
 }
 function emblem(name, cls) {
   var e = EMBLEMS[name]; if (!e) return '';
-  return '<svg class="emb ' + (cls || '') + '" viewBox="' + e.vb + '" fill="currentColor" aria-hidden="true">' + e.g + '</svg>';
+  var g = e.g;
+  if ((cls || '').indexOf('drawn') >= 0) g = g.replace(/<path /g, '<path pathLength="1" ');
+  return '<svg class="emb ' + (cls || '') + '" viewBox="' + e.vb + '" fill="currentColor" aria-hidden="true">' + g + '</svg>';
 }
 function logoMark(cls) {
   var s = '', x = 0;

@@ -24,7 +24,7 @@ CHARACTERS.push(
 {
   id: 'dornelahid', type: 'demon',
   name: 'ドルネラヒド',
-  contract: '', kind: '',
+  contract: '', kind: '傲慢',
   forms: [
     { rank: '霊級', image: 'assets/characters/dornelahid-rei.svg' },
     { rank: '命級', image: 'assets/characters/dornelahid-mei.svg' },

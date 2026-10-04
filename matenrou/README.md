@@ -12,7 +12,7 @@ matenrou/
 │  ├─ icons.js      … 紋章・アイコン（キャラシートSVGから抽出した天使/悪魔/一般人の紋章）
 │  └─ data/         … ★設定はここに書く
 │     ├─ 00-categories.js   カテゴリー・サイト名・トップの紹介文
-│     ├─ articles-*.js      記事（カテゴリーごと）
+│     ├─ articles-*.js      記事（カテゴリーごと）。articles-deep.js は深層（裏設定）
 │     ├─ characters.js      キャラクター
 │     └─ glossary.js        用語集
 └─ assets/

@@ -53,6 +53,17 @@
     var k = sideName === 'heaven' ? 'angel' : sideName === 'abyss' ? 'demon' : 'human';
     return '<span class="sigil ' + (sideName || 'none') + '" aria-hidden="true">' + emblem(k) + '</span>';
   }
+  /* 七つの大罪・階級の紋章。drawn を付けると、魔天楼のタイトルのように線で描かれてから満ちる */
+  function embOfArticle(id) {
+    if (SIN_EMB.indexOf(id) >= 0) return [id];
+    var m = /^rank-(ka|rei|mei|ou|tsukasa|kami)$/.exec(id); if (!m) return null;
+    return ['a-' + m[1], 'd-' + m[1]].filter(function (k) { return EMBLEMS[k]; });   // 天使と悪魔、それぞれの紋章
+  }
+  function embOfKind(text) { for (var i = 0; i < KINDS.length; i++) if (text && String(text).indexOf(KINDS[i][1]) >= 0) return KINDS[i][0]; return ''; }
+  function drawn(id, delay) {
+    var ids = [].concat(id);
+    return ids.map(function (k, i) { return '<span class="emb-wrap" style="--d:' + ((delay || 0) + i * 0.5) + 's">' + emblem(k, 'drawn') + '</span>'; }).join('');
+  }
   function divider(kind) { return '<div class="wrap divider ' + (kind || 'heaven') + '" aria-hidden="true">' + emblem(kind === 'abyss' ? 'orn-demon' : 'orn-angel') + '</div>'; }
   function badge(c) { return '<span class="badge ' + side(c.id) + '">' + esc(c.name) + '</span>'; }
   function countOf(c) { return c.id === 'character' ? CHARACTERS.length : c.id === 'glossary' ? GLOSSARY.length : articlesIn(c.id).length; }
@@ -237,7 +248,12 @@
   function floorLinks(ids) {
     return '<div class="links">' + (ids || []).filter(function (id) { return artById[id]; }).map(function (id) { return '<a href="#/a/' + id + '">' + esc(artById[id].title) + '</a>'; }).join('') + '</div>';
   }
-  function floorBlock(f) {
+  /* 階の紋章：昇塔は天使の階級、降塔は悪魔の階級の紋章（階に近づくと描かれる） */
+  function floorEmb(f, kind) {
+    var id = RANK_ID[f.name], k = id ? (kind === 'heaven' ? 'a-' : 'd-') + id : '';
+    return k && EMBLEMS[k] ? '<span class="fl-emb ' + (kind === 'heaven' ? 'ang' : 'dem') + '" aria-hidden="true">' + emblem(k, 'drawn') + '</span>' : '';
+  }
+  function floorBlock(f, kind) {
     var choirs = '';
     if (f.choirs) {
       choirs = '<ol class="choirs" aria-label="司級天使の九つの階位（上ほど高位）">' + f.choirs.slice().reverse().map(function (c, i, arr) {
@@ -245,7 +261,7 @@
       }).join('') + '</ol>';
     }
     return '<section class="floor' + (f.unknown ? ' unknown' : '') + '" id="fl-' + f.floor + '" data-floor="' + f.floor + '">' +
-      '<span class="no">' + esc(f.floor) + '</span><h2>' + esc(f.name) + '</h2><p>' + esc(f.text) + '</p>' + choirs + floorLinks(f.links) + '</section>';
+      '<span class="no">' + esc(f.floor) + '</span>' + floorEmb(f, kind) + '<h2>' + esc(f.name) + '</h2><p>' + esc(f.text) + '</p>' + choirs + floorLinks(f.links) + '</section>';
   }
   function gateBlock(kind, g) {
     var stage = kind === 'heaven'
@@ -265,17 +281,22 @@
     var alt;
     if (heaven) {
       app.innerHTML = '<div class="tower heaven"><div class="shaft">' + head + gateBlock('heaven', T.gate) +
-        T.floors.slice().reverse().map(floorBlock).join('') + '</div>' + ground + '</div>';
+        T.floors.slice().reverse().map(function (f) { return floorBlock(f, 'heaven'); }).join('') + '</div>' + ground + '</div>';
       alt = ['gate'].concat(T.floors.slice().reverse().map(function (f) { return f.floor; })).concat(['G']);
       tintFloors();
     } else {
-      app.innerHTML = '<div class="tower abyss">' + ground + '<div class="shaft">' + head + T.floors.map(floorBlock).join('') + gateBlock('abyss', T.gate) + '</div></div>';
+      app.innerHTML = '<div class="tower abyss">' + ground + '<div class="shaft">' + head + T.floors.map(function (f) { return floorBlock(f, 'abyss'); }).join('') + gateBlock('abyss', T.gate) + '</div></div>';
       alt = ['G'].concat(T.floors.map(function (f) { return f.floor; })).concat(['gate']);
     }
     var meter = document.createElement('nav');
     meter.className = 'altimeter'; meter.setAttribute('aria-label', '階');
     meter.innerHTML = alt.map(function (id) { return '<a href="#/' + (heaven ? 'ascend' : 'descend') + '/' + id + '" data-to="' + id + '">' + (id === 'gate' ? '門' : id) + '</a>'; }).join('');
     app.appendChild(meter);
+    var floors = app.querySelectorAll('.floor');
+    if ('IntersectionObserver' in window) {
+      var seen = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('seen'); seen.unobserve(e.target); } }); }, { threshold: .35 });
+      floors.forEach(function (el) { seen.observe(el); });
+    } else floors.forEach(function (el) { el.classList.add('seen'); });
     if ('IntersectionObserver' in window) {
       var io = new IntersectionObserver(function (es) {
         es.forEach(function (e) { if (e.isIntersecting) meter.querySelectorAll('a').forEach(function (a) { a.classList.toggle('on', a.dataset.to === e.target.dataset.floor); }); });
@@ -342,12 +363,13 @@
     var t = TYPE[ch.type] || TYPE.human, fs = forms(ch), f = fs[fi] || fs[0];
     var top = ch.type === 'demon' ? ['契約', 'Pactum', ch.contract] : ['所属', 'Ordo', ch.affiliation];
     var low = ch.type === 'demon' ? ['種類', 'Genus', ch.kind] : ch.type === 'angel' ? ['階位', 'Chorus', ch.hierarchy] : null;
+    var re = ch.type === 'angel' && RANK_ID[f.rank] && EMBLEMS['a-' + RANK_ID[f.rank]] ? 'a-' + RANK_ID[f.rank] : ch.type === 'demon' ? sealKey(f.rank, embOfKind(ch.kind)) : '', ke = '';
     return '<div class="csheet side-' + t.side + ' t-' + ch.type + '">' +
       '<div class="cs-cell cs-name"><span class="lb">名前<i>Nomen</i></span><b>' + esc(ch.name) + '</b></div>' +
       '<div class="cs-band">' + emblem(ch.type === 'demon' ? 'orn-demon' : ch.type === 'angel' ? 'orn-angel' : 'orn-human', 'orn') +
         (ch.type === 'human' ? '' : '<span class="lb">階級</span><b class="cs-rank">' + val(f.rank) + '</b>') +
-        '<span class="cs-seal">' + emblem(ch.type) + '</span>' +
-        (low ? '<span class="lb">' + low[0] + '</span><b>' + val(low[2]) + '</b>' : '') +
+        '<span class="cs-seal">' + (re ? drawn(re) : emblem(ch.type)) + '</span>' +
+        (low ? '<span class="lb">' + low[0] + '</span><b>' + val(low[2]) + '</b>' : '') + (ke ? '<span class="cs-kind">' + drawn(ke, .4) + '</span>' : '') +
         emblem(ch.type === 'demon' ? 'orn-demon' : ch.type === 'angel' ? 'orn-angel' : 'orn-human', 'orn flip') + '</div>' +
       '<div class="cs-cell cs-aff"><span class="lb">' + top[0] + '<i>' + top[1] + '</i></span><b>' + val(top[2]) + '</b></div>' +
       '<div class="cs-cell cs-look"><span class="lb">見た目<i>Species</i></span>' +
@@ -422,7 +444,8 @@
       if (s.note) h += '<div class="callout note">' + rich(s.note) + '</div>';
       return h;
     }).join('');
-    var headIcon = a.cat === 'angel' ? emblem('angel') : a.cat === 'demon' ? emblem('demon') : catIcon(c);
+    var ae = embOfArticle(a.id);
+    var headIcon = ae ? drawn(ae) : a.cat === 'angel' ? emblem('angel') : a.cat === 'demon' ? emblem('demon') : catIcon(c);
     var info = '<aside class="infobox"><div class="ib-head">' + headIcon + '<span><span class="mono">' + recCode(a) + '</span><b>' + esc(a.title) + '</b></span></div>' +
       (a.info && a.info.length ? '<dl>' + a.info.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + rich(r[1]) + '</dd>'; }).join('') + '</dl>' : '') +
       '<div class="ib-foot">' + chapter(a.cat) + '　' + esc(c.name) + '<br>' + esc(a.updated) + ' 記</div></aside>';
@@ -430,7 +453,7 @@
     var sib = articlesIn(a.cat), i = sib.indexOf(a), prev = sib[i - 1], next = sib[i + 1];
     app.innerHTML = crumbs([{ t: c.name, href: '#/c/' + c.id }, { t: a.title }]) +
       '<article class="wrap article ' + side(a.cat) + '">' +
-        '<header class="article-head">' + sigil(SIDE[a.cat]) + '<div class="meta"><span class="code">' + recCode(a) + '</span><span>' + esc(c.name) + '<i class="latin"> ' + esc(c.la || '') + '</i></span><span>' + esc(a.updated) + ' 記</span></div>' +
+        '<header class="article-head">' + (ae ? '<span class="sigil big ' + (SIDE[a.cat] || 'none') + '" aria-hidden="true">' + drawn(ae) + '</span>' : sigil(SIDE[a.cat])) + '<div class="meta"><span class="code">' + recCode(a) + '</span><span>' + esc(c.name) + '<i class="latin"> ' + esc(c.la || '') + '</i></span><span>' + esc(a.updated) + ' 記</span></div>' +
         '<h1>' + esc(a.title) + '</h1>' + (a.reading ? '<div class="reading">' + esc(a.reading) + '</div>' : '') +
         '<p class="summary">' + rich(a.summary) + '</p></header>' +
         '<div class="article-body">' + sections + actions(ctxOf(a.cat, a.id)) + '</div>' + info + '</article>' +
@@ -625,13 +648,13 @@
   var WD = window.WORLD;
   var KINDS = [['lust', '色欲'], ['gluttony', '暴食'], ['greed', '強欲'], ['wrath', '憤怒'], ['pride', '傲慢'], ['envy', '嫉妬'], ['sloth', '怠惰']];
   var W = (function () {
-    var d = { form: 'human', reborn: false, fallen: false, pact: null, time: WD.clock.start, event: null, deep: false, spoil: null };
+    var d = { form: 'human', reborn: false, fallen: false, pact: null, who: null, time: WD.clock.start, event: null, deep: false, spoil: null };
     try { var s = JSON.parse(localStorage.getItem('matenrou-world') || 'null'); if (s) for (var k in d) if (k in s) d[k] = s[k]; } catch (e) {}
     return d;
   })();
   window.__W = W;
   function saveW() { window.__W = W; try { localStorage.setItem('matenrou-world', JSON.stringify(W)); } catch (e) {} paintWorld(); }
-  function resetW() { W = { form: 'human', reborn: false, fallen: false, pact: null, time: WD.clock.start, event: null, deep: false, spoil: W.spoil }; saveW(); route(); }
+  function resetW() { W = { form: 'human', reborn: false, fallen: false, pact: null, who: null, time: WD.clock.start, event: null, deep: false, spoil: W.spoil }; saveW(); route(); }
   function spoilOK() { return W.spoil === true; }
   function deepOpen() { return W.deep && spoilOK(); }
   function kindName(id) { for (var i = 0; i < KINDS.length; i++) if (KINDS[i][0] === id) return KINDS[i][1]; return ''; }
@@ -701,8 +724,13 @@
       ['契約する', !!W.pact], ['時を動かす', !!W.event || W.deep], ['深層へ', W.deep]
     ];
     var next = !W.reborn ? ['天使の節で「転生する」', '#/a/angel'] : !W.fallen ? ['天界の門で「堕天する」', '#/ascend/gate'] : !W.pact ? ['悪魔の章で「契約する」', '#/c/demon'] : !W.deep ? ['世界の時計の針を動かす', '#/horologium'] : ['深層の書を開く', '#/deep'];
-    return '<div class="jp-head"><span class="latin">Iter</span><b>あなたの歩み</b></div><ol>' + steps.map(function (s) { return '<li class="' + (s[1] ? 'done' : '') + '">' + s[0] + '</li>'; }).join('') + '</ol>' +
+    // 転生・堕天・契約は、ここから何度でもやり直せる
+    var redo = { '転生する': ['rebirth', true], '堕天する': ['fall', W.reborn], '契約する': ['pact', W.form !== 'angel'] };
+    return '<div class="jp-head"><span class="latin">Iter</span><b>あなたの歩み</b></div><ol>' + steps.map(function (s) {
+      var r = redo[s[0]];
+      return '<li class="' + (s[1] ? 'done' : '') + '">' + (r && r[1] ? '<button type="button" class="jp-redo" data-redo="' + r[0] + '">' + s[0] + '<i>' + (s[1] ? 'やり直す' : '') + '</i></button>' : s[0]) + '</li>'; }).join('') + '</ol>' +
       '<p class="jp-now">いまの身：<b>' + WD.forms[W.form] + '</b>' + (W.pact ? '　契約：<b>' + (W.pact === 'human' ? '人と' : kindName(W.pact)) + '</b>' : '') + '</p>' +
+      (whoOf(W.who) ? '<p class="jp-now">何者：<b>' + esc(whoOf(W.who).title) + '</b></p>' : '') +
       '<a class="jp-next" href="' + next[1] + '">次は ── ' + next[0] + '</a>' +
       '<p class="jp-now">読み方：<b>' + (W.spoil ? 'すべてを知る（ネタバレあり）' : '核心を伏せる（ネタバレなし）') + '</b></p>' +
       '<button type="button" class="jp-reset" id="jp-regate">門をくぐり直す（読み方を変える）</button><br>' +
@@ -723,7 +751,16 @@
       } else { jp.hidden = true; btn.setAttribute('aria-expanded', 'false'); }
     });
     document.addEventListener('click', function (e) { if (!e.target.closest('.status-wrap')) { jp.hidden = true; btn.setAttribute('aria-expanded', 'false'); } });
-    jp.addEventListener('click', function (e) { if (e.target.closest('a')) jp.hidden = true; });
+    jp.addEventListener('click', function (e) {
+      if (e.target.closest('a')) jp.hidden = true;
+      var b = e.target.closest('[data-redo]'); if (!b || riteBusy) return;
+      var n = b.dataset.redo; jp.hidden = true; btn.setAttribute('aria-expanded', 'false');
+      var prev = W.pact;
+      if (n === 'rebirth') { W.form = 'human'; W.reborn = false; W.fallen = false; W.pact = null; W.who = null; }
+      else if (n === 'fall') { W.form = 'angel'; W.fallen = false; W.pact = null; W.who = null; }
+      else { W.pact = null; }
+      saveW(); rite(n, prev);
+    });
     paintWorld();
   }
 
@@ -756,7 +793,7 @@
 
   /* --- 儀式（全画面の演出） --- */
   var riteBusy = false;
-  function rite(name) {
+  function rite(name, prevPact) {
     if (riteBusy) return; riteBusy = true;
     var r = WD.rites[name], ov = document.createElement('div');
     ov.className = 'rite rite-' + name; ov.setAttribute('role', 'dialog'); ov.setAttribute('aria-label', r.label);
@@ -784,13 +821,13 @@
       at(300, function () { line(r.lines[0]); });
       at(2000, function () { ov.classList.add('s2'); line(r.lines[1]); });
       at(4000, function () { ov.classList.add('s3'); line(r.lines[2]); });
-      at(6200, function () { finish(apply); });
+      at(6200, function () { timers.forEach(clearTimeout); apply(); saveW(); whoStage(ov, r.to); });
     } else if (name === 'pact') {
       var demonSelf = W.form === 'demon';
       ov.innerHTML = '<div class="rite-sky"></div><div class="rite-seal"></div><div class="rite-lines"></div><div class="pact-choose"></div>' + skip;
       line(demonSelf ? r.askDemon : r.ask);
       var ch = ov.querySelector('.pact-choose');
-      ch.innerHTML = KINDS.map(function (k) { return '<button type="button" data-kind="' + k[0] + '"><b>' + k[1] + '</b><small>代償：' + esc(priceOf(k[0])) + '</small></button>'; }).join('');
+      ch.innerHTML = KINDS.map(function (k, i) { return '<button type="button" data-kind="' + k[0] + '"><span class="pc-emb">' + drawn(k[0], 0.5 + i * 0.35) + '</span><b>' + k[1] + '</b><small>代償：' + esc(priceOf(k[0])) + '</small></button>'; }).join('');
       ch.addEventListener('click', function (e) {
         var b = e.target.closest('button'); if (!b) return;
         var kind = b.dataset.kind; ch.remove();
@@ -803,9 +840,78 @@
       });
     }
     ov.querySelector('.rite-skip').onclick = function () {
-      if (name === 'pact' && !W.pact) { timers.forEach(clearTimeout); ov.remove(); riteBusy = false; return; }
+      if (name === 'pact' && !W.pact) { timers.forEach(clearTimeout); if (prevPact) { W.pact = prevPact; saveW(); } ov.remove(); riteBusy = false; return; }
+      if (name === 'fall') { timers.forEach(clearTimeout); W.form = 'demon'; W.fallen = true; saveW(); whoStage(ov, r.to); return; }
       finish(name === 'rebirth' ? function () { W.form = 'angel'; W.reborn = true; } : name === 'fall' ? function () { W.form = 'demon'; W.fallen = true; } : function () {});
     };
+  }
+
+  /* --- 堕天のあと：あなたは、何者になる？（記録する／診断で決める／飛ばす） --- */
+  function whoOf(w) {
+    var X = WD.who.sins[w && w.sin];
+    return X ? { title: X.name, text: X.text } : null;
+  }
+  function whoStage(ov, to) {
+    var X = WD.who, st = { answers: [] };
+    ov.className = 'rite rite-who'; ov.setAttribute('aria-label', X.ask);
+    ov.innerHTML = '<div class="rite-sky"></div><div class="who-body"></div><button type="button" class="rite-skip">飛ばす</button>';
+    var body = ov.querySelector('.who-body');
+    function leave(who) {
+      W.who = who; saveW();
+      ov.classList.add('out'); setTimeout(function () { ov.remove(); riteBusy = false; }, 900);
+      location.hash = to;
+    }
+    ov.querySelector('.rite-skip').onclick = function () { leave({ mode: 'skip' }); };
+    function show(html, after) {
+      body.classList.remove('in'); body.innerHTML = html; void body.offsetWidth; body.classList.add('in');
+      if (after) after();
+    }
+    function menu() {
+      show('<span class="latin">' + esc(X.askLatin) + '</span><h2 class="who-ask">' + esc(X.ask) + '</h2><div class="who-opts">' +
+        X.modes.map(function (m) { return '<button type="button" data-m="' + m.id + '"><b>' + esc(m.label) + '</b><small>' + esc(m.desc) + '</small></button>'; }).join('') + '</div>', function () {
+        body.querySelectorAll('[data-m]').forEach(function (b) {
+          b.onclick = function () { var m = b.dataset.m; if (m === 'diagnose') { st.answers = []; ask(0); } else choose(); };
+        });
+      });
+    }
+    // 診断：問いに答える
+    function ask(i) {
+      var q = X.questions[i];
+      show('<span class="latin">' + (i + 1) + ' / ' + X.questions.length + '</span><p class="who-q">' + esc(q.q) + '</p><div class="who-opts one">' +
+        q.a.map(function (a, k) { return '<button type="button" data-k="' + k + '"><b>' + esc(a.t) + '</b></button>'; }).join('') + '</div>', function () {
+        body.querySelectorAll('[data-k]').forEach(function (b) {
+          b.onclick = function () { st.answers.push({ s: q.a[+b.dataset.k].s, p: q.a[+b.dataset.k].p }); i + 1 < X.questions.length ? ask(i + 1) : decide(); };
+        });
+      });
+    }
+    function decide() {
+      var pt = {}, last = {};
+      st.answers.forEach(function (a, i) { [2, 1].forEach(function (n, idx) { var k = a.s[idx]; pt[k] = (pt[k] || 0) + n; last[k] = i; }); });
+      var best = null; for (var k in pt) if (best === null || pt[k] > pt[best] || (pt[k] === pt[best] && last[k] > last[best])) best = k;
+      result({ mode: 'diagnose', sin: best, steps: st.answers.map(function (a) { return a.p; }) });
+    }
+    // 選ぶ：七つの大罪から、自分で選ぶ
+    function choose() {
+      show('<p class="who-q">' + esc(X.chooseAsk) + '</p><div class="who-sins">' +
+        SIN_EMB.map(function (k, n) { return '<button type="button" data-sin="' + k + '"><span class="ws-emb">' + drawn(k, 0.15 + n * 0.2) + '</span><b>' + esc(X.sins[k].name) + '</b></button>'; }).join('') + '</div>', function () {
+        body.querySelectorAll('[data-sin]').forEach(function (b) {
+          b.onclick = function () { result({ mode: 'choose', sin: b.dataset.sin, steps: [] }); };
+        });
+      });
+    }
+    // 結果：歩みから読み取った「何者か」
+    function result(who) {
+      var info = whoOf(who), pick = who.mode === 'choose';
+      show((pick ? '<p class="who-intro">' + esc(X.chooseIntro) + '</p>' :
+        '<p class="who-intro">' + esc(X.diagnoseIntro) + '</p><ul class="who-steps">' + who.steps.map(function (t) { return '<li>' + esc(t) + '</li>'; }).join('') + '</ul>') +
+        '<p class="who-intro">' + esc(pick ? X.chooseOutro : X.diagnoseOutro) + '</p>' +
+        '<span class="who-emb">' + drawn(who.sin) + '</span><h2 class="who-title">' + esc(info.title) + '</h2><p class="who-text">' + esc(info.text) + '</p>' +
+        '<p class="who-intro">' + esc(X.sinNote) + '</p>' +
+        '<div class="who-opts one"><button type="button" id="who-go"><b>悪魔の章へ</b></button></div>', function () {
+        body.querySelector('#who-go').onclick = function () { leave(who); };
+      });
+    }
+    menu();
   }
   // 契約の紋：七芒星を線で描く
   function sealSvg(label) {

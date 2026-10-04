@@ -1055,3 +1055,66 @@ body.form-demon::after { opacity: 1; background: radial-gradient(ellipse 120% 80
 .entry { overflow-y: auto; align-items: start; }
 .entry-body { margin-block: auto; min-height: 100%; align-content: center; }
 @media (max-width: 560px), (max-height: 700px) { .entry-logo .logo { height: 13vh; } .entry-body { gap: 14px; } .entry-choices button { padding: 14px; } }
+
+/* 堕天のあと：あなたは、何者になる？ */
+.rite-who .rite-sky { background: radial-gradient(circle at 50% 40%, #12090b, #000 72%); }
+.rite-who { display: flex; overflow-x: hidden; overflow-y: auto; }   /* 画面全体を縦にスクロールさせる（スクロールバーを右端に出す） */
+.rite-who .rite-sky { position: fixed; }
+.rite-who .rite-skip { position: fixed; }
+.who-body { position: relative; z-index: 6; width: min(680px, 92vw); margin: auto; padding: 48px 0 96px; text-align: center; display: grid; gap: 16px; justify-items: center; opacity: 0; }
+.who-body.in { animation: whoIn 1s ease forwards; }
+@keyframes whoIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+.who-body .latin { font-size: 14px; color: #b8a39e; letter-spacing: .3em; }
+.who-ask { margin: 0; font-size: clamp(26px, 4.4vw, 42px); letter-spacing: .3em; padding-left: .3em; font-weight: 700; }
+.who-q { margin: 0; font-family: var(--f-display); font-size: clamp(18px, 2.6vw, 24px); letter-spacing: .12em; line-height: 1.9; }
+.who-opts { display: grid; gap: 10px; width: 100%; margin-top: 8px; }
+.who-opts button { display: grid; gap: 6px; text-align: left; padding: 14px 18px; background: rgba(255, 255, 255, .02); border: 1px solid rgba(221, 90, 62, .35); color: #efe6df; font: inherit; cursor: pointer; transition: background .3s, border-color .3s; }
+.who-opts button:hover, .who-opts button:focus-visible { background: rgba(221, 90, 62, .12); border-color: #dd5a3e; }
+.who-opts b { font-family: var(--f-display); font-size: 17px; letter-spacing: .18em; font-weight: 600; }
+.who-opts small { font-size: 12px; color: #b8a39e; line-height: 1.7; }
+.who-opts.one button { text-align: center; }
+.who-note { width: 100%; box-sizing: border-box; background: rgba(255, 255, 255, .04); border: 1px solid rgba(221, 90, 62, .35); color: #efe6df; font: inherit; font-size: 15px; padding: 12px 14px; resize: none; }
+.who-intro { margin: 0; color: #cdbdb6; font-size: 14px; letter-spacing: .14em; line-height: 1.9; }
+.who-steps { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-family: var(--f-display); font-size: 16px; letter-spacing: .1em; line-height: 1.8; }
+.who-steps .note { color: #ffd8c8; font-style: italic; }
+.who-title { margin: 8px 0 0; font-size: clamp(32px, 6vw, 56px); letter-spacing: .24em; padding-left: .24em; text-shadow: 0 0 24px rgba(255, 70, 40, .55); }
+.who-text { margin: 0; color: #e3d6cf; font-size: 15px; line-height: 2; }
+@media (max-width: 640px) { .who-body { padding-top: 56px; } }
+
+/* 紋章（七つの大罪・階級）：魔天楼のタイトルのように、線で描かれてから満ちる */
+.emb-wrap { display: contents; }
+.emb.drawn path { stroke: currentColor; stroke-width: .22; stroke-dasharray: 1; stroke-dashoffset: 0; fill-opacity: 1;
+  animation: logoLine 2.4s cubic-bezier(.5, .1, .3, 1) var(--d, 0s) both, logoFill 1.2s ease-out calc(var(--d, 0s) + 1.9s) both, embStroke .8s ease-out calc(var(--d, 0s) + 2.6s) both; }
+/* 線は描き終えたら消え、塗りだけが残る（輪郭が太って見えないように） */
+@keyframes embStroke { from { stroke-opacity: 1; } to { stroke-opacity: 0; } }
+.emb-wrap { --d: 0s; }
+.pc-emb { display: grid; place-items: center; height: 54px; color: #ff9d7c; }
+.pc-emb .emb { height: 54px; width: auto; max-width: 70px; }
+.pact-choose button { justify-items: center; text-align: center; }
+.who-emb { display: grid; place-items: center; height: 130px; color: #ff9d7c; filter: drop-shadow(0 0 14px rgba(255, 70, 40, .55)); }
+.who-emb .emb { height: 130px; width: auto; }
+.sigil.big { width: auto; height: 130px; opacity: .5; display: flex; align-items: center; gap: 14px; }
+.sigil.big .emb { width: auto; height: 130px; }
+.ib-head .emb { width: 36px; height: 36px; }
+.cs-kind { display: grid; place-items: center; height: 46px; color: var(--side); }
+.cs-kind .emb { height: 46px; width: auto; }
+.jp-redo { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; text-align: left; }
+.jp-redo i { font-style: normal; font-size: 10.5px; color: var(--faint); margin-left: 8px; text-decoration: underline; text-underline-offset: 3px; }
+.jp-redo:hover i, .jp-redo:focus-visible i { color: var(--heaven); }
+@media (prefers-reduced-motion: reduce) { .emb.drawn path { animation: none; stroke: none; } }
+
+.who-sins { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; width: 100%; margin-top: 8px; }
+.who-sins button { display: grid; justify-items: center; gap: 8px; padding: 14px 8px; background: rgba(255, 255, 255, .02); border: 1px solid rgba(221, 90, 62, .35); color: #efe6df; font: inherit; cursor: pointer; transition: background .3s, border-color .3s; }
+.who-sins button:hover, .who-sins button:focus-visible { background: rgba(221, 90, 62, .12); border-color: #dd5a3e; }
+.who-sins b { font-family: var(--f-display); font-size: 18px; letter-spacing: .3em; padding-left: .3em; }
+.ws-emb { display: grid; place-items: center; height: 60px; color: #ff9d7c; }
+.ws-emb .emb { height: 60px; width: auto; max-width: 76px; }
+
+/* 塔の階の紋章：階が見えてくると、線で描かれてから満ちる */
+.fl-emb { display: grid; place-items: center; height: 104px; margin: 10px 0 4px; color: var(--f-ink, var(--t-ink)); }
+.fl-emb .emb { height: 104px; width: auto; max-width: 180px; }
+.floor .emb.drawn path { animation-play-state: paused; }
+.floor.seen .emb.drawn path { animation-play-state: running; }
+.abyss .fl-emb { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--abyss) 55%, transparent)); }
+.heaven .fl-emb { filter: drop-shadow(0 0 10px color-mix(in srgb, var(--heaven) 45%, transparent)); }
+@media (max-width: 640px) { .fl-emb, .fl-emb .emb { height: 82px; } }

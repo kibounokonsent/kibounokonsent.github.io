@@ -8,8 +8,8 @@ ARTICLES.push(
     en: 'ORDRANGE',
     summary: 'オールド・レンジニウムが生み出した生物兵器。複数の種類が存在する。',
     updated: '2026-10-02',
-    image: 'assets/images/oldrange/oldrange-03.svg',
-    keywords: ['生物兵器', 'オルド'],
+    image: '',
+    keywords: ['生物兵器', 'オルドレンジ'],
     info: [
       ['分類', '生物兵器'],
       ['創造者', '[[old-rangenium]]'],
@@ -103,6 +103,7 @@ ARTICLES.push(
     related: ['oldrange', 'oldrange-large', 'old-rangenium'],
   },
 
+
   {
     id: 'oldrange-large',
     cat: 'oldrange',
@@ -138,3 +139,5 @@ ARTICLES.push(
     related: ['oldrange', 'oldrange-mantis'],
   }
 );
+
+
