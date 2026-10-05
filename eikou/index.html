@@ -1,7 +1,5 @@
 <title>エイコウ 設定資料集</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<meta name="description" content="人の目には映らない、竜と半竜の世界の記録。光と闇の英雄譚。">
-  <link rel="icon" href="eikou2_.svg">
 <link href="https://fonts.googleapis.com/css2?family=Shippori+Mincho+B1:wght@500;700;800&family=Noto+Sans+JP:wght@400;500;700&family=Cinzel:wght@500;700&display=swap" rel="stylesheet">
 <style>
 /* 人の世界から竜の世界へ。
@@ -427,7 +425,11 @@ footer .links{display:flex;gap:16px}
 /* =========================================================
    ページ切り替え
    ========================================================= */
-main{view-transition-name:page}
+main{view-transition-name:page;overflow-anchor:none}
+/* 繰り返し：ページの終わりは、また始まりに続く（ずっとスクロールできる） */
+.loop-sep{display:flex;align-items:center;justify-content:center;gap:18px;height:150px;color:var(--mute);font-size:12px;letter-spacing:.5em;user-select:none}
+.loop-sep::before,.loop-sep::after{content:"";width:min(18vw,120px);height:1px;background:var(--line)}
+.loop-sep span{opacity:.75}
 header{view-transition-name:hdr}
 .fx{view-transition-name:fx}
 ::view-transition-group(fx){animation:none}
@@ -626,8 +628,8 @@ const ARTICLES = [
  ]]],
  body:['闇と光は、ひとつの身に併せ持つことができない。']},
 
-{id:'pw-2',cat:'power',title:'アクセサリー',lede:'竜となるための力。',
- body:[ '半竜が竜となるための力は、アクセサリーに込められている。多く持つほど強いとされ、尽きることのない力を引き出せるともいわれる。だが、その多くは謎に包まれたままである。']},
+{id:'pw-2',cat:'power',title:'ステータスとアクセサリー',lede:'力の測り方と、竜となるための力。',
+ body:['ステータスの数字は、見た目どおりの差を表さない。99と100の間には、0から100にも及ぶ隔たりがあるとされる。99と100が戦えば、必ず100が勝つ。精神力の値は、傷の治りにも関わる。','半竜が竜となるための力は、アクセサリーに込められている。多く持つほど強いとされ、尽きることのない力を引き出せるともいわれる。だが、その多くは謎に包まれたままである。']},
 
 {id:'ch-raiden',cat:'character',side:'light',title:'雷電',lede:'記憶を失った少年。この記録の中心にいる者。',
  body:['得体の知れない組織に追われ、逃げていたところをアスイに救われた。ホムラ、ミナモと出会って家族として暮らしはじめ、ホムラから「雷電」の名をもらう。のちにPHSに加わった。',{sp:'はじめは雷を操る者に見えた。だが実際には、光と闇の両方を扱うことができる。'},'雷電が望むのは、家族と食卓を囲むこと、鍋をつつくこと、友と笑い合うこと。どこにでもある日常である。'],
@@ -1566,6 +1568,51 @@ function renderSearch(){
 
 const app = document.getElementById('app');
 
+
+/* =========================================================
+   繰り返し：ページの終わりがそのまま始まりにつながる
+   同じページを下につぎ足し、ひと巡りぶん進んだら見えないまま先頭へ戻す。エイコウは繰り返しが伏線
+   ========================================================= */
+const LOOP_SKIP = h => h === 'search';   // 検索ページは入力欄があるので繰り返さない
+const LOOP_TEXT = '繰り返す';
+let loopOn = false, loopTick = false;
+function loopBodies(){ return [...app.querySelectorAll(':scope > .loop-body')]; }
+function loopPeriod(){
+  const b = loopBodies(); if(b.length < 2) return 0;
+  return b[1].getBoundingClientRect().top - b[0].getBoundingClientRect().top;
+}
+function buildLoop(){
+  const orig = app.querySelector(':scope > .loop-body[data-orig]'); if(!orig) return;
+  app.querySelectorAll(':scope > .loop-copy').forEach(n=>n.remove());
+  const h0 = orig.offsetHeight || 1, sepH = 150;
+  const m = Math.max(1, Math.ceil(innerHeight / (h0 + sepH)) + 1);   // 画面を埋めるぶんだけつぎ足す
+  for(let i=0;i<m;i++){
+    const c = document.createElement('div'); c.className = 'loop-copy'; c.setAttribute('aria-hidden','true');
+    c.innerHTML = `<div class="loop-sep"><span>${LOOP_TEXT}</span></div>`;
+    const b = orig.cloneNode(true); b.removeAttribute('data-orig'); b.querySelectorAll('[autofocus]').forEach(e=>e.removeAttribute('autofocus'));
+    b.querySelectorAll('a,button,input,select,textarea').forEach(e=>e.setAttribute('tabindex','-1'));
+    c.appendChild(b); app.appendChild(c);
+  }
+  // loop-body を app の直下に並べて測れるよう、コピーの中身を取り出す
+  app.querySelectorAll(':scope > .loop-copy').forEach(c=>{ const sep = c.firstElementChild, b = c.lastElementChild; app.insertBefore(sep, c); app.insertBefore(b, c); c.remove(); });
+}
+function setupLoop(h){
+  loopOn = false;
+  if(LOOP_SKIP(h)) return;
+  const body = document.createElement('div'); body.className = 'loop-body'; body.dataset.orig = '';
+  while(app.firstChild) body.appendChild(app.firstChild);
+  app.appendChild(body);
+  buildLoop(); loopOn = true;
+}
+function loopCheck(){
+  loopTick = false;
+  if(!loopOn) return;
+  const p = loopPeriod(); if(p <= 0) return;
+  if(scrollY >= p) scrollTo({top: scrollY - p, behavior:'instant'});
+}
+addEventListener('scroll', ()=>{ if(loopOn && !loopTick){ loopTick = true; requestAnimationFrame(loopCheck); } }, {passive:true});
+let loopRz; addEventListener('resize', ()=>{ clearTimeout(loopRz); loopRz = setTimeout(()=>{ if(loopOn) buildLoop(); }, 250); });
+
 function router(){
   const h = (location.hash||'').replace('#','');
   let out, active='';
@@ -1579,6 +1626,7 @@ function router(){
   app.querySelectorAll('.novel-text p').forEach((e,i)=>e.style.setProperty('--n', Math.min(i,24)));
   paintNav(active); paintSpoil();
   window.scrollTo(0,0);
+  setupLoop(h);
 }
 document.querySelector('[data-logo]').innerHTML = LOGO;
 document.body.insertAdjacentHTML('afterbegin', DRAGON_SYMBOLS);
