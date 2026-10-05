@@ -4,20 +4,22 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>魔天楼 ARCHIVE</title>
+<meta name="description" content="創作作品『魔天楼』の設定資料集。昇塔（天使）・地上（人の世）・降塔（悪魔）の三つの領域で記されている。">
 <link rel="icon" href="assets/img/logo.svg">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;1,400;1,500&family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho+B1:wght@500;600;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<!-- 書体は「見出しの明朝（2種の太さ）」「ラテン語の斜体」「記号の等幅」だけ。本文は端末の書体で軽く -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@1,400&family=IBM+Plex+Mono:wght@400&family=Shippori+Mincho+B1:wght@500;700&display=swap">
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
 <div class="atmos" aria-hidden="true"></div>
-<div class="grain" aria-hidden="true"></div>
 <div class="depth-rail" aria-hidden="true"><span class="top">天</span><span class="mk"></span><span class="bot">魔</span></div>
+<a class="skip" href="#app">本文へ</a>
 <header class="site-header">
   <div class="wrap">
     <a class="brand" href="#/" aria-label="魔天楼 トップへ"><span id="brand-mark"></span><b>魔天楼</b></a>
-    <nav class="nav" id="nav" aria-label="カテゴリー"></nav>
+    <nav class="nav" id="nav" aria-label="塔の領域"></nav>
     <div class="header-tools">
       <div class="search">
         <span id="search-ico"></span>
@@ -25,36 +27,36 @@
         <div class="suggest" id="suggest" hidden></div>
       </div>
       <button class="btn-icon" id="theme" type="button" aria-label="テーマ切替"></button>
+      <button class="btn-toc" id="toc-btn" type="button" aria-expanded="false" aria-label="目次をひらく"></button>
     </div>
   </div>
 </header>
 
-<main id="app"></main>
+<main id="app" tabindex="-1"></main>
 
 <footer class="site-footer">
   <div class="wrap">
     <span id="foot-mark"></span>
+    <nav class="foot-nav" aria-label="フッター">
+      <a href="#/r/heaven"><i>↑</i>昇塔</a><a href="#/r/ground"><i class="dot">●</i>地上</a><a href="#/r/abyss"><i>↓</i>降塔</a><a href="#/c/glossary">用語集</a><a href="#/articles">すべての節</a>
+    </nav>
     <span class="foot-txt"><b>魔天楼</b><i>Turris inter Caelum et Infernum</i><small>創作作品『魔天楼』の設定資料集です。記されていることは、すべて作中の設定です。</small></span>
   </div>
 </footer>
 
 <!-- データ（記事を増やすときは js/data/ にファイルを足して、ここに1行追加） -->
-<script src="js/data/00-categories.js"></script>
-<script src="js/data/articles-world.js"></script>
-<script src="js/data/articles-angel.js"></script>
-<script src="js/data/articles-demon.js"></script>
-<script src="js/data/articles-contract.js"></script>
-<script src="js/data/articles-rank.js"></script>
-<script src="js/data/articles-org.js"></script>
-<script src="js/data/articles-dungeon-battle.js"></script>
-<script src="js/data/articles-deep.js"></script>
-<script src="js/data/characters.js"></script>
-<script src="js/data/glossary.js"></script>
-<script src="js/data/tower.js"></script>
-<script src="js/data/world.js"></script>
+<script src="js/data/00-categories.js" defer></script>
+<script src="js/data/articles-heaven.js" defer></script>
+<script src="js/data/articles-ground.js" defer></script>
+<script src="js/data/articles-abyss.js" defer></script>
+<script src="js/data/articles-deep.js" defer></script>
+<script src="js/data/characters.js" defer></script>
+<script src="js/data/glossary.js" defer></script>
+<script src="js/data/tower.js" defer></script>
+<script src="js/data/world.js" defer></script>
 <!-- プログラム -->
-<script src="js/icons.js"></script>
-<script src="js/emblems.js"></script>
-<script src="js/app.js"></script>
+<script src="js/icons.js" defer></script>
+<script src="js/emblems.js" defer></script>
+<script src="js/app.js" defer></script>
 </body>
 </html>

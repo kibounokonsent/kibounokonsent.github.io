@@ -5,7 +5,7 @@
    ========================================================= */
 ARTICLES.push(
 {
-  id: 'kami-wa-tonari', cat: 'world', deep: true,
+  id: 'kami-wa-tonari', cat: 'deep', deep: true,
   title: '神は隣にいる', reading: 'Deus iuxta',
   updated: '2026-10-04',
   summary: '神は遠い場所にいるのではない。人のすぐ隣に、人として存在している。比喩ではなく、そのままの意味で。',
@@ -24,7 +24,7 @@ ARTICLES.push(
   keywords: ['かみはとなりにいる', '神', '隣', '救世主']
 },
 {
-  id: 'yukiyuu-seishi', cat: 'world', deep: true,
+  id: 'yukiyuu-seishi', cat: 'deep', deep: true,
   title: '幸悠 正使', reading: 'ゆきゆう せいし',
   updated: '2026-10-04',
   summary: '序盤から登場する、信仰深いごく普通の少年。その正体は[[lilith|リリス]]。',
@@ -46,7 +46,7 @@ ARTICLES.push(
   keywords: ['ゆきゆうせいし', '幸悠', '正使', '救世主', 'きゅうせいしゆ']
 },
 {
-  id: 'lilith', cat: 'world', deep: true,
+  id: 'lilith', cat: 'deep', deep: true,
   title: 'リリス', reading: 'Lilith',
   updated: '2026-10-04',
   summary: '魔天楼を自らの箱庭とし、その神の分身を置いた存在。本体は[[yukiyuu-seishi|幸悠 正使]]として人間界で生きる。',
@@ -72,7 +72,7 @@ ARTICLES.push(
   keywords: ['りりす', '神', '分身', '龍の世界']
 },
 {
-  id: 'abel-satan', cat: 'world', deep: true,
+  id: 'abel-satan', cat: 'deep', deep: true,
   title: 'アベルとサタン', reading: 'Abel / Satanas',
   updated: '2026-10-04',
   summary: 'アダムが作ったアベルは、魔天楼に放たれ、悪魔の王サタンとなった。サタンは世界の外で、力をつけている。',
@@ -91,7 +91,7 @@ ARTICLES.push(
   keywords: ['あべる', 'さたん', '悪魔の王', 'カイン']
 },
 {
-  id: 'genesis-hakoniwa', cat: 'world', deep: true,
+  id: 'genesis-hakoniwa', cat: 'deep', deep: true,
   title: '箱庭の成り立ち', reading: 'Hortus conclusus',
   updated: '2026-10-04',
   summary: '龍の世界のアダム・イヴ・リリスから、魔天楼が[[lilith|リリス]]の箱庭となり、閉ざされるまでの因果。',

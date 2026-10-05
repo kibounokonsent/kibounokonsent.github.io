@@ -19,7 +19,7 @@ CHARACTERS.push(
   image: 'assets/characters/mortus.svg',
   appearance: '',
   setting: '',
-  related: ['angel', 'rank-tsukasa', 'angel-hierarchy']
+  related: ['angel', 'angel-ranks', 'angel-hierarchy']
 },
 {
   id: 'dornelahid', type: 'demon',
@@ -33,6 +33,6 @@ CHARACTERS.push(
   ],
   appearance: '',
   setting: '',
-  related: ['demon', 'rank-system', 'contract']
+  related: ['demon', 'demon-ranks', 'seven-sins']
 }
 );

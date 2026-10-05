@@ -217,6 +217,241 @@ body.ruin .top .name{color:#c98f86}
 .infect p{font-family:var(--f-disp);font-size:clamp(22px,5vw,34px);letter-spacing:.18em;margin:0;color:#e4d3cd;opacity:0;animation:fadein 3.2s ease .6s forwards}
 .infect button{opacity:0;animation:fadein 1.2s ease 3.8s forwards;background:transparent;color:#c9a49c;border:1px solid #5a3a36;padding:8px 18px;letter-spacing:.12em;cursor:pointer}
 
+/* ===================== 入口 ===================== */
+.gate{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:26px;padding:40px 16px 48px;
+  background:radial-gradient(ellipse 80% 60% at 50% 0%,#221e1a,transparent 70%),var(--night)}
+.gate-logo img{height:clamp(90px,16vw,130px);width:auto;max-width:100%;display:block;margin:0 auto;filter:drop-shadow(0 2px 6px rgba(0,0,0,.6))}
+.gate-lead{margin:0;text-align:center;font-family:var(--f-disp);letter-spacing:.16em;color:var(--hud-sub);font-size:14px}
+.gate-opts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px;width:min(860px,100%)}
+.gate-opt{position:relative;text-align:left;cursor:pointer;min-width:0;display:flex;flex-direction:column;overflow:hidden;border-radius:2px;
+  box-shadow:0 14px 30px rgba(0,0,0,.5);transition:transform .2s,box-shadow .2s;text-decoration:none;color:inherit}
+.gate-opt:hover{transform:translateY(-3px);box-shadow:0 20px 36px rgba(0,0,0,.6)}
+.gate-vis{height:150px;position:relative;overflow:hidden;display:block}
+.gate-txt{padding:16px 20px 20px;display:flex;flex-direction:column;gap:6px;flex:1}
+.gate-txt small{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em}
+.gate-txt b{font-family:var(--f-disp);font-size:22px;letter-spacing:.14em;font-weight:700}
+.gate-txt span{font-size:13px;line-height:1.7}
+.gate-txt em{font-style:normal;font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;margin-top:auto;padding-top:8px}
+.g-play{background:#efe9dc;color:var(--ink)}
+.g-play .gate-vis{background-color:#3a2a1e;background-size:520px 520px}
+.g-play .gate-vis::before{content:"";position:absolute;inset:0;background:radial-gradient(ellipse 70% 80% at 50% 30%,rgba(255,214,150,.28),transparent 65%)}
+.g-play .mini-folder{position:absolute;left:50%;top:56%;width:150px;height:96px;transform:translate(-50%,-50%) rotate(-3deg);background:#cfae6e;border-radius:2px 8px 3px 3px;box-shadow:0 10px 18px rgba(0,0,0,.5)}
+.g-play .mini-folder::before{content:"";position:absolute;left:0;top:-12px;width:40%;height:14px;background:#c9a467;border-radius:5px 5px 0 0}
+.g-play .mini-folder::after{content:"御身神山事案";position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);background:#f4efe2;color:#3b2a14;font-family:var(--f-disp);font-size:12px;letter-spacing:.12em;padding:4px 10px;white-space:nowrap}
+.g-play .gate-txt small{color:#7a6a4f}
+.g-play .gate-txt span{color:#4a4f55}
+.g-play .gate-txt em{color:#8a5a2a}
+.g-db{background:#0f171c;color:#dfe6e8;outline:1px solid #24323b;outline-offset:-1px}
+.g-db .gate-vis{background:#0a1014;border-bottom:1px solid #24323b;padding:18px 20px;font-family:var(--f-mono);font-size:11.5px;line-height:1.8;color:#8fc3b4;letter-spacing:.06em}
+.g-db .gate-vis i{font-style:normal;color:#6b7c85}
+.g-db .gate-vis .cur{display:inline-block;width:7px;height:12px;background:#8fc3b4;vertical-align:-2px;animation:blink 1.1s steps(2) infinite}
+@keyframes blink{50%{opacity:0}}
+.g-db .gate-txt small{color:#8fc3b4}
+.g-db .gate-txt span{color:#a9b6bc}
+.g-db .gate-txt em{color:#8a9aa3}
+.gate-note{margin:0;font-size:12px;color:#8a8278;text-align:center;max-width:36em}
+@media (max-width:640px){.gate-opts{grid-template-columns:minmax(0,1fr)}.gate-vis{height:124px}}
+
+/* ===================== 警察署PC（事件資料データベース） ===================== */
+.db{--db-bg:#0c1216;--db-panel:#111a20;--db-panel2:#16212a;--db-line:#24323b;--db-fg:#dfe6e8;--db-sub:#8a9aa3;--db-acc:#8fc3b4;--db-acc2:#5f8f82;--db-warn:#e07a63;--db-amber:#d9b46a;
+  min-height:100vh;background:var(--db-bg);color:var(--db-fg);display:flex;flex-direction:column;position:relative}
+.db::after{content:"";position:fixed;inset:0;pointer-events:none;z-index:50;background:repeating-linear-gradient(180deg,rgba(255,255,255,.016) 0 1px,transparent 1px 3px)}
+.db a{color:inherit}
+.db-bar{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;background:#0a0f13;border-bottom:1px solid var(--db-line);padding:8px 16px;display:flex;gap:8px 16px;align-items:center;flex-wrap:wrap}
+.db-sys{font-family:var(--f-mono);font-weight:500;font-size:13px;letter-spacing:.22em;color:var(--db-acc);display:flex;align-items:center;gap:10px}
+.db-sys::before{content:"";width:8px;height:8px;border-radius:50%;background:var(--db-acc);box-shadow:0 0 8px var(--db-acc)}
+.db-sys small{font-size:10px;letter-spacing:.16em;color:var(--db-sub)}
+.db-tools{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap;min-width:0}
+.db-search{display:flex;align-items:center;border:1px solid var(--db-line);background:var(--db-panel);min-width:0;margin:0}
+.db-search label{white-space:nowrap;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;color:var(--db-sub);padding:0 4px 0 9px}
+.db-search input{background:transparent;border:0;color:var(--db-fg);font-family:var(--f-body);font-size:14px;padding:6px 9px 6px 4px;width:13em;min-width:0;outline:none}
+.db-search:focus-within{border-color:var(--db-acc2)}
+.db-btn{font-family:var(--f-mono);font-size:11px;letter-spacing:.06em;background:transparent;border:1px solid var(--db-line);color:var(--db-sub);padding:6px 10px;cursor:pointer;white-space:nowrap}
+.db-btn:hover{color:var(--db-fg);border-color:var(--db-acc2)}
+.db-btn b{font-weight:500;color:var(--db-fg)}
+.db-btn.secret b{color:var(--db-warn)}
+.db-case{display:flex;flex-wrap:wrap;gap:4px 22px;padding:9px 16px;border-bottom:1px solid var(--db-line);background:var(--db-panel);font-family:var(--f-mono);font-size:11.5px;letter-spacing:.08em;color:var(--db-sub)}
+.db-case b{color:var(--db-fg);font-weight:500;font-family:var(--f-body);letter-spacing:.04em}
+.db-case .closed{color:var(--db-amber);font-family:var(--f-mono)}
+.db-body{flex:1;display:grid;grid-template-columns:216px minmax(0,1fr);min-height:0}
+.db-nav{border-right:1px solid var(--db-line);background:var(--db-panel);padding:14px 0;display:flex;flex-direction:column}
+.db-nav .h{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:var(--db-sub);padding:0 16px 8px}
+.db-nav a{display:flex;align-items:baseline;gap:10px;padding:9px 16px;text-decoration:none;color:#c3ccd0;border-left:3px solid transparent;font-size:14.5px}
+.db-nav a small{font-family:var(--f-mono);font-size:10px;color:var(--db-sub);letter-spacing:.1em;margin-left:auto}
+.db-nav a:hover{background:var(--db-panel2);color:var(--db-fg)}
+.db-nav a.cur{border-left-color:var(--db-acc);background:var(--db-panel2);color:var(--db-fg)}
+.db-nav .gap{height:10px}
+.db-main{padding:20px 28px 60px;min-width:0;max-width:980px;width:100%}
+.db-crumb{font-family:var(--f-mono);font-size:11px;letter-spacing:.08em;color:var(--db-sub);display:flex;flex-wrap:wrap;gap:4px 8px;align-items:center;margin-bottom:16px}
+.db-crumb a{text-decoration:none;color:var(--db-acc)}
+.db-crumb a:hover{text-decoration:underline}
+.db-crumb .sep{color:#4a5a63}
+.db-crumb .now{color:var(--db-fg);font-family:var(--f-body);letter-spacing:.02em;font-size:12.5px}
+.db-h{display:flex;align-items:baseline;gap:6px 12px;flex-wrap:wrap;border-bottom:1px solid var(--db-line);padding-bottom:10px;margin:0 0 18px}
+.db-h h2{margin:0;font-family:var(--f-disp);font-weight:700;font-size:24px;letter-spacing:.1em;text-wrap:balance}
+.db-h .en{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;color:var(--db-acc)}
+.db-h .cnt{margin-left:auto;font-family:var(--f-mono);font-size:11px;color:var(--db-sub)}
+.db-p{color:#b9c4c9;font-size:14px;margin:0 0 18px;max-width:40em}
+
+.db-tiles{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
+.db-tile{display:flex;flex-direction:column;gap:4px;padding:14px 16px 16px;background:var(--db-panel);border:1px solid var(--db-line);text-decoration:none;min-width:0;transition:border-color .15s,background .15s}
+.db-tile:hover{border-color:var(--db-acc2);background:var(--db-panel2)}
+.db-tile .en{font-family:var(--f-mono);font-size:10px;letter-spacing:.18em;color:var(--db-acc)}
+.db-tile b{font-size:18px;font-family:var(--f-disp);letter-spacing:.1em}
+.db-tile span{font-size:12.5px;color:var(--db-sub);line-height:1.6}
+.db-tile em{font-style:normal;font-family:var(--f-mono);font-size:11px;color:#b9c4c9;margin-top:6px}
+.db-casecard{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 24px;padding:16px 18px;border:1px solid var(--db-line);background:linear-gradient(180deg,var(--db-panel2),var(--db-panel));margin-bottom:22px}
+.db-casecard dl{margin:0;display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 16px;font-size:14px}
+.db-casecard dt{font-family:var(--f-mono);font-size:11px;letter-spacing:.12em;color:var(--db-sub);padding-top:3px}
+.db-casecard dd{margin:0}
+.db-casecard .stamp{align-self:start;font-family:var(--f-mono);font-weight:500;color:var(--db-amber);border:1.5px solid var(--db-amber);padding:4px 12px;letter-spacing:.3em;font-size:13px}
+.db-sec{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;color:var(--db-acc);margin:28px 0 10px;display:flex;align-items:center;gap:10px}
+.db-sec::after{content:"";flex:1;height:1px;background:var(--db-line)}
+
+.db-list{display:flex;flex-direction:column;border-top:1px solid var(--db-line)}
+.db-row{display:grid;grid-template-columns:6.5em minmax(0,1fr) auto;gap:14px;align-items:baseline;padding:11px 10px;border-bottom:1px solid var(--db-line);text-decoration:none;min-width:0}
+a.db-row:hover{background:var(--db-panel2)}
+a.db-row:hover .t{color:var(--db-acc)}
+.db-row .no{font-family:var(--f-mono);font-size:11px;color:var(--db-sub);letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.db-row .t{font-size:15px;min-width:0}
+.db-row .t small{display:block;font-size:12px;color:var(--db-sub);margin-top:2px;line-height:1.6}
+.db-row .k{font-family:var(--f-mono);font-size:10.5px;color:var(--db-sub);letter-spacing:.08em;white-space:nowrap}
+.db-row.lock .t{color:#5d6b73}
+.bar-x{display:inline-block;background:#33424b;height:.9em;vertical-align:-1px;border-radius:1px;max-width:100%}
+.pill{font-family:var(--f-mono);font-size:10px;letter-spacing:.1em;padding:1px 7px;border:1px solid currentColor;white-space:nowrap;font-weight:400}
+.pill.lock,.pill.sp{color:var(--db-warn)}
+
+.db-people{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px}
+.db-person{display:grid;grid-template-columns:62px minmax(0,1fr);gap:12px;padding:12px;background:var(--db-panel);border:1px solid var(--db-line);text-decoration:none;min-width:0}
+.db-person:hover{border-color:var(--db-acc2);background:var(--db-panel2)}
+.db-person .ph,.db-doc .ph{display:block;aspect-ratio:3/4;background:#1c2830;border:1px solid var(--db-line);position:relative;overflow:hidden;max-width:100%}
+.db-person .ph::before,.db-doc .ph::before{content:"";position:absolute;left:50%;top:20%;width:40%;aspect-ratio:1;border-radius:50%;background:#2c3a43;transform:translateX(-50%)}
+.db-person .ph::after,.db-doc .ph::after{content:"";position:absolute;left:50%;bottom:-18%;width:82%;height:46%;border-radius:50% 50% 0 0;background:#2c3a43;transform:translateX(-50%)}
+.db-person b{display:block;font-family:var(--f-disp);font-size:16px;letter-spacing:.06em;line-height:1.35}
+.db-person small{display:block;font-size:11px;color:var(--db-sub);letter-spacing:.08em}
+.db-person span span{display:block;font-size:12px;color:#b9c4c9;line-height:1.6;margin-top:4px}
+.db-person .age{font-family:var(--f-mono);font-size:11px;color:var(--db-acc)!important;margin-top:2px!important}
+
+.db-specs{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px}
+.db-spec{display:flex;flex-direction:column;background:var(--db-panel);border:1px solid var(--db-line);text-decoration:none;min-width:0}
+.db-spec:hover{border-color:var(--db-acc2)}
+.db-spec .im{height:110px;display:grid;place-items:center;background:#d7d3cb;border-bottom:1px solid var(--db-line);padding:8px}
+.db-spec .im img{max-height:94px;width:auto;max-width:100%;object-fit:contain}
+.db-spec .im i{font-style:normal;font-family:var(--f-mono);font-size:10px;color:#6b6760}
+.db-spec>span:last-child{padding:7px 10px;font-family:var(--f-mono);font-size:11.5px;letter-spacing:.06em}
+.db-spec small{display:block;font-family:var(--f-body);font-size:11px;color:var(--db-sub);letter-spacing:0}
+
+/* 個別資料 */
+.db-doc{background:var(--db-panel);border:1px solid var(--db-line);padding:22px 26px 26px}
+.db-doc .meta{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;color:var(--db-sub);border-bottom:1px solid var(--db-line);padding-bottom:8px;margin-bottom:14px}
+.db-doc h2{margin:0;font-family:var(--f-disp);font-weight:700;font-size:26px;letter-spacing:.08em;text-wrap:balance}
+.db-doc .ruby{margin:2px 0 0;font-size:12px;color:var(--db-sub);letter-spacing:.12em}
+.db-doc .top2{display:grid;grid-template-columns:minmax(0,1fr);gap:18px;margin-top:16px}
+.db-doc .top2.with-ph{grid-template-columns:110px minmax(0,1fr)}
+.db-tbl-wrap{overflow-x:auto;min-width:0}
+.db-doc table{width:100%;border-collapse:collapse;font-size:14px}
+.db-doc th,.db-doc td{border:1px solid var(--db-line);padding:7px 11px;text-align:left;vertical-align:top}
+.db-doc th{width:7.5em;background:#0e161b;color:var(--db-sub);font-weight:400;white-space:nowrap;font-size:13px}
+.db-doc td.ng{color:var(--db-warn);font-weight:700}
+.db-doc .txt{margin-top:18px;max-width:40em}
+.db-doc .txt p{margin:.55em 0;font-size:15px;line-height:1.9;color:#d3dbde}
+.db-doc .txt h3{font-family:var(--f-disp);font-size:16px;letter-spacing:.08em;margin:22px 0 4px;padding-left:9px;border-left:3px solid var(--db-acc)}
+.db-doc .txt .pill{margin-left:8px;vertical-align:2px}
+.db-doc .empty{color:var(--db-sub)!important;font-size:13px!important}
+.db-doc figure{margin:16px 0 0;background:#d7d3cb;border:1px solid var(--db-line);padding:12px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.db-doc figure img{height:220px;width:auto;max-width:100%;object-fit:contain}
+.db-doc figcaption{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;color:#4c4a45}
+.rd{display:inline-block;background:#33424b;color:transparent;width:.95em;height:1em;vertical-align:-2px;margin:0 1px;user-select:none;overflow:hidden}
+.db-rel{display:flex;flex-wrap:wrap;gap:8px}
+.db-rel a,.db-rel span{font-size:13px;padding:5px 10px;border:1px solid var(--db-line);text-decoration:none;background:var(--db-bg)}
+.db-rel a:hover{border-color:var(--db-acc2);color:var(--db-acc)}
+.db-rel small{font-family:var(--f-mono);font-size:10px;color:var(--db-sub);margin-right:6px}
+.db-rel span{color:#5d6b73}
+.db-pager{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:20px}
+.db-pager a{display:flex;flex-direction:column;gap:2px;padding:10px 14px;border:1px solid var(--db-line);text-decoration:none;min-width:0;font-size:14px}
+.db-pager a:hover{border-color:var(--db-acc2)}
+.db-pager small{font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;color:var(--db-sub)}
+.db-pager .nx{text-align:right;grid-column:2}
+.db-locked{border:1px dashed #5a3a33;background:#160f0e;padding:26px 24px;display:flex;flex-direction:column;gap:10px;align-items:flex-start}
+.db-locked b{font-family:var(--f-mono);letter-spacing:.2em;color:var(--db-warn);font-weight:500}
+.db-locked p{margin:0;font-size:14px;color:#c7b3ad}
+
+/* 時系列 */
+.db-tl{list-style:none;margin:0;padding:0;position:relative}
+.db-tl::before{content:"";position:absolute;left:3.6em;top:8px;bottom:8px;width:1px;background:var(--db-line)}
+.db-tl li{display:grid;grid-template-columns:2.6em minmax(0,1fr);gap:0 2.2em;padding:10px 0;position:relative}
+.db-tl li::before{content:"";position:absolute;left:calc(3.6em - 4px);top:17px;width:9px;height:9px;border-radius:50%;background:var(--db-bg);border:1.5px solid var(--db-acc)}
+.db-tl li.lock::before{border-color:var(--db-warn)}
+.db-tl li.fin::before{background:var(--db-warn);border-color:var(--db-warn)}
+.db-tl .when{font-family:var(--f-mono);font-size:11px;color:var(--db-sub);padding-top:4px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
+.db-tl .pl{font-family:var(--f-mono);font-size:10.5px;letter-spacing:.16em;color:var(--db-acc)}
+.db-tl .tx{font-size:15px;line-height:1.75}
+.db-tl .tx p{margin:0}
+.db-tl .chips{display:flex;flex-wrap:wrap;gap:6px 10px;margin-top:6px;align-items:center}
+.db-tl .chip2{font-family:var(--f-mono);font-size:10.5px;padding:1px 7px;border:1px solid var(--db-line);color:#b9c4c9}
+.db-tl .chip2.ng{color:var(--db-warn);border-color:#5a3a33}
+.db-tl .chips a{font-size:12px;text-decoration:none;color:var(--db-acc);border-bottom:1px dotted var(--db-acc2)}
+.db-tl li.lock .tx{color:#5d6b73}
+
+.db-hit{display:block;padding:12px 10px;border-bottom:1px solid var(--db-line);text-decoration:none}
+.db-hit:hover{background:var(--db-panel2)}
+.db-hit .no{font-family:var(--f-mono);font-size:11px;color:var(--db-sub);margin-right:10px}
+.db-hit p{margin:4px 0 0;font-size:13px;color:#a9b6bc;line-height:1.7}
+.db-hit mark{background:#3d5a52;color:var(--db-fg);padding:0 1px}
+.db-foot{border-top:1px solid var(--db-line);padding:10px 16px;font-family:var(--f-mono);font-size:10.5px;letter-spacing:.08em;color:#6b7a82;display:flex;flex-wrap:wrap;gap:4px 18px}
+
+.db-boot{position:fixed;inset:0;z-index:45;background:#070b0d;display:flex;align-items:center;justify-content:center;padding:24px 16px;font-family:var(--f-mono);color:var(--db-acc);overflow-y:auto}
+.db-boot .scr{width:min(560px,100%);font-size:12.5px;line-height:1.9;letter-spacing:.06em}
+.db-boot .scr>div{animation:fadein .25s ease both}
+.db-boot .dim{color:#6b7a82}
+.db-boot .ok{color:var(--db-fg)}
+.db-login{margin-top:18px;border:1px solid var(--db-line);padding:16px;background:#0c1317}
+.db-login p{margin:0 0 12px;font-family:var(--f-body);color:#c3ccd0;font-size:14px;letter-spacing:.02em}
+.db-login .two{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.db-login button{text-align:left;background:transparent;border:1px solid var(--db-line);color:var(--db-fg);padding:12px 14px;cursor:pointer;font-family:var(--f-body)}
+.db-login button:hover{border-color:var(--db-acc)}
+.db-login button b{display:block;font-size:15px;font-weight:700}
+.db-login button b i{font-style:normal;font-family:var(--f-mono);font-size:10px;letter-spacing:.14em;color:var(--db-acc);margin-left:6px;font-weight:400}
+.db-login button span{display:block;font-size:12px;color:var(--db-sub);line-height:1.6;margin-top:2px}
+.db-login button.sec b i{color:var(--db-warn)}
+
+/* ページ内確認 */
+.ask{z-index:70;background:rgba(6,6,5,.78)}
+.ask .choice{max-width:440px}
+.ask .row2{display:flex;gap:10px;justify-content:flex-end;margin-top:6px;flex-wrap:wrap}
+.ask .row2 button{background:transparent;border:1px solid var(--rule);color:var(--ink);padding:9px 16px;cursor:pointer;font-size:14px}
+.ask .row2 button.y{background:var(--ink);color:var(--paper);border-color:var(--ink)}
+.ask.dbask .choice{background:#111a20;color:#dfe6e8;border:1px solid #24323b;box-shadow:none;background-image:none}
+.ask.dbask .no{color:#8fc3b4}
+.ask.dbask .row2 button{color:#dfe6e8;border-color:#24323b}
+.ask.dbask .row2 button.y{background:#8fc3b4;color:#0c1216;border-color:#8fc3b4}
+.back-gate{background:none;border:0;color:var(--sub);font-size:12px;text-decoration:underline;cursor:pointer;padding:0;margin-top:14px}
+
+@media (max-width:760px){
+  .db-body{grid-template-columns:minmax(0,1fr)}
+  .db-nav{flex-direction:row;overflow-x:auto;border-right:0;border-bottom:1px solid var(--db-line);padding:0;position:sticky;top:calc(env(safe-area-inset-top,0px) + var(--dbbar-h,48px));z-index:15}
+  .db-nav .h,.db-nav .gap{display:none}
+  .db-nav a{border-left:0;border-bottom:2px solid transparent;padding:10px 12px;white-space:nowrap;font-size:13.5px;flex:none}
+  .db-nav a small{display:none}
+  .db-nav a.cur{border-bottom-color:var(--db-acc)}
+  .db-main{padding:16px 16px 50px}
+  .db-tiles{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .db-doc{padding:18px 16px 20px}
+  .db-doc .top2.with-ph{grid-template-columns:minmax(0,1fr)}
+  .db-doc .top2.with-ph .ph{width:100px}
+  .db-casecard{grid-template-columns:minmax(0,1fr)}
+  .db-casecard .stamp{justify-self:start}
+  .db-row{grid-template-columns:5.4em minmax(0,1fr);gap:4px 10px}
+  .db-row .k,.db-row .pill{grid-column:2;justify-self:start}
+  .db-search{flex:1}
+  .db-search input{width:100%}
+  .db-tools{width:100%;margin-left:0}
+  .db-login .two{grid-template-columns:minmax(0,1fr)}
+  .db-pager{grid-template-columns:minmax(0,1fr)}
+  .db-pager .nx{grid-column:1}
+}
+@media (max-width:420px){.db-tiles{grid-template-columns:minmax(0,1fr)}.db-people{grid-template-columns:minmax(0,1fr)}}
+
 @media (max-width:640px){
   .lead{padding:26px 20px 24px}
   .report{padding:28px 18px 30px}
@@ -235,6 +470,28 @@ body.ruin .top .name{color:#c98f86}
 </head>
 <body>
 
+<section class="gate" id="gate" hidden>
+  <div class="gate-logo"><img src="img/logo.svg" alt="血と肉" onerror="this.replaceWith(document.createTextNode('血と肉'))"></div>
+  <p class="gate-lead">御身神山における行方不明事案の記録</p>
+  <div class="gate-opts">
+    <a class="gate-opt g-play" href="#play">
+      <span class="gate-vis" id="gateWood"><span class="mini-folder"></span></span>
+      <span class="gate-txt"><small>PLAY</small><b>事件を体験する</b>
+        <span>飯田の視点で、署の資料から御身神山へ。その時点で飯田が知っていることだけを、順番に知っていく。</span>
+        <em id="gatePlayState">はじめから</em></span>
+    </a>
+    <a class="gate-opt g-db" href="#db">
+      <span class="gate-vis" aria-hidden="true">
+        <i>&gt;</i> POLICE DATABASE<br><i>&gt;</i> CASE RECORD : 御身神山関連事件<br><i>&gt;</i> STATUS : CLOSED<br><i>&gt;</i> <span class="cur"></span>
+      </span>
+      <span class="gate-txt"><small>DATABASE</small><b>事件資料を閲覧する</b>
+        <span>警察署の端末から、整理された事件記録を直接閲覧する。順番に読む必要はなく、見たい資料へすぐ移動できる。</span>
+        <em>事件概要 ／ 捜査記録 ／ 関係者 ／ 現場記録 ／ 時系列 ／ 資料・記録</em></span>
+    </a>
+  </div>
+  <p class="gate-note">体験の進み具合と資料の閲覧は、別々に記録されます。資料は体験を終えていなくても閲覧できます。</p>
+</section>
+
 <header class="top">
   <span class="name" id="logoTop"><img src="img/logo.svg" alt="血と肉" class="logo-s" onerror="this.replaceWith(document.createTextNode('血と肉'))"></span>
   <span class="case">御身神山事案</span>
@@ -242,6 +499,7 @@ body.ruin .top .name{color:#c98f86}
     <button class="retreat" id="retreat" type="button" hidden>署へ戻る</button>
     <button class="chip" id="filesBtn" type="button">資料一覧 <b id="fileCount">0</b></button>
     <button class="chip" id="spoilBtn" type="button">ネタバレ：<b>なし</b></button>
+    <a class="chip" href="#top" style="text-decoration:none">入口へ</a>
   </div>
 </header>
 
@@ -257,8 +515,39 @@ body.ruin .top .name{color:#c98f86}
       <button type="button" data-mode="off"><b>ネタバレなし</b><span>飯田と同じだけの情報で読む。核心は伏せられたまま。</span></button>
       <button type="button" data-mode="on"><b>ネタバレあり</b><span>作中で判明する情報をすべて読む。</span></button>
     </div>
+    <button type="button" class="back-gate" id="startBack">入口へ戻る</button>
   </div>
 </div>
+<div class="veil ask" id="ask" hidden>
+  <div class="choice paper" role="dialog" aria-modal="true" aria-labelledby="askMsg">
+    <span class="no" id="askHead">確認</span>
+    <p id="askMsg" style="color:inherit;font-size:15px;margin:8px 0 16px"></p>
+    <div class="row2"><button type="button" id="askNo">やめる</button><button type="button" class="y" id="askYes">続ける</button></div>
+  </div>
+</div>
+
+<div class="db" id="db" hidden>
+  <div class="db-bar" id="dbBar">
+    <span class="db-sys">POLICE DATABASE <small>CASE RECORD</small></span>
+    <div class="db-tools">
+      <form class="db-search" id="dbSearch" role="search"><label for="dbq">検索</label><input id="dbq" type="search" placeholder="語句を入力" autocomplete="off"></form>
+      <button class="db-btn" id="dbClr" type="button">閲覧区分：<b>一般</b></button>
+      <a class="db-btn" href="#top" style="text-decoration:none">ログアウト</a>
+    </div>
+  </div>
+  <div class="db-case">
+    <span>CASE : <b>御身神山関連事件</b></span>
+    <span>STATUS : <b class="closed">CLOSED</b></span>
+    <span>件名 : <b>御身神山における行方不明事案</b></span>
+  </div>
+  <div class="db-body">
+    <nav class="db-nav" id="dbNav" aria-label="資料の分類"></nav>
+    <main class="db-main" id="dbMain"></main>
+  </div>
+  <div class="db-foot"><span>御身神山関連事件 ／ 事件記録</span><span id="dbFootClr"></span></div>
+  <div class="db-boot" id="dbBoot" hidden><div class="scr" id="dbBootScr"></div></div>
+</div>
+
 <div class="veil infect" id="infect" hidden>
   <p>あなたは感染した……</p>
   <button type="button" id="infectGo">資料を開く</button>
@@ -270,7 +559,13 @@ body.ruin .top .name{color:#c98f86}
    fields: [項目, 値, 赤字なら1]   body: 段落。{x} の文字は欠落して見える。
    {spoiler:true, t:'…'} の段落は「ネタバレあり」のときだけ出る。 {sec:'見出し'} は小見出し。
    ============================================================ */
-const on = () => S.mode === 'on';
+/* APP：'gate'（入口）／'game'（事件を体験する）／'db'（事件資料を閲覧する）。資料側は独自の閲覧区分を使う */
+let APP='gate';
+const on = () => APP==='db' ? !!DBS.spoil : S.mode === 'on';
+const DBKEY='chitoniku-db-v1';
+let DBS={spoil:null};
+try{const s=JSON.parse(localStorage.getItem(DBKEY)||'null'); if(s) DBS=Object.assign(DBS,s);}catch(e){}
+const dbSave=()=>{try{localStorage.setItem(DBKEY,JSON.stringify(DBS));}catch(e){}};
 
 const PEOPLE = [
   { id:'iida',   name:'飯田 春樹', ruby:'いいだ はるき', age:31, line:'警察官。年齢の割に若々しく、20代に見える。', r:'-1.5deg' },
@@ -607,7 +902,13 @@ function wireReader(){
 }
 function closeReader(){ $('reader').hidden=true; S.view==='desk' ? renderDesk() : refreshSpots(); updateTop(); }
 $('reader').addEventListener('click',e=>{ if(e.target.id==='reader') closeReader(); });
-document.addEventListener('keydown',e=>{ if(e.key==='Escape' && !$('reader').hidden) closeReader(); });
+document.addEventListener('keydown',e=>{ if(e.key!=='Escape') return; if(!$('ask').hidden){ $('askNo').click(); return; } if(APP==='game' && !$('reader').hidden) closeReader(); });
+/* ページ内の確認（ビューアでは confirm() が使えないため） */
+function askConfirm(msg,yes,opt={}){
+  const a=$('ask'); a.classList.toggle('dbask',APP==='db'); $('askMsg').textContent=msg; $('askHead').textContent=opt.head||'確認'; $('askYes').textContent=opt.yes||'続ける';
+  a.hidden=false; $('askNo').focus();
+  $('askNo').onclick=()=>{ a.hidden=true; }; $('askYes').onclick=()=>{ a.hidden=true; yes(); };
+}
 
 function collected(){
   const all=[...DESK_DOCS, ...PEOPLE.map(p=>p.id)];
@@ -989,7 +1290,7 @@ $('filesBtn').onclick=openFiles;
 function setMode(m){
   if(S.mode===m) return;
   const started=S.step>=0||S.read.length||S.found.length||S.cleared;
-  if(S.mode && started && !confirm('ネタバレの切り替えをすると、最初からになります。よろしいですか？')) return;
+  if(S.mode && started && !setMode.ok){ askConfirm('ネタバレの切り替えをすると、最初からになります。よろしいですか？',()=>{ setMode.ok=true; setMode(m); setMode.ok=false; }); return; }
   S={mode:m, view:'desk', desk:0, step:-1, read:[], found:[], cleared:false, max:-1};
   save(); stopForest(); $('reader').hidden=true; document.body.classList.remove('ruin'); document.body.dataset.phase='';
   setRoute(); renderDesk(); updateTop();
@@ -997,12 +1298,224 @@ function setMode(m){
 $('spoilBtn').onclick=()=>setMode(on()?'off':'on');
 document.querySelectorAll('[data-mode]').forEach(b=>b.onclick=()=>{ setMode(b.dataset.mode); $('start').hidden=true; updateTop(); });
 
+/* =====================================================================
+   事件資料データベース（警察署のPC）
+   ゲームの進み具合とは別。既存の DOCS / PEOPLE / STEPS_ON の内容を分類して見せるだけで、新しい設定は足さない。
+   ===================================================================== */
+/* 分類と、そこに入る資料。並び順もこの順 */
+const DB_CATS=[
+  {id:'summary', name:'事件概要', en:'SUMMARY',  note:'事件の発端と概要', docs:['case']},
+  {id:'records', name:'捜査記録', en:'INVESTIGATION LOG', note:'入山から現地での記録', docs:['enter','comm','slide','trace','meet','way','kandaFall']},
+  {id:'people',  name:'関係者',   en:'PERSONS',  note:'警察官・家族・配信者', docs:PEOPLE.map(p=>p.id)},
+  {id:'scene',   name:'現場記録', en:'SCENE',    note:'御身神山・御身神村', docs:['mountain','village']},
+  {id:'timeline',name:'時系列',   en:'TIMELINE', note:'発端から記録終了まで', docs:[]},
+  {id:'files',   name:'資料・記録', en:'MATERIALS', note:'配信映像・血と肉・個体記録', docs:['video','chitoniku','mother',...SPEC_IDS]},
+];
+/* 一般区分（ネタバレなし）では閲覧制限になる記録 */
+const DB_LOCK=new Set(['slide','meet','way','kandaFall']);
+/* 関連資料 */
+const DB_REL={
+  case:['video','streamer','mountain'], video:['case','streamer','chitoniku'], mountain:['enter','village','case'],
+  village:['mountain','chitoniku','mother','hanae','haruko'], chitoniku:['mother','village','meet','video'], mother:['chitoniku','hanae','haruko','village'],
+  iida:['enter','way','village','mother'], kanda:['enter','way','kandaFall'], hanae:['village','mother'], haruko:['village','mother'], streamer:['case','video','trace'],
+  enter:['iida','kanda','mountain'], comm:['enter','slide'], slide:['comm','trace'], trace:['video','streamer'], meet:['chitoniku','video'],
+  way:['village','iida','kanda'], kandaFall:['kanda','chitoniku','village'],
+};
+SPEC_IDS.forEach(id=>DB_REL[id]=['chitoniku']);
+
+const dbCatOf=id=>DB_CATS.find(c=>c.docs.includes(id));
+const dbLocked=id=>!on() && DB_LOCK.has(id);
+/* {x} は判読不能の黒塗りにする */
+const T=t=>String(t??'').replace(/\{(.)\}/g,'<span class="rd" title="判読不能">█</span>');
+const plain=t=>String(t??'').replace(/<[^>]+>/g,'').replace(/[{}]/g,'');
+const bars=(n,w=1)=>`<span class="bar-x" style="width:${n*w}em" aria-label="非表示"></span>`;
+function dbBody(id){
+  return DOCS[id].body().filter(Boolean).map(p=>typeof p==='string'?{t:p}:p).filter(p=>!(p.spoiler&&!on()))
+    .map(p=>p.t?Object.assign({},p,{t:p.t.replace('資料一覧の「血と肉」から閲覧できる','「資料・記録」の個体記録から閲覧できる')}):p);
+}
+const dbHref=id=>{ const c=dbCatOf(id); return `#db.${c.id}.${id}`; };
+const dbTitle=id=>{ const d=DOCS[id]; return (d.title||'').replace(/^No\.\d+　/,m=>m); };
+
+function dbRow(id){
+  const d=DOCS[id];
+  if(dbLocked(id)) return `<div class="db-row lock"><span class="no">${d.no}</span><span class="t">${bars(4)}</span><span class="pill lock">閲覧制限</span></div>`;
+  const first=dbBody(id).find(p=>p.t);
+  return `<a class="db-row" href="${dbHref(id)}"><span class="no">${d.no}</span><span class="t">${esc(d.title)}${first?`<small>${T(first.t).replace(/<b>|<\/b>/g,'')}</small>`:''}</span><span class="k">${d.kind}</span></a>`;
+}
+function dbRel(id){
+  const r=(DB_REL[id]||[]).filter(x=>DOCS[x]);
+  if(!r.length) return '';
+  return `<div class="db-sec">関連資料</div><div class="db-rel">${r.map(x=>dbLocked(x)?`<span><small>${DOCS[x].no}</small>閲覧制限</span>`:`<a href="${dbHref(x)}"><small>${DOCS[x].no}</small>${esc(DOCS[x].title)}</a>`).join('')}</div>`;
+}
+function dbDocHTML(id){
+  const d=DOCS[id], cat=dbCatOf(id);
+  const list=cat.docs, i=list.indexOf(id);
+  const pg=(j,cls,lbl)=>{ const x=list[j]; if(!x) return ""; return dbLocked(x)?`<a class="${cls}" href="${dbHref(x)}"><small>${lbl}</small>${DOCS[x].no}　閲覧制限</a>`:`<a class="${cls}" href="${dbHref(x)}"><small>${lbl}</small>${DOCS[x].no}　${esc(DOCS[x].title)}</a>`; };
+  const pager=`<div class="db-pager">${pg(i-1,'pv','← 前の資料')}${pg(i+1,'nx','次の資料 →')}</div>`;
+  if(dbLocked(id)) return `<div class="db-doc"><div class="meta"><span>${d.no}</span><span>${d.kind}</span></div>
+    <div class="db-locked"><b>ACCESS RESTRICTED</b><p>この記録は機密区分です。一般区分では内容を表示できません。</p>
+    <p>作中で判明する情報（ネタバレ）を含みます。</p><button class="db-btn" type="button" data-clr>機密区分に切り替える</button></div></div>${pager}`;
+  const rows=d.fields().map(([k,v,b])=>`<tr><th>${k}</th><td${b?' class="ng"':''}>${T(v)}</td></tr>`).join('');
+  const body=dbBody(id).map(p=>p.sec?`<h3>${p.sec}</h3>`:`<p>${T(p.t)}${p.spoiler?'<span class="pill sp">機密</span>':''}</p>`).join('');
+  const src=d.figure?(d.img||CHITONIKU_IMG):'';
+  const tlStep=STEPS_ON.findIndex(s=>(s.spots||[]).some(x=>x.doc===id));
+  return `<article class="db-doc" aria-label="${esc(d.title)}">
+    <div class="meta"><span>${d.no}</span><span>${d.kind}${d.hanko?'　／　'+d.hanko:''}</span></div>
+    <h2>${esc(d.title)}</h2>${d.ruby?`<p class="ruby">${d.ruby}</p>`:''}
+    ${d.figure?`<figure><img src="${src||PLACEHOLDER}" alt="${esc(d.title)}"><figcaption>${src?esc(d.title):esc(d.title)+'（図版・仮）'}</figcaption></figure>`:''}
+    <div class="top2${d.person?' with-ph':''}">${d.person?'<div class="ph" aria-hidden="true"></div>':''}<div class="db-tbl-wrap"><table>${rows}</table></div></div>
+    <div class="txt">${body||'<p class="empty">本文の記載なし。</p>'}</div>
+    ${tlStep>=0&&!(dbLocked(id))?`<div class="db-sec">時系列</div><div class="db-rel"><a href="#db.timeline"><small>${pad2(tlStep+2)}</small>時系列でこの記録の位置を見る</a></div>`:''}
+    ${dbRel(id)}
+  </article>${pager}`;
+}
+
+/* 時系列：STEPS_ON（ネタバレありの山道）をそのまま記録順に並べる */
+function dbTimeline(){
+  const out=[{place:'御身神山', text:[DOCS.case.body()[0]], docs:['case','video'], chips:[]}];
+  let n=6;
+  STEPS_ON.forEach(st=>{
+    n-=st.gone||0;
+    const docs=(st.spots||[]).map(s=>s.doc);
+    const chips=[];
+    if(st.comm) chips.push(['通信途絶',1]); if(st.car) chips.push(['車両使用不能',1]); if(st.ret) chips.push(['帰路通行不能',1]);
+    if(st.gone) chips.push([`人員 ${n}名`,1]); if(st.village) chips.push(['御身神村に到着']); if(st.fall) chips.push(['神田が倒れる',1]);
+    out.push({place:st.place, text:st.text, docs, chips, lock:!on()&&(docs.some(d=>DB_LOCK.has(d))||st.end), end:st.end});
+  });
+  out.push({place:'', text:['飯田は崖から落ちた。'], docs:[], chips:[['記録終了',1]], lock:!on(), fin:true});
+  return out;
+}
+function dbTimelineHTML(){
+  const tl=dbTimeline();
+  return `<ol class="db-tl">${tl.map((e,i)=>`<li class="${e.lock?'lock':''}${e.fin?' fin':''}">
+    <span class="when">${pad2(i+1)}</span>
+    <div style="min-width:0"><div class="pl">${e.lock?'—':(e.place?T(e.place):'—')}</div>
+      <div class="tx">${e.lock?`<p>${bars(6)}　<span class="pill lock">閲覧制限</span></p>`:e.text.map(t=>`<p>${T(t)}</p>`).join('')}</div>
+      ${e.lock?'':`<div class="chips">${e.chips.map(([c,ng])=>`<span class="chip2${ng?' ng':''}">${c}</span>`).join('')}${e.docs.map(d=>`<a href="${dbHref(d)}">${DOCS[d].no} ${esc(DOCS[d].title)}</a>`).join('')}</div>`}
+    </div></li>`).join('')}</ol>`;
+}
+
+function dbCatHTML(c){
+  const head=`<div class="db-h"><h2>${c.name}</h2><span class="en">${c.en}</span>${c.docs.length?`<span class="cnt">${c.docs.length}件</span>`:''}</div>`;
+  if(c.id==='summary') return head+dbDocHTML('case').replace(/<div class="db-pager">[\s\S]*$/,'')
+    +`<div class="db-sec">関連する分類</div><div class="db-rel"><a href="#db.records">捜査記録</a><a href="#db.people">関係者</a><a href="#db.scene">現場記録</a><a href="#db.timeline">時系列</a></div>`;
+  if(c.id==='timeline') return head+`<p class="db-p">発端から記録終了までを、起きた順に並べたもの。各項目から、その時点の記録へ移動できる。</p>`+dbTimelineHTML();
+  if(c.id==='people') return head+`<div class="db-people">${PEOPLE.map(p=>`<a class="db-person" href="#db.people.${p.id}"><span class="ph" aria-hidden="true"></span>
+      <span style="min-width:0"><b>${p.name}</b><small>${p.ruby}</small>${p.age?`<span class="age">${p.age}歳</span>`:''}<span>${p.line}</span></span></a>`).join('')}</div>`;
+  if(c.id==='files'){
+    const sp=SPEC_IDS.map((id,i)=>{ const s=SPECIMENS[i], src=s.img||''; return `<a class="db-spec" href="#db.files.${id}"><span class="im">${src?`<img src="${src}" alt="" loading="lazy">`:'<i>図版なし</i>'}</span><span>No.${pad2(i+1)}<small>${s.name?esc(s.name):'名称未記入'}</small></span></a>`; }).join('');
+    return head+`<div class="db-sec">報告書</div><div class="db-list">${dbRow('video')}</div>
+      <div class="db-sec">異常存在</div><div class="db-list">${dbRow('chitoniku')}${dbRow('mother')}</div>
+      <div class="db-sec">血と肉　個体記録</div><div class="db-specs">${sp}</div>`;
+  }
+  return head+`<div class="db-list">${c.docs.map(dbRow).join('')}</div>`;
+}
+function dbHomeHTML(){
+  const c=DOCS.case.fields();
+  return `<div class="db-h"><h2>事件記録</h2><span class="en">CASE RECORD</span></div>
+    <div class="db-casecard"><dl>${c.map(([k,v])=>`<dt>${k}</dt><dd>${T(v)}</dd>`).join('')}</dl><span class="stamp">CLOSED</span></div>
+    <div class="db-tiles">${DB_CATS.map(x=>`<a class="db-tile" href="#db.${x.id}"><span class="en">${x.en}</span><b>${x.name}</b><span>${x.note}</span><em>${x.id==='timeline'?pad2(dbTimeline().length)+' 項目':x.docs.length+' 件'}</em></a>`).join('')}</div>
+    <p class="db-p" style="margin-top:22px">${on()?'機密区分で閲覧中。作中で判明する情報（ネタバレ）をすべて表示しています。':'一般区分で閲覧中。作中の核心に関わる記録は「閲覧制限」と表示されます。画面右上の「閲覧区分」から切り替えられます。'}</p>`;
+}
+function dbSearchHTML(q){
+  const k=q.trim(); if(!k) return dbHomeHTML();
+  const ids=DB_CATS.flatMap(c=>c.docs).filter(id=>!dbLocked(id));
+  const hits=ids.map(id=>{ const d=DOCS[id];
+    const txt=[d.title,d.ruby||'',...d.fields().map(f=>f[0]+' '+f[1]),...dbBody(id).map(p=>p.t||p.sec||'')].map(plain).join(' ／ ');
+    const i=txt.indexOf(k); return i<0?null:{id,txt,i}; }).filter(Boolean);
+  const snip=h=>{ const a=Math.max(0,h.i-30), s=h.txt.slice(a,h.i+k.length+50); return (a?'…':'')+esc(s).split(esc(k)).join(`<mark>${esc(k)}</mark>`)+'…'; };
+  return `<div class="db-h"><h2>検索結果</h2><span class="en">SEARCH</span><span class="cnt">「${esc(k)}」 ${hits.length}件</span></div>
+    ${hits.length?hits.map(h=>`<a class="db-hit" href="${dbHref(h.id)}"><span class="no">${DOCS[h.id].no}</span><b>${esc(DOCS[h.id].title)}</b><p>${snip(h)}</p></a>`).join(''):`<p class="db-p">該当する資料はありません。${on()?'':'一般区分では、閲覧制限の記録は検索されません。'}</p>`}`;
+}
+
+let DBQ='';
+function renderDB(route){
+  const [,cid,did]=(route||'db').split('.');
+  const cat=DB_CATS.find(c=>c.id===cid), doc=did&&DOCS[did]&&cat&&cat.docs.includes(did)?did:null;
+  $('dbNav').innerHTML=`<span class="h">MENU</span><a href="#db" class="${!cat&&!DBQ?'cur':''}">ホーム</a><span class="gap"></span>`
+    +DB_CATS.map(c=>`<a href="#db.${c.id}" class="${cat===c?'cur':''}">${c.name}<small>${c.id==='timeline'?'':c.docs.length}</small></a>`).join('');
+  const crumb=[`<a href="#db">HOME</a>`];
+  if(DBQ&&!cat) crumb.push(`<span class="now">検索</span>`);
+  if(cat) crumb.push(doc?`<a href="#db.${cat.id}">${cat.name}</a>`:`<span class="now">${cat.name}</span>`);
+  if(doc) crumb.push(`<span class="now">${DOCS[doc].no}　${dbLocked(doc)?'閲覧制限':esc(DOCS[doc].title)}</span>`);
+  const body=doc?dbDocHTML(doc):cat?dbCatHTML(cat):DBQ?dbSearchHTML(DBQ):dbHomeHTML();
+  $('dbMain').innerHTML=`<div class="db-crumb">${crumb.join('<span class="sep">›</span>')}</div>${body}`;
+  $('dbMain').querySelectorAll('[data-clr]').forEach(b=>b.onclick=toggleClr);
+  const cb=$('dbClr'); cb.innerHTML=`閲覧区分：<b>${on()?'機密':'一般'}</b>`; cb.classList.toggle('secret',on());
+  $('dbFootClr').textContent=on()?'閲覧区分：機密（ネタバレあり）':'閲覧区分：一般（ネタバレなし）';
+  document.title=(doc?(dbLocked(doc)?DOCS[doc].no:DOCS[doc].title)+' ― ':cat?cat.name+' ― ':'')+'血と肉 事件資料';
+  const bar=$('dbBar'); if(bar) $('db').style.setProperty('--dbbar-h',bar.offsetHeight+'px');
+}
+function setClr(v){ DBS.spoil=v; dbSave(); renderDB(location.hash.slice(1)||'db'); }
+function toggleClr(){
+  if(on()) return setClr(false);
+  askConfirm('機密区分に切り替えると、作中で判明する情報（ネタバレ）がすべて表示されます。',()=>setClr(true),{head:'閲覧区分の変更',yes:'機密区分にする'});
+}
+$('dbClr').onclick=toggleClr;
+$('dbSearch').addEventListener('submit',e=>{ e.preventDefault(); DBQ=$('dbq').value; if(location.hash!=='#db') location.hash='#db'; else renderDB('db'); });
+$('dbq').addEventListener('input',()=>{ DBQ=$('dbq').value; if(location.hash==='#db'||location.hash==='') renderDB('db'); });
+
+/* 端末の起動（初回は閲覧区分を選ぶ） */
+let DB_BOOTED=false;
+function bootDB(then){
+  const b=$('dbBoot'), scr=$('dbBootScr');
+  const lines=['<span class="dim">POLICE DATABASE SYSTEM</span>','接続中……','<span class="ok">接続しました。</span>','CASE RECORD : 御身神山関連事件','STATUS : CLOSED'];
+  b.hidden=false; scr.innerHTML=''; let i=0, done=false;
+  const finish=()=>{ if(done) return; done=true; clearInterval(t);
+    scr.innerHTML=lines.map(l=>`<div>&gt; ${l}</div>`).join('');
+    if(DBS.spoil===null||DBS.spoil===undefined){
+      scr.insertAdjacentHTML('beforeend',`<div class="db-login"><p>閲覧区分を選んでください。あとから画面右上で切り替えられます。</p><div class="two">
+        <button type="button" data-c="0"><b>一般<i>GENERAL</i></b><span>ネタバレなし。核心に関わる記録は閲覧制限になる。</span></button>
+        <button type="button" class="sec" data-c="1"><b>機密<i>CLASSIFIED</i></b><span>ネタバレあり。作中で判明する情報をすべて表示する。</span></button></div></div>`);
+      scr.querySelectorAll('[data-c]').forEach(x=>x.onclick=()=>{ DBS.spoil=x.dataset.c==='1'; dbSave(); b.hidden=true; DB_BOOTED=true; then(); });
+      scr.querySelector('[data-c]').focus();
+    } else { setTimeout(()=>{ b.hidden=true; DB_BOOTED=true; then(); },380); }
+  };
+  const t=setInterval(()=>{ if(i>=lines.length){ finish(); return; } scr.insertAdjacentHTML('beforeend',`<div>&gt; ${lines[i++]}</div>`); },170);
+  b.onclick=e=>{ if(!e.target.closest('.db-login')) finish(); };
+  if(matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
+}
+
+/* ===================== 入口と切り替え ===================== */
+function leaveGame(){ stopForest(); $('reader').hidden=true; $('start').hidden=true; $('infect').hidden=true; document.body.classList.remove('ruin'); document.body.dataset.phase=''; }
+function showOnly(which){
+  $('gate').hidden=which!=='gate'; $('db').hidden=which!=='db';
+  document.querySelector('.top').hidden=which!=='game'; $('app').hidden=which!=='game';
+}
+function enterGate(){
+  if(APP==='game') leaveGame(); APP='gate'; showOnly('gate'); document.title='血と肉 事件資料';
+  $('gateWood').style.backgroundImage=`url(${WOOD})`;
+  $('gatePlayState').textContent=S.cleared?'記録終了後 ／ 続きから':S.step>=0?'山道の途中 ／ 続きから':(S.read.length?'署の資料を閲覧中 ／ 続きから':'はじめから');
+  window.scrollTo(0,0);
+}
+function enterGame(){
+  const was=APP; APP='game'; showOnly('game'); document.title='血と肉 ― 事件を体験する';
+  if(was==='game') return;
+  setRoute();
+  if(!S.cleared && S.step>=STEPS.length){ S.step=-1; S.max=-1; S.view='desk'; }
+  if(S.view==='forest' && S.step>=0) renderForest(); else { S.view='desk'; renderDesk(); }
+  updateTop();
+  if(!S.mode) $('start').hidden=false;
+  window.scrollTo(0,0);
+}
+function enterDB(route){
+  const was=APP; if(was==='game') leaveGame(); APP='db'; showOnly('db');
+  const go=()=>{ renderDB(route); if(was!=='db') window.scrollTo(0,0); else window.scrollTo({top:0}); };
+  if(!DB_BOOTED) bootDB(go); else go();
+}
+function route(){
+  const h=decodeURIComponent(location.hash.slice(1));
+  if(h==='play') return enterGame();
+  if(h==='db'||h.startsWith('db.')) return enterDB(h);
+  enterGate();
+}
+$('startBack').onclick=()=>{ location.hash='#top'; };
+window.addEventListener('hashchange',route);
+
 /* 起動 */
 setRoute();
-if(!S.cleared && S.step>=STEPS.length){ S.step=-1; S.max=-1; S.view='desk'; }
-if(S.view==='forest' && S.step>=0) renderForest(); else { S.view='desk'; renderDesk(); }
-updateTop();
-if(!S.mode) $('start').hidden=false;
+route();
+
 </script>
 
 </body>
