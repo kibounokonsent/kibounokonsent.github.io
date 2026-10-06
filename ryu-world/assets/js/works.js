@@ -54,7 +54,7 @@ const WORKS = [
 
         url: "https://kibounokonsent.github.io/magai-eclipse-archive/magai-eclipse-archive.html"
     },
-    { world: "fronz", era: 5, title: "フロスタン", tentative: true, summary: "寒さが、日に日に強くなっていた。\n\n" +
+    { world: "fronz", era: 5, title: "フロスタン", summary: "寒さが、日に日に強くなっていた。\n\n" +
 "雪は止まず、獲物は姿を消し、採れるものも少なくなっていく。遠くでは、氷河期を眠って過ごすためにコールドスリープへ入った人々もいた。しかし、残された者たちに眠る余裕はなかった。\n\n" +
 "人々は暖を取るため、巨大なジェネレーターやボイラーを造った。壊れれば直し、燃料が尽きれば探しに行く。ただ生きるために、それを繰り返すしかなかった。\n\n" +
 "いつまで、この寒さが続くのか。いつになれば、暖かさは戻るのか。\n\n" +
