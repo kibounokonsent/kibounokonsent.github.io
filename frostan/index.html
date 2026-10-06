@@ -32,7 +32,9 @@
   --f-mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
   color-scheme:dark;
 }
+[hidden]{display:none!important}
 html{background:var(--bg)}
+body{margin:0}
 body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.9;overflow-x:hidden;padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom,0px))}
 body.noboiler{padding-bottom:0}
 *{box-sizing:border-box}
@@ -75,11 +77,12 @@ body.noboiler .side{max-height:calc(100vh - 32px)}
 
 .doc{min-width:0}
 .doc-head{padding-top:clamp(90px,16vh,170px);padding-bottom:24px;display:flex;flex-direction:column;gap:6px;background:linear-gradient(to bottom,rgba(18,24,29,0),rgba(18,24,29,.62) 55%);padding-inline:clamp(22px,4vw,52px)}
+.doc-head>*{width:100%;max-width:640px;margin-inline:auto}
 .kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.22em;color:var(--ember);text-shadow:0 1px 6px rgba(0,0,0,.8)}
 .doc h2{margin:0;font-family:var(--f-head);font-weight:800;font-size:clamp(32px,5vw,52px);line-height:1.25;color:var(--frost);text-wrap:balance;text-shadow:0 2px 18px rgba(0,0,0,.75)}
 .lede{margin:10px 0 0;max-width:36em;font-family:var(--f-head);font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.8;color:var(--frost);text-shadow:0 1px 10px rgba(0,0,0,.85)}
 .doc-body{background:var(--panel);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid var(--line);padding-block:36px 28px;padding-inline:clamp(22px,4vw,52px)}
-.body{display:flex;flex-direction:column;gap:24px;max-width:40em;margin-inline:auto}
+.body{display:flex;flex-direction:column;gap:24px;max-width:640px;margin-inline:auto}
 .body p{margin:0}
 .body h4{margin:10px 0 -6px;font-family:var(--f-head);font-size:21px;color:var(--frost)}
 .quote{margin:4px 0;padding:8px 0 8px 24px;border-left:3px solid var(--ember);font-family:var(--f-head);font-weight:700;font-size:clamp(19px,2.4vw,24px);line-height:1.7;color:var(--frost)}
@@ -127,7 +130,7 @@ body.noboiler .side{max-height:calc(100vh - 32px)}
 .gate b{font-family:var(--f-head);font-size:20px;color:var(--frost)}
 .gate small{color:var(--muted)}
 
-.pager{max-width:40em;margin-inline:auto;margin-top:40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.pager{max-width:640px;margin-inline:auto;margin-top:40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
 .pager button{all:unset;cursor:pointer;font-size:14px;color:var(--muted);padding:4px 0}
 .pager button:hover{color:var(--frost)}
 .pager button b{font-weight:700;color:var(--fg)}
@@ -149,10 +152,23 @@ body.navhidden .side{display:none}
 body.navhidden .archive{grid-template-columns:minmax(0,1fr);max-width:920px}
 
 /* freeze / game over */
-body.iced .hero,body.iced .archive,body.iced .boilerbar,body.iced .setbtn,body.iced #navOpen{pointer-events:none;filter:saturate(.15) brightness(1.12) blur(1.5px);transition:filter 2s}
-#freeze{position:fixed;inset:0;z-index:75;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at center,rgba(220,234,242,.25),rgba(236,245,250,.7))}
-.fz{max-width:440px;width:100%;text-align:center;background:rgba(232,242,247,.92);color:#20313c;border:1px solid #b9cdd8;box-shadow:0 20px 60px rgba(60,90,110,.35),inset 0 0 40px rgba(255,255,255,.8);padding:30px 26px 24px;display:flex;flex-direction:column;gap:12px;align-items:center}
-.fz b{font-family:var(--f-plate);font-weight:900;font-size:clamp(48px,10vw,72px);letter-spacing:.12em;line-height:.95;color:#4f7d96}
+body.iced .hero,body.iced .archive,body.iced .boilerbar,body.iced .setbtn,body.iced #navOpen{pointer-events:none;filter:saturate(.12) brightness(1.18) contrast(.85) blur(2px) hue-rotate(-8deg);transition:filter 2.6s}
+body.iced #scene{filter:saturate(.2) brightness(1.15);transition:filter 2.6s}
+#ice{position:fixed;inset:0;width:100%;height:100%;z-index:74;pointer-events:none;opacity:1;transition:opacity 1.6s ease}
+#ice.melt{opacity:0}
+body.iced{animation:shiver .5s 2.6s 1}
+@keyframes shiver{0%,100%{transform:none}20%{transform:translate(-3px,1px)}40%{transform:translate(3px,-1px)}60%{transform:translate(-2px,0)}80%{transform:translate(2px,1px)}}
+#freeze{position:fixed;inset:0;z-index:75;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at center,rgba(190,220,236,.1),rgba(214,234,245,.35))}
+.fz{position:relative;overflow:hidden;max-width:450px;width:100%;text-align:center;color:#1d3140;
+  background:linear-gradient(135deg,rgba(236,247,252,.93),rgba(196,224,238,.9) 55%,rgba(222,240,249,.93));
+  border:1px solid rgba(255,255,255,.95);box-shadow:0 0 0 1px rgba(120,170,196,.5),0 24px 70px rgba(40,90,120,.45),inset 0 0 50px rgba(255,255,255,.9),inset 0 -14px 30px rgba(120,180,210,.35);
+  padding:32px 26px 26px;display:flex;flex-direction:column;gap:12px;align-items:center;animation:fzIn .9s cubic-bezier(.2,1.4,.4,1)}
+.fz::before{content:"";position:absolute;inset:-40% -10%;background:linear-gradient(115deg,transparent 40%,rgba(255,255,255,.75) 47%,transparent 54%);transform:translateX(-60%);animation:glint 3.4s 1s infinite;pointer-events:none}
+.fz::after{content:"";position:absolute;inset:0;pointer-events:none;opacity:.55;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='450' height='420'><g fill='none' stroke='white' stroke-width='1.2' stroke-linecap='round'><path d='M0 60 L40 72 L66 64 L92 88 L130 92'/><path d='M66 64 L74 40 L96 30'/><path d='M450 300 L410 296 L386 320 L350 316 L330 340'/><path d='M386 320 L392 350 L376 380'/><path d='M300 0 L310 26 L296 44'/></g></svg>") no-repeat center/cover}
+.fz>*{position:relative;z-index:1}
+@keyframes fzIn{from{transform:scale(.86);opacity:0}to{transform:none;opacity:1}}
+@keyframes glint{0%{transform:translateX(-60%)}45%,100%{transform:translateX(60%)}}
+.fz b{font-family:var(--f-plate);font-weight:900;font-size:clamp(50px,10vw,78px);letter-spacing:.12em;line-height:.95;color:#3f7190;text-shadow:0 1px 0 #fff,0 0 18px rgba(255,255,255,.9),0 2px 10px rgba(80,140,175,.5)}
 .fz h3{margin:0;font-family:var(--f-head);font-size:22px;color:#1d2c36}
 .fz p{margin:0;font-size:14.5px;line-height:1.8;color:#3a4d59}
 .fz dl{margin:4px 0;display:grid;grid-template-columns:auto auto;gap:2px 18px;font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums}
@@ -191,6 +207,9 @@ body.iced .hero,body.iced .archive,body.iced .boilerbar,body.iced .setbtn,body.i
 .fuel[disabled] svg{visibility:hidden}
 .fuel.dragging{opacity:.3}
 .hint{font-size:12.5px;line-height:1.6;color:var(--muted);min-width:0;flex:1}
+.sndbtn{flex:none;cursor:pointer;background:#20282e;color:var(--muted);border:1px solid #4b5a64;padding:6px 10px;font-family:var(--f-mono);font-size:11px;letter-spacing:.1em;display:flex;flex-direction:column;align-items:center;gap:2px;line-height:1.2}
+.sndbtn svg{width:18px;height:18px}
+.sndbtn[aria-pressed="true"]{color:var(--frost);border-color:var(--ember)}
 .thermo{flex:none;text-align:right;font-family:var(--f-mono);line-height:1.25;font-variant-numeric:tabular-nums}
 .thermo small{display:block;font-size:10px;letter-spacing:.2em;color:var(--muted)}
 .thermo .tc{font-size:26px;color:var(--frost)}
@@ -249,6 +268,7 @@ body.iced .hero,body.iced .archive,body.iced .boilerbar,body.iced .setbtn,body.i
   .meter{grid-template-columns:5em 1fr 3em;gap:8px}
   .nameplate{padding:16px 22px 14px}
 }
+@media (max-width:480px){.sndbtn span{display:none}.sndbtn{padding:6px}}
 @media (max-width:380px){.fuels{gap:5px}.fuel{width:46px}.thermo small{display:none}}
 </style>
 </head>
@@ -260,7 +280,7 @@ body.iced .hero,body.iced .archive,body.iced .boilerbar,body.iced .setbtn,body.i
     <div class="nameplate"><i></i><i></i><i></i><i></i>
       <small>GARHYURA REGION · BOILER SETTLEMENT RECORDS</small>
       <h1>FROSTAN</h1>
-      <div class="sub">ガルヒューラ地方 ボイラー集落 記録保管</div>
+      <div class="sub">ボイラー集落 記録保管</div>
     </div>
     <p class="catch">氷河期を生きるために。</p>
     <div class="entries">
@@ -298,6 +318,7 @@ body.iced .hero,body.iced .archive,body.iced .boilerbar,body.iced .setbtn,body.i
     </div>
     <div class="fuels" id="fuels"></div>
     <p class="hint">燃料をドラッグして火室へ。クリックでも投入できます。放っておくと火は弱まります。</p>
+    <button class="sndbtn" id="sndBtn" aria-pressed="false" aria-label="音"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 9h4l5-4v14l-5-4H4z"/><path id="sndWave" d="M16 9c1.5 1.5 1.5 4.5 0 6M18.5 6.5c3 3 3 8 0 11"/></svg><span id="sndLbl">音 OFF</span></button>
     <div class="thermo" aria-live="polite"><small>居住区 気温</small><span class="tc" id="tc">6 ℃</span><div class="st" id="st">燃焼良好</div></div>
   </div>
 </section>
@@ -316,6 +337,7 @@ body.iced .hero,body.iced .archive,body.iced .boilerbar,body.iced .setbtn,body.i
 <button id="navOpen" aria-label="資料一覧を表示"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>資料一覧</button>
 <div id="freeze" hidden role="alertdialog" aria-labelledby="fzT"><div class="fz"><b>FROZEN</b><h3 id="fzT">火が絶え、資料集は凍りついた。</h3><p>ボイラーが止まり、居住区の熱は失われた。記録を読む手も、ここで止まる。</p><dl><dt>読んだ記録</dt><dd id="fzRead">0 件</dd><dt>最低気温</dt><dd id="fzMin">—</dd></dl><button id="fzBtn">火を起こし直す</button></div></div>
 <div id="toast" hidden><b id="toastB">BOILER OFFLINE</b><span id="toastS"></span></div>
+<canvas id="ice" aria-hidden="true"></canvas>
 <canvas id="storm" aria-hidden="true"></canvas>
 
 <script>
@@ -328,7 +350,7 @@ const PAGES=[
  {id:'story-hero',sec:'story',n:'01',title:'主人公',en:'THE MAN',chill:4,scene:{people:.65,snow:.4},
   lede:'名前は残っていない。ボイラー集落に暮らす、一人の男。',
   body:[
-   ['p','物語の中心にいるのは、名もなき男である。彼はガルヒューラ地方のボイラー集落で生まれ、巨大なボイラーの熱が届く範囲で育った。'],
+   ['p','物語の中心にいるのは、名もなき男である。彼はこのボイラー集落で生まれ、巨大なボイラーの熱が届く範囲で育った。'],
    ['p','彼は、先に眠った人々を恨んでいる。選ばれた人々は安全な施設でコールドスリープに入り、氷河期を眠って過ごす。残された自分たちには、その選択肢すらなかった。'],
    ['quote','我々は世界に見捨てられた。','名もなき男'],
    ['p','けれども、それは絶望だけの言葉ではない。彼の中で、その言葉はすぐに次の言葉へとつながっている。'],
@@ -396,7 +418,7 @@ const PAGES=[
 
  /* ---------- WORLD ---------- */
  {id:'world-frostan',sec:'world',n:'01',title:'フロスタン文明',en:'FROSTAN',chill:4,scene:{},
-  lede:'ガルヒューラ地方に存在した民族、そしてその文明。氷河期のはじまりを、眠らずに生きた人々。',
+  lede:'極寒の地域に存在した民族、そしてその文明。氷河期のはじまりを、眠らずに生きた人々。',
   body:[
    ['p','フロスタンは、極寒の中で生活を続けるために巨大ジェネレーターを建設し、ボイラーを中心に暮らした人々である。いわゆる古代文明とは別の文明として扱う。'],
    ['p','ただし、彼らは高度な文明を築いたわけではない。氷河期はあまりに過酷で、文明を大きく発展させる余裕そのものがなかった。'],
@@ -417,7 +439,7 @@ const PAGES=[
  {id:'world-climate',sec:'world',n:'03',title:'気候',en:'CLIMATE',chill:20,scene:{snow:.95,fog:.8,people:.05},
   lede:'晴れ間は珍しく、吹雪は日常だった。',
   body:[
-   ['p','氷河期のガルヒューラ地方では、外気は昼も夜もほとんど変わらず冷え込んでいた。太陽が出ない日が続き、昼間でも空は鈍い灰色のままだった。'],
+   ['p','氷河期では、外気は昼も夜もほとんど変わらず冷え込んでいた。太陽が出ない日が続き、昼間でも空は鈍い灰色のままだった。'],
    ['p','風は強く、雪は横から吹きつける。数歩先の建物が見えなくなることも珍しくない。外での作業は、短く、必ず複数人で行うことが決まりになっていた。'],
    ['record','気象日誌','第一ボイラー室 屋上',[['天候','吹雪'],['風','北西　強','w'],['外気','−52 ℃','w'],['日照','なし'],['視程','8 m','w']],''],
    ['record','屋外作業の目安','掲示',[['晴れ間','二時間まで'],['曇天','一時間まで'],['吹雪','外出禁止','w'],['夜間','原則禁止','w']],'規則を破った者が戻らなかった日から、この掲示がある。'],
@@ -441,7 +463,7 @@ const PAGES=[
  {id:'world-settlement-boiler',sec:'world',n:'06',title:'ボイラー集落',en:'BOILER SETTLEMENT',chill:3,scene:{people:.8,machine:.5,snow:.3},
   lede:'巨大なボイラーを中心に、人が寄り集まってできた場所。',
   body:[
-   ['p','ガルヒューラ地方には、巨大ボイラーを中心とした集落が点在していた。熱が届く距離が、そのまま集落の大きさになった。'],
+   ['p','氷河期には、巨大ボイラーを中心とした集落が点在していた。熱が届く距離が、そのまま集落の大きさになった。'],
    ['h','集落の構成（中心から外へ）'],
    ['seq',['ボイラー室と火室','居住区','食料庫・燃料置き場','工作室・発電棟','外周の防雪壁']],
    ['p','ボイラー、ジェネレーター、食料、燃料、物資、修理設備。どれか一つが欠けても、集落は長くはもたない。新しい設備を作る余裕はなく、古い設備を直しながら使い続けるのが、集落の暮らし方だった。'],
@@ -495,7 +517,7 @@ const PAGES=[
  {id:'world-settlements',sec:'world',n:'13',title:'集落',en:'SETTLEMENTS',chill:8,scene:{rival:1,snow:.4,fog:.2},
   lede:'晴れた夜には、遠くに別の集落の灯りが見える。',
   body:[
-   ['p','ガルヒューラ地方には、いくつものボイラー集落があった。互いの距離は徒歩で半日から数日。吹雪の合間には、遠くの煙突から上がる煙が見えた。'],
+   ['p','氷河期には、いくつものボイラー集落があった。互いの距離は徒歩で半日から数日。吹雪の合間には、遠くの煙突から上がる煙が見えた。'],
    ['p','集落どうしは、物資や部品をやり取りすることもあった。互いに助け合えば生き延びられる可能性がある。けれど、相手に渡せば自分たちの分が減る。'],
    ['record','近隣集落一覧','外出班のまとめ',[['東の尾根','半日　煙あり','ok'],['北の谷','二日　不明'],['南の旧発電所','一日　灯り消失','w']],'灯りが見えるうちは、まだ誰かがいる。'],
   ]},
@@ -506,10 +528,10 @@ const $=s=>document.querySelector(s);
 const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
 const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
 const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
-const FX_KEYS=[['trans','ページ遷移'],['snow','吹雪'],['temp','温度変化'],['boiler','ボイラー'],['steam','蒸気'],['frost','霜']];
+const FX_KEYS=[['trans','ページ遷移'],['snow','吹雪'],['temp','温度変化'],['boiler','ボイラー'],['steam','蒸気'],['frost','霜'],['sound','音（吹雪・火）']];
 function load(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}
 function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
-const fx=Object.assign({trans:!REDUCED,snow:!REDUCED,temp:true,boiler:true,steam:!REDUCED,frost:true},load('frostan-fx')||{});
+const fx=Object.assign({trans:!REDUCED,snow:!REDUCED,temp:true,boiler:true,steam:!REDUCED,frost:true,sound:true},load('frostan-fx')||{});
 let spoilOn=!!load('frostan-spoil');
 const revealed=new Set();
 const S={F:80,T:76,page:null,offline:false,frozen:false,freezeT:0,warned:false,minT:76};
@@ -623,8 +645,9 @@ function syncSettings(){
   document.body.classList.toggle('noboiler',!fx.boiler);
   $('#boilerbar').hidden=!fx.boiler;
   $('#frost').hidden=!fx.frost;
+  const sb=$('#sndBtn');if(sb){sb.setAttribute('aria-pressed',fx.sound);$('#sndLbl').textContent=fx.sound?'音 ON':'音 OFF';$('#sndWave').style.display=fx.sound?'':'none';}
 }
-function applyFx(){save('frostan-fx',fx);syncSettings();if(!fx.boiler)hideToast();}
+function applyFx(){save('frostan-fx',fx);syncSettings();if(!fx.boiler)hideToast();sndToggle();}
 $('#fxList').addEventListener('change',e=>{const k=e.target.dataset.fx;if(k){fx[k]=e.target.checked;applyFx();}});
 document.querySelectorAll('[data-all]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.all==='1';FX_KEYS.forEach(([k])=>fx[k]=v);applyFx();}));
 document.querySelectorAll('input[name=spoil]').forEach(r=>r.addEventListener('change',()=>{spoilOn=$('#sp1').checked;save('frostan-spoil',spoilOn);renderNav();renderDoc();}));
@@ -664,7 +687,7 @@ function feed(i){
   s.ok=false; renderFuels();
   setTimeout(()=>{s.ok=true;renderFuels();},f.refill);
   firebox.classList.remove('flash'); void firebox.offsetWidth; firebox.classList.add('flash');
-  scene.burst=1; puffAt(firebox,6);
+  scene.burst=1; puffAt(firebox,6); sndFeed(s.t);
   if(wasOff){S.offline=false;toast('再点火','火が戻りました',true);}
 }
 function flyTo(fromEl,i){
@@ -760,7 +783,7 @@ const storm={
       const c=this.c,dpr=Math.min(devicePixelRatio||1,1.5),w=innerWidth,h=innerHeight;
       c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);
       const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
-      c.classList.add('on');
+      c.classList.add('on');sndGust(dur/1000,intensity);
       const snowy=fx.snow;
       const N=snowy?Math.round(700+500*Math.min(1,intensity)):0;
       const ps=Array.from({length:N},()=>({x:-Math.random()*w*1.4,y:Math.random()*h*1.1-h*.05,v:(1600+Math.random()*2600),l:10+Math.random()*60,a:.25+Math.random()*.7,d:20+Math.random()*160}));
@@ -972,33 +995,223 @@ function drawScene(dt,now,fire,cold){
   if(cold>.05){ctx.fillStyle=`rgba(236,243,247,${(cold*.24).toFixed(3)})`;ctx.fillRect(0,0,w,h);}
 }
 
+/* ======================= ICE ======================= */
+const ice={c:$('#ice'),ctx:null,segs:[],i:0,w:0,h:0};
+function iceBuild(){
+  const c=ice.c,dpr=Math.min(devicePixelRatio||1,1.5),w=innerWidth,h=innerHeight;
+  c.classList.remove('melt');c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);
+  const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);ctx.clearRect(0,0,w,h);
+  Object.assign(ice,{ctx,w,h,segs:[],i:0});
+  const segs=ice.segs,M=Math.min(w,h);
+  function grow(x,y,a,len,depth,d){
+    const steps=Math.max(3,Math.round(len/8)),st=len/steps;
+    for(let i=0;i<steps;i++){
+      if(segs.length>14000) return;
+      a+=(Math.random()-.5)*.32;
+      const nx=x+Math.cos(a)*st,ny=y+Math.sin(a)*st;
+      segs.push({x1:x,y1:y,x2:nx,y2:ny,d,dep:depth});d+=st;x=nx;y=ny;
+      if(depth>0&&i>0&&Math.random()<.5){
+        const sd=Math.random()<.5?1:-1;
+        grow(x,y,a+sd*(.8+Math.random()*.5),len*(.25+Math.random()*.28)*(1-i/steps*.6),depth-1,d);
+      }
+    }
+  }
+  const corner=(x,y)=>1+.9*Math.max(0,1-Math.min(Math.hypot(x,y),Math.hypot(w-x,y),Math.hypot(x,h-y),Math.hypot(w-x,h-y))/(M*.6));
+  for(let x=Math.random()*40;x<w;x+=30+Math.random()*40){
+    grow(x,0,Math.PI/2+(Math.random()-.5)*.9,M*(.1+Math.random()*.26)*corner(x,0),3,0);
+    grow(x,h,-Math.PI/2+(Math.random()-.5)*.9,M*(.1+Math.random()*.26)*corner(x,h),3,0);
+  }
+  for(let y=Math.random()*40;y<h;y+=30+Math.random()*40){
+    grow(0,y,(Math.random()-.5)*.9,M*(.1+Math.random()*.26)*corner(0,y),3,0);
+    grow(w,y,Math.PI+(Math.random()-.5)*.9,M*(.1+Math.random()*.26)*corner(w,y),3,0);
+  }
+  const maxD=segs.reduce((m,s)=>Math.max(m,s.d),1);
+  segs.forEach(s=>s.t=s.d/maxD);segs.sort((a,b)=>a.t-b.t);
+}
+function iceDraw(k){
+  const {ctx,segs}=ice;if(!ctx) return;
+  const LW=[.6,.9,1.4,2.3];
+  ctx.lineCap='round';
+  while(ice.i<segs.length&&segs[ice.i].t<=k){
+    const s=segs[ice.i++];
+    ctx.strokeStyle='rgba(190,225,242,.35)';ctx.lineWidth=LW[s.dep]+3;
+    ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);ctx.stroke();
+    ctx.strokeStyle='rgba(250,253,255,.9)';ctx.lineWidth=LW[s.dep];
+    ctx.beginPath();ctx.moveTo(s.x1,s.y1);ctx.lineTo(s.x2,s.y2);ctx.stroke();
+  }
+}
+function iceFinish(){
+  iceDraw(1);
+  const {ctx,w,h}=ice;if(!ctx) return;
+  const M=Math.min(w,h);
+  /* glassy ice sheet */
+  let g=ctx.createRadialGradient(w/2,h/2,M*.15,w/2,h/2,Math.hypot(w,h)*.6);
+  g.addColorStop(0,'rgba(200,228,242,.10)');g.addColorStop(1,'rgba(214,236,248,.55)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  g=ctx.createLinearGradient(0,0,w,h);
+  g.addColorStop(.18,'rgba(255,255,255,0)');g.addColorStop(.24,'rgba(255,255,255,.22)');g.addColorStop(.3,'rgba(255,255,255,0)');
+  g.addColorStop(.62,'rgba(255,255,255,0)');g.addColorStop(.65,'rgba(255,255,255,.14)');g.addColorStop(.68,'rgba(255,255,255,0)');
+  ctx.fillStyle=g;ctx.fillRect(0,0,w,h);
+  /* cracks */
+  const cx=w*(.3+Math.random()*.4),cy=h*(.3+Math.random()*.4);
+  for(let n=0;n<9;n++){
+    let a=n/9*6.283+Math.random()*.5,x=cx,y=cy;const L=M*(.25+Math.random()*.35);
+    const pts=[[x,y]];
+    for(let d=0;d<L;d+=14+Math.random()*16){a+=(Math.random()-.5)*.6;x+=Math.cos(a)*18;y+=Math.sin(a)*18;pts.push([x,y]);}
+    for(const [col,lw,off] of [['rgba(60,100,125,.35)',2.2,1.2],['rgba(255,255,255,.85)',1.1,0]]){
+      ctx.strokeStyle=col;ctx.lineWidth=lw;ctx.beginPath();pts.forEach(([px,py],i)=>i?ctx.lineTo(px+off,py+off):ctx.moveTo(px+off,py+off));ctx.stroke();}
+  }
+  /* icicles: top edge and top of the boiler bar */
+  const rows=[0];const bb=$('#boilerbar');if(bb&&!bb.hidden)rows.push(bb.getBoundingClientRect().top);
+  for(const y0 of rows){
+    for(let x=Math.random()*10;x<w;x+=8+Math.random()*20){
+      const wd=4+Math.random()*12,len=(y0===0?14:8)+Math.random()*(y0===0?70:44)*(Math.random()<.2?1.6:1);
+      const ig=ctx.createLinearGradient(0,y0,0,y0+len);
+      ig.addColorStop(0,'rgba(248,252,255,.97)');ig.addColorStop(.6,'rgba(214,236,248,.85)');ig.addColorStop(1,'rgba(190,225,242,.2)');
+      ctx.fillStyle=ig;ctx.beginPath();ctx.moveTo(x,y0);ctx.quadraticCurveTo(x+wd*.35,y0+len*.6,x+wd*.5,y0+len);ctx.quadraticCurveTo(x+wd*.65,y0+len*.6,x+wd,y0);ctx.closePath();ctx.fill();
+      ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=.8;ctx.beginPath();ctx.moveTo(x+wd*.3,y0+2);ctx.lineTo(x+wd*.45,y0+len*.7);ctx.stroke();
+    }
+    ctx.fillStyle='rgba(244,250,253,.95)';ctx.fillRect(0,y0,w,y0===0?5:3);
+  }
+}
+function iceMelt(){
+  ice.c.classList.add('melt');
+  setTimeout(()=>{if(!S.frozen&&ice.ctx){ice.ctx.clearRect(0,0,ice.w,ice.h);ice.c.classList.remove('melt');}},1700);
+}
+
+/* ======================= SOUND (Web Audio, synthesized) ======================= */
+const snd={ctx:null};
+function sndInit(){
+  if(snd.ctx||!fx.sound) return;
+  const AC=window.AudioContext||window.webkitAudioContext;if(!AC) return;
+  let ctx;try{ctx=new AC();}catch(e){return;}
+  snd.ctx=ctx;const sr=ctx.sampleRate;
+  /* pink-ish noise, 3s loop */
+  const nb=ctx.createBuffer(1,sr*3,sr),d=nb.getChannelData(0);let b0=0,b1=0,b2=0;
+  for(let i=0;i<d.length;i++){const wh=Math.random()*2-1;b0=.99765*b0+wh*.099046;b1=.963*b1+wh*.2965;b2=.57*b2+wh*1.0526;d[i]=(b0+b1+b2+wh*.1848)*.16;}
+  snd.noise=nb;
+  const wb=ctx.createBuffer(1,sr*2,sr),wd=wb.getChannelData(0);for(let i=0;i<wd.length;i++)wd[i]=Math.random()*2-1;snd.white=wb;
+  const cb=ctx.createBuffer(1,Math.round(sr*.035),sr),cd=cb.getChannelData(0);for(let i=0;i<cd.length;i++)cd[i]=(Math.random()*2-1)*Math.pow(1-i/cd.length,4);snd.click=cb;
+  const comp=ctx.createDynamicsCompressor();comp.connect(ctx.destination);
+  snd.master=ctx.createGain();snd.master.gain.value=.85;snd.master.connect(comp);
+  const node=(t,o={})=>{const n=t==='g'?ctx.createGain():ctx.createBiquadFilter();if(t!=='g')n.type=t;for(const k in o){if(n[k]&&n[k].value!==undefined)n[k].value=o[k];}return n;};
+  snd.node=node;
+  /* wind */
+  const src=ctx.createBufferSource();src.buffer=nb;src.loop=true;
+  const lp=node('lowpass',{frequency:380}),bp=node('bandpass',{frequency:620,Q:5}),bp2=node('bandpass',{frequency:1150,Q:9});
+  const gLow=node('g',{gain:1.1}),gH=node('g',{gain:.75}),gH2=node('g',{gain:.4});
+  snd.wind=node('g',{gain:0});const gust=node('g',{gain:.75});
+  src.connect(lp).connect(gLow).connect(snd.wind);src.connect(bp).connect(gH).connect(snd.wind);src.connect(bp2).connect(gH2).connect(snd.wind);
+  snd.wind.connect(gust).connect(snd.master);
+  const lfo=(f,amt,param)=>{const o=ctx.createOscillator();o.frequency.value=f;const g=node('g',{gain:amt});o.connect(g).connect(param);o.start();};
+  lfo(.11,260,bp.frequency);lfo(.07,420,bp2.frequency);lfo(.19,.28,gust.gain);lfo(.045,.18,gust.gain);
+  /* fire roar */
+  const fsrc=ctx.createBufferSource();fsrc.buffer=nb;fsrc.loop=true;
+  const flp=node('lowpass',{frequency:170});snd.fire=node('g',{gain:0});
+  fsrc.connect(flp).connect(snd.fire).connect(snd.master);
+  lfo(3.1,.04,snd.fire.gain);
+  src.start();fsrc.start(0,1.3);
+  /* crackles */
+  setInterval(()=>{
+    if(!snd.ctx||snd.ctx.state!=='running'||!fx.sound||S.frozen) return;
+    const f=fx.boiler?S.F/100:.8;
+    if(Math.random()<f*.6){const n=1+Math.floor(Math.random()*3);for(let i=0;i<n;i++)sndCrackle(f*(.08+Math.random()*.22),Math.random()*.06);}
+  },70);
+}
+function sndCrackle(vol,delay=0,hp){
+  const ctx=snd.ctx;if(!ctx) return;
+  const s=ctx.createBufferSource();s.buffer=snd.click;s.playbackRate.value=.5+Math.random()*1.3;
+  const f=snd.node(hp?'highpass':'bandpass',{frequency:hp||1300+Math.random()*3200,Q:hp?.7:1.2});const g=snd.node('g',{gain:vol});
+  s.connect(f).connect(g).connect(snd.master);s.start(ctx.currentTime+delay);
+}
+function sndNoiseEnv({type='bandpass',f0=600,f1=1400,q=1,vol=.5,att=.1,dur=1,buf}){
+  const ctx=snd.ctx;if(!ctx||ctx.state!=='running') return;const t=ctx.currentTime;
+  const s=ctx.createBufferSource();s.buffer=buf||snd.white;
+  const f=snd.node(type,{Q:q});f.frequency.setValueAtTime(f0,t);f.frequency.exponentialRampToValueAtTime(f1,t+dur);
+  const g=snd.node('g',{gain:0});g.gain.setValueAtTime(0,t);g.gain.linearRampToValueAtTime(vol,t+att);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  s.connect(f).connect(g).connect(snd.master);s.start(t);s.stop(t+dur+.05);
+}
+function sndTone(f0,f1,vol,dur,type='sine',delay=0){
+  const ctx=snd.ctx;if(!ctx||ctx.state!=='running') return;const t=ctx.currentTime+delay;
+  const o=ctx.createOscillator();o.type=type;o.frequency.setValueAtTime(f0,t);o.frequency.exponentialRampToValueAtTime(f1,t+dur);
+  const g=snd.node('g',{gain:0});g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.001,t+dur);
+  o.connect(g).connect(snd.master);o.start(t);o.stop(t+dur+.05);
+}
+function sndGust(dur,intensity=1){
+  if(!snd.ctx||!fx.sound) return;
+  const v=.55+.35*Math.min(1,intensity);
+  sndNoiseEnv({f0:280,f1:1600,q:1.1,vol:v,att:dur*.25,dur:dur*.95,buf:snd.noise});
+  sndNoiseEnv({type:'lowpass',f0:500,f1:200,vol:v*.9,att:dur*.2,dur:dur,buf:snd.noise});
+}
+function sndFeed(type){
+  if(!snd.ctx||!fx.sound) return;
+  sndTone(95,38,.55,.35);
+  sndNoiseEnv({f0:400,f1:2400,q:.8,vol:.35,att:.15,dur:.8,buf:snd.noise});
+  for(let i=0;i<(type==='wood'?14:8);i++)sndCrackle(.18+Math.random()*.25,.1+Math.random()*1.1);
+  if(fx.steam)setTimeout(()=>sndNoiseEnv({type:'highpass',f0:4500,f1:6500,q:.5,vol:.12,att:.2,dur:1.3}),250);
+}
+function sndFreeze(){
+  if(!snd.ctx||!fx.sound) return;
+  const T=FREEZE_MS/1000;
+  for(let i=0;i<22;i++){const at=Math.random()*T*.9;
+    sndTone(2400+Math.random()*4200,1800+Math.random()*2000,.03+Math.random()*.05,.25+Math.random()*.4,'sine',at);
+    if(Math.random()<.6)sndCrackle(.25+Math.random()*.25,at,2500);}
+  sndTone(70,32,.5,.6,'sine',T*.82);
+  setTimeout(()=>sndNoiseEnv({type:'highpass',f0:1800,f1:900,q:.6,vol:.6,att:.01,dur:.7}),T*820);
+}
+function sndIgnite(){
+  if(!snd.ctx||!fx.sound) return;
+  sndNoiseEnv({f0:200,f1:2000,q:.7,vol:.55,att:.4,dur:1.4,buf:snd.noise});
+  sndTone(60,110,.35,.9,'sine',.1);
+  for(let i=0;i<16;i++)sndCrackle(.15+Math.random()*.25,.3+Math.random()*1.6);
+}
+function sndToggle(){
+  if(fx.sound){sndInit();if(snd.ctx&&snd.ctx.state==='suspended')snd.ctx.resume().catch(()=>{});}
+  else if(snd.ctx&&snd.ctx.state==='running')snd.ctx.suspend().catch(()=>{});
+}
+function sndUpdate(fire,cold){
+  const ctx=snd.ctx;if(!ctx||ctx.state!=='running') return;const t=ctx.currentTime;
+  const w=(.1+scene.cur.snow*.42+cold*.22)*(S.frozen?.55:1);
+  const f=S.frozen?0:(fx.boiler?fire:.8)*.55;
+  snd.wind.gain.setTargetAtTime(w,t,.6);snd.fire.gain.setTargetAtTime(f,t,.4);
+}
+['pointerdown','keydown'].forEach(ev=>document.addEventListener(ev,()=>{if(fx.sound)sndToggle();},{capture:true}));
+document.addEventListener('visibilitychange',()=>{if(!snd.ctx)return;if(document.hidden)snd.ctx.suspend().catch(()=>{});else if(fx.sound)snd.ctx.resume().catch(()=>{});});
+$('#sndBtn').addEventListener('click',()=>{fx.sound=!fx.sound;applyFx();});
+
 /* ======================= MAIN LOOP ======================= */
 let pressure=72,lastUI=0,lastT=performance.now();
 const needle=$('#needle'),gNum=$('#gNum'),tcEl=$('#tc'),stEl=$('#st'),root=document.documentElement;
 const tempC=T=>Math.round(-38+T*.56);
+const FREEZE_MS=3200;
 function freezeStart(){
-  S.frozen=true;S.freezeT=0;document.body.classList.add('iced');hideToast();
+  S.frozen=true;S.freezeAt=performance.now();document.body.classList.add('iced');hideToast();
+  iceBuild();sndFreeze();
   S.frStart=parseFloat(getComputedStyle(root).getPropertyValue('--fr'))||40;
   S.foStart=parseFloat(getComputedStyle(root).getPropertyValue('--frost-o'))||.6;
 }
 function freezeShow(){
   $('#fzRead').textContent=visited.size+' 件';
   $('#fzMin').textContent=tempC(S.minT)+' ℃';
+  iceFinish();
   $('#freeze').hidden=false;$('#fzBtn').focus();
 }
 $('#fzBtn').addEventListener('click',()=>{
   $('#freeze').hidden=true;document.body.classList.remove('iced');
   S.frozen=false;S.F=70;S.T=55;S.offline=false;S.warned=false;S.minT=55;
   scene.burst=1;toast('再点火','火が戻りました。記録を読み続けられます',true);
+  iceMelt();sndIgnite();
   lastT=performance.now();requestAnimationFrame(loop);
 });
 function loop(now){
   const dt=Math.min(.05,(now-lastT)/1000);lastT=now;
   if(S.frozen){
-    S.freezeT+=dt;const k=clamp(S.freezeT/2.4);
+    const k=clamp((now-S.freezeAt)/FREEZE_MS);
+    iceDraw(Math.pow(k,.8));
+    if(now-lastUI>140){lastUI=now;sndUpdate(0,1);}
     root.style.setProperty('--fr',lerp(S.frStart,0,k).toFixed(1)+'%');
     root.style.setProperty('--frost-o',lerp(S.foStart,1,k).toFixed(3));
-    if(S.freezeT<2.4) requestAnimationFrame(loop); else freezeShow();
+    if(k<1) requestAnimationFrame(loop); else freezeShow();
     return;
   }
   /* physics */
@@ -1029,6 +1242,7 @@ function loop(now){
   /* UI vars, throttled */
   if(now-lastUI>140){
     lastUI=now;
+    sndUpdate(fire,cold);
     const warm=clamp(fire*1.3);
     root.style.setProperty('--ember',rgba(mix([128,152,166],[233,162,76],warm)));
     root.style.setProperty('--ember-glow',`rgba(233,162,76,${(.26*fire).toFixed(3)})`);

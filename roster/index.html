@@ -53,8 +53,34 @@ a{color:inherit}
 .mug .steam i:nth-child(3){left:62%;animation-delay:2.4s}
 @keyframes wisp{0%{transform:translateY(8px) scaleX(.6);opacity:0}30%{opacity:.85}100%{transform:translateY(-58px) scaleX(1.7) rotate(14deg);opacity:0}}
 .mug.tipped .steam{display:none}
-.mug .tip{position:absolute;left:50%;top:100%;margin-top:12px;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;letter-spacing:.18em;color:#f0d7ae;background:rgba(20,13,8,.78);padding:2px 9px;opacity:0;transition:opacity .2s;pointer-events:none}
-.mug:hover .tip,.mug:focus-visible .tip{opacity:1}
+.mug .tip,.hot .tip{position:absolute;left:50%;top:100%;margin-top:12px;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;letter-spacing:.18em;color:#f0d7ae;background:rgba(20,13,8,.78);padding:2px 9px;opacity:0;transition:opacity .2s;pointer-events:none}
+.mug:hover .tip,.mug:focus-visible .tip,.hot:hover .tip,.hot:focus-visible .tip{opacity:1}
+
+/* 工房の中で触れるところ（canvasの上に透明なボタンを重ねる） */
+.hot{position:absolute;z-index:5;appearance:none;border:0;background:none;padding:0;cursor:pointer;transform:translate(-50%,-50%);border-radius:50%}
+.hot:focus-visible{outline:2px dashed #f0c46a;outline-offset:2px}
+.hot[data-k="lamp"] .tip{top:auto;bottom:100%;margin:0 0 6px}
+
+/* 工房の音スイッチ（真鍮の銘板） */
+.soundsw{position:absolute;z-index:6;top:14px;right:16px;appearance:none;border:0;cursor:pointer;display:flex;align-items:center;gap:10px;padding:7px 16px 7px 12px;font:inherit;color:#2a1a0a;border-radius:4px;
+  background:radial-gradient(circle at 7px 7px,#5a3a14 1.6px,transparent 2.4px),radial-gradient(circle at calc(100% - 7px) 7px,#5a3a14 1.6px,transparent 2.4px),radial-gradient(circle at 7px calc(100% - 7px),#5a3a14 1.6px,transparent 2.4px),radial-gradient(circle at calc(100% - 7px) calc(100% - 7px),#5a3a14 1.6px,transparent 2.4px),linear-gradient(180deg,#e0bd72,#a87c34 55%,#7a5520);
+  box-shadow:inset 0 1px 0 rgba(255,240,200,.6),inset 0 -2px 0 rgba(0,0,0,.25),0 4px 12px rgba(0,0,0,.6)}
+.soundsw:hover{filter:brightness(1.08)}
+.soundsw .lever{position:relative;flex:none;width:14px;height:30px;border-radius:7px;background:#2a1a0e;box-shadow:inset 0 2px 3px rgba(0,0,0,.7)}
+.soundsw .lever::after{content:"";position:absolute;left:50%;top:15px;width:14px;height:14px;margin-left:-7px;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f6ecd2,#8a7a5a 70%);box-shadow:0 2px 3px rgba(0,0,0,.5);transition:top .2s cubic-bezier(.5,1.7,.6,1)}
+.soundsw[aria-pressed="true"] .lever::after{top:1px}
+.soundsw .lbl{display:flex;flex-direction:column;line-height:1.25;text-align:left}
+.soundsw b{font-family:var(--f-head);font-weight:400;font-size:14px;letter-spacing:.18em}
+.soundsw small{font-family:var(--f-body);font-size:10.5px;letter-spacing:.14em;opacity:.85;white-space:nowrap}
+.soundsw .pilot{flex:none;width:9px;height:9px;border-radius:50%;background:#4a1a10;box-shadow:inset 0 1px 2px rgba(0,0,0,.6)}
+.soundsw[data-state="on"] .pilot{background:#ff9a4a;box-shadow:0 0 8px 2px rgba(255,140,60,.8)}
+.soundsw[data-state="off"] .pilot{animation:pilot 2.4s ease-in-out 5}
+.soundsw[data-state="wait"] .pilot{background:#d08a30;animation:pilot 1.2s ease-in-out infinite}
+@keyframes pilot{50%{background:#c4562a;box-shadow:0 0 6px 1px rgba(255,120,50,.6)}}
+
+/* コーヒーのしずく */
+.drip{position:absolute;z-index:6;width:5px;height:7px;margin-left:-2.5px;border-radius:50% 50% 50% 50%/60% 60% 40% 40%;background:#3a1d08;pointer-events:none;animation:drip .48s ease-in forwards}
+@keyframes drip{0%{transform:translateY(0) scaleY(.6);opacity:0}15%{opacity:.9}100%{transform:translateY(38px) scaleY(1.25);opacity:0}}
 
 /* ── 作業台 ── */
 .bench{position:relative;padding-inline:16px;padding-block:30px 90px;
@@ -234,7 +260,13 @@ h2,h3,h4{font-family:var(--f-head);font-weight:400;text-wrap:balance;margin:0;li
   box-shadow:inset 0 4px 7px rgba(0,0,0,.75),inset 0 -1px 0 rgba(255,240,210,.15);
   clip-path:polygon(1% 8%,6% 0,22% 6%,41% 1%,58% 7%,77% 0,93% 5%,100% 14%,98% 52%,100% 88%,90% 100%,71% 94%,52% 100%,33% 93%,15% 100%,3% 92%,0 55%)}
 .censor.cut .tag{position:absolute;left:12px;top:50%;transform:translateY(-50%) rotate(-2deg);background:var(--paper);border:1px solid var(--ink-soft);font-size:11px;letter-spacing:.2em;padding:1px 8px;color:var(--ink-soft);box-shadow:1px 2px 3px rgba(0,0,0,.35)}
-.seal-img{display:block;pointer-events:none;mix-blend-mode:multiply}
+.seal-img{display:block;pointer-events:none;mix-blend-mode:multiply;transform:rotate(var(--r,0deg))}
+/* 読み進めると検閲印が「ドン」と押される */
+.seal-img.pending{opacity:0}
+.seal-img.stamp{animation:stampIn .42s cubic-bezier(.3,1.4,.5,1) both}
+@keyframes stampIn{0%{opacity:0;transform:rotate(var(--r,0deg)) scale(1.9)}55%{opacity:1;transform:rotate(calc(var(--r,0deg) + 2deg)) scale(.92)}100%{opacity:1;transform:rotate(var(--r,0deg)) scale(1)}}
+.paper-wrap.shuffle{animation:shuffle .55s ease}
+@keyframes shuffle{0%{transform:rotate(-.35deg)}30%{transform:translate(7px,-5px) rotate(.35deg)}65%{transform:translate(-2px,1px) rotate(-.5deg)}100%{transform:rotate(-.35deg)}}
 .head-banned{display:grid;gap:12px;justify-items:center;padding:14px 0}
 .head-banned i{display:block;height:46px;width:min(80%,520px);background:var(--ink-tex) center/100% 100% no-repeat}
 .head-banned i+i{height:16px;width:min(60%,380px)}
@@ -269,9 +301,14 @@ footer.colophon{margin-top:28px;border-top:1px solid var(--ink);padding-top:7px;
   .bench{padding-top:110px}
   .mug{width:58px;height:58px}
   .haze.front{opacity:.1}
+  .soundsw{top:10px;right:10px;padding:5px 11px 5px 9px;gap:8px}
+  .soundsw b{font-size:12.5px}
+  .soundsw small{font-size:9.5px}
+  .soundsw .lever{width:12px;height:26px}
+  .soundsw .lever::after{width:12px;height:12px;margin-left:-6px;top:13px}
 }
 @media (prefers-reduced-motion:reduce){
-  .haze,.mug .steam i,.cens.emerge,.hidden-ink.emerge{animation:none!important}
+  .haze,.mug .steam i,.cens.emerge,.hidden-ink.emerge,.seal-img.stamp,.paper-wrap.shuffle,.drip,.soundsw .pilot{animation:none!important}
   .stain,.mug .cup,.mug .puddle{transition:none!important}
 }
 </style>
@@ -282,6 +319,8 @@ footer.colophon{margin-top:28px;border-top:1px solid var(--ink);padding-top:7px;
 <div class="scene" id="scene">
   <canvas id="workshop" aria-hidden="true"></canvas>
   <button class="mug" id="mug" type="button"></button>
+  <div id="hots"></div>
+  <button class="soundsw" id="soundsw" type="button" aria-pressed="false" title="歯車・蒸気・コーヒーの音"><span class="lever"></span><span class="lbl"><b>工房の音</b><small>OFF · 消音</small></span><span class="pilot"></span></button>
 </div>
 
 <div class="bench" id="bench">
@@ -314,6 +353,7 @@ footer.colophon{margin-top:28px;border-top:1px solid var(--ink);padding-top:7px;
 </div>
 
 <script src="articles.js"></script>
+<script src="sound.js"></script>
 
 <script>
 /* ── 起動時に一度だけ描く質感（墨・印・染み・もや） ── */
@@ -466,7 +506,7 @@ function hash(s){ var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.
 function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
 function visible(a){ return a && (!a.spoiler || spoiler); }
 function inkSpan(n){ return '<span class="ink" title="ネタバレありで判読できる" aria-label="伏せ字">' + "　".repeat(Math.max(2, Math.min(n, 22))) + '</span>'; }
-function sealImg(kind, seed){ var r = (seed % 24) - 12; return '<img class="seal-img" alt="" src="' + TEX.seal(kind, seed) + '" style="transform:rotate(' + r + 'deg)">'; }
+function sealImg(kind, seed){ var r = (seed % 24) - 12; return '<img class="seal-img" alt="" src="' + TEX.seal(kind, seed) + '" style="--r:' + r + 'deg">'; }
 function censorBlock(text, k){
   var h = hash(text), kind = ["ink","cut","ban"][(k === undefined ? h : k) % 3];
   var n = Math.max(2, Math.min(3, Math.ceil(text.length / 34)));
@@ -687,8 +727,31 @@ function render(){
   if (lastKey !== null && lastKey !== key){
     var top = document.getElementById("paper").getBoundingClientRect().top + window.scrollY - 12;
     if (Math.abs(window.scrollY - top) > 40) window.scrollTo(0, top);
+    if (window.SFX) SFX.page();
+    if (!reduce){ wrap.classList.remove("shuffle"); void wrap.offsetWidth; wrap.classList.add("shuffle"); }
   }
+  armSeals();
   lastKey = key; emerging = false;
+}
+
+/* ── 検閲印：画面に入ったものから順に押していく ── */
+var wrap = document.querySelector(".paper-wrap"), sealIO = null, stampQ = 0, stampReset;
+if (!reduce && "IntersectionObserver" in window){
+  sealIO = new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if (!e.isIntersecting) return;
+      sealIO.unobserve(e.target);
+      var el = e.target, d = stampQ++ * .14;
+      clearTimeout(stampReset); stampReset = setTimeout(function(){ stampQ = 0; }, 300);
+      setTimeout(function(){ el.classList.remove("pending"); el.classList.add("stamp"); }, d * 1000);
+      if (window.SFX) SFX.stamp(d + .22);
+    });
+  }, {threshold: .6});
+}
+function armSeals(){
+  if (!sealIO) return;
+  sealIO.disconnect();
+  view.querySelectorAll(".seal-img").forEach(function(el){ el.classList.add("pending"); sealIO.observe(el); });
 }
 
 /* ── コーヒー ── */
@@ -733,14 +796,30 @@ function toggle(fromMug){
       y = Math.max(220, Math.min(rect.height - 220, window.innerHeight * .45 - rect.top));
     }
     spoiler = true; syncUI();
+    if (window.SFX) SFX.spill(fromMug && !reduce);
+    if (fromMug && !reduce) drips();
     setTimeout(function(){ addStain(x, y, true); }, fromMug && !reduce ? 650 : 0);
     setTimeout(function(){ emerging = !reduce; render(); }, reduce ? 0 : (fromMug ? 1100 : 450));
   } else {
     spoiler = false; syncUI();
+    if (window.SFX) SFX.swap();
     paper.querySelectorAll(".stain").forEach(function(s){ s.classList.add("gone"); setTimeout(function(){ s.remove(); }, 800); });
     render();
   }
   try { localStorage.setItem("roster-spoiler", spoiler ? "1" : "0"); } catch(e){}
+}
+/* 机の縁から垂れるしずく（落ちきったところで「ポタ」） */
+function drips(){
+  var scene = document.getElementById("scene");
+  [1.5, 2.2, 3.0, 4.1].forEach(function(s, i){
+    setTimeout(function(){
+      var d = document.createElement("i"); d.className = "drip";
+      d.style.left = (parseFloat(mug.style.left) || scene.clientWidth * .7) + (i % 2 ? 9 : -6) + "px";
+      d.style.top = (scene.clientHeight - 6) + "px";
+      scene.appendChild(d);
+      setTimeout(function(){ d.remove(); if (window.SFX) SFX.drip(); }, 460);
+    }, s * 1000);
+  });
 }
 mug.addEventListener("click", function(){ toggle(true); });
 document.getElementById("spoiler").addEventListener("click", function(){ toggle(false); });
@@ -1131,13 +1210,42 @@ function build(){
   for (var cl = 0; cl < 6; cl++) clouds.push({x: CR() * W, y: H * (.15 + CR() * .65), w: W * (.35 + CR() * .35), h: H * (.25 + CR() * .25), v: (.06 + CR() * .1) * (CR() < .5 ? -1 : 1), a: .35 + CR() * .35});
 
   if (window.placeMug) window.placeMug(L.mugX, H - by2 - 10);
+  placeHots();
+  if (window.SFX){
+    var P = SFX.pos, pn = function(x){ return Math.max(-.9, Math.min(.9, x / W * 2 - 1)); };
+    P.gear = pn(L.gears[0].x); P.valve = pn(L.valve.x); P.gauge = pn(L.gauge.x); P.window = pn(w.x + w.w / 2); P.lamp = 0; P.mug = pn(L.mugX);
+  }
+}
+
+/* 触れるところ：弁・圧力計・歯車・ランプ */
+var hostH = document.getElementById("hots"), HOT = [
+  {k: "valve", label: "蒸気を逃がす", fn: function(){ WS.burstNow(); }},
+  {k: "gauge", label: "圧力計を叩く", fn: function(){ WS.kick("gauge"); }},
+  {k: "gear", label: "歯車を小突く", fn: function(){ WS.kick("gear"); }},
+  {k: "lamp", label: "ランプを揺らす", fn: function(){ WS.kick("lamp"); }}
+];
+HOT.forEach(function(h){
+  var b = document.createElement("button");
+  b.type = "button"; b.className = "hot"; b.dataset.k = h.k; b.setAttribute("aria-label", h.label);
+  b.innerHTML = '<span class="tip">' + h.label + '</span>';
+  b.addEventListener("click", function(){ h.fn(); if (reduce) frame(performance.now()); });
+  hostH.appendChild(b); h.el = b;
+});
+function placeHots(){
+  var G0 = L.gears[0], spots = {
+    valve: [L.valve.x, L.valve.y - 22, 46],
+    gauge: [L.gauge.x, L.gauge.y, L.gauge.r * 2 + 16],
+    gear: [G0.x, G0.y, G0.r * 1.5],
+    lamp: [W * .5, H * .2 - 8, 76]
+  };
+  HOT.forEach(function(h){ var s = spots[h.k]; h.el.style.left = s[0] + "px"; h.el.style.top = s[1] + "px"; h.el.style.width = h.el.style.height = s[2] + "px"; });
 }
 
 function frame(now){
   if (!reduce && running) requestAnimationFrame(frame);
   if (!reduce && now - last < 32) return;
   var dt = Math.min(.1, (now - last) / 1000); last = now;
-  var t = (now - t0) / 1000, w = L.win;
+  var t = WS.now(), w = L.win, P = WS.pressure(t), wh = WS.whistle(t);
   cx.setTransform(DPR, 0, 0, DPR, 0, 0);
   cx.drawImage(bg, 0, 0, W, H);
 
@@ -1145,7 +1253,10 @@ function frame(now){
   var T = L.tower;
   cx.fillStyle = "#3a2420"; cx.fillRect(T.x - T.r * .45, T.y, T.r * .9, w.y + w.h - T.y);
   cx.save(); cx.translate(T.x, T.y); cx.rotate(t * .25); cx.drawImage(L.towerSp.c, -L.towerSp.r, -L.towerSp.r, L.towerSp.r * 2, L.towerSp.r * 2); cx.restore();
-  if (!reduce) stacks.forEach(function(st){ if (Math.random() < st.rate * .18 && smoke.length < 120) smoke.push({x: st.x, y: st.y, r: 3, a: .38, vx: 6 + Math.random() * 6, vy: -8 - Math.random() * 6}); });
+  /* 汽笛が鳴るあいだは煙突が勢いよく吐く */
+  if (!reduce) stacks.forEach(function(st, si){
+    if (Math.random() < st.rate * .18 * (1 + 5 * wh) && smoke.length < 200) smoke.push({x: st.x, y: st.y, r: 3, a: .38 + wh * .2, vx: 6 + Math.random() * 6, vy: -8 - Math.random() * 6 - wh * 14});
+  });
   for (var i = smoke.length - 1; i >= 0; i--){
     var p = smoke[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.r += 2.2 * dt; p.a -= .045 * dt;
     if (p.a <= 0){ smoke.splice(i, 1); continue; }
@@ -1160,7 +1271,10 @@ function frame(now){
   cx.fillStyle = beam; cx.beginPath();
   cx.moveTo(w.x + w.w * .15, w.y + w.h * .25); cx.lineTo(w.x + w.w * .95, w.y + w.h * .2); cx.lineTo(w.x + w.w * 1.9, L.benchY); cx.lineTo(w.x + w.w * .7, L.benchY); cx.closePath(); cx.fill();
 
-  L.gears.forEach(function(G, n){ cx.save(); cx.translate(G.x, G.y); cx.rotate(t * G.speed + n * .2); cx.drawImage(G.sp.c, -G.sp.r, -G.sp.r, G.sp.r * 2, G.sp.r * 2); cx.restore(); });
+  /* 歯車は一歯ずつ「カチッ」と送られる（音と同じ時刻表） */
+  var tooth = WS.teeth(t), kj = WS.since("gear"), jx = 0, jy = 0;
+  if (kj < .5){ var je = 1 - kj / .5; jx = Math.sin(kj * 70) * 2.6 * je; jy = Math.cos(kj * 55) * 1.8 * je; }
+  L.gears.forEach(function(G, n){ cx.save(); cx.translate(G.x + jx, G.y + jy); cx.rotate(G.dir * tooth * 6.283 / G.t + n * .2); cx.drawImage(G.sp.c, -G.sp.r, -G.sp.r, G.sp.r * 2, G.sp.r * 2); cx.restore(); });
 
   var gg = L.gauge;
   cx.beginPath(); cx.arc(gg.x, gg.y, gg.r + 5, 0, 7); cx.fillStyle = "#8a6a3a"; cx.fill();
@@ -1168,16 +1282,31 @@ function frame(now){
   cx.strokeStyle = "#2a2016"; cx.lineWidth = 1.2;
   for (var mm = 0; mm <= 10; mm++){ var a = Math.PI * .75 + mm / 10 * Math.PI * 1.5; cx.beginPath(); cx.moveTo(gg.x + Math.cos(a) * gg.r * .76, gg.y + Math.sin(a) * gg.r * .76); cx.lineTo(gg.x + Math.cos(a) * gg.r * .92, gg.y + Math.sin(a) * gg.r * .92); cx.stroke(); }
   cx.strokeStyle = "#b4261b"; cx.lineWidth = 2.5; cx.beginPath(); cx.arc(gg.x, gg.y, gg.r * .84, Math.PI * 1.9, Math.PI * 2.25); cx.stroke();
-  var na = Math.PI * .75 + Math.PI * 1.5 * (.62 + Math.sin(t * 1.3) * .05 + Math.sin(t * 7) * .012);
+  /* 圧力がじわじわ上がって赤い帯へ → 弁が開いて一気に下がる */
+  var tp = WS.since("gauge"), wob = tp < 2 ? Math.sin(tp * 24) * .07 * Math.exp(-tp * 2.6) : 0;
+  var shk = P.venting ? Math.sin(t * 41) * .02 * P.vent : (P.p > .85 ? Math.sin(t * 33) * .008 : 0);
+  var na = Math.PI * .75 + Math.PI * 1.5 * Math.min(1.02, P.p + Math.sin(t * 7) * .006 + shk + wob);
+  var warn = P.venting || (P.p > .86 && Math.sin(t * 9) > 0), lpx = gg.x - gg.r - 13, lpy = gg.y + gg.r * .55;
+  cx.beginPath(); cx.arc(lpx, lpy, 6.5, 0, 7); cx.fillStyle = "#3a2a16"; cx.fill();
+  cx.beginPath(); cx.arc(lpx, lpy, 4.2, 0, 7); cx.fillStyle = warn ? "#ff5a2a" : "#4a1810"; cx.fill();
+  if (warn){ var wg = cx.createRadialGradient(lpx, lpy, 0, lpx, lpy, 26); wg.addColorStop(0, "rgba(255,90,40,.45)"); wg.addColorStop(1, "rgba(255,90,40,0)"); cx.fillStyle = wg; cx.fillRect(lpx - 26, lpy - 26, 52, 52); }
   cx.strokeStyle = "#1b1814"; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(gg.x, gg.y); cx.lineTo(gg.x + Math.cos(na) * gg.r * .8, gg.y + Math.sin(na) * gg.r * .8); cx.stroke();
   cx.fillStyle = "#1b1814"; cx.beginPath(); cx.arc(gg.x, gg.y, 2.5, 0, 7); cx.fill();
   cx.strokeStyle = "rgba(255,255,255,.35)"; cx.lineWidth = 1.5; cx.beginPath(); cx.arc(gg.x, gg.y, gg.r - 3, 3.6, 4.6); cx.stroke();
 
   cx.drawImage(fg, 0, 0, W, H);
 
-  if (!reduce && Math.random() < .45) steam.push({x: L.valve.x + 18, y: L.valve.y - 4, r: 4, a: .32, vx: 30 + Math.random() * 30, vy: -22 - Math.random() * 20});
+  if (!reduce){
+    if (Math.random() < .25 + Math.max(0, P.p - .6) * 1.3) steam.push({x: L.valve.x + 18, y: L.valve.y - 4, r: 4, a: .32, vx: 30 + Math.random() * 30, vy: -22 - Math.random() * 20});
+    if (P.venting) for (var vn = Math.ceil(5 * P.vent); vn > 0 && steam.length < 320; vn--) steam.push({x: L.valve.x + 16, y: L.valve.y - 6, r: 5 + Math.random() * 5, a: .12 + .45 * P.vent, vx: 140 + Math.random() * 170, vy: -30 - Math.random() * 70, big: 1});
+  }
+  if (P.venting){
+    var vf = cx.createRadialGradient(L.valve.x + 60, L.valve.y - 30, 0, L.valve.x + 60, L.valve.y - 30, 150);
+    vf.addColorStop(0, "rgba(235,225,210," + .22 * P.vent + ")"); vf.addColorStop(1, "rgba(235,225,210,0)");
+    cx.fillStyle = vf; cx.fillRect(L.valve.x - 90, L.valve.y - 180, 300, 300);
+  }
   for (var s2 = steam.length - 1; s2 >= 0; s2--){
-    var q = steam[s2]; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.r += 9 * dt; q.a -= .14 * dt;
+    var q = steam[s2]; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= q.big ? .94 : .97; q.r += (q.big ? 24 : 9) * dt; q.a -= (q.big ? .2 : .14) * dt;
     if (q.a <= 0){ steam.splice(s2, 1); continue; }
     cx.globalAlpha = q.a; cx.drawImage(puff, q.x - q.r * 2, q.y - q.r * 2, q.r * 4, q.r * 4);
   }
@@ -1196,17 +1325,21 @@ function frame(now){
   });
   cx.globalAlpha = 1;
 
-  var lx = W * .5 + Math.sin(t * .6) * 3, ly = H * .2;
-  cx.strokeStyle = "#0e0a07"; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(W * .5, 0); cx.lineTo(lx, ly - 22); cx.stroke();
+  /* 吊りランプ：小突くと揺れ、ときどき明滅する */
+  var lk = WS.since("lamp"), swing = Math.sin(t * .6) * .012 + (lk < 14 ? .2 * Math.exp(-lk * .42) * Math.sin(lk * 2.9) : 0);
+  var lx = 0, ly = H * .2;
+  cx.save(); cx.translate(W * .5, 0); cx.rotate(swing);
+  cx.strokeStyle = "#0e0a07"; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(0, 0); cx.lineTo(lx, ly - 22); cx.stroke();
   var sh2 = cx.createLinearGradient(lx - 34, 0, lx + 34, 0); sh2.addColorStop(0, "#1c1c1a"); sh2.addColorStop(.45, "#4a4a46"); sh2.addColorStop(1, "#1a1a18");
   cx.fillStyle = sh2; cx.beginPath(); cx.moveTo(lx - 9, ly - 24); cx.lineTo(lx + 9, ly - 24); cx.lineTo(lx + 36, ly); cx.lineTo(lx - 36, ly); cx.closePath(); cx.fill();
-  var fl = .85 + Math.sin(t * 9) * .03 + Math.sin(t * 2.3) * .04;
+  var fl = (.85 + Math.sin(t * 9) * .03 + Math.sin(t * 2.3) * .04) * WS.flicker(t) * (lk < 1.2 && Math.sin(lk * 40) > .4 ? .45 : 1);
   var bulb = cx.createRadialGradient(lx, ly + 4, 1, lx, ly + 4, 70);
   bulb.addColorStop(0, "rgba(255,228,170," + fl + ")"); bulb.addColorStop(.18, "rgba(255,180,90," + fl * .4 + ")"); bulb.addColorStop(1, "rgba(255,160,70,0)");
   cx.fillStyle = bulb; cx.beginPath(); cx.arc(lx, ly + 4, 70, 0, 7); cx.fill();
   var cone = cx.createLinearGradient(0, ly, 0, L.benchY);
   cone.addColorStop(0, "rgba(255,200,130," + .1 * fl + ")"); cone.addColorStop(1, "rgba(255,200,130,0)");
   cx.fillStyle = cone; cx.beginPath(); cx.moveTo(lx - 34, ly); cx.lineTo(lx + 34, ly); cx.lineTo(lx + 230, L.benchY); cx.lineTo(lx - 230, L.benchY); cx.closePath(); cx.fill();
+  cx.restore();
 }
 
 var rt;

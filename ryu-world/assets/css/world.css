@@ -186,23 +186,17 @@ body {
 
 
 /* =========================================================
-   立体空間
+   地図（canvas）
    ========================================================= */
 
 /*
- * JSが毎フレーム書くのは #world-space の3つの変数だけ：
- *   --tilt  … 傾き（0deg=真上から, 大きいほど横から）
- *   --spin  … 回転
- *   --s     … 画面サイズに合わせた縮尺
- * 光・文字（.bb）は同じ変数で逆回転して、常に正面を向く。
+ * 地図は world.js が <canvas> 1枚に描く。
+ * （以前の CSS 3D による組み立ては、スマホでは重すぎたため置き換えた）
  */
 
 #world-stage {
     position: absolute;
     inset: 0;
-
-    perspective: 1600px;
-    perspective-origin: 50% 45%;
 
     touch-action: none;
 
@@ -212,677 +206,56 @@ body {
     -webkit-user-select: none;
 }
 
+#world-stage.is-pointing {
+    cursor: pointer;
+}
+
 #world-stage.is-dragging {
     cursor: grabbing;
 }
 
-#world-space {
-    --tilt: 0deg;
-    --spin: 0deg;
-    --s: 1;
-
-    position: absolute;
-    left: 50%;
-    top: 50%;
-
-    width: 0;
-    height: 0;
-
-    transform:
-        translate(var(--offx, 0px), var(--shift, 0px))
-        scale3d(var(--s), var(--s), var(--s))
-        rotateX(var(--tilt))
-        rotateZ(var(--spin));
-
-    will-change: transform;
-}
-
-/* 立体の入れ物はすべて3Dを保ち、触れる部分以外はクリックを通す */
-#world-space,
-#world-space .node,
-#world-space .solid,
-#world-space .grp {
-    transform-style: preserve-3d;
-}
-
-#world-space * {
-    pointer-events: none;
-}
-
-.node {
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    width: 0;
-    height: 0;
-
-    transform:
-        translate3d(
-            var(--x, 0px),
-            var(--y, 0px),
-            calc(var(--z, 0px) + var(--lift, 0px))
-        );
-
-    transition: --lift 0.9s ease;
-}
-
-.solid,
-.grp {
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    width: 0;
-    height: 0;
-}
-
-@property --lift {
-    syntax: "<length>";
-    inherits: true;
-    initial-value: 0px;
-}
-
-
-/* ---------------------------------------------------------
-   面（三角形・四角形）
-   JSが matrix3d で3D空間の任意の位置・向きに貼る。
-   --------------------------------------------------------- */
-
-.face,
-.quad,
-.flat {
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    transform-origin: 0 0;
-}
-
-.face svg {
+#world-canvas {
     display: block;
-    overflow: visible;
-}
 
-/* 触れる立体だけ、形の部分でクリックを受ける */
-#world-space .is-clickable polygon {
-    pointer-events: visiblePainted;
-    cursor: pointer;
-}
-
-#world-space .alias-hit {
-    pointer-events: stroke;
-    cursor: pointer;
-}
-
-#world-space .hit {
-    pointer-events: auto;
-    cursor: pointer;
-
-    background: rgba(0, 0, 0, 0.004);
-}
-
-
-/* ---------------------------------------------------------
-   常に正面を向く要素（光・文字）
-   --------------------------------------------------------- */
-
-.bb {
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    /* 回転の中心を「置いた点」にする（要素の中心だと大きな光がずれる） */
-    transform-origin: 0 0;
-
-    transform:
-        translate3d(var(--bx, 0px), var(--by, 0px), var(--bz, 0px))
-        rotateZ(calc(var(--spin) * -1))
-        rotateX(calc(var(--tilt) * -1))
-        translate(-50%, -50%)
-        translate3d(var(--ldx, 0px), var(--ldy, 0px), var(--lz, 0px));
-}
-
-.label {
-    white-space: nowrap;
-
-    font-size: 13px;
-    letter-spacing: 0.28em;
-
-    color: rgba(240, 238, 232, 0.8);
-
-    text-shadow: 0 0 10px rgba(0, 0, 0, 0.95);
-}
-
-.label-small {
-    font-size: 10px;
-    letter-spacing: 0.2em;
-}
-
-.label-river {
-    font-size: 11px;
-    letter-spacing: 0.35em;
-
-    color: rgba(240, 238, 232, 0.45);
-}
-
-.label-eden {
-    font-size: 15px;
-    letter-spacing: 0.4em;
-
-    color: #fdfdfb;
-
-    text-shadow:
-        0 0 12px rgba(255, 255, 255, 0.5),
-        0 0 2px rgba(0, 0, 0, 0.9);
-}
-
-.label-alias {
-    font-size: 12px;
-    letter-spacing: 0.4em;
-
-    color: rgba(225, 225, 230, 0.55);
-}
-
-.label-abyss {
-    color: rgba(205, 130, 130, 0.65);
-}
-
-.glow {
-    border-radius: 50%;
-}
-
-
-/* =========================================================
-   悠久の楽園
-   ========================================================= */
-
-#eden-light {
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    width: 0;
-    height: 0;
-
-    pointer-events: none;
-
-    /* 下の世界に光を「足す」ように重ねる */
-    mix-blend-mode: screen;
-
-    transition: opacity 1s ease;
-
-    will-change: transform;
-}
-
-#world-page.is-eden-dim #eden-light {
-    opacity: 0.3;
-}
-
-/*
- * 普段：控えめな灯り（小さく、淡く、光線はほとんど見えない）
- * カーソルを合わせる／選ぶ：光が満ち、光線が広がる
- */
-.eden-aura {
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    opacity: 0.42;
-    transform: scale(0.68);
-
-    transition:
-        opacity 1.4s ease,
-        transform 1.8s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-#world-page.is-eden-radiant .eden-aura {
-    opacity: 1;
-    transform: scale(1.08);
-
-    transition:
-        opacity 0.7s ease,
-        transform 1.2s cubic-bezier(0.2, 0.7, 0.2, 1);
-}
-
-.eden-aura > div {
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    border-radius: 50%;
-
-    transform: translate(-50%, -50%);
-}
-
-.eden-aura .eden-rays {
-    opacity: 0.25;
-
-    transition: opacity 1.4s ease;
-}
-
-#world-page.is-eden-radiant .eden-aura .eden-rays {
-    opacity: 1;
-}
-
-/* 結晶と光輪も、輝くときだけ一段明るく */
-#world-space .node[data-world="eden"] .lf {
-    transition: filter 1.2s ease;
-}
-
-#world-page.is-eden-radiant #world-space .node[data-world="eden"] .lf {
-    filter: brightness(1.45);
-}
-
-.eden-glow {
-    width: 640px;
-    height: 640px;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(255, 255, 255, 0.58) 0%,
-            rgba(255, 255, 255, 0.2) 14%,
-            rgba(255, 255, 255, 0.06) 34%,
-            transparent 62%
-        );
-
-    animation: edenBreathe 7s ease-in-out infinite;
-}
-
-.eden-rays {
-    width: 620px;
-    height: 620px;
-}
-
-.eden-rays svg {
-    display: block;
     width: 100%;
     height: 100%;
-
-    animation: slowTurn 90s linear infinite;
 }
 
-.eden-rays line {
-    stroke: rgba(255, 255, 255, 0.16);
-    stroke-width: 1;
-}
-
-.eden-rays line.is-long {
-    stroke: rgba(255, 255, 255, 0.32);
-}
-
-/* 光輪：水平の輪と、傾いた輪がそれぞれゆっくり回る */
-.halo-ring {
+/* 拡大・傾きを変えたときだけ現れる「視点を戻す」 */
+#view-reset {
     position: absolute;
-    left: 0;
-    top: 0;
+    right: clamp(1rem, 3vw, 2rem);
+    bottom: clamp(1rem, 3vh, 1.8rem);
 
-    border-radius: 50%;
+    z-index: 5;
 
-    border: 1px solid rgba(255, 255, 255, 0.6);
+    padding: 0.55rem 0.9rem;
 
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    background: rgba(0, 0, 0, 0.45);
+    color: inherit;
+
+    font: inherit;
+    font-size: 0.74rem;
+    letter-spacing: 0.2em;
+
+    cursor: pointer;
+
+    opacity: 0;
+    pointer-events: none;
+
+    transition: opacity 0.5s ease, border-color 0.3s ease;
 }
 
-/* 闇の輪：黒い帯を、ごく細い光の縁取りで闇の中に浮かばせる */
-.halo-ring.is-dark {
-    border: 3px solid rgba(6, 6, 8, 0.95);
-
-    box-shadow:
-        0 0 0 1px rgba(255, 255, 255, 0.26),
-        inset 0 0 0 1px rgba(255, 255, 255, 0.16);
+#view-reset.is-shown {
+    opacity: 0.7;
+    pointer-events: auto;
 }
 
-.halo-spin {
-    animation: haloSpin 40s linear infinite;
-}
-
-.halo-spin.is-reverse {
-    animation-duration: 55s;
-    animation-direction: reverse;
-}
-
-/* 天へ伸びる光の柱 */
-.beam {
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.08) 30%,
-            rgba(255, 255, 255, 0.62) 50%,
-            rgba(255, 255, 255, 0.08) 70%,
-            transparent
-        );
-
-    -webkit-mask-image: linear-gradient(to top, #000, transparent);
-    mask-image: linear-gradient(to top, #000, transparent);
-}
-
-
-/* =========================================================
-   エイリアスワールド（大地）
-   ========================================================= */
-
-.alias-art svg {
-    display: block;
-    overflow: visible;
-}
-
-.alias-rim {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.38);
-    stroke-width: 1.4;
-}
-
-.alias-rim.faint {
-    stroke: rgba(255, 255, 255, 0.14);
-}
-
-.alias-sigil rect {
-    fill: none;
-    stroke: rgba(255, 255, 255, 0.16);
-    stroke-width: 1.2;
-}
-
-.alias-sigil rect.is-bold {
-    stroke: rgba(255, 255, 255, 0.34);
-    stroke-width: 1.6;
-}
-
-.rim-ring svg,
-.sprite svg {
-    display: block;
-    overflow: visible;
-}
-
-
-/* ---------------------------------------------------------
-   四つの川：中心から流れ、縁を越えてこぼれ落ち、さらさら消える
-   --------------------------------------------------------- */
-
-/*
- * 流れ・落下は、中の模様（.flow / .sand）を transform で動かす。
- * 背景位置を動かすと毎フレーム描き直しになり重いため。
- */
-
-.river-strip {
-    overflow: hidden;
-
-    background:
-        linear-gradient(
-            90deg,
-            transparent 0%,
-            var(--rc) 22%,
-            var(--rc) 100%
-        );
-
-    -webkit-mask-image: linear-gradient(
-        to bottom, transparent, #000 35%, #000 65%, transparent
-    );
-    mask-image: linear-gradient(
-        to bottom, transparent, #000 35%, #000 65%, transparent
-    );
-
-    opacity: 0.85;
-}
-
-.river-strip .flow {
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: -40px;
-    right: 0;
-
-    background:
-        repeating-linear-gradient(
-            90deg,
-            transparent 0 16px,
-            rgba(255, 255, 255, 0.55) 21px,
-            transparent 26px 40px
-        );
-
-    -webkit-mask-image: linear-gradient(90deg, transparent 8%, #000 30%);
-    mask-image: linear-gradient(90deg, transparent 8%, #000 30%);
-
-    will-change: transform;
-
-    animation: riverFlow var(--flow, 1.8s) linear infinite;
-}
-
-/* 縁からこぼれ落ちる砂のような光 */
-.river-fall {
-    overflow: hidden;
-
-    background: linear-gradient(to bottom, var(--rc-soft), transparent 70%);
-
-    -webkit-mask-image:
-        linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 35%, transparent 100%),
-        linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-    -webkit-mask-composite: source-in;
-    mask-image:
-        linear-gradient(to bottom, #000 0%, rgba(0, 0, 0, 0.55) 35%, transparent 100%),
-        linear-gradient(90deg, transparent, #000 30%, #000 70%, transparent);
-    mask-composite: intersect;
-}
-
-.river-fall .sand {
-    position: absolute;
-    left: 0;
-    right: 0;
-    top: -100px;
-    bottom: 0;
-
-    will-change: transform;
-}
-
-.river-fall .sand-a {
-    background:
-        radial-gradient(circle, var(--rc) 0 1.1px, transparent 1.6px) 0 0 / 7px 9px;
-
-    animation: sandFall var(--fall, 2.4s) linear infinite;
-}
-
-.river-fall .sand-b {
-    top: -105px;
-
-    background:
-        radial-gradient(circle, rgba(255, 255, 255, 0.8) 0 0.8px, transparent 1.3px) 3px 4px / 11px 15px;
-
-    animation: sandFallB calc(var(--fall, 2.4s) * 1.35) linear infinite;
-}
-
-
-/* =========================================================
-   刹那の奈落（最下層）
-   ========================================================= */
-
-.abyss-glow {
-    width: 440px;
-    height: 440px;
-
-    background:
-        radial-gradient(
-            circle,
-            rgba(160, 26, 26, 0.6) 0%,
-            rgba(100, 12, 12, 0.22) 35%,
-            transparent 68%
-        );
-
-    animation: abyssPulse 11s ease-in-out infinite;
-}
-
-.vortex svg {
-    display: block;
-    overflow: visible;
-
-    animation: slowTurn 70s linear infinite reverse;
-}
-
-.vortex circle {
-    fill: none;
-    stroke: rgba(150, 50, 50, var(--a, 0.3));
-    stroke-width: 1.2;
-    stroke-dasharray: 3 9;
-}
-
-
-/* =========================================================
-   名前のない無数の世界（別世界）
-   ========================================================= */
-
-.nameless svg {
-    display: block;
-    overflow: visible;
-}
-
-/* 龍の世界の外：色も光も届かない、くすんだ世界 */
-.nameless polygon {
-    fill: rgba(90, 90, 95, 0.06);
-    stroke: rgba(120, 120, 126, calc(var(--a, 0.35) * 0.75));
-    stroke-width: 1.2;
-}
-
-
-/* =========================================================
-   光の柱・螺旋
-   ========================================================= */
-
-.pillar {
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            rgba(255, 255, 255, 0.07) 35%,
-            rgba(255, 255, 255, 0.45) 50%,
-            rgba(255, 255, 255, 0.07) 65%,
-            transparent
-        );
-
-    -webkit-mask-image: linear-gradient(
-        to bottom, #000 0%, #000 55%, transparent 100%
-    );
-    mask-image: linear-gradient(
-        to bottom, #000 0%, #000 55%, transparent 100%
-    );
-}
-
-.helix svg {
-    display: block;
-    overflow: visible;
-}
-
-.helix path {
-    fill: none;
-    stroke-width: 1.3;
-    stroke-linecap: round;
-}
-
-
-/* =========================================================
-   エイリアス＝世界の礎・守護
-   ========================================================= */
-
-/* 十二使徒：縁に立つ、色を持つ光の柱 */
-.apostle {
-    background:
-        linear-gradient(
-            90deg,
-            transparent,
-            var(--ac) 45%,
-            var(--ac) 55%,
-            transparent
-        );
-
-    -webkit-mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
-    mask-image: linear-gradient(to top, #000 0%, rgba(0, 0, 0, 0.5) 60%, transparent 100%);
-
-    opacity: 0.55;
-}
-
-/* 龍の世界の境界：縁から架かる、淡い光の天蓋 */
-.dome-ring svg {
-    display: block;
-    overflow: visible;
-}
-
-.dome-ring circle {
-    fill: none;
-    stroke: rgba(225, 228, 240, var(--a, 0.15));
-    stroke-width: 1.2;
-}
-
-.label-outside {
-    font-size: 11px;
-    letter-spacing: 0.45em;
-
-    color: rgba(170, 170, 178, 0.38);
-}
-
-/* 礎の根：大地から各世界へ伸びる、細い光 */
-.root {
-    background:
-        linear-gradient(
-            to top,
-            rgba(190, 190, 205, 0.4),
-            rgba(190, 190, 205, 0.12) 60%,
-            transparent
-        );
-}
-
-
-/* =========================================================
-   魂界：巡る魂の灯
-   ========================================================= */
-
-.soul-orbit {
-    animation: soulOrbit 180s linear infinite;
-}
-
-.soul-path svg {
-    display: block;
-    overflow: visible;
-}
-
-.soul-path circle {
-    fill: none;
-    stroke: rgba(140, 210, 230, 0.22);
-    stroke-width: 1.2;
-    stroke-dasharray: 2 10;
-}
-
-/* （#world-space .hit の透明な背景より優先させる） */
-#world-space .wisp {
-    width: var(--ws, 22px);
-    height: var(--ws, 22px);
-
-    border-radius: 50%;
-
-    background:
-        radial-gradient(
-            circle,
-            #f2ffff 0%,
-            rgba(170, 232, 245, 0.75) 22%,
-            rgba(110, 200, 225, 0.22) 50%,
-            transparent 72%
-        );
-}
-
-.wisp::after {
-    content: "";
-
-    position: absolute;
-    inset: 0;
-
-    border-radius: 50%;
-
-    background: inherit;
-
-    animation: wispFlicker 3.2s ease-in-out infinite;
-    animation-delay: calc(var(--d, 0s) * -1);
-}
-
-.label-soul {
-    color: rgba(190, 235, 245, 0.75);
+#view-reset:hover,
+#view-reset:focus-visible {
+    opacity: 1;
+    border-color: rgba(255, 255, 255, 0.5);
 }
 
 
@@ -919,46 +292,7 @@ body {
 }
 
 
-/* =========================================================
-   選択状態
-   ========================================================= */
-
-/*
- * 3D空間の入れ物に opacity / filter をかけると、中の立体が平面に
- * 潰れてしまう。そのため明るさの変化は「葉」の要素（.lf）にだけかける。
- */
-
-.lf {
-    transition: filter 1s ease;
-}
-
-#world-space.has-selection .node.is-dimmed .lf {
-    filter: brightness(0.28);
-}
-
-#world-space.has-selection .node.is-selected .lf {
-    filter: brightness(1.35);
-}
-
-/* カーソルを合わせた世界は、淡く光る（選択中の暗転より優先） */
-#world-space .node.is-hover .lf,
-#world-space.has-selection .node.is-hover .lf {
-    filter: brightness(1.55);
-}
-
-#world-space.has-selection .node.is-selected {
-    --lift: 22px;
-}
-
-/* エイリアス選択時だけ、世界全体が少し暗く、ゆっくり沈む */
-#world-page.is-alias .lf {
-    transition-duration: 1.8s;
-}
-
-#world-page.is-alias .node {
-    transition-duration: 1.8s;
-}
-
+/* エイリアス選択時だけ、世界全体が少し暗くなる */
 #world-page.is-alias::after {
     content: "";
 
@@ -978,7 +312,6 @@ body {
 
     animation: aliasDim 1.8s ease both;
 }
-
 
 /* =========================================================
    情報パネル
@@ -1238,46 +571,17 @@ body {
 
 }
 
-
-/* =========================================================
-   軽量モード（性能の低い端末で自動的に有効になる）
-   ========================================================= */
-
-#world-page.is-lite .eden-rays svg,
-#world-page.is-lite .wisp::after,
-#world-page.is-lite .halo-spin,
-#world-page.is-lite .river-fall .sand,
-#world-page.is-lite #eden-light .eden-glow,
-#world-page.is-lite .abyss-glow {
-    animation: none;
-}
-
-#world-page.is-lite .nameless {
-    display: none;
-}
-
-
 /* =========================================================
    モーション低減設定
    ========================================================= */
 
 @media (prefers-reduced-motion: reduce) {
 
-    #world-page,
-    .eden-glow,
-    .eden-rays svg,
-    .halo-spin,
-    .soul-orbit,
-    .wisp::after,
-    .river-strip .flow,
-    .river-fall .sand,
-    .abyss-glow,
-    .vortex svg {
+    #world-page {
         animation: none;
     }
 
 }
-
 
 /* =========================================================
    見やすさの調整（2026-10 見直し）
@@ -1288,130 +592,6 @@ body {
     text-wrap: pretty;
 
     -webkit-font-smoothing: antialiased;
-}
-
-/* ---------- 地図の文字 ---------- */
-
-/*
- * 世界の名前は3Dの外（#label-layer）に描く（world.js の label() を参照）。
- * 3D空間の中の .label は位置の目印なので見せない。
- */
-#world-space .label {
-    visibility: hidden;
-}
-
-#label-layer {
-    position: absolute;
-    inset: 0;
-
-    z-index: 2;
-
-    pointer-events: none;
-
-    overflow: hidden;
-}
-
-.map-label {
-    position: absolute;
-    left: 0;
-    top: 0;
-
-    white-space: nowrap;
-
-    font-size: 13px;
-    letter-spacing: 0.26em;
-
-    color: rgba(244, 242, 236, 0.9);
-
-    text-shadow:
-        0 0 3px #000,
-        0 0 8px #000,
-        0 0 16px rgba(0, 0, 0, 0.9);
-
-    transition: opacity 1s ease, color 0.6s ease;
-
-    will-change: transform;
-}
-
-.map-label.is-dimmed {
-    opacity: 0.32;
-}
-
-.map-label.is-lit {
-    color: #fff;
-}
-
-.map-label.label-small {
-    font-size: 12px;
-    letter-spacing: 0.2em;
-}
-
-.map-label.label-river {
-    font-size: 11px;
-    letter-spacing: 0.35em;
-
-    color: rgba(240, 238, 232, 0.55);
-}
-
-.map-label.label-eden {
-    font-size: 15px;
-    letter-spacing: 0.4em;
-
-    color: #fdfdfb;
-
-    text-shadow:
-        0 0 12px rgba(255, 255, 255, 0.45),
-        0 0 3px #000,
-        0 0 8px rgba(0, 0, 0, 0.9);
-}
-
-.map-label.label-alias {
-    letter-spacing: 0.4em;
-
-    color: rgba(228, 228, 234, 0.8);
-}
-
-.map-label.label-abyss {
-    color: rgba(222, 150, 150, 0.85);
-}
-
-.map-label.label-soul {
-    color: rgba(196, 238, 248, 0.9);
-}
-
-.map-label.label-outside {
-    font-size: 11px;
-    letter-spacing: 0.45em;
-
-    color: rgba(185, 185, 195, 0.55);
-}
-
-/* 結晶の横に添える名前：結晶へ向かう細い線を引く */
-.label-side::before,
-.label-side::after {
-    content: "";
-
-    display: inline-block;
-
-    width: 22px;
-    height: 1px;
-
-    vertical-align: middle;
-
-    background: rgba(240, 238, 232, 0.45);
-}
-
-.label-side-l::before,
-.label-side-r::after {
-    display: none;
-}
-
-.label-side-l::after {
-    margin-left: 0.6em;
-}
-
-.label-side-r::before {
-    margin-right: 0.8em;
 }
 
 /* ---------- 画面の文字・操作 ---------- */
@@ -1493,29 +673,6 @@ body {
 
 @media (max-width: 700px) {
 
-    .map-label {
-        font-size: 12px;
-        letter-spacing: 0.14em;
-    }
-
-    .map-label.label-river,
-    .map-label.label-outside {
-        font-size: 10px;
-        letter-spacing: 0.2em;
-
-        opacity: 0.7;
-    }
-
-    .map-label.label-eden {
-        font-size: 13px;
-        letter-spacing: 0.3em;
-    }
-
-    .label-side::before,
-    .label-side::after {
-        width: 12px;
-    }
-
     /* 下から出るパネル：後ろの地図が透けて文字に重ならないように */
     #world-panel {
         min-height: 0;
@@ -1553,6 +710,10 @@ body {
 
     #world-header h1 {
         font-size: 1.15rem;
+    }
+
+    #view-reset {
+        bottom: calc(1rem + env(safe-area-inset-bottom));
     }
 
     /* スマホでも「はじまりへ戻る」を出す（下はヒントと重なるので右上へ） */

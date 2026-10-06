@@ -602,9 +602,9 @@
 
 /* 黒い球の木（生命の木）：黒い球の縁に、昏い紫の光がにじむ */
 [data-tone="dark"] .sphere {
-    background: radial-gradient(circle, transparent 46%, rgba(150, 90, 230, 0.55) 60%, transparent 76%);
+    background: radial-gradient(circle, transparent 46%, rgba(6, 6, 6, 0.55) 60%, transparent 76%);
 
-    box-shadow: 0 0 34px 8px rgba(90, 40, 150, 0.45);
+    box-shadow: 0 0 34px 8px rgba(86, 86, 86, 0.45);
 }
 
 @keyframes sphereLight {

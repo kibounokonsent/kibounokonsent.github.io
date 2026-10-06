@@ -38,22 +38,12 @@
                      → エイリアス → 刹那の奈落
              真上から見ると、楽園を中心とした同心円になる。
 
-             形はすべて world.js が組み立てる
+             形はすべて world.js が <canvas> に描く
              （各世界の位置・形の設定もそちらに集約）。
              ================================================== -->
 
         <div id="world-stage" aria-hidden="true">
-            <div id="world-space"></div>
-
-            <!-- 楽園の光：3D空間の外に描き、楽園の位置に毎フレーム合わせる
-                 （3Dの中に大きな光を置くと、奥行きの計算で切れてしまうため） -->
-            <div id="eden-light">
-                <!-- 普段は控えめに灯り、カーソルを合わせる（または選ぶ）と光り輝く -->
-                <div class="eden-aura">
-                    <div class="eden-glow"></div>
-                    <div class="eden-rays"></div>
-                </div>
-            </div>
+            <canvas id="world-canvas"></canvas>
         </div>
 
 
@@ -74,6 +64,9 @@
 
         <!-- 操作のヒント（最初に触れたら消える） -->
         <p id="world-hint" aria-hidden="true">ドラッグで傾ける・回す</p>
+
+        <!-- 拡大・傾きを変えたときだけ現れる -->
+        <button type="button" id="view-reset">視点を戻す</button>
 
         <a id="back-to-creation" href="../index.html">はじまりへ戻る</a>
 

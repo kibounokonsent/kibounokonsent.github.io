@@ -33,7 +33,10 @@ const SITE = {
      destroyHits   : 1件を壊すのに必要な回数
      jumpscare     : すべて壊したときのジャンプスケア（画像は jumpscareImages）
      sound         : 効果音（叩く音・扉・注射・悲鳴）。ブラウザ内で合成するので音声ファイルは不要
-     soundVolume   : 音量（0〜1）
+     soundVolume   : 音量（0〜1）。すべての音の全体音量
+     ambient       : 環境音（蛍光灯の唸り・空調のサー音・院内の物音）。精神ゲージが減るほど不穏になる
+     ambientVolume : 環境音だけの音量（0〜1）
+     ecg           : 心電図モニターの「ピッ…ピッ…」。ゲージが減るほど速く・不規則に、0 では心停止音も
      whispers      : 背景にまれに浮かぶ囁き */
   /* entryGate を false にしたときの初期モード：'safe'（ネタバレなし） / 'spoiler'（ネタバレあり） */
   defaultMode: 'safe',
@@ -51,6 +54,9 @@ const SITE = {
     jumpscare: true,
     sound: true,
     soundVolume: 0.7,
+    ambient: true,
+    ambientVolume: 0.6,
+    ecg: true,
     whispers: true,
   },
 

@@ -87,6 +87,8 @@
     eyeOff: P('<path d="M3 3l18 18"/><path d="M10.6 5.6A10.6 10.6 0 0112 5.5c6.4 0 10 6.5 10 6.5a17.4 17.4 0 01-3.2 3.9M6.4 6.9C3.6 8.7 2 12 2 12s3.6 6.5 10 6.5c1.6 0 3-.4 4.2-1"/><path d="M9.9 9.9a3 3 0 004.2 4.2"/>'),
     back: P('<path d="M15 5l-7 7 7 7"/>'),
     next: P('<path d="M9 5l7 7-7 7"/>'),
+    sound: P('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M15.5 9a4 4 0 010 6M18 6.5a7.5 7.5 0 010 11"/>'),
+    mute: P('<path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z"/><path d="M16 9.5l5 5M21 9.5l-5 5"/>'),
     list: P('<path d="M8 6h13M8 12h13M8 18h13M3.5 6h.01M3.5 12h.01M3.5 18h.01" />'),
   };
 
@@ -103,7 +105,7 @@
   }
 
   /* ───────── sanity gauge ───────── */
-  const FX = Object.assign({ entryGate: true, sanityGauge: true, sanityLoss: 6, sanityDrain: { seconds: 15, amount: 1 }, redactLoss: 3, whispers: true, corruption: true, zeroRot: 0.22, destroy: true, destroyHits: 7, jumpscare: true, sound: true, soundVolume: 0.7 }, SITE.effects || {});
+  const FX = Object.assign({ entryGate: true, sanityGauge: true, sanityLoss: 6, sanityDrain: { seconds: 15, amount: 1 }, redactLoss: 3, whispers: true, corruption: true, zeroRot: 0.22, destroy: true, destroyHits: 7, jumpscare: true, sound: true, soundVolume: 0.7, ambient: true, ambientVolume: 0.6, ecg: true }, SITE.effects || {});
   let effectsOn = local.get('kh-effects', true);
   const reduceMotion = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   const fxActive = () => effectsOn && !reduceMotion;
@@ -136,11 +138,12 @@
         const g = $('#sanity');
         g.classList.remove('hit'); void g.offsetWidth; g.classList.add('hit');
         corrupt.burst();
+        if (before - this.value >= 3 && this.value > 0) sfx.thump(before - this.value >= 6 ? .7 : .45);   // 大きく削れると心臓が跳ねる
       }
       const lvAfter = this.level();
       if (before > 0 && this.value === 0) { madness(); route(true); }          // 0 のときだけの記事が現れる
       else if (before === 0 && this.value > 0) route(true);                   // 正気に戻ると消える
-      if (lvBefore !== lvAfter) corrupt.restart();
+      if (lvBefore !== lvAfter) { corrupt.restart(); amb.retune(); }
     },
     lose(n) { if (FX.sanityGauge && !this.locked && this.value > 0) this.set(this.value - n); },
     visit(id) {
@@ -180,6 +183,7 @@
   }
 
   function madness() {
+    sfx.alarm();
     const el = document.createElement('div');
     el.className = 'madness';
     el.innerHTML = `<div class="madness-inner"><p class="madness-en">SANITY 000</p><p class="madness-ja">精神ゲージが 0 になりました</p><p class="madness-sub">あなたは、もう平常ではいられない。<br>……記録が、増えている。</p>${FX.destroy ? '<p class="madness-hint">古い記録が、邪魔だ。<br>叩いて、壊せ。</p>' : ''}<button class="btn btn--ghost" type="button">それでも読む</button></div>`;
@@ -195,7 +199,7 @@
        ・責める言葉が一瞬チラつく
      をだんだん激しくする。演出OFF・視差効果を減らす設定では止まる。
      ========================================================= */
-  const MOJI = SITE.mojibake || '縺繧繝ｿ譁蟄怜喧縺代€ゅ�ｧ髮ｻ蜒譛ｬ蠖薙¢髯｢逞ｲ荳ｭ辟｡莉･蜈ｨ驛ｨ竊鍋ｴ�';
+  const MOJI = SITE.mojibake || '縺繧繝ｿ譁蟄怜喧縺代€ゅ\uFFFDｧ髮ｻ蜒譛ｬ蠖薙¢髯｢逞ｲ荳ｭ辟｡莉･蜈ｨ驛ｨ竊鍋ｴ\uFFFD';
   const TIERS = {
     mid:  { moji: [2600, 5200, 1, .30, 140, 320], noise: [9000, 16000],  blame: null },
     low:  { moji: [900, 2200, 2, .45, 160, 520],  noise: [3500, 7500],   blame: [6500, 12000, 1] },
@@ -361,6 +365,7 @@
         }, rnd(minMs, maxMs));
       }
       if (Math.random() < 0.4) heroLogo.moji(count, minMs, maxMs); // ロゴの文字も化ける
+      if (Math.random() < 0.5) sfx.tick();
     },
     /* ノイズ：画面が裂けて色がずれる */
     noise() {
@@ -370,14 +375,17 @@
         t.style.height = rnd(2, 14) + 'vh';
         t.style.setProperty('--dx', rnd(-40, 40) + 'px');
       });
+      const dur = rnd(140, 380);
       document.documentElement.classList.add('is-glitch');
-      setTimeout(() => document.documentElement.classList.remove('is-glitch'), rnd(140, 380));
+      sfx.static(dur / 1000 + .05);
+      setTimeout(() => document.documentElement.classList.remove('is-glitch'), dur);
     },
     /* 責める言葉が一瞬チラつく */
     blame(max) {
       const words = SITE.blameTexts || [];
       if (!words.length) return;
       const n = 1 + Math.floor(Math.random() * max);
+      sfx.blame(rnd(.16, .3));
       for (let i = 0; i < n; i++) {
         const el = document.createElement('span');
         el.className = 'blame' + (Math.random() < .3 ? ' blame--red' : '') + (Math.random() < .25 ? ' blame--v' : '');
@@ -397,21 +405,61 @@
 
   /* =========================================================
      音（ブラウザ内で合成。音声ファイルは不要）
-     effects.sound: false で無音。演出OFFでも無音。
+     effects.sound: false で無音。演出OFF・ヘッダーの音ボタンOFFでも無音。
+       ・sfx … 叩く／扉／注射／悲鳴／ノイズ／責める声など、その場で鳴る効果音
+       ・amb … 心電図モニター・蛍光灯の唸り・空調のノイズ・院内の物音（常に流れる環境音）
+               精神ゲージの段階（high / mid / low / zero）で、だんだん不穏になる
      ========================================================= */
-  let actx = null;
+  let soundOn = local.get('kh-sound', true);
+  let actx = null, master = null;
   function audio() {
-    if (!FX.sound || !effectsOn) return null;
+    if (!FX.sound || !effectsOn || !soundOn) return null;
     try {
-      actx = actx || new (window.AudioContext || window.webkitAudioContext)();
-      if (actx.state === 'suspended') actx.resume();
+      if (!actx) {
+        actx = new (window.AudioContext || window.webkitAudioContext)();
+        const comp = actx.createDynamicsCompressor();
+        comp.threshold.value = -16; comp.ratio.value = 4;
+        master = actx.createGain(); master.gain.value = FX.soundVolume ?? 0.7;
+        master.connect(comp); comp.connect(actx.destination);
+      }
+      if (actx.state === 'suspended' && document.visibilityState === 'visible') actx.resume();
       return actx;
     } catch { return null; }
   }
-  function noiseBuf(c, sec) {
-    const b = c.createBuffer(1, Math.floor(c.sampleRate * sec), c.sampleRate);
-    const d = b.getChannelData(0);
+  /* ノイズの素材（作るのは最初の1回だけ） */
+  const BUF = {};
+  function whiteBuf(c) {
+    if (BUF.white) return BUF.white;
+    const b = c.createBuffer(1, c.sampleRate * 4, c.sampleRate), d = b.getChannelData(0);
     for (let i = 0; i < d.length; i++) d[i] = Math.random() * 2 - 1;
+    return (BUF.white = b);
+  }
+  function pinkBuf(c) {
+    if (BUF.pink) return BUF.pink;
+    const b = c.createBuffer(1, c.sampleRate * 6, c.sampleRate), d = b.getChannelData(0);
+    let b0 = 0, b1 = 0, b2 = 0, b3 = 0, b4 = 0, b5 = 0, b6 = 0;
+    for (let i = 0; i < d.length; i++) {
+      const w = Math.random() * 2 - 1;
+      b0 = .99886 * b0 + w * .0555179; b1 = .99332 * b1 + w * .0750759; b2 = .969 * b2 + w * .153852;
+      b3 = .8665 * b3 + w * .3104856; b4 = .55 * b4 + w * .5329522; b5 = -.7616 * b5 - w * .016898;
+      d[i] = (b0 + b1 + b2 + b3 + b4 + b5 + b6 + w * .5362) * .11; b6 = w * .115926;
+    }
+    return (BUF.pink = b);
+  }
+  /* 壊れた電波のような、ざらついたノイズ（サンプルを粗く間引く） */
+  function crunchBuf(c, sec) {
+    const b = c.createBuffer(1, Math.floor(c.sampleRate * sec), c.sampleRate), d = b.getChannelData(0);
+    let v = 0, hold = 0;
+    for (let i = 0; i < d.length; i++) {
+      if (hold-- <= 0) { v = Math.round((Math.random() * 2 - 1) * 3) / 3; hold = Math.floor(rnd(1, Math.random() < .1 ? 60 : 14)); }
+      d[i] = v;
+    }
+    return b;
+  }
+  /* 残響（廊下の奥で鳴っているように） */
+  function reverbIR(c, sec, decay) {
+    const len = Math.floor(c.sampleRate * sec), b = c.createBuffer(2, len, c.sampleRate);
+    for (let ch = 0; ch < 2; ch++) { const d = b.getChannelData(ch); for (let i = 0; i < len; i++) d[i] = (Math.random() * 2 - 1) * Math.pow(1 - i / len, decay); }
     return b;
   }
   function distCurve(k) {
@@ -419,11 +467,14 @@
     for (let i = 0; i < n; i++) { const x = (i * 2) / n - 1; curve[i] = ((3 + k) * x * 20 * (Math.PI / 180)) / (Math.PI + k * Math.abs(x)); }
     return curve;
   }
+
   const sfx = {
-    out(c, vol = 1) {
-      const g = c.createGain(); g.gain.value = (FX.soundVolume ?? 0.7) * vol;
-      const comp = c.createDynamicsCompressor(); g.connect(comp); comp.connect(c.destination);
-      return g;
+    /* 効果音の出口（音量 vol） */
+    out(c, vol = 1) { const g = c.createGain(); g.gain.value = vol; g.connect(master); return g; },
+    /* 左右の位置（-1 左 〜 1 右） */
+    pan(c, dest, p) {
+      if (!c.createStereoPanner) return dest;
+      const s = c.createStereoPanner(); s.pan.value = Math.max(-1, Math.min(1, p)); s.connect(dest); return s;
     },
     tone(c, o, type, f1, f2, t, dur, vol) {
       const s = c.createOscillator(); s.type = type;
@@ -431,18 +482,19 @@
       const g = c.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
       s.connect(g); g.connect(o); s.start(t); s.stop(t + dur + 0.05);
     },
-    noise(c, o, t, dur, vol, type, f1, f2) {
-      const n = c.createBufferSource(); n.buffer = noiseBuf(c, dur);
-      const f = c.createBiquadFilter(); f.type = type; f.frequency.setValueAtTime(f1, t); f.frequency.exponentialRampToValueAtTime(f2, t + dur);
+    noise(c, o, t, dur, vol, type, f1, f2, q) {
+      const n = c.createBufferSource(); n.buffer = whiteBuf(c);
+      const f = c.createBiquadFilter(); f.type = type; if (q) f.Q.value = q;
+      f.frequency.setValueAtTime(f1, t); f.frequency.exponentialRampToValueAtTime(f2, t + dur);
       const g = c.createGain(); g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(0.001, t + dur);
-      n.connect(f); f.connect(g); g.connect(o); n.start(t);
+      n.connect(f); f.connect(g); g.connect(o); n.start(t, rnd(0, 4 - dur - .05), dur + .05);
     },
     thud() { const c = audio(); if (!c) return; const o = this.out(c, .8), t = c.currentTime; this.tone(c, o, 'sine', 80, 38, t, .35, 1); },
     hit() { const c = audio(); if (!c) return; const o = this.out(c, .7), t = c.currentTime;
       this.tone(c, o, 'sine', 120, 45, t, .18, .9); this.noise(c, o, t, .14, .7, 'lowpass', 1400, 300); },
     smash() { const c = audio(); if (!c) return; const o = this.out(c, .9), t = c.currentTime;
       this.tone(c, o, 'sine', 95, 28, t, .6, 1); this.noise(c, o, t, .55, .9, 'lowpass', 2600, 180); this.noise(c, o, t + .05, .4, .4, 'bandpass', 900, 200); },
-    creak() { const c = audio(); if (!c) return; const o = this.out(c, .35), t = c.currentTime;
+    creak(vol = .35) { const c = audio(); if (!c) return; const o = this.out(c, vol), t = c.currentTime;
       const s = c.createOscillator(); s.type = 'sawtooth';
       s.frequency.setValueAtTime(70, t); s.frequency.linearRampToValueAtTime(130, t + .5); s.frequency.linearRampToValueAtTime(85, t + 1.3);
       const f = c.createBiquadFilter(); f.type = 'bandpass'; f.Q.value = 9; f.frequency.value = 700;
@@ -466,6 +518,349 @@
       });
       this.noise(c, o, t, 1.6, .9, 'bandpass', 3600, 600);
     },
+
+    /* ── ここから追加の効果音 ── */
+    /* 画面が裂けるノイズ（ザザッ） */
+    static(dur = .25) {
+      const c = audio(); if (!c) return; const o = this.out(c, .32), t = c.currentTime;
+      const n = c.createBufferSource(); n.buffer = crunchBuf(c, dur + .05);
+      const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 380;
+      const g = c.createGain(); g.gain.setValueAtTime(.9, t); g.gain.setValueAtTime(.9, t + dur * .8); g.gain.linearRampToValueAtTime(0, t + dur);
+      n.connect(hp); hp.connect(g); g.connect(o); n.start(t);
+      const s = c.createOscillator(); s.type = 'square';                   // 混線したデータ音
+      for (let k = 0; k < dur; k += .025) s.frequency.setValueAtTime(rnd(180, 3200), t + k);
+      const sg = c.createGain(); sg.gain.setValueAtTime(.12, t); sg.gain.setValueAtTime(0, t + dur);
+      s.connect(sg); sg.connect(o); s.start(t); s.stop(t + dur + .02);
+      this.tone(c, o, 'sine', 70, 40, t, Math.min(.3, dur), .5);           // 低い「ボッ」
+    },
+    /* 文字化けの小さな電子音 */
+    tick() {
+      const c = audio(); if (!c) return; const o = this.out(c, .05), t = c.currentTime;
+      for (let i = 0, n = 1 + Math.floor(Math.random() * 3); i < n; i++) this.tone(c, o, 'square', rnd(2400, 6200), rnd(1200, 3000), t + i * .03, .018, .8);
+    },
+    /* 責める言葉：逆再生したような、くぐもった声 */
+    blame(dur = .25) {
+      const c = audio(); if (!c) return; const o = this.pan(c, this.out(c, .32), rnd(-.7, .7)), t = c.currentTime, d = Math.max(.18, dur + .06);
+      const ws = c.createWaveShaper(); ws.curve = distCurve(60);
+      const env = c.createGain(); env.gain.setValueAtTime(0.001, t); env.gain.exponentialRampToValueAtTime(1, t + d * .9); env.gain.linearRampToValueAtTime(0, t + d);
+      ws.connect(env); env.connect(o);
+      const s = c.createOscillator(); s.type = 'sawtooth';
+      s.frequency.setValueAtTime(rnd(70, 95), t); s.frequency.exponentialRampToValueAtTime(rnd(110, 150), t + d);
+      [[450, 6, .8], [820, 7, .6], [2500, 8, .25]].forEach(([f, q, v]) => {   // 「お」の口の形
+        const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = f; bp.Q.value = q;
+        const g = c.createGain(); g.gain.value = v * 3; s.connect(bp); bp.connect(g); g.connect(ws);
+      });
+      s.start(t); s.stop(t + d + .02);
+      this.noise(c, env, t, d, .4, 'bandpass', 900, 2600, 1.5);
+    },
+    /* 背景の囁き：息まじりの、言葉にならない声 */
+    whisper() {
+      const c = audio(); if (!c) return;
+      const o = this.pan(c, this.out(c, .16), rnd(-1, 1)), t = c.currentTime;
+      if (amb.verb) { const s = c.createGain(); s.gain.value = .5; o.connect(s); s.connect(amb.verb); }
+      let k = 0;
+      for (let i = 0, n = 3 + Math.floor(Math.random() * 4); i < n; i++) {
+        const d = rnd(.1, .24), sib = Math.random() < .3;
+        this.noise(c, o, t + k, d, sib ? .35 : .9, sib ? 'highpass' : 'bandpass', sib ? 4800 : rnd(900, 1500), sib ? 6000 : rnd(1600, 3000), sib ? 0 : 2.5);
+        k += d + rnd(.02, .12);
+      }
+    },
+    /* 記録を開いたときの、カルテをめくる音 */
+    page() {
+      const c = audio(); if (!c) return; const o = this.out(c, .16), t = c.currentTime;
+      this.noise(c, o, t, .16, .8, 'bandpass', 3200, 1300, 1.2);
+      this.noise(c, o, t + .1, .09, .4, 'bandpass', 2400, 1800, 1.5);
+    },
+    /* 精神が大きく削れたとき：心臓が跳ねる */
+    thump(vol = .7) {
+      const c = audio(); if (!c) return; const o = this.out(c, vol), t = c.currentTime;
+      this.tone(c, o, 'sine', 78, 40, t, .2, 1); this.tone(c, o, 'sine', 160, 70, t, .08, .35);
+      this.tone(c, o, 'sine', 66, 36, t + .19, .22, .65);
+    },
+    /* 精神ゲージ 0：モニターの警報 → 心停止音 */
+    alarm() {
+      const c = audio(); if (!c) return; const o = this.pan(c, this.out(c, .22), -.3), t = c.currentTime;
+      const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 2600; lp.connect(o);
+      [0, .16, .32, .7, .86, 1.02].forEach((k) => {
+        const s = c.createOscillator(); s.type = 'square'; s.frequency.value = 988;
+        const g = c.createGain(); g.gain.setValueAtTime(0, t + k); g.gain.linearRampToValueAtTime(.5, t + k + .01); g.gain.setValueAtTime(.5, t + k + .11); g.gain.linearRampToValueAtTime(0, t + k + .13);
+        s.connect(g); g.connect(lp); s.start(t + k); s.stop(t + k + .15);
+      });
+      amb.flatline(3.2, 1.5);
+    },
+  };
+
+  /* =========================================================
+     環境音：病院の空気
+       hum   … 蛍光灯・電源の唸り（ブーン）
+       hiss  … 空調・古いスピーカーのサー音
+       drone … 精神が削れるほど湧いてくる、低い不協和音
+       ECG   … 心電図モニター。ゲージが減るほど速く・不規則になり、0 では心停止（ピーー）も
+       物音  … 水滴・遠くの金属音・ストレッチャーの車輪・足音・ノック・遠い泣き声・耳元の息
+     ========================================================= */
+  const TUNE = {
+    //       唸り   サー    低音    心拍  ゆらぎ 欠落  物音の間隔(ms)   出る物音（重み）
+    high: { hum: .05,  hiss: .016, drone: 0,    bpm: 64,  jit: .02, skip: 0,   ev: [14000, 28000], pool: { drip: 3, buzz: 3, chime: 1, squeak: 1 } },
+    mid:  { hum: .065, hiss: .03,  drone: .03,  bpm: 84,  jit: .07, skip: .03, ev: [9000, 18000],  pool: { drip: 2, buzz: 3, squeak: 2, clang: 1, chime: 1, steps: 1 } },
+    low:  { hum: .08,  hiss: .05,  drone: .08,  bpm: 108, jit: .2,  skip: .08, ev: [6000, 12000],  pool: { drip: 1, buzz: 2, squeak: 1, clang: 2, steps: 2, knock: 1, wail: 1, chime: 1 } },
+    zero: { hum: .1,   hiss: .08,  drone: .14,  bpm: 126, jit: .28, skip: .1,  ev: [3500, 8000],   pool: { buzz: 2, clang: 1, steps: 2, knock: 2, wail: 2, breath: 2 }, flat: [18000, 34000] },
+  };
+  const amb = {
+    on: false, n: null, verb: null, timers: [], nextFlat: 0, flatUntil: 0,
+    tune() { return TUNE[sanity.level()] || TUNE.high; },
+    vol() { return FX.ambientVolume ?? 0.6; },
+    start() {
+      if (this.on || !FX.ambient) return;
+      const c = audio(); if (!c) return;
+      this.on = true;
+      document.documentElement.dataset.snd = 'on';
+      const t = c.currentTime, n = {};
+      n.bus = c.createGain(); n.bus.gain.setValueAtTime(0, t); n.bus.gain.setTargetAtTime(this.vol(), t, .9); n.bus.connect(master);
+      this.verb = c.createConvolver(); this.verb.buffer = reverbIR(c, 3.2, 2.6);
+      const vg = c.createGain(); vg.gain.value = .55; this.verb.connect(vg); vg.connect(n.bus);
+      const loop = (node) => { node.start(t); (n.src = n.src || []).push(node); return node; };
+      const osc = (type, f) => { const o = c.createOscillator(); o.type = type; o.frequency.value = f; return loop(o); };
+
+      /* 蛍光灯の唸り */
+      n.hum = c.createGain(); n.hum.gain.value = 0;
+      const hlp = c.createBiquadFilter(); hlp.type = 'lowpass'; hlp.frequency.value = 900; hlp.connect(n.hum); n.hum.connect(n.bus);
+      [[50, 'sine', .8], [100, 'sine', .5], [150, 'sawtooth', .07], [200, 'square', .025]].forEach(([f, ty, v]) => {
+        const g = c.createGain(); g.gain.value = v; osc(ty, f).connect(g); g.connect(hlp);
+      });
+      /* ちらつくときのジジッ（ふだんは 0） */
+      n.buzz = c.createGain(); n.buzz.gain.value = 0;
+      const bbp = c.createBiquadFilter(); bbp.type = 'bandpass'; bbp.frequency.value = 1700; bbp.Q.value = .8;
+      osc('sawtooth', 100).connect(bbp); osc('square', 120.5).connect(bbp); bbp.connect(n.buzz); n.buzz.connect(n.bus);
+      /* サー音 */
+      const hs = c.createBufferSource(); hs.buffer = pinkBuf(c); hs.loop = true; loop(hs);
+      const hhp = c.createBiquadFilter(); hhp.type = 'highpass'; hhp.frequency.value = 250;
+      const hlp2 = c.createBiquadFilter(); hlp2.type = 'lowpass'; hlp2.frequency.value = 5200;
+      n.hiss = c.createGain(); n.hiss.gain.value = 0;
+      hs.connect(hhp); hhp.connect(hlp2); hlp2.connect(n.hiss); n.hiss.connect(n.bus);
+      /* 低い不協和音（ゆっくり揺れる） */
+      n.drone = c.createGain(); n.drone.gain.value = 0;
+      const dlp = c.createBiquadFilter(); dlp.type = 'lowpass'; dlp.frequency.value = 420; dlp.connect(n.drone); n.drone.connect(n.bus);
+      [[55, 'sawtooth', .35], [55.9, 'sawtooth', .35], [77.8, 'sine', .5], [116.5, 'triangle', .18]].forEach(([f, ty, v]) => {
+        const g = c.createGain(); g.gain.value = v; osc(ty, f).connect(g); g.connect(dlp);
+      });
+      const lfo = osc('sine', .09), lg = c.createGain(); lg.gain.value = 160; lfo.connect(lg); lg.connect(dlp.frequency);
+      this.n = n;
+      this.retune(true);
+      this.nextFlat = performance.now() + rnd(8000, 14000);
+      this.beat();
+      this.events();
+    },
+    stop() {
+      if (!this.on) return;
+      this.on = false;
+      document.documentElement.dataset.snd = 'off';
+      document.documentElement.classList.remove('is-flat');
+      this.timers.forEach(clearTimeout); this.timers = [];
+      const n = this.n; this.n = null;
+      if (n && actx) {
+        const t = actx.currentTime;
+        n.bus.gain.cancelScheduledValues(t); n.bus.gain.setTargetAtTime(0, t, .25);
+        setTimeout(() => { (n.src || []).forEach((s) => { try { s.stop(); } catch { /* noop */ } }); n.bus.disconnect(); }, 1500);
+      }
+    },
+    /* ゲージの段階に合わせて、層の音量をゆっくり変える */
+    retune(now) {
+      if (!this.on || !this.n) return;
+      const T = this.tune(), t = actx.currentTime, k = now ? .6 : 2.2;
+      this.n.hum.gain.setTargetAtTime(T.hum, t, k);
+      this.n.hiss.gain.setTargetAtTime(T.hiss, t, k);
+      this.n.drone.gain.setTargetAtTime(T.drone, t, k * 1.5);
+    },
+    /* ジャンプスケア前の「静寂」 */
+    duck(silent) {
+      if (!this.on || !this.n) return;
+      const t = actx.currentTime;
+      this.n.bus.gain.cancelScheduledValues(t);
+      this.n.bus.gain.setTargetAtTime(silent ? 0 : this.vol(), t, silent ? .04 : 1.4);
+    },
+    later(ms, fn) { this.timers.push(setTimeout(fn, ms)); },
+
+    /* ── 心電図モニター ── */
+    beat() {
+      if (!this.on) return;
+      const T = this.tune(), lv = sanity.level(), now = performance.now();
+      let ms = (60000 / T.bpm) * (1 + rnd(-T.jit, T.jit));
+      if (FX.ecg && now >= this.flatUntil) {
+        if (T.flat && now >= this.nextFlat) {                 // 0 のとき：ときどき心停止
+          const d = rnd(3, 5.5);
+          this.flatline(d);
+          this.nextFlat = now + d * 1000 + rnd(T.flat[0], T.flat[1]);
+          ms = d * 1000 + rnd(500, 1400);
+        } else if (Math.random() >= T.skip) {
+          this.blip(lv);
+          if ((lv === 'low' || lv === 'zero') && Math.random() < .14) this.later(rnd(150, 230), () => this.blip(lv)); // 期外収縮
+        }
+      }
+      this.later(ms, () => this.beat());
+    },
+    blip(lv) {
+      const c = audio(); if (!c || !this.n) return;
+      const t = c.currentTime + .01, zero = lv === 'zero';
+      const o = sfx.pan(c, this.n.bus, -.35);
+      const f = zero ? rnd(940, 1010) : 1000, len = .085;
+      [[f, 'sine', .13], [f * 2, 'sine', .015]].concat(zero ? [[f * 1.06, 'sine', .05]] : []).forEach(([fr, ty, v]) => {
+        const s = c.createOscillator(); s.type = ty; s.frequency.value = fr;
+        const g = c.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .004); g.gain.setValueAtTime(v, t + len); g.gain.linearRampToValueAtTime(0, t + len + .025);
+        s.connect(g); g.connect(o); s.start(t); s.stop(t + len + .05);
+      });
+      if (lv === 'low' || zero) {                              // 自分の心臓の音も聞こえてくる
+        const h = c.createGain(); h.gain.value = zero ? .55 : .25; h.connect(this.n.bus);
+        sfx.tone(c, h, 'sine', 72, 38, t, .2, 1); sfx.tone(c, h, 'sine', 62, 34, t + .17, .2, .6);
+      }
+      pulseUI();
+    },
+    /* 心停止音（ピーーー） */
+    flatline(sec, delay = 0) {
+      const c = audio(); if (!c || !this.n) return;
+      const t = c.currentTime + delay, o = sfx.pan(c, this.n.bus, -.35);
+      this.flatUntil = performance.now() + (delay + sec) * 1000;
+      const s = c.createOscillator(); s.type = 'sine'; s.frequency.value = 1000;
+      const g = c.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.12, t + .01); g.gain.setValueAtTime(.12, t + sec); g.gain.linearRampToValueAtTime(0, t + sec + .05);
+      s.connect(g); g.connect(o); s.start(t); s.stop(t + sec + .1);
+      const root = document.documentElement;
+      this.later(delay * 1000, () => root.classList.add('is-flat'));
+      this.later((delay + sec) * 1000, () => root.classList.remove('is-flat'));
+    },
+
+    /* ── 院内の物音 ── */
+    events() {
+      if (!this.on) return;
+      const T = this.tune();
+      this.later(rnd(T.ev[0], T.ev[1]), () => {
+        if (this.on && document.visibilityState === 'visible' && performance.now() >= this.flatUntil) {
+          const pool = Object.entries(T.pool), sum = pool.reduce((s, [, w]) => s + w, 0);
+          let r = Math.random() * sum;
+          const name = (pool.find(([, w]) => (r -= w) < 0) || pool[0])[0];
+          this.ev[name]?.call(this);
+        }
+        this.events();
+      });
+    },
+    /* 物音の出口：dry（そのまま）と wet（残響）の割合で距離感を出す */
+    place(c, p, dry, wet) {
+      const o = c.createGain();
+      const d = c.createGain(); d.gain.value = dry; o.connect(d); d.connect(sfx.pan(c, this.n.bus, p));
+      const w = c.createGain(); w.gain.value = wet; o.connect(w); w.connect(this.verb);
+      return o;
+    },
+    ev: {
+      /* 水滴（ぴちょん） */
+      drip() {
+        const c = actx, o = this.place(c, rnd(-.8, .8), .35, 1);
+        let k = 0;
+        for (let i = 0, n = 1 + Math.floor(Math.random() * 3); i < n; i++) {
+          const t = c.currentTime + k, f = rnd(1300, 2300);
+          sfx.tone(c, o, 'sine', f, f * .42, t, .06, .2);
+          k += rnd(.5, 1.3);
+        }
+      },
+      /* 蛍光灯がジジッ… と点滅する */
+      buzz() {
+        const c = actx, g = this.n.buzz.gain, t = c.currentTime;
+        let k = 0;
+        for (let i = 0, n = 6 + Math.floor(Math.random() * 10); i < n; i++) {
+          g.setValueAtTime(Math.random() < .55 ? rnd(.025, .07) : 0, t + k);
+          k += rnd(.025, .09);
+        }
+        g.setValueAtTime(0, t + k);
+        const o = this.place(c, rnd(-.5, .5), .4, .2);
+        for (let i = 0; i < 4; i++) sfx.noise(c, o, t + rnd(0, k), .02, .15, 'highpass', 3000, 5000);
+      },
+      /* 院内放送のチャイム（正気を失うほど、音程が狂う） */
+      chime() {
+        const c = actx, lv = sanity.level(), o = this.place(c, rnd(-.3, .3), .12, 1.1), t = c.currentTime;
+        const up = [523.3, 659.3, 784, 1046.5];
+        const notes = lv === 'high' ? up : lv === 'mid' ? up.map((f) => f * rnd(.97, 1.01)) : [...up].reverse().map((f) => f * rnd(.86, .95));
+        notes.forEach((f, i) => {
+          const ti = t + i * .42;
+          [[f, 'sine', .07], [f * 2.01, 'sine', .015], [f, 'triangle', .02]].forEach(([fr, ty, v]) => {
+            const s = c.createOscillator(); s.type = ty; s.frequency.setValueAtTime(fr, ti);
+            if (lv === 'low') s.frequency.linearRampToValueAtTime(fr * .9, ti + 1.2);  // 伸びたテープのように
+            const g = c.createGain(); g.gain.setValueAtTime(0, ti); g.gain.linearRampToValueAtTime(v, ti + .01); g.gain.exponentialRampToValueAtTime(.0005, ti + 1.3);
+            s.connect(g); g.connect(o); s.start(ti); s.stop(ti + 1.35);
+          });
+        });
+      },
+      /* ストレッチャーの車輪がキィ…キィ…と横切る */
+      squeak() {
+        const c = actx, t = c.currentTime, n = 4 + Math.floor(Math.random() * 4), from = Math.random() < .5 ? -1 : 1;
+        for (let i = 0; i < n; i++) {
+          const ti = t + i * rnd(.4, .5), o = this.place(c, from * (1 - (2 * i) / (n - 1)) * .8, .12, .6);
+          const s = c.createOscillator(); s.type = 'sine'; const f = rnd(2100, 2700);
+          s.frequency.setValueAtTime(f, ti); s.frequency.linearRampToValueAtTime(f * 1.08, ti + .1);
+          const v = c.createOscillator(); v.frequency.value = 34; const vg = c.createGain(); vg.gain.value = 70; v.connect(vg); vg.connect(s.frequency);
+          const g = c.createGain(); g.gain.setValueAtTime(0, ti); g.gain.linearRampToValueAtTime(.05, ti + .03); g.gain.linearRampToValueAtTime(0, ti + .14);
+          s.connect(g); g.connect(o); s.start(ti); s.stop(ti + .16); v.start(ti); v.stop(ti + .16);
+        }
+        const r = this.place(c, 0, .15, .4);
+        sfx.noise(c, r, t, Math.min(3.8, n * .48), .18, 'lowpass', 160, 110);
+      },
+      /* 遠くで金属が落ちる */
+      clang() {
+        const c = actx, t = c.currentTime, o = this.place(c, rnd(-.9, .9), .08, 1.2), base = rnd(170, 260);
+        const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1900; lp.connect(o);
+        [[1, .09], [2.76, .06], [5.4, .04], [8.93, .025]].forEach(([m, v]) => sfx.tone(c, lp, 'sine', base * m, base * m * .995, t, rnd(1.4, 2.4), v));
+        sfx.noise(c, lp, t, .08, .3, 'bandpass', 2400, 900, 1);
+      },
+      /* 足音。正気を失っているほど、近づいてくる */
+      steps() {
+        const c = actx, t = c.currentTime, lv = sanity.level(), n = 5 + Math.floor(Math.random() * 5), near = lv === 'zero' || (lv === 'low' && Math.random() < .5);
+        const p = rnd(-.8, .8);
+        for (let i = 0; i < n; i++) {
+          const ti = t + i * rnd(.56, .68), a = near ? .04 + (i / n) * .3 : .07;
+          const o = this.place(c, p * (near ? 1 - i / n : 1), near ? .3 + i / n : .15, .7);
+          sfx.tone(c, o, 'sine', 95, 45, ti, .13, a * 2.2); sfx.noise(c, o, ti, .07, a * 1.6, 'lowpass', 900, 300);
+        }
+      },
+      /* 扉を叩く音（コン、コン、コン） */
+      knock() {
+        const c = actx, t = c.currentTime, o = this.place(c, rnd(-1, 1), .7, .4);
+        const times = [0, .24, .48]; if (Math.random() < .4) times.push(1.3 + rnd(0, .5));
+        times.forEach((k) => {
+          sfx.noise(c, o, t + k, .09, .55, 'bandpass', 320, 220, 3);
+          sfx.tone(c, o, 'sine', 150, 85, t + k, .1, .4);
+        });
+      },
+      /* 廊下の奥の、泣き声のような何か */
+      wail() {
+        const c = actx, t = c.currentTime, d = rnd(2.2, 3.4), o = this.place(c, rnd(-1, 1), .03, 1);
+        const s = c.createOscillator(); s.type = 'sawtooth';
+        const f = rnd(330, 420); s.frequency.setValueAtTime(f, t); s.frequency.linearRampToValueAtTime(f * 1.12, t + d * .3); s.frequency.exponentialRampToValueAtTime(f * .62, t + d);
+        const v = c.createOscillator(); v.frequency.value = rnd(4.5, 6.5); const vg = c.createGain(); vg.gain.value = f * .03; v.connect(vg); vg.connect(s.frequency);
+        const env = c.createGain(); env.gain.setValueAtTime(0, t); env.gain.linearRampToValueAtTime(.08, t + d * .35); env.gain.linearRampToValueAtTime(0, t + d);
+        const lp = c.createBiquadFilter(); lp.type = 'lowpass'; lp.frequency.value = 1500;
+        [[800, 6], [1150, 7]].forEach(([ff, q]) => { const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = ff; bp.Q.value = q; s.connect(bp); bp.connect(lp); });
+        lp.connect(env); env.connect(o); s.start(t); s.stop(t + d + .05); v.start(t); v.stop(t + d + .05);
+      },
+      /* 耳元の息づかい */
+      breath() {
+        const c = actx, t = c.currentTime, o = this.place(c, Math.random() < .5 ? -.95 : .95, 1, .05);
+        const n = c.createBufferSource(); n.buffer = pinkBuf(c);
+        const bp = c.createBiquadFilter(); bp.type = 'bandpass'; bp.Q.value = .8;
+        bp.frequency.setValueAtTime(700, t); bp.frequency.linearRampToValueAtTime(1300, t + 1.1); bp.frequency.setValueAtTime(1100, t + 1.3); bp.frequency.linearRampToValueAtTime(550, t + 2.8);
+        const g = c.createGain(); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(.35, t + 1); g.gain.linearRampToValueAtTime(0, t + 1.2);
+        g.gain.linearRampToValueAtTime(.5, t + 1.5); g.gain.linearRampToValueAtTime(0, t + 2.9);
+        n.connect(bp); bp.connect(g); g.connect(o); n.start(t, rnd(0, 2), 3);
+      },
+    },
+  };
+  /* 心拍に合わせて、ゲージと画面がかすかに脈打つ */
+  function pulseUI() {
+    const root = document.documentElement, g = $('#sanity');
+    root.classList.add('is-beat'); g && g.classList.add('is-beat');
+    setTimeout(() => { root.classList.remove('is-beat'); g && g.classList.remove('is-beat'); }, 140);
+  }
+  /* 作者確認用：コンソールで khSfx('wail') などと打つと、その音だけ鳴らせる */
+  window.khSfx = (name) => {
+    amb.start();
+    if (amb.ev[name] && amb.on) amb.ev[name].call(amb);
+    else if (sfx[name]) sfx[name]();
+    else console.log('[狂乱病院] 鳴らせる音:', [...Object.keys(amb.ev), 'static', 'tick', 'blame', 'whisper', 'page', 'thump', 'alarm', 'hit', 'smash', 'creak', 'inject', 'scream', 'thud'].join(', '));
   };
 
   /* =========================================================
@@ -623,6 +1018,7 @@
     const imgs = SITE.jumpscareImages || [];
     if (!FX.jumpscare || !fxActive() || !imgs.length) { endScreen(); return; }
     corrupt.stop();
+    amb.duck(true);   // すべての音が止まる
     // 画像は 'パス' か { src: 'パス', focus: [横, 縦] }（focus は顔の位置。0〜1 の割合）
     const chosen = pick(imgs);
     const src = typeof chosen === 'string' ? chosen : chosen.src;
@@ -642,7 +1038,7 @@
     if (img.complete) fit(); else img.addEventListener('load', fit);
     setTimeout(() => { el.classList.add('is-go'); sfx.scream(); }, 900);   // 一瞬の静寂のあと
     setTimeout(() => el.classList.add('is-cut'), 2500);
-    setTimeout(() => { el.remove(); endScreen(); }, 2900);
+    setTimeout(() => { el.remove(); amb.duck(false); endScreen(); }, 2900);
   }
   function endScreen() {
     const d = document.createElement('div');
@@ -704,6 +1100,7 @@
           w.style.top = (18 + Math.random() * 70) + 'vh';
           w.style.fontSize = (14 + Math.random() * 26) + 'px';
           $('#whispers').appendChild(w);
+          sfx.whisper();
           setTimeout(() => w.remove(), 4200);
         }
         tick();
@@ -752,7 +1149,7 @@
         <div class="ent-desk">
           <p class="ent-desk-h">受付窓口</p>
           <p class="ent-desk-t">入院区分を選び、扉を開けてください。</p>
-          <p class="ent-desk-note">流血・狂気・身体損壊の描写と、点滅・文字化け・<strong>大きな音</strong>の演出を含みます。</p>
+          <p class="ent-desk-note">流血・狂気・身体損壊の描写と、点滅・文字化け・<strong>大きな音</strong>の演出を含みます。<br>扉を開けると院内の音が流れます（右上のスピーカーで消音できます）。</p>
         </div>
         <div class="ent-doors">${entranceDoor('safe')}${entranceDoor('spoiler')}</div>
         <p class="gate-foot">区分はあとから画面上部のボタンで変更できます。</p>
@@ -1256,8 +1653,43 @@
 
     const fxBtn = $('#fx-toggle');
     const paintFx = () => { document.documentElement.dataset.fx = effectsOn ? 'on' : 'off'; fxBtn.textContent = effectsOn ? '演出：ON' : '演出：OFF'; };
-    fxBtn.addEventListener('click', () => { effectsOn = !effectsOn; local.set('kh-effects', effectsOn); paintFx(); });
+    fxBtn.addEventListener('click', () => { effectsOn = !effectsOn; local.set('kh-effects', effectsOn); paintFx(); paintSnd(); if (effectsOn) amb.start(); else amb.stop(); });
     paintFx();
+
+    /* 音のON/OFF（ヘッダーのスピーカー） */
+    const sndBtn = $('#snd-btn');
+    const paintSnd = () => {
+      if (!sndBtn) return;
+      sndBtn.hidden = !FX.sound;
+      const on = soundOn && effectsOn;
+      sndBtn.innerHTML = `${on ? ICONS.sound : ICONS.mute}<span class="mode-btn-label">${on ? '音あり' : '無音'}</span>`;
+      sndBtn.title = on ? '音：ON — クリックで消音' : (effectsOn ? '音：OFF — クリックで音を出す' : '演出OFF中は無音です');
+      sndBtn.classList.toggle('is-off', !on);
+      sndBtn.setAttribute('aria-pressed', String(on));
+    };
+    sndBtn?.addEventListener('click', () => {
+      soundOn = !soundOn; local.set('kh-sound', soundOn);
+      if (soundOn && !effectsOn) { effectsOn = true; local.set('kh-effects', true); paintFx(); }
+      paintSnd();
+      if (soundOn) { amb.start(); sfx.page(); } else amb.stop();
+    });
+    paintSnd();
+    /* ブラウザは「最初の操作」までは音を出せないので、最初のクリック／キー入力で環境音を始める */
+    const kick = () => { if (!amb.on) amb.start(); else audio(); };
+    ['pointerdown', 'keydown', 'touchstart'].forEach((ev) => document.addEventListener(ev, kick, { capture: true, passive: true }));
+    /* 別タブにいるあいだは止める */
+    document.addEventListener('visibilitychange', () => {
+      if (!actx) return;
+      if (document.visibilityState === 'hidden') actx.suspend();
+      else if (amb.on) actx.resume();
+    });
+    /* 施設の扉にマウスを乗せると、きしむ */
+    let creakAt = 0;
+    app.addEventListener('mouseover', (e) => {
+      const d = e.target.closest('.door:not(.is-locked)');
+      if (!d || d.contains(e.relatedTarget) || performance.now() - creakAt < 1200) return;
+      creakAt = performance.now(); sfx.creak(.14);
+    });
 
     $('#year').textContent = new Date().getFullYear();
     sanity.paint();
@@ -1266,7 +1698,7 @@
   }
 
   shell();
-  window.addEventListener('hashchange', () => route());
+  window.addEventListener('hashchange', () => { sfx.page(); route(); });
   route();
   entryGate();
   whisperLoop();

@@ -1123,3 +1123,20 @@ html[data-fx="on"][data-sanity="zero"] .bleed { display: block; }
 /* 演出OFF／視差効果を減らす */
 html[data-fx="off"] :is(.bleed, .gore) { display: none !important; }
 @media (prefers-reduced-motion: reduce) { .bleed, .gore { display: none !important; } }
+
+/* =========================================================
+   音（環境音と連動する見た目）
+   ========================================================= */
+.snd-btn.is-off { color: var(--faint); }
+.snd-btn.is-off svg { opacity: .7; }
+/* 心電図の音に合わせて、ゲージとフッターの波形が光る */
+.sanity-fill { transition: width .8s cubic-bezier(.3,1.6,.5,1), filter .12s; }
+.sanity.is-beat .sanity-fill { filter: brightness(1.9); }
+html.is-beat .ecg { opacity: 1; }
+/* 心停止音（ピーー）のあいだ */
+html.is-flat .sanity-fill { animation: flatBlink .45s steps(1) infinite; }
+html.is-flat .ecg { animation-play-state: paused; opacity: .25; }
+@keyframes flatBlink { 50% { opacity: .1; } }
+/* 精神ゲージ 0：音が出ているときは、画面の脈動を実際の心拍に合わせる */
+html[data-snd="on"][data-fx="on"][data-sanity="zero"] .fx-vignette { animation: none; opacity: .8; transition: opacity .4s ease-out; }
+html[data-snd="on"][data-fx="on"][data-sanity="zero"].is-beat .fx-vignette { opacity: 1; transition: opacity .06s; }
