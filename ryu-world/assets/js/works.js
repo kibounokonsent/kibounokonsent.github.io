@@ -12,6 +12,7 @@
    summary : 短いあらすじ（結末や深い設定は書かない ― サイトは作品への入口）。
              段落を分けたいところは「\n\n」、改行は「\n」
    url     : 作品ページのURL。まだ無いときは空文字（「準備中」と表示）
+   linkLabel : （任意）ボタンの言葉。省略すると「作品を見る」
    ========================================================= */
 
 const WORKS = [
@@ -61,7 +62,7 @@ const WORKS = [
             "それらは遥か昔、日常的に使われていたものだった。スマートフォン、銃 ―― 人々はそれを「ロストテクノロジー」と呼んだ。今を生きる者にとって、それはまるで魔法だった。\n\n" +
             "ロストテクノロジーを修復し、科学を発展させる国・ヒルロンド。それを恐れて手を引いた強国・ラロネイア。資源を巡り、二つの国は冷戦の中にある。\n\n" +
             "その力を手にしたとき、悲しみの連鎖を続けるのか。それとも、断ち切るのか。",
-        url: ""
+        url: "https://kibounokonsent.github.io/roster/index.html"
     },
     { world: "fronz", era: 7, title: "MOON CORE", 
         summary: 
@@ -73,7 +74,9 @@ const WORKS = [
     { world: "fronz", era: 8, title: "終末世界", tentative: true, summary: "", url: "" },
 
     // ---------- その他の世界 ----------
-    { world: "other", era: null, title: "伽藍堂", summary: "", url: "" },
+    { world: "other", era: null, title: "伽藍堂", summary: "人の世に現れた妖怪は、人々の暮らしに寄生し、静かにその身を蝕んでいた。妖怪の存在が当たり前となった世界で、妖怪を狩る一体の妖怪がいる。\n\n" +
+"妖怪【怨念】は、各地を巡りながら妖怪たちと対峙していく。人と妖怪が交わるその先で、怨念は様々なものを目にすることになる。", 
+url: "https://kibounokonsent.github.io/garando/index.html" },
     {
         world: "other", era: null, title: "魔天楼",
         summary: "天使は、人を喰らう。悪魔は、人と契約する。そして、その間で人は生きている。\n\n" +
@@ -86,6 +89,19 @@ const WORKS = [
 "死神は力を使うたび、死の直前の苦しみや痛み、絶望や後悔を思い出す。罪を背負う者は、自らの罪と向き合いながら生きていく。死と罪、その二つを背負った人々は、前世に縛られながらも、今世をどう生きる", url: "" },
 
     { world: "other", era: null, title: "トルサ図書館", summary: "", url: "" },
+    {
+        world: "other", era: null, title: "破壊之王の間",
+        summary: "数多の吸血鬼と悪魔を率いる王、エデン・カネル・ヴァンパイア。\n\n" +
+            "仲間たちは彼を、破壊之王（デストルクティオ）と呼ぶ。",
+        url: "../hakai/index.html",
+        linkLabel: "世界へ入る"
+    },
+    {
+        world: "other", era: null, title: "コンセントズ",
+        summary: "希望のコンセント。\n空虚のコンセント。\n絶望のコンセント。",
+        url: "../consents/index.html",
+        linkLabel: "会いに行く"
+    },
 
     // ---------- 魂界 ----------
     { world: "soul", era: null, title: "死を生きる", summary: "人は死ぬと、どこへ行くのだろう。\n\n" +

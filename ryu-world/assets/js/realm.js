@@ -271,6 +271,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (w.url) {
             link.href = w.url;
+            // 作品ではなく「世界」へ入るものは、ボタンの言葉を変えられる
+            link.textContent = w.linkLabel || "作品を見る";
             // 外部の作品サイトは別のタブで開き、地図は残しておく
             const external = /^https?:/.test(w.url);
             link.target = external ? "_blank" : "";

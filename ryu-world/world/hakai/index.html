@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>破壊之王の間 ― 龍の世界</title>
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <!-- 悠久の楽園と同じ作りを使い、色だけを変える -->
+    <link rel="stylesheet" href="../../assets/css/eden.css">
+    <link rel="stylesheet" href="../../assets/css/hakai.css">
+</head>
+
+<body class="hakai">
+
+    <!-- ==================================================
+         破壊之王の間（Scratch作品を軽量プレイヤーで再生）
+         --------------------------------------------------
+         軽くするため、絵を3枚に分けて重ねている：
+           hakai-back  … 動かない背景（赤い月と城）。一度だけ描く
+           eden-canvas … 動く層（破壊之王の翼・外套など）。毎フレーム描く
+           hakai-front … 動かない赤い靄。一度だけ描く
+         冒頭の黒い幕が消えるまでは、すべてを eden-canvas に描く。
+         ================================================== -->
+
+    <canvas id="hakai-back" class="hakai-layer" aria-hidden="true"></canvas>
+    <canvas id="eden-canvas" class="hakai-layer" aria-hidden="true"></canvas>
+    <canvas id="hakai-front" class="hakai-layer" aria-hidden="true"></canvas>
+
+    <!-- 絵の端を闇へ溶かす（canvasにマスクをかけるより軽い） -->
+    <div id="hakai-edge" class="hakai-layer" aria-hidden="true"></div>
+
+    <div id="eden-veil" aria-hidden="true"></div>
+
+
+    <!-- ==================================================
+         操作
+         ================================================== -->
+
+    <a id="back-to-map" href="../other/index.html">その他の世界へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">夢想世界</span>
+    </button>
+
+    <!-- 夢想世界（フリーBGMとして配布されている音源） -->
+    <audio id="music" src="../../assets/hakai/musou.mp3" loop preload="none"></audio>
+
+
+    <!-- ==================================================
+         資料
+         ================================================== -->
+
+    <main id="eden-page">
+
+        <section id="eden-hero">
+            <p class="hero-en">HALL OF THE KING OF DESTRUCTION</p>
+            <h1>破壊之王の間</h1>
+            <p class="hero-scroll" aria-hidden="true">読む</p>
+        </section>
+
+        <article id="eden-lore">
+
+            <!-- ==========================================
+                 破壊之王
+                 ========================================== -->
+
+            <section class="lore-block">
+                <h2>破壊之王</h2>
+
+                <p class="king-name">エデン・カネル・ヴァンパイア</p>
+
+                <dl class="king-profile">
+                    <div><dt>種族</dt><dd>破壊之王</dd></div>
+                    <div><dt>性別</dt><dd>男</dd></div>
+                    <div><dt>年齢</dt><dd>1028歳</dd></div>
+                    <div><dt>身長</dt><dd>152cm</dd></div>
+                    <div><dt>誕生日</dt><dd>9月30日</dd></div>
+                </dl>
+
+                <p>数多の吸血鬼と悪魔を率いる王。<br>仲間たちは彼を、<br>破壊之王（デストルクティオ）と呼ぶ。</p>
+                <p>純粋な吸血鬼一族の末裔であり、<br>ある悪魔と契約を交わしている。</p>
+                <p>彼の血を与えられた者は、<br>強大な吸血鬼となる。</p>
+                <p>その軍には四天王が存在する。<br>だが、そのうちの一人は今も不在である。</p>
+                <p>極度の人間不信ゆえに、<br>彼はテレパシーでしか言葉を交わさない。</p>
+            </section>
+
+
+            <!-- ==========================================
+                 力（能力の説明の下に、薄く「自問自答」の声を添える）
+                 ========================================== -->
+
+            <section class="lore-block abilities">
+                <h2>吸血鬼としての力</h2>
+
+                <div class="ability">
+                    <h3>血液操作<span class="ability-read">サングウィスオペレーション</span></h3>
+                    <p>あらゆる血を操る。</p>
+                    <p class="inner-voice">この力が、あの時も使えていれば違っただろうか。<br>私たちは弱すぎたんだ。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>洗脳</h3>
+                    <p>強い意志を持つ者でなければ、<br>耐えることはできない。</p>
+                    <p class="inner-voice">私も耐えられそうにない。<br>私に強い意志などあるのか。<br>こんなにも、醜い。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>変化</h3>
+                    <p>様々な姿に変わる。</p>
+                    <p class="inner-voice">なら、なぜあの頃の姿を保ったままでいるんだ。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>吸血鬼病毒<span class="ability-read">ヴァンパイアウイルス</span></h3>
+                    <p>人を屍に変える病毒。<br>侵された者は、一定の確率で吸血鬼となる。</p>
+                    <p class="inner-voice">数を増やしたところで、何になるんだ。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>透明化</h3>
+                    <p>姿を消す。</p>
+                    <p class="inner-voice">ずっと、消えていれば幸せだろうか。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>吸血鬼門<span class="ability-read">ヴァンパイアポータル</span></h3>
+                    <p>同じ血を持つ者だけが通れる門。</p>
+                    <p class="inner-voice">真に血を分かつ家族は、もういない。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>吸血鬼之激怒<span class="ability-read">ヴァンパイアイラ</span></h3>
+                    <p>一時的に、力を極限まで高める。</p>
+                    <p class="inner-voice">その怒りは、誰に向けたものだ？</p>
+                </div>
+
+                <div class="ability">
+                    <h3>炎龍創造<span class="ability-read">サラマンダー・クリエイト</span></h3>
+                    <p>血で作られた竜を呼び出す。</p>
+                    <p class="inner-voice">こんな粗悪なコピーを作れる力なんていらない。</p>
+                </div>
+            </section>
+
+            <section class="lore-block abilities">
+                <h2>魔王としての力</h2>
+
+                <div class="ability">
+                    <h3>血満月<span class="ability-read">サングウィスルナ</span></h3>
+                    <p>血の満ちた満月を呼び、吸血鬼を活性化させる。<br>昼であっても、この力の下では鮮血の夜となる。</p>
+                    <p class="inner-voice">あの日も、夜だった。<br>そして、炎で赤かった。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>血流雨<span class="ability-read">サングウィスインベル</span></h3>
+                    <p>血の雨を降らせ、病毒を撒く。<br>その雨の下で、人は人ではいられない。</p>
+                    <p class="inner-voice">それを使えばすぐに終わるというのに、<br>蟻を踏むように彼らを蹂躙するのはなぜだ？</p>
+                </div>
+
+                <div class="ability">
+                    <h3>魔王</h3>
+                    <p>現実を改変し、修復する。<br>過去と未来を知る。</p>
+                    <p class="inner-voice">なぜ、その力を使わない？<br>使うのが、怖いのか？</p>
+                </div>
+
+                <div class="ability">
+                    <h3>支配者</h3>
+                    <p>視界に捉えた者の力を無効にする。<br>敗れた者には、絶対の命令を下す。<br>支配下に置いた者の力を、自らのものとして振るう。<br>それは眷属や仲間にも及ぶ。</p>
+                    <p class="inner-voice">私にそんな権利があるとでも？<br>ない。私は王なんかじゃない。<br>神でもない。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>憎悪之炎環</h3>
+                    <p>深い憎悪を抱いた相手に、憎悪の炎を纏わせる。<br>纏わされた者は、時が経つごとに古い記憶から失っていき、<br>その身を強く焼かれ続ける。<br>水も、何も効かない。<br>解くには、カネルを倒すか……それとも。</p>
+                    <p>サタンの力とカネルの力が重なり合って生まれたもの。</p>
+                    <p class="inner-voice">……炎……私の全ての怒りの原初だ。<br>忘れるな、あの時のことだけは。</p>
+                </div>
+            </section>
+
+            <section class="lore-block abilities">
+                <h2>その身に宿るもの</h2>
+
+                <div class="ability">
+                    <h3>優しい心</h3>
+                    <p>眷属に、絶えず再生を施す。</p>
+                    <p class="inner-voice">私に優しい心など、もうあるはずもない。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>復讐心</h3>
+                    <p>人間と相対すると、血が昂る。<br>吸血鬼の力が、極限まで引き上げられる。</p>
+                    <p class="inner-voice">空っぽの復讐心だけが、私を生かしている。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>反抗</h3>
+                    <p>力が滅ぼされかけると、かつての記憶を再び燃やし、<br>より強くなって再臨する。</p>
+                    <p class="inner-voice">抗え、こんな私に。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>かつての思い出</h3>
+                    <p>身が滅びかけると、かつての思い出がよみがえり、<br>理を否定して蘇る。</p>
+                    <p class="inner-voice">私の家族を、友を、否定するな。</p>
+                </div>
+
+                <div class="ability">
+                    <h3>壊讐鎌<span class="ability-read">デストロアベンファルク</span></h3>
+                    <p>悪魔の力で生み出された、復讐と破壊の鎌。<br>阻むものすべてを壊し、現実を否定する。<br>概念も、存在も、まとめて破壊する。</p>
+                    <p class="inner-voice">私に復讐心なんて、残っているのだろうか。</p>
+                </div>
+            </section>
+
+
+            <!-- ==========================================
+                 過去
+                 ========================================== -->
+
+            <section class="lore-block">
+                <h2>花と人を愛した少年</h2>
+                <p>幼き頃の彼は、<br>純粋で、優しい心の持ち主だった。</p>
+                <p>少年は、花と人が好きだった。<br>夜には、よく村の少女と遊びに出かけた。</p>
+                <p>村の人々は寛容で、<br>吸血鬼である彼らと共に暮らしていた。</p>
+                <p>その一族は、人を食さない道を選んでいたからだ。<br>人を噛む力すらないほど弱かったが、<br>村人たちとの日々を見れば、<br>彼らは幸せだったといえる。</p>
+                <p>だから彼は、人を何よりも愛した。<br>そして、その少女を深く愛していた。</p>
+            </section>
+
+            <section class="lore-block">
+                <h2>燃える夜</h2>
+                <p>しかしある日、彼らの屋敷は燃やされた。</p>
+                <p>村を訪れた冒険者が、<br>吸血鬼の屋敷を見て、<br>吸血鬼ハンターに告げたのだ。</p>
+                <p>一族と村の人々は、<br>十字架に縛られた。</p>
+                <p>生き残ったのは、<br>カネルと、少女だけだった。</p>
+                <p>だが少女も追手に討たれ、<br>カネルは独り、逃げるしかなかった。</p>
+                <p>一夜にしてすべてを失った彼は、<br>その怒りのまま、<br>悪魔に心臓を明け渡した。</p>
+                <p>そうして、彼は復讐に堕ちた。<br>優しい少年は、もうどこにもいない。</p>
+            </section>
+
+            <section class="lore-block">
+                <h2>王と呼ばれて</h2>
+                <p>それから彼は、着実に力をつけていった。</p>
+                <p>魂を喰らい、吸血鬼を増やした。<br>悪魔を引き込み、仲間を増やした。<br>人々は屍となり、踊った。</p>
+                <p>ゆえに、彼は王と呼ばれるようになる。</p>
+                <p>数多の力を持っていた。<br>数多の軍を持っていた。<br>数多の……</p>
+                <p>彼自身にすら数え切れない何かが積み重なり、<br>吸血鬼の王、悪魔の王 ――<br>数々の名が、彼として刻まれた。</p>
+                <p>やがて彼はその力で、<br>一つ、また一つと、世界を滅ぼした。</p>
+            </section>
+
+            <section class="lore-block lore-last" id="lore-last">
+                <h2>終われない者</h2>
+                <p>その力は、とどまることを知らなかった。<br>いや ―― 復讐心だけが、彼を動かしていた。</p>
+                <p>彼自身も止め時を失い、やがて、<br>契約した悪魔すらも欺き、地に堕とし、<br>己の力として取り込んだ。</p>
+                <p>彼は強くなった。<br>いや、強くなりすぎてしまった。</p>
+                <p>何故、力を求めるのか。<br>何故、壊すのか。<br>それすらも、もうわからない。</p>
+                <p>彼はいまだに、<br>大切な人をよみがえらせることすらできない。</p>
+                <p>破壊の力で、再生などできるはずもなかった。<br>失われた魂は、蘇らない。</p>
+                <p>粗悪なコピーを生み出しては、<br>自らの手で壊す日々があった。</p>
+                <p class="lore-voice">壊して、壊して、壊し続ける。</p>
+                <p>終われない者。<br>それが、拒絶の神。</p>
+                <p class="king-final">エデン・カネル</p>
+            </section>
+
+
+            <!-- ==========================================
+                 裏設定（開いたときだけ読める）
+                 ========================================== -->
+
+            <details class="lore-hidden">
+                <summary>記されなかったこと</summary>
+
+                <section class="lore-block">
+                    <h3>ヴァンパイア一族</h3>
+                    <p>かつて吸血鬼を統べる王、<br>ヴァンパイアロードを生み出した、<br>純血の吸血鬼の一族。</p>
+
+                    <h3>カネルの家系</h3>
+                    <p>ヴァンパイア一族のうち、<br>人を食さない平和主義の家系。</p>
+                    <p>人を噛む力すら持たないほど弱いが、<br>長い寿命を生かして薬草と医術に通じ、<br>医者として村を支えていた。</p>
+
+                    <h3>夜に遊んでいた理由</h3>
+                    <p>吸血鬼なら、昼は苦手だろう ――<br>少女はそう気遣って、いつも夜に彼を誘った。</p>
+                    <p>本当は、弱くなった一族は<br>とうに日の光を克服していた。<br>それでもカネルは、<br>少女の優しさを断れなかった。</p>
+                </section>
+            </details>
+
+            <!-- 音楽のクレジット（配布元の表記ルールに合わせて書き換える） -->
+            <p class="lore-credit">音楽：「夢想世界」 フリーBGM</p>
+
+        </article>
+
+    </main>
+
+
+    <script src="../../assets/hakai/project.js"></script>
+    <script src="../../assets/js/eden-player.js"></script>
+    <script src="../../assets/js/hakai-page.js"></script>
+
+</body>
+
+</html>

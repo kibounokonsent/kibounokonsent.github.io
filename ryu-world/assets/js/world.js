@@ -286,6 +286,7 @@ document.addEventListener("DOMContentLoaded", () => {
         if (pos.x) e.style.setProperty("--bx", `${pos.x}px`);
         if (pos.y) e.style.setProperty("--by", `${pos.y}px`);
         if (pos.z) e.style.setProperty("--bz", `${pos.z}px`);
+        if (pos.dx) e.style.setProperty("--ldx", `${pos.dx}px`);
         if (pos.dy) e.style.setProperty("--ldy", `${pos.dy}px`);
 
         e.innerHTML = html;
@@ -323,8 +324,80 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
+    /*
+     * 世界の名前。
+     * 3D空間の中には「位置の目印」だけを置き、実際の文字は3Dの外
+     * （#label-layer）に描いて、毎フレーム目印の位置へ合わせる。
+     *   ・結晶の奥に文字が隠れない（3Dの前後関係の影響を受けない）
+     *   ・スマホで地図を縮めても、文字は読める大きさのまま
+     */
+    const labelLayer = (() => {
+        let layer = document.getElementById("label-layer");
+        if (!layer) {
+            layer = document.createElement("div");
+            layer.id = "label-layer";
+            layer.setAttribute("aria-hidden", "true");
+            stage.appendChild(layer);
+        }
+        return layer;
+    })();
+
+    const mapLabels = [];
+
     function label(parent, text, className, pos) {
-        return billboard(parent, `label ${className || ""}`, pos, text);
+
+        const anchor = billboard(parent, `label ${className || ""}`, pos, text);
+
+        const twin = document.createElement("div");
+        twin.className = `map-label ${className || ""}`;
+        twin.textContent = text;
+        labelLayer.appendChild(twin);
+
+        const side = /label-side-l/.test(className || "")
+            ? "l"
+            : /label-side-r/.test(className || "") ? "r" : "c";
+
+        mapLabels.push({ anchor, twin, side, node: parent.closest(".node") || parent });
+
+        return anchor;
+
+    }
+
+    function syncLabels() {
+
+        const base = stage.getBoundingClientRect();
+
+        mapLabels.forEach((m) => {
+
+            const r = m.anchor.getBoundingClientRect();
+            const y = r.top + r.height / 2 - base.top;
+            let x = r.left + r.width / 2 - base.left;
+            let ax = "-50%";
+
+            // 横に添える名前は、結晶側の端をそろえる
+            if (m.side === "l") { x = r.right - base.left; ax = "-100%"; }
+            if (m.side === "r") { x = r.left - base.left; ax = "0%"; }
+
+            // 画面の端からはみ出さないように寄せる（スマホの縦長画面向け）
+            if (m.side !== "c") {
+                const w = m.width || (m.width = m.twin.offsetWidth);
+                const pad = 6;
+                if (m.side === "l") x = Math.max(x, w + pad);
+                if (m.side === "r") x = Math.min(x, base.width - w - pad);
+            }
+
+            m.twin.style.transform =
+                `translate(${x.toFixed(1)}px, ${y.toFixed(1)}px) translate(${ax}, -50%)`;
+
+            const n = m.node;
+            m.twin.classList.toggle("is-dimmed", n.classList.contains("is-dimmed"));
+            m.twin.classList.toggle(
+                "is-lit",
+                n.classList.contains("is-selected") || n.classList.contains("is-hover")
+            );
+
+        });
+
     }
 
     /* 水平に寝かせた平面（その場の z に置く） */
@@ -398,7 +471,7 @@ document.addEventListener("DOMContentLoaded", () => {
             true
         );
 
-        label(n, "刹那の奈落", "label-abyss", { z: -150 });
+        // 刹那の奈落の名前は常には出さない（大地の下に隠れた世界。触れたときだけ名前が出る）
     }
 
     /* ---------- エイリアスワールド：厚みのある大地 ---------- */
@@ -587,7 +660,8 @@ document.addEventListener("DOMContentLoaded", () => {
 
         }
 
-        const lt = (100 * Math.PI) / 180;
+        // エイリアスワールドの名前（手前の中央）と重ならない位置に置く
+        const lt = (140 * Math.PI) / 180;
 
         label(n, "魂界", "label-small label-soul", {
             x: Math.round(Math.cos(lt) * R),
@@ -744,7 +818,8 @@ document.addEventListener("DOMContentLoaded", () => {
             true
         );
 
-        label(n, "ミスセオワールド", "", { z: 60, dy: -14 });
+        // 名前は結晶の横に添える（真上に置くと、上のフロンズの結晶に隠れてしまう）
+        label(n, "ミスセオワールド", "label-side label-side-r", { z: 30, dx: 250 });
     }
 
     /* ---------- フロンズワールド ---------- */
@@ -758,7 +833,7 @@ document.addEventListener("DOMContentLoaded", () => {
             true
         );
 
-        label(n, "フロンズワールド", "", { z: 58, dy: -14 });
+        label(n, "フロンズワールド", "label-side label-side-l", { z: 30, dx: -250 });
     }
 
     /* ---------- その他の世界：フロンズ・ミスセオの周りに浮かぶ ---------- */
@@ -859,7 +934,12 @@ document.addEventListener("DOMContentLoaded", () => {
         tilt: 0,
         spin: -24,
         tiltTarget: 0,
-        spinTarget: -24
+        spinTarget: -24,
+        // 情報パネルを開いたとき、地図をパネルの無い側へ寄せる量（px）
+        offX: 0,
+        offY: 0,
+        offXTarget: 0,
+        offYTarget: 0
     };
 
     let autoSpin = !reduceMotion;
@@ -882,11 +962,12 @@ document.addEventListener("DOMContentLoaded", () => {
     function applyView() {
 
         const t = (view.tilt * Math.PI) / 180;
-        const shift = Z_CENTER * Math.sin(t) * currentScale;
+        const shift = Z_CENTER * Math.sin(t) * currentScale + view.offY;
 
         space.style.setProperty("--tilt", `${view.tilt.toFixed(2)}deg`);
         space.style.setProperty("--spin", `${view.spin.toFixed(2)}deg`);
         space.style.setProperty("--shift", `${shift.toFixed(1)}px`);
+        space.style.setProperty("--offx", `${view.offX.toFixed(1)}px`);
 
         // 楽園（軸上 z=edenZ）の画面上の位置と大きさを求めて、光を重ねる
         if (edenLight) {
@@ -900,10 +981,12 @@ document.addEventListener("DOMContentLoaded", () => {
             const screenY = H * PERSPECTIVE_ORIGIN_Y + fromOrigin * f;
 
             edenLight.style.transform =
-                `translate(${(stage.clientWidth / 2).toFixed(1)}px, ${screenY.toFixed(1)}px) ` +
+                `translate(${(stage.clientWidth / 2 + view.offX * f).toFixed(1)}px, ${screenY.toFixed(1)}px) ` +
                 `scale(${(currentScale * f).toFixed(4)})`;
 
         }
+
+        syncLabels();
 
     }
 
@@ -953,12 +1036,16 @@ document.addEventListener("DOMContentLoaded", () => {
 
         view.tilt += (view.tiltTarget - view.tilt) * k;
         view.spin += (view.spinTarget - view.spin) * k;
+        view.offX += (view.offXTarget - view.offX) * k;
+        view.offY += (view.offYTarget - view.offY) * k;
 
         applyView();
 
         const settled =
             Math.abs(view.tiltTarget - view.tilt) < 0.01 &&
-            Math.abs(view.spinTarget - view.spin) < 0.01;
+            Math.abs(view.spinTarget - view.spin) < 0.01 &&
+            Math.abs(view.offXTarget - view.offX) < 0.5 &&
+            Math.abs(view.offYTarget - view.offY) < 0.5;
 
         if (settled && !autoSpin) {
             loopRunning = false;
@@ -988,13 +1075,18 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     function fitScale() {
-        currentScale = Math.min(window.innerWidth / 1180, window.innerHeight / 1120);
+        // スマホの縦長画面では、外周の漂う結晶が少し切れても地図を大きく見せる
+        const fitWidth = window.innerWidth <= 700 ? 960 : 1180;
+        currentScale = Math.min(window.innerWidth / fitWidth, window.innerHeight / 1120);
         space.style.setProperty("--s", currentScale.toFixed(4));
         applyView();
     }
 
     fitScale();
-    window.addEventListener("resize", fitScale);
+    window.addEventListener("resize", () => {
+        mapLabels.forEach((m) => { m.width = 0; });
+        fitScale();
+    });
 
     applyView();
 
@@ -1094,6 +1186,8 @@ document.addEventListener("DOMContentLoaded", () => {
             space.querySelectorAll(`.node[data-world="${key}"]`)
                 .forEach((n) => n.classList.add("is-hover"));
         }
+
+        syncLabels();
 
     }
 
@@ -1268,6 +1362,22 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let selectedWorld = null;
 
+    /*
+     * パネルを開いたら、地図をパネルの無い側へ少し寄せて、
+     * 選んだ世界がパネルに隠れないようにする
+     * （PC：左へ／スマホ：下からのパネルなので上へ）。
+     */
+    function makeRoomForPanel(open) {
+
+        const narrow = window.innerWidth <= 700;
+
+        view.offXTarget = open && !narrow ? -worldPanel.offsetWidth * 0.42 : 0;
+        view.offYTarget = open && narrow ? -window.innerHeight * 0.16 : 0;
+
+        wake();
+
+    }
+
     function clearSelection() {
 
         selectedWorld = null;
@@ -1280,6 +1390,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         worldPanel.classList.remove("is-open");
         worldPanel.setAttribute("aria-hidden", "true");
+
+        makeRoomForPanel(false);
+        syncLabels();
 
     }
 
@@ -1316,6 +1429,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
         worldPanel.classList.add("is-open");
         worldPanel.setAttribute("aria-hidden", "false");
+
+        makeRoomForPanel(true);
+        syncLabels();
 
     }
 

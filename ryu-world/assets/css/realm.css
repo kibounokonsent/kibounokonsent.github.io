@@ -813,3 +813,194 @@ body.has-selection .work:not(.is-selected) {
     }
 
 }
+
+
+/* =========================================================
+   見やすさの調整（2026-10 見直し）
+   ========================================================= */
+
+body {
+    word-break: auto-phrase;
+    text-wrap: pretty;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+/* 画面上端：スクロールした本文が「戻る」リンクと重ならないよう、闇でにじませる */
+body::before {
+    content: "";
+
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+
+    z-index: 4;
+
+    height: clamp(3.6rem, 9vh, 5rem);
+
+    background: linear-gradient(to bottom, rgba(0, 0, 0, 0.92), rgba(0, 0, 0, 0.6) 55%, transparent);
+
+    pointer-events: none;
+}
+
+#back-to-map {
+    padding: 0.5rem 0.3rem;
+
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+
+    opacity: 0.68;
+}
+
+#back-to-map:focus-visible,
+#work-link:focus-visible,
+#work-close:focus-visible {
+    outline: 1px solid rgba(var(--accent), 0.7);
+    outline-offset: 4px;
+}
+
+#realm-title-en {
+    font-size: 0.72rem;
+    letter-spacing: 0.42em;
+    padding-left: 0.42em;
+}
+
+#realm-name {
+    padding-left: 0.3em;
+}
+
+#realm-lead {
+    font-size: 0.92rem;
+
+    opacity: 0.8;
+}
+
+#realm-lore h2,
+.works-heading {
+    font-size: 0.8rem;
+}
+
+#realm-lore .lore-empty {
+    font-size: 0.85rem;
+
+    opacity: 0.6;
+}
+
+.era-name {
+    font-size: 0.76rem;
+    letter-spacing: 0.24em;
+
+    color: rgba(var(--accent), 0.82);
+}
+
+.work-title {
+    color: rgba(244, 242, 236, 0.9);
+}
+
+.work-tentative {
+    font-size: 0.66rem;
+}
+
+/* キーボードで選んでいる作品が分かるように */
+.work:focus-visible {
+    outline: 1px solid rgba(var(--accent), 0.55);
+    outline-offset: 2px;
+}
+
+body.has-selection .work:not(.is-selected) {
+    opacity: 0.55;
+}
+
+.time-end {
+    font-size: 0.82rem;
+
+    color: rgba(var(--accent), 0.75);
+}
+
+
+/* ---------- 作品パネル ---------- */
+
+#work-close {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+
+    opacity: 0.65;
+}
+
+#work-eyebrow {
+    font-size: 0.72rem;
+    letter-spacing: 0.24em;
+}
+
+#work-summary {
+    font-size: 0.95rem;
+
+    opacity: 0.88;
+}
+
+#work-summary.is-empty {
+    font-size: 0.88rem;
+
+    opacity: 0.6;
+}
+
+#work-link {
+    font-size: 0.86rem;
+}
+
+#work-soon {
+    font-size: 0.82rem;
+
+    opacity: 0.6;
+}
+
+
+@media (max-width: 700px) {
+
+    #realm-lead,
+    #realm-lore p {
+        letter-spacing: 0.06em;
+    }
+
+    #realm-name {
+        letter-spacing: 0.18em;
+        padding-left: 0.18em;
+    }
+
+    .era-name {
+        font-size: 0.72rem;
+        letter-spacing: 0.16em;
+    }
+
+    /* 下から出るパネル：後ろの年表が透けて文字に重ならないように */
+    #work-panel {
+        min-height: 0;
+        max-height: 78vh;
+
+        padding: 2.8rem 1.5rem calc(2rem + env(safe-area-inset-bottom));
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(0, 0, 0, 0),
+                rgba(3, 3, 4, 0.94) 2.2rem,
+                rgba(3, 3, 4, 0.98)
+            );
+
+        border-top: 1px solid rgba(var(--accent), 0.18);
+    }
+
+    #work-close {
+        top: -2.2rem;
+        right: -0.6rem;
+    }
+
+    #work-link {
+        display: block;
+
+        text-align: center;
+    }
+
+}

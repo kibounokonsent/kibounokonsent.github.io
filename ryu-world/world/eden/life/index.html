@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>生命の木 ― 悠久の楽園 ― 龍の世界</title>
+
+    <!-- 楽園の枠（音楽を流し続ける外側のページ）の中で開く -->
+    <script src="../../../assets/js/eden-frame.js" data-place="life"></script>
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../../../assets/css/eden.css">
+    <link rel="stylesheet" href="../../../assets/css/eden-places.css">
+</head>
+
+<!-- 木の種類は data-tree、球の色（白／黒）は data-tone で決まる（球の位置や光の向きは eden-tree.js） -->
+<body class="eden-place tree-page" data-tree="life" data-tone="dark">
+
+    <div class="place-backdrop" aria-hidden="true"></div>
+
+    <!-- ==================================================
+         操作
+         ================================================== -->
+
+    <a id="back-to-map" href="../gate/index.html">悠久の楽園へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">歓喜の歌</span>
+    </button>
+
+    <!-- 歓喜の歌（楽園の全ページで続けて流れる） -->
+    <audio id="music" src="../../../assets/eden/joy.mp3" loop preload="none"></audio>
+
+
+    <main class="place-page">
+
+        <header class="place-hero">
+            <p class="hero-en">TREE OF LIFE</p>
+            <h1>生命の木</h1>
+        </header>
+
+        <!-- 木の絵。球の上に光が順に灯る -->
+        <figure id="tree-figure" class="tree-figure">
+            <img src="../../../assets/eden/places/tree-life.webp" alt="生命の木">
+        </figure>
+
+        <article class="place-lore">
+            <!-- この場所の資料（<section class="lore-block"> を増やせば書き足せる） -->
+            <section class="lore-block">
+                <h2>生命の実</h2>
+                <p>エバは生命の実を得た。</p>
+                <p>エバの命より、<br>最初の竜セツは生まれた。</p>
+                <p>白き身に黒き紋を宿す竜であった。</p>
+                <p>すべての竜はその血を継ぐ。</p>
+                <p class="lore-cite">― 龍の書　第五章「始まりの子ら」より</p>
+            </section>
+        </article>
+
+        <!-- 楽園のほかの場所へ -->
+        <section class="place-paths">
+            <h2>楽園のほかの場所</h2>
+            <nav class="eden-gates" data-eden-gates aria-label="楽園の場所"></nav>
+        </section>
+
+    </main>
+
+
+    <script src="../../../assets/js/eden-music.js"></script>
+    <script src="../../../assets/js/eden-places.js"></script>
+    <script src="../../../assets/js/eden-tree.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,466 @@
+/* =========================================================
+   龍の世界 / コンセントズ
+   ---------------------------------------------------------
+   3体それぞれの色：
+     希望（hope）    … 闇に黄色い稲妻
+     空虚（void）    … 灰と白
+     絶望（despair） … 淡い光に黒い線
+   ========================================================= */
+
+* {
+    box-sizing: border-box;
+}
+
+body {
+    --accent: 255, 230, 0;
+    --page: #0b0a02;
+
+    margin: 0;
+
+    min-height: 100vh;
+
+    background:
+        radial-gradient(ellipse at 50% 35%, rgba(var(--accent), 0.1), transparent 60%),
+        var(--page);
+    color: #efece2;
+
+    font-family:
+        "Noto Serif JP",
+        "Yu Mincho",
+        "Hiragino Mincho ProN",
+        serif;
+
+    word-break: auto-phrase;
+    text-wrap: pretty;
+
+    -webkit-font-smoothing: antialiased;
+
+    transition: background-color 0.8s ease;
+}
+
+body[data-consent="kibou"] {
+    --accent: 255, 230, 0;
+    --page: #0b0a02;
+}
+
+body[data-consent="kuukyo"] {
+    --accent: 220, 220, 214;
+    --page: #0a0a0a;
+}
+
+body[data-consent="zetubou"] {
+    --accent: 255, 246, 190;
+    --page: #0d0c08;
+}
+
+
+/* ---------- 戻る ---------- */
+
+#back-to-map {
+    position: fixed;
+    top: clamp(1rem, 3vh, 1.8rem);
+    left: clamp(1rem, 3vw, 2rem);
+
+    z-index: 5;
+
+    padding: 0.5rem 0.3rem;
+
+    color: inherit;
+    text-decoration: none;
+
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+
+    opacity: 0.7;
+
+    transition: opacity 0.4s ease;
+}
+
+#back-to-map::before {
+    content: "← ";
+}
+
+#back-to-map:hover,
+#back-to-map:focus-visible {
+    opacity: 1;
+}
+
+#back-to-map:focus-visible,
+.consent-btn:focus-visible {
+    outline: 1px solid rgba(var(--accent), 0.8);
+    outline-offset: 4px;
+}
+
+
+/* ---------- 見出し ---------- */
+
+#consents-page {
+    width: min(1000px, 100%);
+    margin: 0 auto;
+    padding: clamp(4.5rem, 10vh, 6.5rem) clamp(1rem, 4vw, 2rem) 6rem;
+}
+
+#consents-header {
+    margin-bottom: clamp(1.6rem, 4vh, 2.4rem);
+
+    text-align: center;
+}
+
+.consents-en {
+    margin: 0 0 0.6rem;
+
+    font-size: 0.74rem;
+    letter-spacing: 0.5em;
+    padding-left: 0.5em;
+
+    color: rgba(var(--accent), 0.9);
+}
+
+#consents-header h1 {
+    margin: 0;
+
+    font-size: clamp(1.7rem, 4vw, 2.6rem);
+    font-weight: 400;
+    letter-spacing: 0.3em;
+    padding-left: 0.3em;
+}
+
+
+/* =========================================================
+   組み立ての舞台
+   ========================================================= */
+
+#consent-stage {
+    position: relative;
+
+    /* 画面の高さにも収まるように */
+    width: min(100%, calc((100vh - 15rem) * 4 / 3));
+    min-width: min(100%, 320px);
+    aspect-ratio: 4 / 3;
+    margin: 0 auto;
+
+    overflow: hidden;
+
+    background: #000;
+
+    box-shadow:
+        0 0 0 1px rgba(var(--accent), 0.25),
+        0 20px 60px rgba(0, 0, 0, 0.6);
+}
+
+#consent-stage > * {
+    position: absolute;
+}
+
+.c-bg {
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+}
+
+/* 枠の中心の光：ゆっくり脈打つ */
+.c-glow {
+    left: 50%;
+    top: 50%;
+
+    width: 78%;
+    aspect-ratio: 1;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: radial-gradient(circle, rgba(var(--accent), 0.22), transparent 65%);
+
+    mix-blend-mode: screen;
+
+    animation: glowPulse 4.5s ease-in-out infinite;
+}
+
+@keyframes glowPulse {
+    0%, 100% { opacity: 0.55; transform: translate(-50%, -50%) scale(0.96); }
+    50% { opacity: 1; transform: translate(-50%, -50%) scale(1.04); }
+}
+
+/* 本体と、その後ろの黒い影（本体と同じ絵を真っ黒にして、右下へずらす） */
+.c-char,
+.c-shadow {
+    left: 50%;
+    bottom: 1.5%;
+
+    height: var(--char-h, 92%);
+    width: auto;
+
+    transform: translateX(-50%);
+}
+
+.c-shadow {
+    filter: brightness(0);
+
+    transform: translateX(calc(-50% + 2.3%)) translateY(1.1%);
+}
+
+/* 組み立てのあとの、一瞬の通電 */
+.c-flash {
+    inset: 0;
+
+    background: radial-gradient(circle at 50% 50%, rgba(var(--accent), 0.55), rgba(255, 255, 255, 0) 70%);
+
+    opacity: 0;
+
+    pointer-events: none;
+}
+
+
+/* ---------- 組み立て：枠 → 影 → 本体 → 通電 ---------- */
+
+.is-assembling .c-bg {
+    animation: bgIn 0.9s steps(1, end) both, bgSettle 0.9s ease-out both;
+}
+
+@keyframes bgIn {
+    /* 電源が入るように、二度ちらついてから灯る */
+    0% { opacity: 0; }
+    12% { opacity: 0.7; }
+    20% { opacity: 0.1; }
+    32% { opacity: 0.9; }
+    40% { opacity: 0.3; }
+    55%, 100% { opacity: 1; }
+}
+
+@keyframes bgSettle {
+    from { transform: scale(1.06); filter: brightness(1.6); }
+    to { transform: scale(1); filter: brightness(1); }
+}
+
+.is-assembling .c-shadow {
+    animation: shadowIn 0.6s cubic-bezier(0.2, 0.8, 0.2, 1) 0.55s both;
+}
+
+@keyframes shadowIn {
+    from {
+        opacity: 0;
+        transform: translateX(calc(-50% + 9%)) translateY(4%);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(calc(-50% + 2.3%)) translateY(1.1%);
+    }
+}
+
+.is-assembling .c-char {
+    animation: charIn 0.7s cubic-bezier(0.2, 0.8, 0.2, 1) 0.85s both;
+}
+
+@keyframes charIn {
+    from {
+        opacity: 0;
+        transform: translateX(-50%) translateY(6%) scale(0.97);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0) scale(1);
+    }
+}
+
+.is-assembling .c-flash {
+    animation: flash 0.7s ease-out 1.35s both;
+}
+
+@keyframes flash {
+    0% { opacity: 0; }
+    20% { opacity: 1; }
+    100% { opacity: 0; }
+}
+
+
+/* =========================================================
+   切り替えのボタン
+   ========================================================= */
+
+#consent-select {
+    display: flex;
+    justify-content: center;
+    gap: clamp(0.5rem, 2vw, 1rem);
+
+    margin: clamp(1.2rem, 3vh, 2rem) auto 0;
+}
+
+.consent-btn {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+
+    min-width: 0;
+    width: 10rem;
+    padding: 0.6rem 0.4rem 0.7rem;
+
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    background: rgba(255, 255, 255, 0.03);
+    color: inherit;
+
+    font: inherit;
+
+    cursor: pointer;
+
+    transition: border-color 0.4s ease, background 0.4s ease, transform 0.4s ease;
+}
+
+.btn-thumb {
+    display: grid;
+    place-items: center;
+
+    height: 4.2rem;
+
+    overflow: hidden;
+}
+
+.btn-thumb img {
+    height: 100%;
+    width: auto;
+    max-width: 6rem;
+
+    object-fit: contain;
+
+    filter: drop-shadow(3px 2px 0 #000);
+
+    opacity: 0.6;
+
+    transition: opacity 0.4s ease, transform 0.4s ease;
+}
+
+.btn-name {
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+}
+
+.consent-btn:hover {
+    border-color: rgba(var(--accent), 0.5);
+
+    transform: translateY(-2px);
+}
+
+.consent-btn:hover .btn-thumb img {
+    opacity: 0.9;
+}
+
+.consent-btn[aria-pressed="true"] {
+    border-color: rgba(var(--accent), 0.85);
+    background: rgba(var(--accent), 0.08);
+}
+
+.consent-btn[aria-pressed="true"] .btn-thumb img {
+    opacity: 1;
+
+    transform: scale(1.06);
+}
+
+
+/* =========================================================
+   説明
+   ========================================================= */
+
+#consent-info {
+    width: min(30rem, 100%);
+    margin: clamp(2.4rem, 6vh, 4rem) auto 0;
+
+    text-align: center;
+}
+
+#consent-info.is-shown {
+    animation: infoIn 1s ease 0.9s both;
+}
+
+@keyframes infoIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: none; }
+}
+
+.info-en {
+    margin: 0 0 0.7rem;
+
+    font-size: 0.72rem;
+    letter-spacing: 0.45em;
+    padding-left: 0.45em;
+
+    color: rgba(var(--accent), 0.9);
+}
+
+.info-name {
+    margin: 0 0 1.8rem;
+
+    font-size: clamp(1.3rem, 2.6vw, 1.7rem);
+    font-weight: 400;
+    letter-spacing: 0.22em;
+    padding-left: 0.22em;
+}
+
+.info-text p {
+    margin: 0 0 1.4rem;
+
+    font-size: 0.96rem;
+    line-height: 2.2;
+    letter-spacing: 0.12em;
+}
+
+.info-text.is-empty p {
+    font-size: 0.86rem;
+
+    opacity: 0.55;
+}
+
+
+/* =========================================================
+   スマートフォン
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+    #consents-header h1 {
+        letter-spacing: 0.18em;
+        padding-left: 0.18em;
+    }
+
+    #consent-stage {
+        width: 100%;
+    }
+
+    .consent-btn {
+        width: auto;
+        flex: 1;
+    }
+
+    .btn-thumb {
+        height: 3.4rem;
+    }
+
+    .btn-thumb img {
+        max-width: 4.5rem;
+    }
+
+    .btn-name {
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+    }
+
+}
+
+
+/* =========================================================
+   モーション低減設定
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .c-glow,
+    .is-assembling .c-bg,
+    .is-assembling .c-shadow,
+    .is-assembling .c-char,
+    .is-assembling .c-flash,
+    #consent-info.is-shown {
+        animation: none;
+    }
+
+}

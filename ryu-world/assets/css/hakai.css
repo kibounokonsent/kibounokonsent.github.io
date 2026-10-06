@@ -1,0 +1,355 @@
+/* =========================================================
+   龍の世界 / 破壊之王の間
+   ---------------------------------------------------------
+   作りは悠久の楽園（eden.css）と同じ。ここでは色だけを変える：
+   楽園の白い光に対して、赤い月と闇の紫。
+   ========================================================= */
+
+body.hakai {
+    --hakai-red: 214, 52, 64;
+    --hakai-violet: 132, 70, 210;
+
+    color: #f3ece9;
+}
+
+/* 文字の列の後ろを沈める（絵が細かく赤いので、楽園と同じくらいしっかり） */
+.hakai #eden-veil {
+    background:
+        linear-gradient(
+            90deg,
+            transparent 22%,
+            rgba(6, 0, 4, 0.66) 50%,
+            rgba(6, 0, 4, 0.88) 66%,
+            rgba(6, 0, 4, 0.92)
+        );
+}
+
+/* 赤い絵の上でも読めるよう、英字は明るい赤にして闇で縁取る */
+.hakai .hero-en {
+    color: rgb(255, 150, 156);
+
+    opacity: 0.95;
+
+    text-shadow:
+        0 0 3px #000,
+        0 0 10px #000,
+        0 0 18px rgba(0, 0, 0, 0.9);
+}
+
+.hakai #eden-hero h1 {
+    text-shadow:
+        0 0 22px rgba(var(--hakai-red), 0.45),
+        0 0 4px rgba(0, 0, 0, 0.9);
+}
+
+.hakai .hero-scroll::after {
+    background: linear-gradient(to bottom, rgba(var(--hakai-red), 0.9), transparent);
+}
+
+.hakai .lore-block h2 {
+    color: rgba(var(--hakai-red), 0.95);
+}
+
+.hakai #music-toggle {
+    border-color: rgba(var(--hakai-red), 0.5);
+}
+
+.hakai #music-toggle:hover,
+.hakai #music-toggle:focus-visible {
+    border-color: rgba(var(--hakai-red), 0.9);
+}
+
+@keyframes inviteHakai {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--hakai-red), 0); }
+    50% { box-shadow: 0 0 0 6px rgba(var(--hakai-red), 0.22); }
+}
+
+.hakai #music-toggle.is-inviting {
+    animation-name: inviteHakai;
+}
+
+/* 資料がまだ短いので、下の余白を詰める */
+.hakai #eden-lore {
+    padding-bottom: 30vh;
+}
+
+@media (max-width: 700px) {
+
+    .hakai #eden-veil {
+        background: rgba(6, 0, 4, 0.78);
+    }
+
+    .hakai .hero-en {
+        letter-spacing: 0.3em;
+        padding-left: 0.3em;
+    }
+
+}
+
+
+/* =========================================================
+   絵の重ね方（軽量化）
+   ---------------------------------------------------------
+   3枚の canvas を同じ位置・大きさに重ねる（大きさは eden.css の
+   #eden-canvas と同じ：ステージ4:3を画面に収まる最大の大きさで中央へ）。
+   ========================================================= */
+
+.hakai .hakai-layer {
+    position: fixed;
+    left: 50%;
+    top: 50%;
+
+    width: min(100vw, 133.333vh);
+    height: min(75vw, 100vh);
+
+    transform: translate(-50%, -50%);
+
+    display: block;
+
+    pointer-events: none;
+}
+
+/* canvas に直接マスクをかけると毎フレーム重いので外し、代わりに上から闇を重ねる */
+.hakai #eden-canvas {
+    -webkit-mask-image: none;
+    mask-image: none;
+}
+
+#hakai-back,
+#hakai-front {
+    visibility: hidden;
+}
+
+body.is-layered #hakai-back,
+body.is-layered #hakai-front {
+    visibility: visible;
+}
+
+#hakai-edge {
+    background:
+        linear-gradient(90deg, #000 0, transparent 6%, transparent 94%, #000 100%);
+}
+
+@media (max-aspect-ratio: 4/3) {
+    #hakai-edge {
+        background:
+            linear-gradient(180deg, #000 0, transparent 6%, transparent 94%, #000 100%);
+    }
+}
+
+
+/* =========================================================
+   破壊之王の資料
+   ========================================================= */
+
+/* 少し長い資料なので、列を広げ、各ブロックの間隔を詰める */
+.hakai #eden-lore {
+    width: min(480px, 88vw);
+}
+
+.hakai .lore-block {
+    margin-bottom: 14vh;
+}
+
+/* ---------- 名と身上 ---------- */
+
+.king-name {
+    margin: 0 0 1.6rem !important;
+
+    font-size: 1.3rem !important;
+    letter-spacing: 0.16em !important;
+
+    color: #fff;
+
+    text-shadow:
+        0 0 18px rgba(var(--hakai-red), 0.5),
+        0 0 4px #000;
+}
+
+.king-profile {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr));
+    gap: 0.5rem 1.4rem;
+
+    margin: 0 0 3rem;
+    padding: 1.1rem 0;
+
+    border-top: 1px solid rgba(var(--hakai-red), 0.35);
+    border-bottom: 1px solid rgba(var(--hakai-red), 0.35);
+
+    font-size: 0.86rem;
+    letter-spacing: 0.1em;
+}
+
+.king-profile div {
+    display: flex;
+    gap: 0.9rem;
+}
+
+.king-profile dt {
+    min-width: 3.2em;
+
+    color: rgba(var(--hakai-red), 0.95);
+}
+
+.king-profile dd {
+    margin: 0;
+}
+
+/* ---------- 力 ---------- */
+
+.ability {
+    margin: 0 0 3.4rem;
+}
+
+.ability h3,
+.lore-hidden h3 {
+    margin: 0 0 0.9rem;
+
+    font-size: 1.02rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+
+    color: #fff;
+}
+
+.ability-read {
+    display: block;
+
+    margin-top: 0.3rem;
+
+    font-size: 0.7rem;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+
+    color: rgba(var(--hakai-red), 0.9);
+}
+
+.hakai .ability p {
+    margin: 0 0 0.9rem;
+
+    font-size: 0.92rem;
+    line-height: 2.05;
+}
+
+/*
+ * 自問自答の声：説明とは別の「心の声」として、薄く、少し遅れて浮かぶ。
+ * 赤い細い線で区切り、本文よりひと回り小さく。
+ */
+.hakai .ability .inner-voice {
+    margin: 1.1rem 0 0;
+    padding-left: 1rem;
+
+    border-left: 1px solid rgba(var(--hakai-red), 0.35);
+
+    font-size: 0.84rem;
+    line-height: 2;
+    letter-spacing: 0.12em;
+
+    color: rgb(236, 214, 218);
+}
+
+.has-reveal .ability .inner-voice {
+    transition: opacity 2.4s ease 0.9s, transform 2.4s ease 0.9s;
+}
+
+/* 薄さは常に（読み込み前・WebGLが無い環境でも）同じにしておく */
+.hakai .ability .inner-voice {
+    opacity: 0.48;
+}
+
+/* 名・身上・力の名も、本文と同じように一つずつ浮かび上がる */
+.has-reveal .lore-block h3,
+.has-reveal .king-profile {
+    transition: opacity 1.6s ease, transform 1.6s ease;
+}
+
+.has-reveal .lore-block h3:not(.is-visible),
+.has-reveal .king-profile:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+/* ---------- 過去の結び ---------- */
+
+.king-final {
+    margin-top: 3rem !important;
+
+    font-size: 1.25rem !important;
+    letter-spacing: 0.3em !important;
+
+    color: #fff;
+
+    text-shadow:
+        0 0 24px rgba(var(--hakai-red), 0.6),
+        0 0 4px #000;
+}
+
+/* ---------- 裏設定（開いたときだけ） ---------- */
+
+.lore-hidden {
+    margin: 0 0 8vh;
+
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.lore-hidden summary {
+    padding: 1.4rem 0;
+
+    font-size: 0.84rem;
+    letter-spacing: 0.4em;
+
+    color: rgba(var(--hakai-red), 0.9);
+
+    list-style: none;
+
+    cursor: pointer;
+}
+
+.lore-hidden summary::-webkit-details-marker {
+    display: none;
+}
+
+.lore-hidden summary::after {
+    content: "＋";
+
+    margin-left: 0.8rem;
+
+    opacity: 0.7;
+}
+
+.lore-hidden[open] summary::after {
+    content: "－";
+}
+
+.lore-hidden summary:focus-visible {
+    outline: 1px solid rgba(var(--hakai-red), 0.7);
+    outline-offset: 4px;
+}
+
+.lore-hidden .lore-block {
+    margin-bottom: 4rem;
+}
+
+.lore-hidden h3 {
+    margin-top: 2.6rem;
+
+    font-size: 0.95rem;
+}
+
+.lore-hidden h3:first-child {
+    margin-top: 0.6rem;
+}
+
+@media (max-width: 700px) {
+
+    .king-name {
+        font-size: 1.12rem !important;
+        letter-spacing: 0.08em !important;
+    }
+
+    .hakai .ability p {
+        letter-spacing: 0.08em;
+    }
+
+}

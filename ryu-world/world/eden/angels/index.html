@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>天使たち ― 悠久の楽園 ― 龍の世界</title>
+
+    <!-- 楽園の枠（音楽を流し続ける外側のページ）の中で開く -->
+    <script src="../../../assets/js/eden-frame.js" data-place="angels"></script>
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../../../assets/css/eden.css">
+    <link rel="stylesheet" href="../../../assets/css/eden-places.css">
+</head>
+
+<body class="eden-place angels-page">
+
+    <!-- 楽園の光（背景）と、空を漂うリリン達 -->
+    <div class="place-backdrop" aria-hidden="true"></div>
+    <div id="lilin-sky" aria-hidden="true"></div>
+
+    <!-- ==================================================
+         操作
+         ================================================== -->
+
+    <a id="back-to-map" href="../gate/index.html">悠久の楽園へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">歓喜の歌</span>
+    </button>
+
+    <!-- 歓喜の歌（楽園の全ページで続けて流れる） -->
+    <audio id="music" src="../../../assets/eden/joy.mp3" loop preload="none"></audio>
+
+
+    <main class="place-page">
+
+        <header class="place-hero">
+            <p class="hero-en">THE ANGELS</p>
+            <h1>天使たち</h1>
+            <p class="place-lead">龍の傍らを巡り、<br>静かに見守る者たち。</p>
+        </header>
+
+        <!-- 龍の書より -->
+        <blockquote class="place-scripture">
+            <p>またリリスは天使を生み、<br>世界の守護を命じた。</p>
+            <cite>― 龍の書　第五章「始まりの子ら」より</cite>
+        </blockquote>
+
+        <!-- 天使（angels-data.js から並べる） -->
+        <div id="angel-list"></div>
+
+        <p class="angels-yet">ほかの天使たちは、まだ記されていない。</p>
+
+        <!-- 楽園のほかの場所へ -->
+        <section class="place-paths">
+            <h2>楽園のほかの場所</h2>
+            <nav class="eden-gates" data-eden-gates aria-label="楽園の場所"></nav>
+        </section>
+
+    </main>
+
+
+    <script src="../../../assets/js/eden-music.js"></script>
+    <script src="../../../assets/js/eden-places.js"></script>
+    <script src="../../../assets/js/angels-data.js"></script>
+    <script src="../../../assets/js/eden-angels.js"></script>
+
+</body>
+
+</html>

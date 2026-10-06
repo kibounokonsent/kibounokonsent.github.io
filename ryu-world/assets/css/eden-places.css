@@ -1,0 +1,1010 @@
+/* =========================================================
+   龍の世界 / 悠久の楽園 ― 門と、楽園の中の場所
+   ---------------------------------------------------------
+   eden.css（楽園の共通の作り）のあとに読み込む。
+     ・道しるべ（門のページ・各場所のページの下）
+     ・場所のページの共通部分
+     ・天使たち
+     ・生命の木／知恵の木
+   ========================================================= */
+
+:root {
+    --eden-gold: 222, 196, 120;
+}
+
+
+/* =========================================================
+   道しるべ
+   ========================================================= */
+
+.eden-gates {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.8rem;
+}
+
+.eden-gate {
+    display: flex;
+
+    backface-visibility: hidden;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.35rem;
+
+    min-width: 8.4rem;
+    padding: 0.9rem 1rem 0.8rem;
+
+    color: inherit;
+    text-decoration: none;
+
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid rgba(255, 255, 255, 0.26);
+
+    transition:
+        background 0.4s ease,
+        border-color 0.4s ease,
+        transform 0.4s ease;
+}
+
+.gate-glyph {
+    display: grid;
+    place-items: center;
+
+    width: 40px;
+    height: 34px;
+}
+
+.gate-glyph svg {
+    max-width: 100%;
+    max-height: 100%;
+
+    filter: drop-shadow(0 0 6px rgba(255, 255, 255, 0.35));
+
+    transition: filter 0.4s ease, transform 0.4s ease;
+}
+
+.gate-name {
+    font-size: 0.95rem;
+    letter-spacing: 0.2em;
+    padding-left: 0.2em;
+}
+
+.gate-en {
+    font-size: 0.58rem;
+    letter-spacing: 0.24em;
+    padding-left: 0.24em;
+
+    opacity: 0.62;
+}
+
+.eden-gate:hover,
+.eden-gate:focus-visible {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.6);
+
+    transform: translateY(-3px);
+}
+
+.eden-gate:hover .gate-glyph svg,
+.eden-gate:focus-visible .gate-glyph svg {
+    filter: drop-shadow(0 0 10px rgba(255, 255, 255, 0.8));
+    transform: scale(1.08);
+}
+
+.eden-gate:focus-visible {
+    outline: 1px solid rgba(255, 255, 255, 0.7);
+    outline-offset: 3px;
+}
+
+/* 天使たちへの道だけ、ほのかに金色 */
+.eden-gate[data-place="angels"]:hover,
+.eden-gate[data-place="angels"]:focus-visible {
+    border-color: rgba(var(--eden-gold), 0.75);
+}
+
+
+/* ---------- 門のページ：最初の画面の道しるべ ---------- */
+
+.hero-gates {
+    margin-top: 2.2rem;
+
+    text-shadow: none;
+}
+
+/* ---------- 門のページ：資料の終わりの「楽園の路」 ---------- */
+
+/*
+ * 縦の幹から、場所ごとに枝が分かれる形。
+ * 道しるべ自体は横並びのものと同じ部品を使う。
+ */
+.path-gates {
+    position: relative;
+
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.9rem;
+
+    margin-top: 2.4rem;
+    padding-left: 2.2rem;
+}
+
+.path-gates::before {
+    content: "";
+
+    position: absolute;
+    left: 0.55rem;
+    top: 0.4rem;
+    bottom: 1.6rem;
+
+    width: 1px;
+
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.7), rgba(255, 255, 255, 0.15));
+}
+
+.path-gates .eden-gate {
+    position: relative;
+
+    display: grid;
+    grid-template-columns: 40px 1fr;
+    grid-template-rows: auto auto;
+    column-gap: 1rem;
+    align-items: center;
+
+    padding: 0.8rem 1rem;
+
+    text-align: left;
+}
+
+.path-gates .eden-gate::before {
+    content: "";
+
+    position: absolute;
+    left: -1.65rem;
+    top: 50%;
+
+    width: 1.65rem;
+    height: 1px;
+
+    background: rgba(255, 255, 255, 0.45);
+}
+
+.path-gates .gate-glyph {
+    grid-row: 1 / 3;
+}
+
+.path-gates .gate-name,
+.path-gates .gate-en {
+    padding-left: 0;
+}
+
+.path-gates .eden-gate:hover,
+.path-gates .eden-gate:focus-visible {
+    transform: translateX(4px);
+}
+
+.has-reveal .path-gates {
+    transition: opacity 1.6s ease, transform 1.6s ease;
+}
+
+.has-reveal .path-gates:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(14px);
+}
+
+
+/* =========================================================
+   場所のページ（天使たち・生命の木・知恵の木）の共通部分
+   ========================================================= */
+
+.eden-place {
+    background: #000;
+}
+
+.place-backdrop {
+    position: fixed;
+    inset: 0;
+
+    z-index: 0;
+
+    pointer-events: none;
+}
+
+.place-page {
+    position: relative;
+    z-index: 2;
+
+    width: min(1040px, 100%);
+    margin: 0 auto;
+    padding: 0 clamp(1.2rem, 5vw, 3rem) 6rem;
+}
+
+.place-hero {
+    padding: clamp(7rem, 20vh, 11rem) 0 clamp(3rem, 8vh, 5rem);
+
+    text-align: center;
+
+    text-shadow: 0 0 18px rgba(0, 0, 0, 0.8), 0 0 4px rgba(0, 0, 0, 0.9);
+
+    opacity: 0;
+    transform: translateY(10px);
+
+    transition: opacity 2s ease, transform 2s ease;
+}
+
+.is-arrived .place-hero {
+    opacity: 1;
+    transform: none;
+}
+
+.place-hero h1 {
+    margin: 0;
+
+    font-size: clamp(1.9rem, 4.5vw, 3rem);
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+}
+
+.place-lead {
+    margin: 2rem 0 0;
+
+    font-size: 0.98rem;
+    line-height: 2.3;
+    letter-spacing: 0.16em;
+
+    opacity: 0.82;
+}
+
+.place-lore {
+    width: min(460px, 100%);
+    margin: 0 auto;
+    padding: 8vh 0 4vh;
+
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+.place-paths {
+    margin: 10vh auto 0;
+
+    text-align: center;
+}
+
+.place-paths h2 {
+    margin: 0 0 2rem;
+
+    font-size: 0.84rem;
+    font-weight: 400;
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+
+    opacity: 0.8;
+}
+
+.has-reveal .place-paths {
+    transition: opacity 1.6s ease;
+}
+
+.has-reveal .place-paths:not(.is-visible) {
+    opacity: 0;
+}
+
+
+/* =========================================================
+   天使たち
+   ========================================================= */
+
+/* 楽園の絵をごく薄く敷き、上から金色の光をにじませる */
+.angels-page .place-backdrop {
+    background:
+        radial-gradient(ellipse at 50% 18%, rgba(var(--eden-gold), 0.22), transparent 55%),
+        radial-gradient(ellipse at 50% 100%, rgba(0, 0, 0, 0.9), transparent 60%),
+        linear-gradient(rgba(5, 4, 2, 0.84), rgba(5, 4, 2, 0.84)),
+        url("../eden/e43bbc1100e5.webp") center / cover no-repeat;
+
+    filter: saturate(0.6) blur(2px);
+
+    /* ぼかしで縁が透けないよう、少し大きく敷く */
+    inset: -12px;
+}
+
+.angels-page .hero-en,
+.angels-page .angel-en {
+    color: rgba(var(--eden-gold), 0.95);
+}
+
+/* ---------- 空のリリン達 ---------- */
+
+#lilin-sky {
+    position: fixed;
+    inset: 0;
+
+    z-index: 1;
+
+    overflow: hidden;
+
+    pointer-events: none;
+}
+
+.lilin {
+    position: absolute;
+
+    width: var(--w, 60px);
+    height: auto;
+
+    opacity: 0;
+
+    filter: drop-shadow(0 0 8px rgba(var(--eden-gold), 0.6));
+
+    animation: lilinLife var(--life, 12s) ease-in-out forwards;
+
+    will-change: transform, opacity;
+}
+
+/* 生まれ（光の中から現れ）、漂い、消えていく */
+@keyframes lilinLife {
+    0% {
+        opacity: 0;
+        transform: translate(0, 12px) scale(0.5, 0.5) scaleX(var(--flip, 1));
+    }
+    14% {
+        opacity: 0.85;
+        transform: translate(calc(var(--dx) * 0.12), 0) scale(1) scaleX(var(--flip, 1));
+    }
+    78% {
+        opacity: 0.6;
+    }
+    100% {
+        opacity: 0;
+        transform: translate(var(--dx), var(--dy)) scale(0.75) scaleX(var(--flip, 1));
+    }
+}
+
+/* ---------- 天使 ---------- */
+
+.angel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.5rem, 5vw, 4rem);
+
+    margin: 0 0 12vh;
+}
+
+.angel-figure {
+    position: relative;
+
+    margin: 0;
+}
+
+/* 背後の光輪 */
+.angel-figure::before {
+    content: "";
+
+    position: absolute;
+    left: 50%;
+    top: 45%;
+
+    width: 70%;
+    aspect-ratio: 1;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: radial-gradient(circle, rgba(var(--eden-gold), 0.28), transparent 68%);
+}
+
+.angel-figure img {
+    position: relative;
+
+    display: block;
+
+    width: 100%;
+    height: auto;
+
+    filter: drop-shadow(0 0 18px rgba(var(--eden-gold), 0.35));
+
+    animation: angelFloat 7s ease-in-out infinite;
+}
+
+@keyframes angelFloat {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+}
+
+.angel-text {
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+.angel-en {
+    margin: 0 0 0.8rem;
+
+    font-size: 0.72rem;
+    letter-spacing: 0.45em;
+}
+
+.angel-text h2 {
+    margin: 0 0 2rem;
+
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 400;
+    letter-spacing: 0.3em;
+}
+
+.angel-text p:not(.angel-en),
+.kin-text p {
+    margin: 0 0 1.6rem;
+
+    font-size: 0.98rem;
+    line-height: 2.3;
+    letter-spacing: 0.14em;
+}
+
+/* ---------- 共にいる者たち（エカマータの兄弟たち） ---------- */
+
+.angel-kin {
+    grid-column: 1 / -1;
+
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr);
+    align-items: center;
+    gap: clamp(1.5rem, 5vw, 4rem);
+
+    padding-top: 5vh;
+
+    border-top: 1px solid rgba(var(--eden-gold), 0.22);
+}
+
+.kin-row {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: clamp(0.6rem, 3vw, 2rem);
+}
+
+/* 三人のリリンが、順に生まれては消える */
+.kin-row img {
+    width: 30%;
+    height: auto;
+
+    filter: drop-shadow(0 0 10px rgba(var(--eden-gold), 0.45));
+
+    animation: kinBreath 9s ease-in-out infinite;
+    animation-delay: calc(var(--k) * -3s);
+}
+
+@keyframes kinBreath {
+    0%, 100% { opacity: 0.12; transform: translateY(6px) scale(0.92); }
+    30%, 60% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.kin-text h3 {
+    margin: 0 0 1.6rem;
+
+    font-size: 1.1rem;
+    font-weight: 400;
+    letter-spacing: 0.22em;
+}
+
+.kin-text h3 span {
+    display: block;
+
+    margin-top: 0.4rem;
+
+    font-size: 0.72rem;
+    letter-spacing: 0.4em;
+
+    color: rgba(var(--eden-gold), 0.95);
+}
+
+.angels-yet {
+    margin: 0;
+
+    text-align: center;
+
+    font-size: 0.86rem;
+    letter-spacing: 0.24em;
+
+    opacity: 0.55;
+}
+
+.has-reveal .angel,
+.has-reveal .angel-kin,
+.has-reveal .angels-yet {
+    transition: opacity 1.8s ease, transform 1.8s ease;
+}
+
+.has-reveal .angel:not(.is-visible),
+.has-reveal .angel-kin:not(.is-visible),
+.has-reveal .angels-yet:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(18px);
+}
+
+
+/* =========================================================
+   生命の木・知恵の木
+   ========================================================= */
+
+.tree-page[data-tone="light"] .place-backdrop {
+    background:
+        radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, 0.12), transparent 58%),
+        #050506;
+}
+
+.tree-page[data-tone="dark"] .place-backdrop {
+    background:
+        radial-gradient(ellipse at 50% 42%, rgba(96, 48, 150, 0.2), transparent 58%),
+        #040306;
+}
+
+/* 木が最初の画面に収まるよう、見出しは小さめに */
+.tree-page .place-hero {
+    padding: clamp(4.5rem, 11vh, 6.5rem) 0 1.4rem;
+}
+
+.tree-page .place-hero h1 {
+    font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+}
+
+/* 絵の縦横比（209.3 × 365.6）を保ったまま、画面に収める */
+.tree-figure {
+    position: relative;
+
+    width: min(86vw, calc(min(72vh, 860px) * 0.5726));
+    aspect-ratio: 209.3366 / 365.619;
+    margin: 0 auto;
+
+    opacity: 0;
+
+    transition: opacity 2.4s ease 0.4s;
+}
+
+.is-arrived .tree-figure {
+    opacity: 1;
+}
+
+.tree-figure img {
+    display: block;
+
+    width: 100%;
+    height: 100%;
+}
+
+/* 球に灯る光：--order の順に、少しずつ遅れて灯っては消える */
+.sphere {
+    position: absolute;
+    left: var(--x);
+    top: var(--y);
+
+    width: calc(var(--r) * 2);
+    aspect-ratio: 1;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    pointer-events: none;
+
+    animation: sphereLight 9.6s ease-in-out infinite;
+    animation-delay: calc(var(--order) * 0.9s);
+}
+
+/* 白い球の木（知恵の木）：白い光が、球からあふれる */
+[data-tone="light"] .sphere {
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0%, rgba(255, 255, 255, 0.5) 40%, transparent 72%);
+
+    box-shadow: 0 0 30px 10px rgba(255, 255, 255, 0.35);
+
+    mix-blend-mode: screen;
+}
+
+/* 黒い球の木（生命の木）：黒い球の縁に、昏い紫の光がにじむ */
+[data-tone="dark"] .sphere {
+    background: radial-gradient(circle, transparent 46%, rgba(150, 90, 230, 0.55) 60%, transparent 76%);
+
+    box-shadow: 0 0 34px 8px rgba(90, 40, 150, 0.45);
+}
+
+@keyframes sphereLight {
+    0%, 100% { opacity: 0; transform: translate(-50%, -50%) scale(0.85); }
+    6% { opacity: 1; transform: translate(-50%, -50%) scale(1.18); }
+    22% { opacity: 0.25; transform: translate(-50%, -50%) scale(1.05); }
+    40% { opacity: 0; }
+}
+
+.tree-page .lore-block {
+    text-align: center;
+}
+
+
+/* =========================================================
+   スマートフォン
+   ========================================================= */
+
+@media (max-width: 700px) {
+
+    .hero-gates {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0.6rem;
+
+        width: min(100%, 22rem);
+        margin-top: 1.8rem;
+    }
+
+    .eden-gate {
+        min-width: 0;
+        padding: 0.75rem 0.5rem 0.7rem;
+    }
+
+    .gate-name {
+        font-size: 0.88rem;
+        letter-spacing: 0.12em;
+    }
+
+    .gate-en {
+        font-size: 0.52rem;
+        letter-spacing: 0.14em;
+    }
+
+    .place-paths .eden-gates {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .place-hero h1 {
+        letter-spacing: 0.26em;
+        padding-left: 0.26em;
+    }
+
+    .angel,
+    .angel-kin {
+        grid-template-columns: 1fr;
+    }
+
+    .angel-text,
+    .kin-text {
+        text-align: center;
+    }
+
+    .angel-text p:not(.angel-en),
+    .kin-text p {
+        letter-spacing: 0.08em;
+    }
+
+}
+
+
+/* =========================================================
+   モーション低減設定
+   ========================================================= */
+
+@media (prefers-reduced-motion: reduce) {
+
+    .angel-figure img,
+    .kin-row img,
+    .sphere {
+        animation: none;
+    }
+
+    .kin-row img {
+        opacity: 1;
+    }
+
+}
+
+
+/* =========================================================
+   楽園の枠（world/eden/index.html）
+   ---------------------------------------------------------
+   中の枠に場所を読み込み、音楽のボタンだけを外に置く。
+   ========================================================= */
+
+html:has(body.eden-shell),
+body.eden-shell {
+    height: 100%;
+    margin: 0;
+
+    overflow: hidden;
+
+    background: #000;
+}
+
+#eden-frame {
+    position: fixed;
+    inset: 0;
+
+    width: 100%;
+    height: 100%;
+
+    border: 0;
+
+    background: #000;
+}
+
+/* 枠の中のページは、自分の音楽ボタンを出さない（枠のボタンが同じ場所にある） */
+.in-eden-shell #music-toggle {
+    display: none;
+}
+
+
+/* =========================================================
+   道しるべ：5つになったときの並び
+   ========================================================= */
+
+.hero-gates .eden-gate {
+    min-width: 7.6rem;
+}
+
+@media (max-width: 700px) {
+
+    /* 2列に並べ、余った最後の1つは横いっぱいに */
+    .hero-gates .eden-gate:last-child:nth-child(odd),
+    .place-paths .eden-gate:last-child:nth-child(odd) {
+        grid-column: 1 / -1;
+    }
+
+}
+
+
+/* =========================================================
+   龍の書
+   ========================================================= */
+
+/* 眠る龍の気配を、ごく薄く敷く */
+.book-page .place-backdrop {
+    background:
+        radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.07), transparent 60%),
+        linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)),
+        url("../images/dragon-soft.png") center 30% / cover no-repeat,
+        #000;
+}
+
+.book-layout {
+    display: grid;
+    grid-template-columns: 12rem minmax(0, 32rem);
+    justify-content: center;
+    gap: clamp(2rem, 6vw, 5rem);
+
+    margin-top: 2rem;
+}
+
+/* ---------- 目次 ---------- */
+
+.book-toc {
+    position: sticky;
+    top: 6rem;
+
+    align-self: start;
+
+    font-size: 0.8rem;
+    letter-spacing: 0.12em;
+}
+
+.toc-title {
+    margin: 0 0 1rem;
+
+    font-size: 0.74rem;
+    letter-spacing: 0.4em;
+
+    opacity: 0.6;
+}
+
+.book-toc ol {
+    margin: 0;
+    padding: 0;
+
+    list-style: none;
+
+    border-left: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.book-toc a {
+    display: block;
+
+    padding: 0.42rem 0 0.42rem 1rem;
+    margin-left: -1px;
+
+    color: inherit;
+    text-decoration: none;
+
+    border-left: 1px solid transparent;
+
+    opacity: 0.55;
+
+    transition: opacity 0.4s ease, border-color 0.4s ease;
+}
+
+.book-toc a span {
+    display: block;
+
+    font-size: 0.64rem;
+    letter-spacing: 0.24em;
+
+    opacity: 0.75;
+}
+
+.book-toc a:hover,
+.book-toc a:focus-visible,
+.book-toc a.is-current {
+    opacity: 1;
+
+    border-left-color: rgba(255, 255, 255, 0.85);
+}
+
+.book-toc a:focus-visible {
+    outline: 1px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 2px;
+}
+
+/* ---------- 本文 ---------- */
+
+.book-text {
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+.book-opening {
+    margin: 0 0 16vh;
+    padding: 0;
+
+    text-align: center;
+}
+
+.book-opening p {
+    margin: 0;
+
+    font-size: 1.08rem;
+    line-height: 2.5;
+    letter-spacing: 0.18em;
+}
+
+.book-opening cite {
+    display: block;
+
+    margin-top: 1.6rem;
+
+    font-size: 0.8rem;
+    font-style: normal;
+    letter-spacing: 0.2em;
+
+    opacity: 0.65;
+}
+
+.book-chapter {
+    margin: 0 0 16vh;
+
+    scroll-margin-top: 5rem;
+}
+
+.chapter-head {
+    margin: 0 0 3.4rem;
+}
+
+.chapter-num {
+    margin: 0 0 0.7rem;
+
+    font-size: 0.74rem;
+    letter-spacing: 0.45em;
+
+    opacity: 0.6;
+}
+
+.chapter-head h2 {
+    margin: 0;
+
+    font-size: clamp(1.4rem, 2.6vw, 1.8rem);
+    font-weight: 400;
+    letter-spacing: 0.3em;
+}
+
+.chapter-head h2::after {
+    content: "";
+
+    display: block;
+
+    width: 2.4rem;
+    height: 1px;
+    margin-top: 1.4rem;
+
+    background: rgba(255, 255, 255, 0.5);
+}
+
+.chapter-body p {
+    margin: 0 0 1.9rem;
+
+    font-size: 1rem;
+    line-height: 2.3;
+    letter-spacing: 0.16em;
+}
+
+/* 龍の声・人々の言葉 */
+.chapter-body .book-voice {
+    font-size: 1.06rem;
+
+    color: #fff;
+
+    text-shadow:
+        0 0 14px rgba(255, 255, 255, 0.35),
+        0 0 4px #000;
+}
+
+.has-reveal .book-opening,
+.has-reveal .chapter-head,
+.has-reveal .chapter-body p {
+    transition: opacity 1.6s ease, transform 1.6s ease;
+}
+
+.has-reveal .book-opening:not(.is-visible),
+.has-reveal .chapter-head:not(.is-visible),
+.has-reveal .chapter-body p:not(.is-visible) {
+    opacity: 0;
+    transform: translateY(12px);
+}
+
+@media (max-width: 860px) {
+
+    .book-layout {
+        grid-template-columns: minmax(0, 1fr);
+        gap: 0;
+    }
+
+    /* スマホ：目次は本文の前に、2列で */
+    .book-toc {
+        position: static;
+
+        margin: 0 0 12vh;
+    }
+
+    .book-toc ol {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 0 1rem;
+    }
+
+    .chapter-body p,
+    .book-opening p {
+        letter-spacing: 0.1em;
+    }
+
+    .chapter-head h2 {
+        letter-spacing: 0.2em;
+    }
+
+}
+
+
+/* =========================================================
+   龍の書からの一節（天使たち・木のページ）
+   ========================================================= */
+
+.place-scripture {
+    margin: -1rem auto 10vh;
+    padding: 0;
+
+    text-align: center;
+
+    text-shadow: 0 0 10px rgba(0, 0, 0, 0.9);
+}
+
+.place-scripture p {
+    margin: 0;
+
+    font-size: 1rem;
+    line-height: 2.3;
+    letter-spacing: 0.16em;
+}
+
+.place-scripture cite,
+.lore-cite {
+    display: block;
+
+    margin-top: 1.2rem;
+
+    font-size: 0.76rem !important;
+    font-style: normal;
+    letter-spacing: 0.18em;
+
+    opacity: 0.6;
+}

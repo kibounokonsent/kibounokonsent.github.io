@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>コンセントズ ― 龍の世界</title>
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../../assets/css/consents.css">
+</head>
+
+<!--
+    コンセントズ（その他の世界）。
+    3体それぞれを、枠（背景）→ 黒い影 → 本体 の順に組み立てて見せる。
+    キャラクターの一覧・説明文は assets/js/consents.js にまとめてある。
+-->
+<body data-consent="kibou">
+
+    <a id="back-to-map" href="../other/index.html">その他の世界へ戻る</a>
+
+    <main id="consents-page">
+
+        <header id="consents-header">
+            <p class="consents-en">CONSENTS</p>
+            <h1>コンセントズ</h1>
+        </header>
+
+        <!-- 組み立ての舞台（Scratchのステージと同じ 4:3） -->
+        <section id="consent-stage" aria-live="polite">
+            <img class="c-bg" alt="" aria-hidden="true">
+            <div class="c-glow" aria-hidden="true"></div>
+            <img class="c-shadow" alt="" aria-hidden="true">
+            <img class="c-char" alt="">
+            <div class="c-flash" aria-hidden="true"></div>
+        </section>
+
+        <!-- 3体の切り替え -->
+        <nav id="consent-select" aria-label="コンセントを選ぶ"></nav>
+
+        <section id="consent-info">
+            <p class="info-en"></p>
+            <h2 class="info-name"></h2>
+            <div class="info-text"></div>
+        </section>
+
+    </main>
+
+    <script src="../../assets/js/consents.js"></script>
+
+</body>
+
+</html>

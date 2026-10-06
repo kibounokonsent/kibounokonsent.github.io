@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>悠久の楽園 ― 龍の世界</title>
+
+    <!-- 楽園の枠（音楽を流し続ける外側のページ）の中で開く -->
+    <script src="../../../assets/js/eden-frame.js" data-place="gate"></script>
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../../../assets/css/eden.css">
+    <link rel="stylesheet" href="../../../assets/css/eden-places.css">
+</head>
+
+<!--
+    悠久の楽園の「門」。
+    龍のいない楽園の景色を流し、ここから龍の間・天使たち・生命の木・知恵の木へ分かれていく。
+    （場所の一覧は assets/js/eden-places.js）
+-->
+<body class="eden-hub" data-assets="../../../assets/eden/" data-place="gate">
+
+    <!-- ==================================================
+         楽園の景色（Scratch作品を軽量プレイヤーで再生）
+         ================================================== -->
+
+    <canvas id="eden-canvas" aria-hidden="true"></canvas>
+
+    <div id="eden-veil" aria-hidden="true"></div>
+
+
+    <!-- ==================================================
+         操作
+         ================================================== -->
+
+    <!-- 楽園の外（世界地図）へは、外側の枠ごと移る -->
+    <a id="back-to-map" href="../../index.html" target="_parent">世界地図へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">歓喜の歌</span>
+    </button>
+
+    <!-- 歓喜の歌（フリーBGMとして無料配布されている音源）。楽園の全ページで続けて流れる -->
+    <audio id="music" src="../../../assets/eden/joy.mp3" loop preload="none"></audio>
+
+
+    <!-- ==================================================
+         門と資料
+         ================================================== -->
+
+    <main id="eden-page">
+
+        <section id="eden-hero">
+            <p class="hero-en">ETERNAL EDEN</p>
+            <h1>悠久の楽園</h1>
+
+            <!-- 楽園の中の場所（eden-places.js から描く） -->
+            <nav class="eden-gates hero-gates" data-eden-gates aria-label="楽園の場所"></nav>
+
+            <p class="hero-scroll" aria-hidden="true">読む</p>
+        </section>
+
+        <article id="eden-lore">
+
+            <section class="lore-block">
+                <h2>楽園</h2>
+                <p>楽園はすべての中心なり。<br>楽園はすべての外側なり。</p>
+                <p>そこに時は流れず。</p>
+                <p>過去も未来もなく、<br>ただ在るのみ。</p>
+                <p>龍は楽園に眠る。</p>
+                <p>天使たちはその傍らを巡り、<br>静かに見守る。</p>
+            </section>
+
+            <section class="lore-block">
+                <h2>還る場所</h2>
+                <p>死せる者は楽園へ還る。</p>
+                <p>迷える魂も、<br>傷ついた魂も、<br>最後には楽園へ辿り着く。</p>
+                <p>ゆえに人は言う。</p>
+                <p>「死は終わりにあらず。」<br>「還る時なり。」</p>
+            </section>
+
+            <section class="lore-block">
+                <h2>失われし楽園</h2>
+                <p>はじめ、<br>人と竜は楽園に住んでいた。</p>
+                <p>彼らの命は長く。<br>その力は今より遥かに強かった。</p>
+                <p>されど、<br>死は訪れた。</p>
+                <p>……</p>
+                <p>楽園は静かに乱れた。</p>
+                <p>ゆえに神は、<br>人と竜を楽園より離した。</p>
+                <p>されど見捨てはしなかった。</p>
+                <p>魂はなお、<br>死の後に楽園へ還る。</p>
+            </section>
+
+            <!-- 楽園の路：読み終えたところから、もう一度道を選べるように -->
+            <section class="lore-block eden-paths">
+                <h2>楽園の路</h2>
+                <p>門の先で、道は分かれる。</p>
+                <nav class="eden-gates path-gates" data-eden-gates aria-label="楽園の場所"></nav>
+            </section>
+
+            <p class="lore-source">― 龍の書より（全文は「龍の書」に）</p>
+
+            <!-- 音楽のクレジット（配布元の表記ルールに合わせて書き換える） -->
+            <p class="lore-credit">音楽：ベートーヴェン「交響曲第9番 第4楽章（歓喜の歌）」 フリーBGM</p>
+
+        </article>
+
+    </main>
+
+
+    <script src="../../../assets/eden/hub-project.js"></script>
+    <script src="../../../assets/js/eden-player.js"></script>
+    <script src="../../../assets/js/eden-music.js"></script>
+    <script src="../../../assets/js/eden-places.js"></script>
+    <script src="../../../assets/js/eden-hub.js"></script>
+
+</body>
+
+</html>

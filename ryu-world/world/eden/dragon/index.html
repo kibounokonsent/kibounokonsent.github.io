@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>龍の間 ― 悠久の楽園 ― 龍の世界</title>
+
+    <!-- 楽園の枠（音楽を流し続ける外側のページ）の中で開く -->
+    <script src="../../../assets/js/eden-frame.js" data-place="dragon"></script>
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../../../assets/css/eden.css">
+</head>
+
+<body data-assets="../../../assets/eden/">
+
+    <!-- ==================================================
+         楽園と龍（Scratch作品を軽量プレイヤーで再生）
+         ================================================== -->
+
+    <canvas id="eden-canvas" aria-hidden="true"></canvas>
+
+    <!-- 龍の眼：資料を読み進めるほど、こちらを見てくる -->
+    <div id="dragon-eyes" aria-hidden="true">
+        <span class="eye"></span>
+        <span class="eye"></span>
+    </div>
+
+    <div id="eden-veil" aria-hidden="true"></div>
+
+
+    <!-- ==================================================
+         操作
+         ================================================== -->
+
+    <a id="back-to-map" href="../gate/index.html">悠久の楽園へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">歓喜の歌</span>
+    </button>
+
+    <!-- 歓喜の歌（フリーBGMとして無料配布されている音源） -->
+    <audio id="music" src="../../../assets/eden/joy.mp3" loop preload="none"></audio>
+
+
+    <!-- ==================================================
+         資料
+         ================================================== -->
+
+    <main id="eden-page">
+
+        <section id="eden-hero">
+            <p class="hero-en">THE SLEEPING DRAGON</p>
+            <h1>龍の間</h1>
+            <p class="hero-scroll" aria-hidden="true">読む</p>
+        </section>
+
+        <article id="eden-lore">
+
+            <p class="lore-quote">
+                「案ずるな。<br>
+                我は常に汝の傍に在り。<br>
+                光と闇を抱く者よ。<br>
+                共に還ろう、悠久の地へ。」
+                <span>― 楽園に眠る龍の言葉</span>
+            </p>
+
+            <section class="lore-block">
+                <h2>龍の眠る間</h2>
+                <p>龍は楽園に眠る。</p>
+                <p>天使たちはその傍らを巡り、<br>静かに見守る。</p>
+            </section>
+
+            <section class="lore-block">
+                <h2>龍の理</h2>
+                <p>龍は無数に在る。</p>
+                <p>されど真なる龍はただ一つ。</p>
+                <p>楽園に眠る龍のみである。</p>
+                <p>他は皆、<br>その抜け殻なり。</p>
+                <p>抜け殻は滅びず。</p>
+                <p>倒れてもなお現れる。</p>
+                <p>羽根は今も世界へ降り続ける。</p>
+                <p>羽根に触れる者は夢を見る。</p>
+                <p>遠き日の夢を。<br>未だ来ぬ日の夢を。</p>
+                <p>あるいは。</p>
+                <p>悠久の地の夢を。</p>
+            </section>
+
+            <section class="lore-block lore-last" id="lore-last">
+                <h2>帰郷</h2>
+                <p>人は生まれる。<br>人は生きる。<br>人は愛する。<br>人は失う。</p>
+                <p>そして還る。</p>
+                <p>竜もまた還る。<br>獣もまた還る。</p>
+                <p>魂あるものは皆、<br>最後には楽園へ辿り着く。</p>
+                <p>ゆえに恐れるな。<br>死は終わりにあらず。<br>それは帰郷なり。</p>
+                <p class="lore-voice">
+                    「我は汝であり。<br>汝は我なり。」<br>
+                    「光と闇を抱く者よ。」<br>
+                    「さあ、帰ろう。」<br>
+                    「悠久の地、エターナル・エデンへ。」
+                </p>
+            </section>
+
+            <p class="lore-source">― 龍の書より</p>
+
+            <!-- 音楽のクレジット（配布元の表記ルールに合わせて書き換える） -->
+            <p class="lore-credit">音楽：ベートーヴェン「交響曲第9番 第4楽章（歓喜の歌）」 フリーBGM</p>
+
+        </article>
+
+    </main>
+
+
+    <script src="../../../assets/eden/project.js"></script>
+    <script src="../../../assets/js/eden-music.js"></script>
+    <script src="../../../assets/js/eden-player.js"></script>
+    <script src="../../../assets/js/eden-page.js"></script>
+
+</body>
+
+</html>

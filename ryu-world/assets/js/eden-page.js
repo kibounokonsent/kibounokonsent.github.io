@@ -1,7 +1,7 @@
 /* =========================================================
    龍の世界 / 悠久の楽園 ― ページの演出
    =========================================================
-   ・楽園と龍（Scratch作品）を軽量プレイヤーで再生する
+   ・龍の間：楽園と龍（Scratch作品）を軽量プレイヤーで再生する
    ・歓喜の歌を流す（ブラウザに自動再生を止められたら、ボタンで誘う）
    ・資料を読み進めるほど、龍がこちらを見てくる
    ========================================================= */
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const hero = document.getElementById("eden-hero");
     const lore = document.getElementById("eden-lore");
     const lastBlock = document.getElementById("lore-last");
-    const music = document.getElementById("music");
+    const musicEl = document.getElementById("music");
     const musicBtn = document.getElementById("music-toggle");
 
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
@@ -32,86 +32,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     ];
 
 
-    /* ---------- 音楽 ---------- */
+    /* ---------- 音楽（楽園の全ページ共通：eden-music.js） ---------- */
 
-    const MUSIC_KEY = "ryu-eden-music";
-    let musicWanted = true;
-
-    try {
-        musicWanted = localStorage.getItem(MUSIC_KEY) !== "off";
-    } catch (e) { /* 保存できない環境でも動かす */ }
-
-    let fadeTimer = null;
-
-    function fadeTo(target, ms) {
-
-        clearInterval(fadeTimer);
-
-        const start = music.volume;
-        const t0 = performance.now();
-
-        fadeTimer = setInterval(() => {
-            const k = Math.min(1, (performance.now() - t0) / ms);
-            music.volume = start + (target - start) * k;
-            if (k >= 1) {
-                clearInterval(fadeTimer);
-                if (target === 0) music.pause();
-            }
-        }, 50);
-
-    }
-
-    function setPressed(on) {
-        musicBtn.setAttribute("aria-pressed", on ? "true" : "false");
-    }
-
-    async function playMusic() {
-
-        try {
-            music.volume = 0;
-            await music.play();
-            fadeTo(0.8, 2500);
-            setPressed(true);
-            musicBtn.classList.remove("is-inviting");
-            return true;
-        } catch (e) {
-            // ブラウザが自動再生を止めた：ボタンを押してもらう
-            setPressed(false);
-            musicBtn.classList.add("is-inviting");
-            return false;
-        }
-
-    }
-
-    musicBtn.addEventListener("click", () => {
-
-        const on = musicBtn.getAttribute("aria-pressed") !== "true";
-
-        musicWanted = on;
-
-        try {
-            localStorage.setItem(MUSIC_KEY, on ? "on" : "off");
-        } catch (e) { /* 何もしない */ }
-
-        if (on) {
-            playMusic();
-        } else {
-            setPressed(false);
-            fadeTo(0, 800);
-        }
-
-    });
-
-    setPressed(false);
+    const music = EdenMusic.init(musicEl, musicBtn);
 
 
     /* ---------- 楽園の再生 ---------- */
 
-    const player = new EdenPlayer(canvas, EDEN_PROJECT, "../../assets/eden/");
+    // 画像の置き場所（ページの深さに合わせて、HTMLの data-assets で指定する）
+    const assetBase = body.dataset.assets || "../../assets/eden/";
+
+    const player = new EdenPlayer(canvas, EDEN_PROJECT, assetBase);
 
     // 曲はページ側の <audio> で流す（フリーBGMの歓喜の歌）
     player.sounds["歓喜の歌"] = () => {
-        if (musicWanted) playMusic();
+        music.start();
         return () => false;   // 曲はループし続けるので、終わりを待ち続ける
     };
     player.sounds["ポップ"] = () => null;

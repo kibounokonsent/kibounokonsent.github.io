@@ -1581,3 +1581,150 @@ body.leaving #world-sparks {
     }
 
 }
+
+
+/* =========================================================
+   見やすさの調整（2026-10 見直し）
+   ---------------------------------------------------------
+   演出はそのままに、文字の大きさ・濃さ・改行位置だけを整える。
+   ========================================================= */
+
+/* 日本語を文節の途中で改行しない／最終行に1文字だけ残さない */
+body {
+    word-break: auto-phrase;
+    text-wrap: pretty;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+/*
+ * 字間を広げた中央揃えの見出しは、最後の文字の後ろにも字間がつき、
+ * 左に寄って見える。字間と同じだけ左に余白を足して真ん中に戻す。
+ */
+.chapter-title h1 {
+    padding-left: 0.25em;
+}
+
+.entry-text h1 {
+    padding-left: 0.3em;
+}
+
+/* 「第一章」などの小見出し：小さく薄すぎて読めなかった */
+.chapter-title span {
+    font-size: 0.8rem;
+    letter-spacing: 0.4em;
+    padding-left: 0.4em;
+
+    opacity: 0.62;
+}
+
+/* 「― 楽園に眠る龍の言葉」 */
+#opening-quote span {
+    font-size: 0.82rem;
+    letter-spacing: 0.2em;
+
+    opacity: 0.68;
+}
+
+/* 世界への入口の短い文 */
+.entry-text p {
+    font-size: 0.95rem;
+    padding-left: 0.3em;
+
+    opacity: 0.72;
+}
+
+#world-enter {
+    padding: 1.2rem 3rem 1.2rem 3.2rem;
+
+    font-size: 0.95rem;
+
+    border-color: rgba(23, 23, 26, 0.42);
+}
+
+#world-enter:focus-visible {
+    outline: 1px solid rgba(23, 23, 26, 0.7);
+    outline-offset: 6px;
+}
+
+
+/* ---------- 冒頭：「下へ読み進める」ことをそっと伝える ---------- */
+
+#scroll-cue {
+    position: absolute;
+    left: 50%;
+    bottom: clamp(1.6rem, 6vh, 3.2rem);
+
+    z-index: 2;
+
+    margin: 0;
+
+    transform: translateX(-50%);
+
+    font-size: 0.72rem;
+    letter-spacing: 0.5em;
+    padding-left: 0.5em;
+
+    color: #eee;
+
+    opacity: 0;
+
+    pointer-events: none;
+
+    /* 冒頭の言葉が現れ終わってから（2s + 4s）、少し遅れて灯る */
+    animation: cueAppear 2.4s ease 6.8s forwards;
+}
+
+#scroll-cue::after {
+    content: "";
+
+    display: block;
+
+    width: 1px;
+    height: 38px;
+    margin: 0.9rem auto 0;
+
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), transparent);
+
+    animation: cueLine 2.6s ease-in-out infinite;
+}
+
+@keyframes cueAppear {
+    to { opacity: 0.5; }
+}
+
+@keyframes cueLine {
+    0%, 100% { transform: translateY(0); opacity: 0.35; }
+    50% { transform: translateY(8px); opacity: 1; }
+}
+
+
+@media (max-width: 600px) {
+
+    .chapter-title h1 {
+        letter-spacing: 0.18em;
+        padding-left: 0.18em;
+    }
+
+    .entry-text h1 {
+        padding-left: 0.15em;
+    }
+
+    #world-enter {
+        padding: 1.1rem 2.4rem 1.1rem 2.6rem;
+    }
+
+}
+
+@media (prefers-reduced-motion: reduce) {
+
+    #scroll-cue {
+        animation: none;
+        opacity: 0.5;
+    }
+
+    #scroll-cue::after {
+        animation: none;
+    }
+
+}

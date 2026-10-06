@@ -3,33 +3,40 @@
    DANGER LEVEL DATA
    danger-data.js
 
-   危険度アイコン画像は images/theos.png のように
-   ファイル名を合わせて置くと自動で表示される。
-   画像が無い間は代替のシンボル表示になる。
+   危険度アイコン（エンブレム）は各区分の image で指定する。
+     テオス       images/T.svg
+     キンディノス images/K.svg
+     エピメレイア images/E.svg
+     アスファレス images/A.svg
+   画像が読み込めない間は代替のシンボル表示になる。
 ========================================================== */
 
 const dangerLevels = {
 
     theos:{
         label:"テオス",
+        image:"images/T.svg",
         symbol:"Θ",
         emoji:"⚫"
     },
 
     kindynos:{
         label:"キンディノス",
+        image:"images/K.svg",
         symbol:"▲",
         emoji:"🔴"
     },
 
     epimeleia:{
         label:"エピメレイア",
+        image:"images/E.svg",
         symbol:"⬡",
         emoji:"🟡"
     },
 
     asphales:{
         label:"アスファレス",
+        image:"images/A.svg",
         symbol:"❖",
         emoji:"🟢"
     }
@@ -52,7 +59,7 @@ function dangerIconHtml(dangerKey, size){
 
     return `
     <span class="danger-icon" style="width:${s}px;height:${s}px;">
-        <img src="images/${dangerKey}.png" alt="${level.label}"
+        <img src="${level.image || ("images/" + dangerKey + ".svg")}" alt="${level.label}" draggable="false"
              onerror="this.style.display='none'; this.nextElementSibling.style.display='flex';">
         <span class="danger-icon-fallback">${level.symbol}</span>
     </span>`;
@@ -89,4 +96,18 @@ const requiredRankByDanger = {
 
 function getRankValue(rank){
     return rankOrder[rank] || 0;
+}
+
+
+/* ==========================================================
+   危険度エンブレムのパス（img src 用）
+========================================================== */
+
+function dangerImageSrc(dangerKey){
+
+    const level =
+        dangerLevels[dangerKey];
+
+    return level ? (level.image || "images/" + dangerKey + ".svg") : "";
+
 }

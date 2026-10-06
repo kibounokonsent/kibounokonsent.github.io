@@ -12,6 +12,8 @@
    ・画像は SVG（約50MB）を、必要な解像度の WebP（約4MB）に変換済み
    ・Scratch と同じく 1秒30回 の速さで動く
 
+   ※ 破壊之王の間（world/hakai/）も同じプレイヤーで再生している。
+
    使い方：
      const player = new EdenPlayer(canvas, EDEN_PROJECT, "assets/");
      await player.load();
@@ -155,9 +157,26 @@
 
     class EdenPlayer {
 
-        constructor(canvas, project, assetBase) {
+        constructor(canvas, project, assetBase, options = {}) {
 
             this.canvas = canvas;
+
+            /*
+             * alpha: true … 背景を透明にして描く（動かない層を別の絵として
+             *               下や上に重ね、毎フレームは動く層だけを描くときに使う）
+             */
+            this.alpha = Boolean(options.alpha);
+
+            // 描かない層の名前（動かない層を別に描いておくときに使う）
+            this.skipLayers = new Set();
+            this.skipStage = false;
+
+            // 行列は毎回作らず、1つを使い回す（ごみを出さない）
+            this.matrix = new Float32Array(9);
+            this.matrix[8] = 1;
+
+            // 「途中で待たないスクリプトか」の覚え書き
+            this.yieldCache = new Map();
             this.project = project;
             this.base = assetBase;
 
@@ -186,8 +205,9 @@
 
             const gl = this.canvas.getContext("webgl", {
                 premultipliedAlpha: true,
-                alpha: false,
-                antialias: false
+                alpha: this.alpha,
+                antialias: false,
+                powerPreference: "default"
             });
 
             if (!gl) {
@@ -199,7 +219,7 @@
 
             const files = new Set();
             this.project.targets.forEach((t) =>
-                t.costumes.forEach((c) => files.add(c.file))
+                t.costumes.forEach((c) => { if (c.file) files.add(c.file); })
             );
 
             this.textures = {};
@@ -244,7 +264,67 @@
 
             }));
 
+            this.buildMeshes();
             this.buildTargets();
+
+        }
+
+        /*
+         * 軽量化：コスチュームに「網目」（mesh）の情報があれば、絵の透明な
+         * 部分を描かずに済むよう、中身のあるマスだけを覆う形を作っておく。
+         * （網目は変換のときに画像から作ってある。無ければ四角形のまま）
+         */
+        buildMeshes() {
+
+            const gl = this.gl;
+
+            this.project.targets.forEach((t) => t.costumes.forEach((c) => {
+
+                if (!c.mesh || c.__mesh) return;
+
+                const g = c.mesh.g;
+                const v = [];
+
+                /*
+                 * 横に続くマスもまとめず、1マスずつ四角形にする。隣のマスと
+                 * 頂点をぴったり共有させることで、継ぎ目に髪の毛ほどの隙間や
+                 * 二重塗りが出ない（まとめると「T字の継ぎ目」ができてしまう）。
+                 */
+                c.mesh.runs.forEach(([x0, y, x1]) => {
+                    const v0 = y / g, v1 = (y + 1) / g;
+                    for (let x = x0; x < x1; x++) {
+                        const u0 = x / g, u1 = (x + 1) / g;
+                        v.push(
+                            u0, v0, u0, v0,  u1, v0, u1, v0,  u0, v1, u0, v1,
+                            u0, v1, u0, v1,  u1, v0, u1, v0,  u1, v1, u1, v1
+                        );
+                    }
+                });
+
+                const buf = gl.createBuffer();
+                gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+                gl.bufferData(gl.ARRAY_BUFFER, new Float32Array(v), gl.STATIC_DRAW);
+
+                c.__mesh = { buf, count: v.length / 4 };
+
+            }));
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, this.quadBuf);
+            this.boundBuf = this.quadBuf;
+
+        }
+
+        useBuffer(buf) {
+
+            if (this.boundBuf === buf) return;
+
+            const gl = this.gl;
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+            gl.vertexAttribPointer(this.aPos, 2, gl.FLOAT, false, 16, 0);
+            gl.vertexAttribPointer(this.aUv, 2, gl.FLOAT, false, 16, 8);
+
+            this.boundBuf = buf;
 
         }
 
@@ -283,8 +363,13 @@
                 0, 1, 0, 1,  1, 0, 1, 0,  1, 1, 1, 1
             ]), gl.STATIC_DRAW);
 
+            this.quadBuf = buf;
+            this.boundBuf = buf;
+
             const aPos = gl.getAttribLocation(prog, "a_pos");
             const aUv = gl.getAttribLocation(prog, "a_uv");
+            this.aPos = aPos;
+            this.aUv = aUv;
             gl.enableVertexAttribArray(aPos);
             gl.enableVertexAttribArray(aUv);
             gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 16, 0);
@@ -558,6 +643,13 @@
                 case "sensing_timer": return (performance.now() - this.timerStart) / 1000;
 
                 case "looks_costume": return this.field(b, "COSTUME");
+
+                case "looks_costumenumbername": {
+                    if (this.field(b, "NUMBER_NAME") === "name") {
+                        return t.def.costumes[t.costume]?.name ?? "";
+                    }
+                    return t.costume + 1;
+                }
                 case "motion_goto_menu": return this.field(b, "TO");
                 case "control_create_clone_of_menu": return this.field(b, "CLONE_OPTION");
                 case "sound_sounds_menu": return this.field(b, "SOUND_MENU");
@@ -596,6 +688,96 @@
             return inp ? inp[1] : null;
         }
 
+        /*
+         * 軽量化：そのスクリプトが途中で「待つ」（フレームをまたぐ）ことが
+         * 無いなら、ジェネレーターを作らずに普通の関数として一気に実行する。
+         * 毎フレーム何十回も通る「もし〜なら」の入れ子で、ごみが出なくなる。
+         */
+        canYield(id, t) {
+
+            const key = t.def.name + "\u0000" + id;
+
+            if (this.yieldCache.has(key)) return this.yieldCache.get(key);
+
+            this.yieldCache.set(key, true);   // 再帰の途中は「待つかも」とみなす
+
+            let result = false;
+            let cur = id;
+
+            while (cur && !result) {
+
+                const b = t.def.blocks[cur];
+
+                if (!b) break;
+
+                switch (b.o) {
+                    case "control_forever":
+                    case "control_repeat":
+                    case "control_repeat_until":
+                    case "control_wait":
+                    case "sound_playuntildone":
+                    case "control_delete_this_clone":
+                        result = true;
+                        break;
+                    case "control_if":
+                    case "control_if_else": {
+                        const a = this.substack(b, "SUBSTACK");
+                        const c = this.substack(b, "SUBSTACK2");
+                        result = (a && this.canYield(a, t)) || (c && this.canYield(c, t));
+                        break;
+                    }
+                    default:
+                        break;
+                }
+
+                cur = b.n;
+
+            }
+
+            this.yieldCache.set(key, result);
+            return result;
+
+        }
+
+        runSync(id, t) {
+
+            while (id) {
+
+                if (t.deleted) return;
+
+                const b = t.def.blocks[id];
+
+                if (!b) return;
+
+                if (b.o === "control_if") {
+                    if (bool(this.input(b, "CONDITION", t))) {
+                        const sub = this.substack(b, "SUBSTACK");
+                        if (sub) this.runSync(sub, t);
+                    }
+                } else if (b.o === "control_if_else") {
+                    const sub = bool(this.input(b, "CONDITION", t))
+                        ? this.substack(b, "SUBSTACK")
+                        : this.substack(b, "SUBSTACK2");
+                    if (sub) this.runSync(sub, t);
+                } else {
+                    // 待たない命令だけなので、ジェネレーターを1歩進めれば終わる
+                    this.exec(b, t).next();
+                }
+
+                id = b.n;
+
+            }
+
+        }
+
+        *runSub(sub, t) {
+            if (!this.canYield(sub, t)) {
+                this.runSync(sub, t);
+                return;
+            }
+            return yield* this.runStack(sub, t);
+        }
+
         *exec(b, t) {
 
             switch (b.o) {
@@ -606,7 +788,7 @@
                     const sub = this.substack(b, "SUBSTACK");
                     for (;;) {
                         if (sub) {
-                            if ((yield* this.runStack(sub, t)) === "stop") return "stop";
+                            if ((yield* this.runSub(sub, t)) === "stop") return "stop";
                         }
                         yield;
                     }
@@ -617,7 +799,7 @@
                     const sub = this.substack(b, "SUBSTACK");
                     for (let i = 0; i < n; i++) {
                         if (sub) {
-                            if ((yield* this.runStack(sub, t)) === "stop") return "stop";
+                            if ((yield* this.runSub(sub, t)) === "stop") return "stop";
                         }
                         yield;
                     }
@@ -628,7 +810,7 @@
                     const sub = this.substack(b, "SUBSTACK");
                     while (!bool(this.input(b, "CONDITION", t))) {
                         if (sub) {
-                            if ((yield* this.runStack(sub, t)) === "stop") return "stop";
+                            if ((yield* this.runSub(sub, t)) === "stop") return "stop";
                         }
                         yield;
                     }
@@ -638,7 +820,7 @@
                 case "control_if": {
                     if (bool(this.input(b, "CONDITION", t))) {
                         const sub = this.substack(b, "SUBSTACK");
-                        if (sub) return yield* this.runStack(sub, t);
+                        if (sub) return yield* this.runSub(sub, t);
                     }
                     return;
                 }
@@ -647,7 +829,7 @@
                     const sub = bool(this.input(b, "CONDITION", t))
                         ? this.substack(b, "SUBSTACK")
                         : this.substack(b, "SUBSTACK2");
-                    if (sub) return yield* this.runStack(sub, t);
+                    if (sub) return yield* this.runSub(sub, t);
                     return;
                 }
 
@@ -686,6 +868,14 @@
 
                 case "motion_gotoxy":
                     t.x = num(this.input(b, "X", t));
+                    t.y = num(this.input(b, "Y", t));
+                    return;
+
+                case "motion_setx":
+                    t.x = num(this.input(b, "X", t));
+                    return;
+
+                case "motion_sety":
                     t.y = num(this.input(b, "Y", t));
                     return;
 
@@ -873,19 +1063,33 @@
 
         }
 
-        render() {
+        render(only) {
 
             const gl = this.gl;
 
             if (!this.view) return;
 
-            gl.clearColor(0, 0, 0, 1);
+            if (this.alpha) {
+                gl.clearColor(0, 0, 0, 0);
+            } else {
+                gl.clearColor(0, 0, 0, 1);
+            }
             gl.clear(gl.COLOR_BUFFER_BIT);
+
+            const halfW = this.view.w / 2;
+            const halfH = this.view.h / 2;
 
             const sx = 2 / this.view.w;
             const sy = 2 / this.view.h;
 
             this.targets.forEach((t) => {
+
+                // only が渡されたときは、その層だけを描く（動かない層を焼き付けるとき）
+                if (only) {
+                    if (!only(t)) return;
+                } else {
+                    if (t.isStage ? this.skipStage : this.skipLayers.has(t.def.name)) return;
+                }
 
                 if (!t.isStage && !t.visible) return;
 
@@ -894,7 +1098,8 @@
 
                 const c = t.def.costumes[t.costume];
 
-                if (!c) return;
+                // 中身の無いコスチューム（大きさ0の空の絵）は描かない
+                if (!c || !c.file) return;
 
                 const tex = this.textures[c.file];
 
@@ -924,12 +1129,19 @@
                 const tx = cos * ax - sin * ay + px;
                 const ty = sin * ax + cos * ay + py;
 
+                // 画面の外に完全に出ている層は描かない
+                const ex = Math.abs(m00) + Math.abs(m10);
+                const ey = Math.abs(m01) + Math.abs(m11);
+                const cx = tx + (m00 + m10) / 2;
+                const cy = ty + (m01 + m11) / 2;
+                if (Math.abs(cx) - ex / 2 > halfW || Math.abs(cy) - ey / 2 > halfH) return;
+
                 // 列優先の mat3（clip = M * [u, v, 1]）
-                gl.uniformMatrix3fv(this.loc.u_matrix, false, new Float32Array([
-                    m00 * sx, m01 * sy, 0,
-                    m10 * sx, m11 * sy, 0,
-                    tx * sx, ty * sy, 1
-                ]));
+                const M = this.matrix;
+                M[0] = m00 * sx; M[1] = m01 * sy;
+                M[3] = m10 * sx; M[4] = m11 * sy;
+                M[6] = tx * sx;  M[7] = ty * sy;
+                gl.uniformMatrix3fv(this.loc.u_matrix, false, M);
 
                 const e = t.effects;
                 const bright = clampEffect("brightness", (e.brightness || 0)) / 100 + this.extra.tone;
@@ -944,7 +1156,16 @@
 
                 gl.activeTexture(gl.TEXTURE0);
                 gl.bindTexture(gl.TEXTURE_2D, tex);
-                gl.drawArrays(gl.TRIANGLES, 0, 6);
+
+                // 絵を歪める効果が無いときだけ、網目（中身のある部分）で描く
+                const mesh = c.__mesh;
+                if (mesh && !e.whirl && !e.fisheye && !e.pixelate) {
+                    this.useBuffer(mesh.buf);
+                    gl.drawArrays(gl.TRIANGLES, 0, mesh.count);
+                } else {
+                    this.useBuffer(this.quadBuf);
+                    gl.drawArrays(gl.TRIANGLES, 0, 6);
+                }
 
             });
 

@@ -229,7 +229,7 @@ body {
     height: 0;
 
     transform:
-        translateY(var(--shift, 0px))
+        translate(var(--offx, 0px), var(--shift, 0px))
         scale3d(var(--s), var(--s), var(--s))
         rotateX(var(--tilt))
         rotateZ(var(--spin));
@@ -340,7 +340,7 @@ body {
         rotateZ(calc(var(--spin) * -1))
         rotateX(calc(var(--tilt) * -1))
         translate(-50%, -50%)
-        translateY(var(--ldy, 0px));
+        translate3d(var(--ldx, 0px), var(--ldy, 0px), var(--lz, 0px));
 }
 
 .label {
@@ -1276,4 +1276,305 @@ body {
         animation: none;
     }
 
+}
+
+
+/* =========================================================
+   見やすさの調整（2026-10 見直し）
+   ========================================================= */
+
+body {
+    word-break: auto-phrase;
+    text-wrap: pretty;
+
+    -webkit-font-smoothing: antialiased;
+}
+
+/* ---------- 地図の文字 ---------- */
+
+/*
+ * 世界の名前は3Dの外（#label-layer）に描く（world.js の label() を参照）。
+ * 3D空間の中の .label は位置の目印なので見せない。
+ */
+#world-space .label {
+    visibility: hidden;
+}
+
+#label-layer {
+    position: absolute;
+    inset: 0;
+
+    z-index: 2;
+
+    pointer-events: none;
+
+    overflow: hidden;
+}
+
+.map-label {
+    position: absolute;
+    left: 0;
+    top: 0;
+
+    white-space: nowrap;
+
+    font-size: 13px;
+    letter-spacing: 0.26em;
+
+    color: rgba(244, 242, 236, 0.9);
+
+    text-shadow:
+        0 0 3px #000,
+        0 0 8px #000,
+        0 0 16px rgba(0, 0, 0, 0.9);
+
+    transition: opacity 1s ease, color 0.6s ease;
+
+    will-change: transform;
+}
+
+.map-label.is-dimmed {
+    opacity: 0.32;
+}
+
+.map-label.is-lit {
+    color: #fff;
+}
+
+.map-label.label-small {
+    font-size: 12px;
+    letter-spacing: 0.2em;
+}
+
+.map-label.label-river {
+    font-size: 11px;
+    letter-spacing: 0.35em;
+
+    color: rgba(240, 238, 232, 0.55);
+}
+
+.map-label.label-eden {
+    font-size: 15px;
+    letter-spacing: 0.4em;
+
+    color: #fdfdfb;
+
+    text-shadow:
+        0 0 12px rgba(255, 255, 255, 0.45),
+        0 0 3px #000,
+        0 0 8px rgba(0, 0, 0, 0.9);
+}
+
+.map-label.label-alias {
+    letter-spacing: 0.4em;
+
+    color: rgba(228, 228, 234, 0.8);
+}
+
+.map-label.label-abyss {
+    color: rgba(222, 150, 150, 0.85);
+}
+
+.map-label.label-soul {
+    color: rgba(196, 238, 248, 0.9);
+}
+
+.map-label.label-outside {
+    font-size: 11px;
+    letter-spacing: 0.45em;
+
+    color: rgba(185, 185, 195, 0.55);
+}
+
+/* 結晶の横に添える名前：結晶へ向かう細い線を引く */
+.label-side::before,
+.label-side::after {
+    content: "";
+
+    display: inline-block;
+
+    width: 22px;
+    height: 1px;
+
+    vertical-align: middle;
+
+    background: rgba(240, 238, 232, 0.45);
+}
+
+.label-side-l::before,
+.label-side-r::after {
+    display: none;
+}
+
+.label-side-l::after {
+    margin-left: 0.6em;
+}
+
+.label-side-r::before {
+    margin-right: 0.8em;
+}
+
+/* ---------- 画面の文字・操作 ---------- */
+
+#world-header-en {
+    font-size: 0.68rem;
+    letter-spacing: 0.42em;
+
+    opacity: 0.55;
+}
+
+#world-hint {
+    font-size: 0.78rem;
+    padding-left: 0.3em;
+}
+
+@keyframes hintAppear {
+    to { opacity: 0.62; }
+}
+
+#back-to-creation {
+    padding: 0.5rem 0.2rem;
+
+    font-size: 0.78rem;
+
+    opacity: 0.55;
+}
+
+#back-to-creation::before {
+    content: "← ";
+}
+
+#world-tip {
+    font-size: 0.8rem;
+}
+
+
+/* ---------- 情報パネル ---------- */
+
+#panel-close {
+    width: 2.75rem;
+    height: 2.75rem;
+    padding: 0;
+
+    opacity: 0.6;
+}
+
+#panel-close:focus-visible,
+#panel-link:focus-visible {
+    outline: 1px solid rgba(255, 255, 255, 0.6);
+    outline-offset: 4px;
+}
+
+#panel-eyebrow {
+    font-size: 0.7rem;
+    letter-spacing: 0.38em;
+
+    opacity: 0.6;
+}
+
+#panel-desc {
+    font-size: 0.95rem;
+
+    opacity: 0.86;
+}
+
+#panel-link {
+    font-size: 0.86rem;
+
+    border-color: rgba(255, 255, 255, 0.42);
+}
+
+#panel-soon {
+    font-size: 0.8rem;
+
+    opacity: 0.6;
+}
+
+
+@media (max-width: 700px) {
+
+    .map-label {
+        font-size: 12px;
+        letter-spacing: 0.14em;
+    }
+
+    .map-label.label-river,
+    .map-label.label-outside {
+        font-size: 10px;
+        letter-spacing: 0.2em;
+
+        opacity: 0.7;
+    }
+
+    .map-label.label-eden {
+        font-size: 13px;
+        letter-spacing: 0.3em;
+    }
+
+    .label-side::before,
+    .label-side::after {
+        width: 12px;
+    }
+
+    /* 下から出るパネル：後ろの地図が透けて文字に重ならないように */
+    #world-panel {
+        min-height: 0;
+
+        padding: 2.6rem 1.5rem calc(2rem + env(safe-area-inset-bottom));
+
+        background:
+            linear-gradient(
+                180deg,
+                rgba(0, 0, 0, 0),
+                rgba(0, 0, 0, 0.9) 2.2rem,
+                rgba(0, 0, 0, 0.96)
+            );
+    }
+
+    #panel-close {
+        top: -2rem;
+        right: -0.6rem;
+    }
+
+    #panel-name {
+        margin-bottom: 1rem;
+    }
+
+    #panel-desc {
+        font-size: 0.9rem;
+        line-height: 2;
+    }
+
+    #panel-link {
+        display: block;
+
+        text-align: center;
+    }
+
+    #world-header h1 {
+        font-size: 1.15rem;
+    }
+
+    /* スマホでも「はじまりへ戻る」を出す（下はヒントと重なるので右上へ） */
+    #back-to-creation {
+        display: block;
+
+        top: clamp(1.2rem, 3.5vh, 2.2rem);
+        right: clamp(1rem, 4vw, 1.6rem);
+        bottom: auto;
+        left: auto;
+
+        font-size: 0.74rem;
+        letter-spacing: 0.15em;
+    }
+
+}
+
+/* スマホでパネルを開いている間は、戻るリンクを控える */
+@media (max-width: 700px) {
+    #world-page:has(#world-panel.is-open) #back-to-creation {
+        opacity: 0;
+
+        pointer-events: none;
+    }
 }

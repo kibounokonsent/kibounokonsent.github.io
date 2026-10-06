@@ -779,7 +779,16 @@ function renderFiles(files){
             `<span class="file-name"></span>` +
             `<span class="file-state"></span>`;
 
-        item.querySelector(".file-glyph").textContent = glyph;
+        if(openable && file.type === "entity" && dangerLevels[file.danger]){
+            const glyphEl = item.querySelector(".file-glyph");
+            glyphEl.classList.add("glyph-emblem");
+            glyphEl.innerHTML =
+                `<img src="${dangerImageSrc(file.danger)}" alt="${dangerLevels[file.danger].label}" draggable="false"
+                      onerror="this.parentNode.classList.remove('glyph-emblem'); this.parentNode.textContent='${glyph}';">`;
+        }
+        else{
+            item.querySelector(".file-glyph").textContent = glyph;
+        }
         item.querySelector(".file-name").textContent = label;
         item.querySelector(".file-state").textContent = state;
 
@@ -882,7 +891,47 @@ function renderFileView(file){
 
     sheet.appendChild(text);
 
+    if(file.name === "Danger_Classification.txt"){
+        sheet.appendChild(buildDangerLegend());
+    }
+
     viewerContent.appendChild(sheet);
+
+}
+
+
+/* ==========================================================
+   危険度エンブレム一覧（危険度分類規程の末尾に添付）
+========================================================== */
+
+function buildDangerLegend(){
+
+    const codes = { theos:"D", kindynos:"R", epimeleia:"E", asphales:"S" };
+
+    const box =
+        document.createElement("div");
+
+    box.className = "danger-legend";
+
+    let html = `<div class="danger-legend-title">別表　危険度標章</div><div class="danger-legend-grid">`;
+
+    ["theos", "kindynos", "epimeleia", "asphales"].forEach(key=>{
+
+        const level = dangerLevels[key];
+        if(!level) return;
+
+        html += `<figure class="danger-legend-item danger-${key}">
+                    ${dangerIconHtml(key, 72)}
+                    <figcaption><span class="danger-legend-code">${codes[key]}</span>${level.label}</figcaption>
+                 </figure>`;
+
+    });
+
+    html += `</div>`;
+
+    box.innerHTML = html;
+
+    return box;
 
 }
 
@@ -918,13 +967,17 @@ function renderEntityView(entity){
 
     html += `<div class="dossier-band">${level ? level.label : ""}</div>`;
 
+    if(level){
+        html += `<div class="dossier-emblem" title="${level.label}">${dangerIconHtml(entity.danger, 84)}</div>`;
+    }
+
     html += `<div class="entity-id">${entity.id}</div>`;
 
     html += `<div class="entity-meta">`;
 
     html += `<div class="entity-meta-block">
                 <span class="entity-meta-label">危険度</span>
-                <span class="entity-meta-value">${dangerIconHtml(entity.danger, 26)} ${level ? level.label : ""}</span>
+                <span class="entity-meta-value">${dangerIconHtml(entity.danger, 28)} ${level ? level.label : ""}</span>
              </div>`;
 
     html += `<div class="entity-meta-block">
@@ -1177,6 +1230,7 @@ function showLockedEntity(file){
 
     viewerContent.innerHTML =
         `<div class="permission-error">
+            ${level ? `<div class="locked-emblem">${dangerIconHtml(file.danger, 64)}</div>` : ""}
             ACCESS DENIED<br><br>
             危険度：<br>${level ? level.label : ""}<br><br>
             必要クリアランス：<br>${requiredRank}<br><br>

@@ -1,0 +1,1220 @@
+<title>ROSTER 記録新報</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IM+Fell+English+SC&family=IM+Fell+English:ital@0;1&family=Shippori+Mincho:wght@400;600;800&family=Zen+Antique&family=Yuji+Syuku&family=UnifrakturCook:wght@700&display=swap">
+<style>
+/* 煙る工房（canvas）→ 上の机にコーヒー → 作業台の木目に広げた古新聞。室内のもやが全体に薄くかかる。 */
+:root{
+  --wall:#20150e;            /* 煤けた煉瓦壁 */
+  --wood:#3e2716;            /* 作業台 */
+  --paper:#e2d7ba;           /* 新聞用紙 */
+  --paper-shade:#cfc19c;     /* 紙の焼け */
+  --ink:#1b1814;             /* 活字の墨 */
+  --ink-soft:#4b4337;        /* かすれた活字 */
+  --brass:#8b5e1f;           /* 真鍮 */
+  --seal:#b4261b;            /* 朱肉 */
+  --coffee:#6a3b14;          /* コーヒー・浮き出た文字 */
+  --side-l:#8b3a2a; --side-h:#2e5560; --side-o:#5a4870; --side-m:#6d6648;
+  --f-mast:"UnifrakturCook","IM Fell English",serif;
+  --f-latin:"IM Fell English SC","IM Fell English",Georgia,serif;
+  --f-head:"Zen Antique","Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho",serif;
+  --ink-tex:none; --haze-tex:none;
+  color-scheme:dark;
+}
+html{background:var(--wall)}
+body{background:var(--wall);color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.9;overflow-x:hidden}
+a{color:inherit}
+:focus-visible{outline:2px solid var(--seal);outline-offset:2px}
+
+/* ── 室内のもや（全面・合成のみで動かす） ── */
+.haze{position:fixed;inset:-30%;pointer-events:none;background-image:var(--haze-tex);background-size:760px 760px;will-change:transform;animation:drift 90s linear infinite alternate}
+.haze.back{z-index:1;opacity:.55}
+.haze.front{z-index:4;opacity:.16;background-size:1100px 1100px;animation-duration:130s;animation-direction:alternate-reverse}
+@keyframes drift{from{transform:translate3d(0,0,0)}to{transform:translate3d(14%,-6%,0)}}
+
+/* ── 工房 ── */
+.scene{position:relative;height:clamp(320px,64vh,660px);background:var(--wall)}
+#workshop{display:block;width:100%;height:100%}
+
+/* コーヒー（上の机の上） */
+.mug{position:absolute;z-index:5;appearance:none;border:0;background:none;padding:0;cursor:pointer;width:74px;height:74px;transform:translateX(-50%)}
+.mug svg{width:100%;height:100%;overflow:visible;display:block}
+.mug .cup{transform-box:view-box;transform-origin:14px 74px;transition:transform .55s cubic-bezier(.5,-.3,.7,1)}
+.mug.tipped .cup{transform:rotate(-96deg) translate(-4px,2px)}
+.mug .pour{stroke-dasharray:120;stroke-dashoffset:120;opacity:0}
+.mug.tipped .pour{animation:pour .9s .35s ease-out forwards}
+@keyframes pour{0%{stroke-dashoffset:120;opacity:1}70%{stroke-dashoffset:0;opacity:1}100%{stroke-dashoffset:0;opacity:0}}
+.mug .puddle{transform-box:view-box;transform-origin:10px 76px;transform:scaleX(0);transition:transform .8s .45s ease-out}
+.mug.tipped .puddle{transform:scaleX(1)}
+.mug .steam{position:absolute;left:44%;bottom:78%;width:40px;height:70px;margin-left:-20px;pointer-events:none}
+.mug .steam i{position:absolute;bottom:0;left:40%;width:12px;height:34px;border-radius:50%;background:radial-gradient(rgba(240,230,215,.5),transparent 70%);animation:wisp 3.6s ease-in infinite;opacity:0}
+.mug .steam i:nth-child(2){left:15%;animation-delay:1.2s}
+.mug .steam i:nth-child(3){left:62%;animation-delay:2.4s}
+@keyframes wisp{0%{transform:translateY(8px) scaleX(.6);opacity:0}30%{opacity:.85}100%{transform:translateY(-58px) scaleX(1.7) rotate(14deg);opacity:0}}
+.mug.tipped .steam{display:none}
+.mug .tip{position:absolute;left:50%;top:100%;margin-top:12px;transform:translateX(-50%);white-space:nowrap;font-size:11.5px;letter-spacing:.18em;color:#f0d7ae;background:rgba(20,13,8,.78);padding:2px 9px;opacity:0;transition:opacity .2s;pointer-events:none}
+.mug:hover .tip,.mug:focus-visible .tip{opacity:1}
+
+/* ── 作業台 ── */
+.bench{position:relative;padding-inline:16px;padding-block:30px 90px;
+  background:
+    radial-gradient(ellipse 60% 900px at 50% 300px,rgba(255,196,120,.13),transparent 75%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='700'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.004 0.16' numOctaves='3' seed='4'/%3E%3CfeColorMatrix values='0 0 0 0 .32  0 0 0 0 .19  0 0 0 0 .09  0 0 0 .55 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E"),
+    linear-gradient(90deg,#3a2414,#46301c 30%,#3b2615 60%,#442d19);
+  background-color:var(--wood);
+  box-shadow:inset 0 16px 20px -12px rgba(0,0,0,.75)}
+.props{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.prop{position:absolute}
+.prop svg{display:block;overflow:visible}
+
+/* ── 紙面 ── */
+.paper-wrap{position:relative;z-index:2;max-width:900px;margin-inline:auto;transform:rotate(-.35deg)}
+.paper-wrap::before{content:"";position:absolute;inset:10px 6px -6px 10px;background:rgba(0,0,0,.5);box-shadow:0 22px 40px 6px rgba(0,0,0,.55);z-index:-1}
+.paper{position:relative;background-color:var(--paper);
+  background-image:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' seed='9'/%3E%3CfeColorMatrix values='0 0 0 0 .3  0 0 0 0 .24  0 0 0 0 .12  0 0 0 .2 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E"),
+    radial-gradient(ellipse at 0 0,rgba(130,95,40,.26),transparent 30%),
+    radial-gradient(ellipse at 100% 100%,rgba(120,85,35,.28),transparent 35%),
+    radial-gradient(ellipse at 100% 0,rgba(130,95,40,.16),transparent 25%),
+    linear-gradient(90deg,transparent 49.6%,rgba(90,70,35,.10) 50%,rgba(255,250,235,.12) 50.4%,transparent 51%);
+  padding:26px clamp(16px,4.2vw,46px) 40px;overflow:hidden}
+.crease{position:absolute;left:0;right:0;top:760px;height:26px;pointer-events:none;background:linear-gradient(180deg,transparent,rgba(80,60,30,.13) 48%,rgba(255,250,235,.35) 52%,transparent)}
+.ring,.stain{position:absolute;pointer-events:none}
+.stain{width:540px;height:540px;margin:-270px 0 0 -270px;opacity:0;transform:scale(.05);transition:transform 1.3s cubic-bezier(.15,.8,.25,1),opacity .35s ease;z-index:3}
+.stain.on{opacity:1;transform:scale(1)}
+.stain.gone{opacity:0;transition:opacity .8s ease}
+
+/* 題字まわり */
+.topline{display:flex;flex-wrap:wrap;justify-content:space-between;align-items:center;gap:8px 18px;font-size:12.5px;letter-spacing:.12em;color:var(--ink-soft);border-bottom:1px solid var(--ink);padding-bottom:7px}
+.topline .pg{font-family:var(--f-head);color:var(--ink);font-size:14px}
+.mast{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:12px;padding:8px 0 4px}
+.mast h1{margin:0;font-family:var(--f-mast);font-weight:700;font-size:clamp(58px,12vw,128px);line-height:.95;text-align:center;letter-spacing:.02em}
+.mast h1 a{text-decoration:none}
+.ear{border:1.5px solid var(--ink);padding:6px 8px;font-size:11.5px;line-height:1.55;text-align:center;max-width:9.5em;justify-self:start}
+.ear.r{justify-self:end}
+.ear b{display:block;font-family:var(--f-head);font-weight:400;font-size:15px;letter-spacing:.1em}
+.mast-sub{text-align:center;font-family:var(--f-head);font-size:clamp(15px,2.3vw,21px);letter-spacing:.55em;padding-left:.55em}
+.motto{text-align:center;font-family:"IM Fell English",serif;font-style:italic;font-size:13.5px;color:var(--ink-soft)}
+.rule2{border:0;border-top:4px double var(--ink);margin:8px 0 0}
+nav.sections{display:flex;flex-wrap:wrap;justify-content:center;border-bottom:1px solid var(--ink);margin-top:3px}
+nav.sections a{font-family:var(--f-latin);font-size:13.5px;letter-spacing:.14em;text-decoration:none;padding:6px 13px;display:flex;flex-direction:column;align-items:center;line-height:1.3}
+nav.sections a small{font-family:var(--f-body);font-size:10.5px;letter-spacing:.2em;color:var(--ink-soft)}
+nav.sections a[aria-current="page"]{background:var(--ink);color:var(--paper)}
+nav.sections a[aria-current="page"] small{color:var(--paper-shade)}
+nav.sections a:hover:not([aria-current="page"]){background:rgba(27,24,20,.08)}
+.mode button{appearance:none;border:1px solid var(--ink);background:transparent;font:inherit;color:var(--ink);cursor:pointer;display:flex;padding:0;letter-spacing:.08em}
+.mode button span{padding:2px 9px}
+.mode button[aria-pressed="false"] .off{background:var(--ink);color:var(--paper)}
+.mode button[aria-pressed="true"] .on{background:var(--coffee);color:var(--paper)}
+
+/* 活字 */
+.kicker{font-family:var(--f-latin);font-size:12.5px;letter-spacing:.2em;color:var(--brass)}
+h2,h3,h4{font-family:var(--f-head);font-weight:400;text-wrap:balance;margin:0;line-height:1.3;word-break:keep-all;overflow-wrap:anywhere}
+.deck{font-family:var(--f-body);font-weight:800;color:var(--ink-soft)}
+.date{font-size:12px;letter-spacing:.12em;color:var(--ink-soft);font-variant-numeric:tabular-nums}
+.more{display:inline-block;margin-top:6px;font-family:var(--f-latin);letter-spacing:.15em;font-size:12.5px;text-decoration:none;border-bottom:1px solid var(--ink)}
+.more:hover{color:var(--seal);border-color:var(--seal)}
+
+/* 一面 */
+.front{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);margin-top:18px}
+.front .lead{padding-right:22px;border-right:1px solid rgba(27,24,20,.5);min-width:0}
+.front .side{padding-left:20px;min-width:0}
+.lead h2{font-size:clamp(40px,7vw,76px);letter-spacing:.06em;line-height:1.1;margin:2px 0 4px}
+.lead h2 a{text-decoration:none}
+.lead .deck{font-size:clamp(15px,2vw,18px);border-top:1px solid var(--ink);border-bottom:1px solid var(--ink);padding:4px 0;margin-bottom:10px}
+.photo{margin:0 0 12px;border:1px solid rgba(27,24,20,.6);padding:3px}
+.photo canvas{display:block;width:100%;height:auto}
+.photo figcaption{font-size:11.5px;color:var(--ink-soft);padding:3px 2px 0}
+.cols{columns:2 15em;column-gap:24px;column-rule:1px solid rgba(27,24,20,.4)}
+.cols p{margin:0 0 .7em;text-indent:1em;text-align:justify}
+.cols p:first-child{text-indent:0}
+.cols p:first-child::first-letter{font-family:var(--f-head);font-size:3em;float:left;line-height:1;margin:5px 8px 0 0}
+.boxed{border:2px solid var(--ink);outline:1px solid var(--ink);outline-offset:3px;padding:14px 14px 12px;margin:4px 4px 20px}
+.boxed h3{font-size:23px;margin:4px 0}
+.boxed p{margin:0 0 4px;font-size:14px}
+.cat-figure{display:flex;justify-content:center;margin:4px 0}
+.index-list{list-style:none;margin:0;padding:0}
+.index-list li{border-top:1px dotted rgba(27,24,20,.6);padding:7px 0}
+.index-list a{text-decoration:none;font-family:var(--f-head);font-size:16px}
+.index-list a:hover{color:var(--seal)}
+.index-list .d{display:block;font-size:12.5px;color:var(--ink-soft);line-height:1.6}
+.column-band{border-top:4px double var(--ink);margin-top:22px;padding-top:10px;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:start}
+.vert{writing-mode:vertical-rl;height:19em;overflow-x:auto;overflow-y:hidden;max-width:100%;font-size:15px;line-height:1.85;min-width:0}
+.vert p{margin:0 0 0 .2em;text-indent:1em}
+.vert blockquote{margin:0 .4em;font-family:var(--f-head);font-size:16.5px;border-left:1px solid var(--ink);border-right:1px solid var(--ink);padding:0 .3em}
+.vert h4{font-size:15px;margin:0 .4em}
+.vert-title{writing-mode:vertical-rl;font-family:var(--f-head);font-size:28px;letter-spacing:.2em;border-left:2px solid var(--ink);padding-left:8px;height:19em;display:flex;flex-direction:column;justify-content:space-between}
+.vert-title small{font-family:var(--f-body);font-size:12px;letter-spacing:.3em;color:var(--ink-soft)}
+.vert-title a{text-decoration:none}
+.band{border-top:4px double var(--ink);margin-top:24px;padding-top:3px}
+.band-head{display:flex;justify-content:space-between;align-items:baseline;gap:12px;border-bottom:1px solid var(--ink);padding:2px 0 4px}
+.band-head h3{font-family:var(--f-latin);font-size:19px;letter-spacing:.18em}
+.band-head h3 small{font-family:var(--f-body);font-size:12.5px;letter-spacing:.2em;margin-left:10px;color:var(--ink-soft)}
+.band-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr))}
+.story{position:relative;padding:10px 14px 12px;border-left:1px solid rgba(27,24,20,.4);min-width:0}
+.story:first-child{border-left:0;padding-left:0}
+.story h4{font-size:19px;margin:2px 0 4px}
+.story h4 a{text-decoration:none}
+.story h4 a:hover{color:var(--seal)}
+.story p{margin:0;font-size:13.5px;line-height:1.75}
+.story .seal-img{position:absolute;right:4px;top:4px;width:56px}
+.ads{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,180px),1fr));gap:10px;margin-top:8px}
+.ad{padding:10px;text-align:center;font-size:12.5px;line-height:1.6}
+.ad b{display:block;font-family:var(--f-head);font-weight:400;font-size:18px;line-height:1.35;margin-bottom:4px}
+.ad .f{display:block;margin-top:4px;font-size:11.5px;letter-spacing:.15em;border-top:1px solid currentColor;padding-top:3px}
+.ad.plain{border:1px solid var(--ink)}
+.ad.inverse{background:var(--ink);color:var(--paper)}
+.ad.frame{border:3px double var(--ink);outline:1px solid var(--ink);outline-offset:-7px}
+
+/* 欄 */
+.sec-head{text-align:center;padding:18px 0 8px;border-bottom:1px solid var(--ink)}
+.sec-head h2{font-family:var(--f-latin);font-size:clamp(30px,5vw,46px);letter-spacing:.2em}
+.sec-head p{margin:2px 0 0;font-family:var(--f-head);font-size:18px;letter-spacing:.35em}
+.sec-intro{max-width:44em;margin:12px auto 0;text-align:center;font-size:14px;color:var(--ink-soft)}
+.chron{margin-top:18px}
+.chron h3{font-size:21px;margin-bottom:4px}
+.chron .scroll,.alignment .scroll{overflow-x:auto}
+.chron table{width:100%;border-collapse:collapse;font-size:14.5px}
+.chron td{border-top:1px dotted rgba(27,24,20,.55);padding:5px 10px;vertical-align:top}
+.chron td.y{white-space:nowrap;font-family:var(--f-head);width:7.5em;font-variant-numeric:tabular-nums}
+.chron tr.w td.y{color:var(--side-l)}
+.alignment{margin-top:20px}
+.alignment h3{font-size:21px}
+.chart{min-width:560px;font-size:13px}
+.chart .row{display:grid;grid-template-columns:7.5em 1fr;align-items:center;min-height:38px;border-top:1px dotted rgba(27,24,20,.5)}
+.chart .row a{font-family:var(--f-head);text-decoration:none}
+.track{position:relative;height:22px;background:repeating-linear-gradient(90deg,transparent 0 9px,rgba(27,24,20,.08) 9px 10px)}
+.seg{position:absolute;top:0;bottom:0;display:flex;align-items:center;padding-inline:6px;color:var(--paper);font-size:11.5px;white-space:nowrap;overflow:hidden;border-right:2px solid var(--paper)}
+.seg.L{background:var(--side-l)} .seg.H{background:var(--side-h)} .seg.O{background:var(--side-o)} .seg.M{background:var(--side-m)}
+.seg.hid{background:var(--ink-tex) center/100% 100% no-repeat;border-right:0}
+.axis{display:grid;grid-template-columns:7.5em 1fr;font-size:12px;color:var(--ink-soft);border-top:1px solid var(--ink);font-variant-numeric:tabular-nums}
+.axis .ticks{position:relative;height:22px}
+.axis .ticks span{position:absolute;top:3px;transform:translateX(-50%)}
+.legend{display:flex;flex-wrap:wrap;gap:6px 18px;font-size:12.5px;margin:6px 0 4px}
+.legend i{display:inline-block;width:14px;height:10px;margin-right:6px;vertical-align:middle}
+.note{font-size:12.5px;color:var(--ink-soft);margin:6px 0 0}
+
+/* 記事 */
+.crumb{font-family:var(--f-latin);font-size:13px;letter-spacing:.12em;margin-top:12px}
+.crumb a{text-decoration:none;border-bottom:1px solid rgba(27,24,20,.4)}
+.art-head{position:relative;text-align:center;padding:8px 0 12px;border-bottom:1px solid var(--ink)}
+.art-head h2{font-size:clamp(34px,6vw,62px);letter-spacing:.06em;margin:2px 0 6px}
+.art-head .deck{font-size:clamp(15px,2vw,18px)}
+.art{display:grid;grid-template-columns:minmax(0,1fr) 15em;gap:28px;margin-top:18px}
+.art.nofacts{grid-template-columns:minmax(0,1fr)}
+.art-body{columns:2 17em;column-gap:28px;column-rule:1px solid rgba(27,24,20,.4);min-width:0}
+.art-body p{margin:0 0 .85em;text-indent:1em;text-align:justify}
+.art-body h4{font-size:18px;margin:1em 0 .4em;break-after:avoid;border-bottom:1px solid rgba(27,24,20,.55);padding-bottom:2px}
+.art-body h4:first-child{margin-top:0}
+.art-body ul{margin:0 0 .85em;padding-left:1.3em}
+.art-body li::marker{content:"◆ ";color:var(--brass);font-size:.8em}
+.art-body blockquote{margin:.3em 0 1em;padding:9px 12px;border-top:2px solid var(--ink);border-bottom:2px solid var(--ink);font-family:var(--f-head);font-size:18px;text-align:center;break-inside:avoid}
+.art-body a,.facts a,.vert a,.boxed p a{text-decoration:underline;text-decoration-color:var(--brass);text-underline-offset:3px}
+.facts{border:2px solid var(--ink);padding:10px 13px;align-self:start;font-size:13.5px}
+.facts h4{font-family:var(--f-latin);letter-spacing:.18em;font-size:14px;text-align:center;border-bottom:1px solid var(--ink);padding-bottom:4px;margin-bottom:6px}
+.facts dl{margin:0;display:grid;grid-template-columns:auto 1fr;gap:4px 12px}
+.facts dt{color:var(--ink-soft);white-space:nowrap}
+.facts dd{margin:0;font-weight:600}
+.wartrack{margin-top:12px;border-top:1px solid var(--ink);padding-top:8px}
+.wartrack ol{list-style:none;margin:4px 0 0;padding:0}
+.wartrack li{display:grid;grid-template-columns:3.6em 1fr;gap:8px;padding:3px 0;border-top:1px dotted rgba(27,24,20,.45)}
+.chip{display:inline-block;width:9px;height:9px;margin-right:6px}
+.related{border-top:4px double var(--ink);margin-top:24px;padding-top:4px}
+
+/* ── 検閲（墨・印は起動時に一度だけ描いた画像を使う） ── */
+.ink{background:var(--ink-tex) center/100% 100% no-repeat;color:transparent;user-select:none;cursor:help;padding:0 .15em;box-decoration-break:clone;-webkit-box-decoration-break:clone}
+.censor{position:relative;margin:.3em 0 1em;break-inside:avoid;text-indent:0;min-height:64px}
+.censor .bars{display:grid;gap:9px;padding:8px 0}
+.censor .bars i{display:block;height:13px;background:var(--ink-tex) center/100% 100% no-repeat}
+.censor .seal-img{position:absolute;right:5%;top:50%;width:86px;margin-top:-43px}
+.censor.cut{min-height:76px}
+.censor.cut .hole{height:66px;margin:5px 0;background:
+  url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='120'%3E%3Cfilter id='w'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.006 0.2' numOctaves='3' seed='2'/%3E%3CfeColorMatrix values='0 0 0 0 .3  0 0 0 0 .18  0 0 0 0 .08  0 0 0 .7 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23w)'/%3E%3C/svg%3E"),#3a2414;
+  box-shadow:inset 0 4px 7px rgba(0,0,0,.75),inset 0 -1px 0 rgba(255,240,210,.15);
+  clip-path:polygon(1% 8%,6% 0,22% 6%,41% 1%,58% 7%,77% 0,93% 5%,100% 14%,98% 52%,100% 88%,90% 100%,71% 94%,52% 100%,33% 93%,15% 100%,3% 92%,0 55%)}
+.censor.cut .tag{position:absolute;left:12px;top:50%;transform:translateY(-50%) rotate(-2deg);background:var(--paper);border:1px solid var(--ink-soft);font-size:11px;letter-spacing:.2em;padding:1px 8px;color:var(--ink-soft);box-shadow:1px 2px 3px rgba(0,0,0,.35)}
+.seal-img{display:block;pointer-events:none;mix-blend-mode:multiply}
+.head-banned{display:grid;gap:12px;justify-items:center;padding:14px 0}
+.head-banned i{display:block;height:46px;width:min(80%,520px);background:var(--ink-tex) center/100% 100% no-repeat}
+.head-banned i+i{height:16px;width:min(60%,380px)}
+.art-head .seal-img{position:absolute;right:7%;top:18px;width:116px}
+.banned-note{text-align:center;font-size:13.5px;color:var(--ink-soft);margin-top:12px}
+
+/* ── 浮かび上がる記録 ── */
+.cens{background-image:linear-gradient(transparent 62%,rgba(106,59,20,.2) 62%)}
+.cens.emerge{animation:unink 1.8s ease both}
+@keyframes unink{0%{background-color:var(--ink);color:transparent}45%{background-color:rgba(27,24,20,.5);color:rgba(106,59,20,.3)}100%{background-color:transparent;color:inherit}}
+p.cens-p>span{background-image:linear-gradient(transparent 62%,rgba(106,59,20,.2) 62%)}
+.hidden-ink{color:var(--coffee);font-weight:800;letter-spacing:.06em;border-left:2px solid rgba(106,59,20,.5);padding-left:.6em;text-indent:0!important}
+.hidden-ink.emerge{animation:rise 2.6s ease both}
+@keyframes rise{0%{opacity:0;filter:blur(4px)}40%{opacity:.25;filter:blur(2px)}100%{opacity:1;filter:none}}
+
+footer.colophon{margin-top:28px;border-top:1px solid var(--ink);padding-top:7px;display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px;font-size:12px;color:var(--ink-soft);letter-spacing:.08em}
+
+@media (max-width:760px){
+  .front{grid-template-columns:minmax(0,1fr)}
+  .front .lead{padding-right:0;border-right:0}
+  .front .side{padding-left:0;margin-top:18px}
+  .art{grid-template-columns:minmax(0,1fr)}
+  .facts{order:-1}
+  .story{border-left:0;padding-left:0;border-top:1px dotted rgba(27,24,20,.5)}
+  .story:first-child{border-top:0}
+  .mast{grid-template-columns:1fr}
+  .ear{display:none}
+  nav.sections a{padding:5px 8px;font-size:12px}
+  .column-band{grid-template-columns:minmax(0,1fr)}
+  .vert-title{writing-mode:horizontal-tb;height:auto;border-left:0;border-bottom:2px solid var(--ink);padding:0 0 4px;flex-direction:row;align-items:baseline;font-size:22px;order:-1}
+  .paper-wrap{transform:none}
+  .bench{padding-top:110px}
+  .mug{width:58px;height:58px}
+  .haze.front{opacity:.1}
+}
+@media (prefers-reduced-motion:reduce){
+  .haze,.mug .steam i,.cens.emerge,.hidden-ink.emerge{animation:none!important}
+  .stain,.mug .cup,.mug .puddle{transition:none!important}
+}
+</style>
+
+<div class="haze back" aria-hidden="true"></div>
+<div class="haze front" aria-hidden="true"></div>
+
+<div class="scene" id="scene">
+  <canvas id="workshop" aria-hidden="true"></canvas>
+  <button class="mug" id="mug" type="button"></button>
+</div>
+
+<div class="bench" id="bench">
+  <div class="props" id="props" aria-hidden="true"></div>
+  <div class="paper-wrap">
+    <div class="paper" id="paper">
+      <div class="crease" aria-hidden="true"></div>
+      <div class="topline">
+        <span><span class="pg" id="pg">第一面</span>　統合暦記録集成 縮刷版</span>
+        <div class="mode" role="group" aria-label="ネタバレ表示">
+          <button id="spoiler" type="button" aria-pressed="false" title="机のコーヒーをこぼしても切り替わる"><span class="off">ネタバレなし</span><span class="on">ネタバレあり</span></button>
+        </div>
+      </div>
+      <header class="mast">
+        <div class="ear"><b>歯車戦争</b>統合暦四一二年<br>〜四六三年</div>
+        <h1><a href="#home">Roster</a></h1>
+        <div class="ear r"><b>蒸気と記録</b>記録に残る事実のみを掲ぐ</div>
+      </header>
+      <div class="mast-sub">歯車戦争記録新報</div>
+      <div class="motto">Of Steam, of Gears, and of Records Unresolved</div>
+      <hr class="rule2">
+      <nav class="sections" id="nav" aria-label="欄"></nav>
+      <main id="view"></main>
+      <footer class="colophon">
+        <span>本紙は記録に残る事実のみを掲げ、記録なき問いには答えを与えない。</span>
+        <span id="count"></span>
+      </footer>
+    </div>
+  </div>
+</div>
+
+<script src="articles.js"></script>
+
+<script>
+/* ── 起動時に一度だけ描く質感（墨・印・染み・もや） ── */
+window.TEX = (function(){
+"use strict";
+function rng(seed){ return function(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+function cvs(w, h){ var c = document.createElement("canvas"); c.width = w; c.height = h; return c; }
+
+/* 刷毛で塗った墨 */
+function inkTexture(){
+  var c = cvs(480, 52), x = c.getContext("2d"), R = rng(77);
+  x.fillStyle = "#1b1814";
+  var top = 6, bot = 46;
+  for (var i = 0; i < 480; i++){
+    top += (R() - .5) * 1.6; bot += (R() - .5) * 1.6;
+    top = Math.min(10, Math.max(2, top)); bot = Math.min(50, Math.max(42, bot));
+    var t = top, b = bot;
+    if (i < 14){ var k = i / 14; t += (1 - k) * 14 * R(); b -= (1 - k) * 14 * R(); }
+    if (i > 466){ var k2 = (480 - i) / 14; t += (1 - k2) * 16 * R(); b -= (1 - k2) * 16 * R(); }
+    x.fillRect(i, t, 1.3, b - t);
+  }
+  x.globalCompositeOperation = "destination-out";
+  for (var s = 0; s < 26; s++){
+    x.globalAlpha = .08 + R() * .18; x.lineWidth = .6 + R() * 1.4;
+    var y = 8 + R() * 36, x0 = R() * 300; x.beginPath(); x.moveTo(x0, y); x.lineTo(x0 + 60 + R() * 200, y + (R() - .5) * 2); x.stroke();
+  }
+  x.globalAlpha = 1;
+  return c.toDataURL();
+}
+
+/* 朱肉の印 */
+function sealImage(kind, seed){
+  var S = 240, c = cvs(S, S), x = c.getContext("2d"), R = rng(seed * 97 + 13);
+  var red = "rgb(" + (176 + (R() * 12 | 0)) + ",36,26)";
+  x.strokeStyle = red; x.fillStyle = red; x.textAlign = "center"; x.textBaseline = "middle";
+  var F = '"Yuji Syuku","Zen Antique",serif';
+  if (kind === "date"){
+    var cxp = S / 2, r = 104;
+    x.lineWidth = 10; x.beginPath(); x.arc(cxp, cxp, r, 0, 7); x.stroke();
+    x.lineWidth = 5;
+    [cxp - 30, cxp + 30].forEach(function(y){ var dx = Math.sqrt(r * r - (y - cxp) * (y - cxp)) - 3; x.beginPath(); x.moveTo(cxp - dx, y); x.lineTo(cxp + dx, y); x.stroke(); });
+    x.font = "48px " + F; x.fillText("検", cxp - 28, cxp - 64); x.fillText("閲", cxp + 28, cxp - 64);
+    x.font = "34px " + F; x.fillText("統合暦", cxp, cxp + 1);
+    x.font = "56px " + F; x.fillText("済", cxp, cxp + 66);
+  } else {
+    var ch = kind.split("");
+    x.lineWidth = 11; roundRect(x, 12, 12, S - 24, S - 24, 12); x.stroke();
+    x.lineWidth = 4; roundRect(x, 30, 30, S - 60, S - 60, 4); x.stroke();
+    x.font = "74px " + F;
+    x.fillText(ch[0], S * .69, S * .34); x.fillText(ch[1], S * .69, S * .68);
+    x.fillText(ch[2], S * .31, S * .34); x.fillText(ch[3], S * .31, S * .68);
+  }
+  /* かすれ */
+  x.globalCompositeOperation = "destination-out";
+  for (var i = 0; i < 1600; i++){ x.globalAlpha = .25 + R() * .75; x.beginPath(); x.arc(R() * S, R() * S, .4 + R() * 1.7, 0, 7); x.fill(); }
+  for (var j = 0; j < 5; j++){
+    var a = R() * 6.283, px = S / 2 + Math.cos(a) * S * .42, py = S / 2 + Math.sin(a) * S * .42, rr = 22 + R() * 36;
+    var g = x.createRadialGradient(px, py, 0, px, py, rr); g.addColorStop(0, "rgba(0,0,0,.75)"); g.addColorStop(1, "rgba(0,0,0,0)");
+    x.globalAlpha = 1; x.fillStyle = g; x.fillRect(px - rr, py - rr, rr * 2, rr * 2);
+  }
+  x.globalAlpha = 1; x.globalCompositeOperation = "source-over";
+  return c.toDataURL();
+}
+function roundRect(x, a, b, w, h, r){ x.beginPath(); x.moveTo(a + r, b); x.arcTo(a + w, b, a + w, b + h, r); x.arcTo(a + w, b + h, a, b + h, r); x.arcTo(a, b + h, a, b, r); x.arcTo(a, b, a + w, b, r); x.closePath(); }
+
+/* こぼれたコーヒーの染み */
+function blob(R, n, rad, cx0, cy0){
+  var p = [];
+  for (var i = 0; i < n; i++){ var a = i / n * 6.283, r = rad * (.78 + R() * .3 + Math.sin(a * 3 + R()) * .06); p.push([cx0 + Math.cos(a) * r, cy0 + Math.sin(a) * r * .86]); }
+  return p;
+}
+function trace(x, p){
+  var n = p.length; x.beginPath();
+  x.moveTo((p[n - 1][0] + p[0][0]) / 2, (p[n - 1][1] + p[0][1]) / 2);
+  for (var i = 0; i < n; i++){ var q = p[(i + 1) % n]; x.quadraticCurveTo(p[i][0], p[i][1], (p[i][0] + q[0]) / 2, (p[i][1] + q[1]) / 2); }
+  x.closePath();
+}
+function stainImage(seed){
+  var S = 540, c = cvs(S, S), x = c.getContext("2d"), R = rng(seed);
+  var p = blob(R, 30, 190, S / 2, S / 2);
+  var g = x.createRadialGradient(S / 2 - 30, S / 2 - 20, 20, S / 2, S / 2, 220);
+  g.addColorStop(0, "rgba(150,95,40,.16)"); g.addColorStop(.75, "rgba(132,80,30,.26)"); g.addColorStop(1, "rgba(118,68,24,.34)");
+  trace(x, p); x.fillStyle = g; x.fill();
+  x.lineJoin = "round";
+  trace(x, p); x.strokeStyle = "rgba(96,52,16,.42)"; x.lineWidth = 6; x.stroke();
+  trace(x, p); x.strokeStyle = "rgba(80,42,12,.5)"; x.lineWidth = 1.6; x.stroke();
+  var inner = blob(R, 18, 90, S / 2 + 30, S / 2 - 30);
+  trace(x, inner); x.fillStyle = "rgba(120,70,26,.12)"; x.fill(); x.strokeStyle = "rgba(96,52,16,.18)"; x.lineWidth = 3; x.stroke();
+  x.fillStyle = "rgba(110,62,22,.36)";
+  for (var k = 0; k < 16; k++){ var a = R() * 6.283, r = 210 + R() * 50, s = 2 + R() * 9; x.beginPath(); x.ellipse(S / 2 + Math.cos(a) * r, S / 2 + Math.sin(a) * r * .86, s, s * (.7 + R() * .3), a, 0, 7); x.fill(); }
+  return c.toDataURL();
+}
+
+/* 室内のもや */
+function hazeImage(){
+  var S = 512, c = cvs(S, S), x = c.getContext("2d"), R = rng(31);
+  for (var i = 0; i < 70; i++){
+    var px = R() * S, py = R() * S, r = 40 + R() * 150, a = .03 + R() * .07;
+    for (var ox = -1; ox <= 1; ox++) for (var oy = -1; oy <= 1; oy++){
+      var g = x.createRadialGradient(px + ox * S, py + oy * S, 0, px + ox * S, py + oy * S, r);
+      g.addColorStop(0, "rgba(214,196,168," + a + ")"); g.addColorStop(1, "rgba(214,196,168,0)");
+      x.fillStyle = g; x.fillRect(px + ox * S - r, py + oy * S - r, r * 2, r * 2);
+    }
+  }
+  return c.toDataURL();
+}
+
+var seals = {}, inkURL = "";
+function build(){
+  inkURL = inkTexture();
+  document.documentElement.style.setProperty("--ink-tex", 'url("' + inkURL + '")');
+  seals = {};
+  ["date", "閲覧禁止", "掲載差止"].forEach(function(k){ seals[k] = [0, 1, 2].map(function(v){ return sealImage(k, v + 1); }); });
+}
+build();
+document.documentElement.style.setProperty("--haze-tex", 'url("' + hazeImage() + '")');
+return {
+  build: build,
+  seal: function(kind, seed){ var arr = seals[kind] || seals.date; return arr[seed % arr.length]; },
+  stain: stainImage
+};
+})();
+</script>
+
+<script>
+/* ── 紙面 ── */
+(function(){
+"use strict";
+var A = (window.ROSTER && ROSTER.ARTICLES) || [];
+var CHRON = (window.ROSTER && ROSTER.CHRONOLOGY) || [];
+var ADS = (window.ROSTER && ROSTER.ADS) || [];
+var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+var SECTIONS = [
+  {key:"home",en:"HOME",jp:"一面"},
+  {key:"history",en:"HISTORY",jp:"歴史",intro:"スチームパンク時代の始まりから、戦後復興、ヒューバートへの改称まで。"},
+  {key:"nations",en:"NATIONS",jp:"国家",intro:"各国の成り立ちと、歯車戦争の中でどう動いたか。"},
+  {key:"people",en:"PEOPLE",jp:"人物",intro:"その時代をつくった人々の記録。"},
+  {key:"technology",en:"TECHNOLOGY",jp:"技術",intro:"蒸気機関、精密加工、そしてロストテクノロジー。"},
+  {key:"war",en:"WAR RECORD",jp:"戦記",intro:"統合暦四一二年から四六三年まで。どの国がいつ、どちらの側にあったか。"},
+  {key:"mystery",en:"MYSTERY",jp:"記録と謎",intro:"資料を読むほど増えていく、答えのない問い。"}
+];
+var KANJI = ["一","二","三","四","五","六","七","八","九","十"];
+var SIDE = {L:{name:"ラロネイア側",color:"var(--side-l)"},H:{name:"ヒルロンド側",color:"var(--side-h)"},O:{name:"ラロネイアと交戦",color:"var(--side-o)"},M:{name:"他国の管理下",color:"var(--side-m)"}};
+var WAR_FROM = 412, WAR_TO = 463;
+var byId = {}; A.forEach(function(a){ byId[a.id] = a; });
+var spoiler = false, emerging = false;
+try { spoiler = localStorage.getItem("roster-spoiler") === "1"; } catch(e){}
+
+function hash(s){ var h = 0; for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) | 0; return Math.abs(h); }
+function esc(s){ return String(s).replace(/[&<>"']/g, function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]; }); }
+function visible(a){ return a && (!a.spoiler || spoiler); }
+function inkSpan(n){ return '<span class="ink" title="ネタバレありで判読できる" aria-label="伏せ字">' + "　".repeat(Math.max(2, Math.min(n, 22))) + '</span>'; }
+function sealImg(kind, seed){ var r = (seed % 24) - 12; return '<img class="seal-img" alt="" src="' + TEX.seal(kind, seed) + '" style="transform:rotate(' + r + 'deg)">'; }
+function censorBlock(text, k){
+  var h = hash(text), kind = ["ink","cut","ban"][(k === undefined ? h : k) % 3];
+  var n = Math.max(2, Math.min(3, Math.ceil(text.length / 34)));
+  var w = [100, 93, 61], bars = "";
+  for (var i = 0; i < n; i++) bars += '<i style="width:' + w[(i + h) % 3] + '%"></i>';
+  if (kind === "cut") return '<div class="censor cut" aria-label="切り取られた記述"><div class="hole"></div><span class="tag">切取済</span></div>';
+  if (kind === "ban") return '<div class="censor" aria-label="閲覧禁止の記述"><div class="bars">' + bars + '</div>' + sealImg("閲覧禁止", h) + '</div>';
+  return '<div class="censor" aria-label="検閲された記述"><div class="bars">' + bars + '</div>' + sealImg("date", h) + '</div>';
+}
+function inline(s){
+  var h = esc(s);
+  h = h.replace(/\[\[([a-z0-9\-]+)(?:\|([^\]]+))?\]\]/g, function(_, id, label){
+    var a = byId[id], text = label || (a ? a.title : id);
+    if (a && !visible(a)) return inkSpan(text.length);
+    return '<a href="#' + (id === "war-record" ? "war" : id) + '">' + text + '</a>';
+  });
+  h = h.replace(/\{\{(.+?)\}\}/g, function(_, inner){
+    if (!spoiler) return inkSpan(inner.replace(/<[^>]+>/g, "").length);
+    return '<span class="cens' + (emerging ? " emerge" : "") + '">' + inner + '</span>';
+  });
+  return h;
+}
+function plain(s){ return String(s).replace(/\[\[([a-z0-9\-]+)(?:\|([^\]]+))?\]\]/g, function(_, id, l){ var a = byId[id]; if (a && !visible(a)) return "〓〓〓"; return l || (a ? a.title : id); }).replace(/\{\{(.+?)\}\}/g, function(_, m){ return spoiler ? m : "〓〓"; }); }
+function bodyHTML(lines){
+  var out = "", list = null;
+  function flush(){ if (list){ out += "<ul>" + list.join("") + "</ul>"; list = null; } }
+  lines.forEach(function(line){
+    if (line.indexOf("* ") === 0){ (list = list || []).push("<li>" + inline(line.slice(2)) + "</li>"); return; }
+    flush();
+    if (line.indexOf("## ") === 0) out += "<h4>" + inline(line.slice(3)) + "</h4>";
+    else if (line.indexOf("> ") === 0) out += "<blockquote>" + inline(line.slice(2)) + "</blockquote>";
+    else if (line.indexOf("!! ") === 0) out += spoiler ? '<p class="cens-p"><span class="cens' + (emerging ? " emerge" : "") + '">' + inline(line.slice(3)) + "</span></p>" : censorBlock(line);
+    else if (line.indexOf("%% ") === 0){ if (spoiler) out += '<p class="hidden-ink' + (emerging ? " emerge" : "") + '">' + inline(line.slice(3)) + "</p>"; }
+    else out += "<p>" + inline(line) + "</p>";
+  });
+  flush();
+  return out;
+}
+function excerpt(a, n){
+  var paras = (a.body || []).filter(function(l){ return !/^(## |> |\* |!! |%% )/.test(l); });
+  var t = plain(paras[0] || a.deck || "");
+  return t.length > n ? t.slice(0, n) + "……" : t;
+}
+function sectionOf(key){ for (var i = 0; i < SECTIONS.length; i++) if (SECTIONS[i].key === key) return SECTIONS[i]; return null; }
+function inSection(key){ return A.filter(function(a){ return a.section === key; }); }
+function storyHTML(a, text){
+  if (!visible(a)) return '<article class="story" title="ネタバレありで閲覧できる"><div class="date">' + esc(a.year || "　") + '</div><h4>' + inkSpan(a.title.length) + '</h4><p>本記事は掲載を差し止められている。</p>' + sealImg("掲載差止", hash(a.id)) + '</article>';
+  return '<article class="story"><div class="date">' + esc(a.year || "　") + '</div><h4><a href="#' + a.id + '">' + esc(a.title) + '</a></h4><p>' + text + '</p></article>';
+}
+
+var nav = document.getElementById("nav");
+function renderNav(current){
+  nav.innerHTML = SECTIONS.map(function(s){ return '<a href="#' + s.key + '"' + (s.key === current ? ' aria-current="page"' : "") + ">" + s.en + "<small>" + s.jp + "</small></a>"; }).join("");
+  var i = SECTIONS.findIndex(function(s){ return s.key === current; });
+  document.getElementById("pg").textContent = "第" + KANJI[Math.max(0, i)] + "面";
+}
+
+/* 一面の黒い猫（木版風） */
+var CAT = '<svg width="96" height="86" viewBox="0 0 96 86" aria-hidden="true"><path fill="#1b1814" d="M22 80c-6-18-2-36 12-45l-5-22c-.3-2 1.7-3 3-1.8L44 22c3-.8 6-.8 9 0l12-10.8c1.3-1.2 3.3-.2 3 1.8l-5 22c14 9 18 27 12 45z"/><path d="M73 78c12-2 18-11 15-22-1-4-6-4-6 0 1 8-3 13-10 14" fill="#1b1814"/><path d="M36 50c3-2 7-2 9 0M51 50c2-2 6-2 9 0" stroke="#e2d7ba" stroke-width="2.4" fill="none" stroke-linecap="round"/><path d="M30 66h36M34 72h28" stroke="rgba(226,215,186,.25)" stroke-width="1"/></svg>';
+
+function renderHome(){
+  var top = byId["gear-war"] || A[0];
+  var box = (spoiler && byId["black-cat"]) || byId["fereres"];
+  var col = A.filter(function(a){ return a.column && visible(a); })[0];
+  var h = '<section class="front"><article class="lead"><div class="kicker">' + sectionOf(top.section).en + (top.year ? " ・ " + esc(top.year) : "") + '</div>' +
+    '<h2><a href="#' + top.id + '">' + esc(top.title) + '</a></h2><div class="deck">' + inline(top.deck || "") + '</div>' +
+    '<figure class="photo"><canvas id="halftone" width="720" height="330"></canvas><figcaption>兵器製造所の内部。歯車機構と砲弾の搬送路（記録写真）</figcaption></figure>' +
+    '<div class="cols">' + bodyHTML(top.body.filter(function(l){ return l.indexOf("## ") !== 0; }).slice(0, 4)) + '</div><a class="more" href="#' + top.id + '">全文を読む →</a></article><aside class="side">';
+  if (box) h += '<div class="boxed"><div class="kicker">' + sectionOf(box.section).en + '</div><div class="cat-figure">' + CAT + '</div><h3>' + esc(box.title) + '</h3><p>' + esc(excerpt(box, 64)) + '</p><a class="more" href="#' + box.id + '">記録を読む →</a></div>';
+  h += '<div class="kicker">本号の主な記事</div><ul class="index-list">';
+  A.filter(function(a){ return a !== top && a !== box && a !== col && visible(a); }).slice(0, 6).forEach(function(a){
+    h += '<li><a href="#' + a.id + '">' + esc(a.title) + '</a><span class="d">' + inline(a.deck || "") + '</span></li>';
+  });
+  h += '</ul></aside></section>';
+  if (col) h += '<section class="column-band"><div class="vert">' + bodyHTML(col.body) + '</div><div class="vert-title"><a href="#' + col.id + '">' + esc(col.title) + '</a><small>小欄</small></div></section>';
+  SECTIONS.slice(1).forEach(function(s){
+    var items = inSection(s.key).filter(function(a){ return a !== top && a !== col; }).slice(0, 4);
+    if (!items.length) return;
+    h += '<section class="band"><div class="band-head"><h3>' + s.en + '<small>' + s.jp + '</small></h3><a class="more" href="#' + s.key + '">欄を開く →</a></div><div class="band-grid">';
+    items.forEach(function(a){ h += storyHTML(a, esc(excerpt(a, 50))); });
+    h += '</div></section>';
+  });
+  if (ADS.length) h += '<section class="band"><div class="band-head"><h3>ADVERTISEMENTS<small>広告</small></h3></div><div class="ads">' +
+    ADS.map(function(ad){ return '<div class="ad ' + esc(ad.style || "plain") + '"><b>' + esc(ad.head) + '</b>' + esc(ad.body || "") + (ad.foot ? '<span class="f">' + esc(ad.foot) + '</span>' : "") + '</div>'; }).join("") + '</div></section>';
+  return h;
+}
+function chronHTML(onlyWar, title){
+  var rows = CHRON.filter(function(c){ return !onlyWar || c.war; }).slice().sort(function(a, b){ return a.year - b.year; });
+  var h = '<section class="chron"><h3>' + title + '</h3><div class="scroll"><table><tbody>';
+  rows.forEach(function(c){
+    var t = c.spoiler ? (spoiler ? '<span class="cens' + (emerging ? " emerge" : "") + '">' + inline(c.text) + '</span>' : inkSpan(Math.min(18, Math.max(6, c.text.length)))) : inline(c.text);
+    h += '<tr' + (c.war ? ' class="w"' : "") + '><td class="y">統合暦' + String(c.year).padStart(3, "0") + '年</td><td>' + t + '</td></tr>';
+  });
+  return h + '</tbody></table></div></section>';
+}
+function pct(y){ return (y - WAR_FROM) / (WAR_TO - WAR_FROM) * 100; }
+function alignmentHTML(){
+  var h = '<section class="alignment"><h3>歯車戦争 陣営推移図</h3><div class="legend">';
+  Object.keys(SIDE).forEach(function(k){ h += '<span><i style="background:' + SIDE[k].color + '"></i>' + SIDE[k].name + '</span>'; });
+  if (!spoiler) h += '<span><i style="background:var(--ink)"></i>検閲された記録</span>';
+  h += '</div><div class="scroll"><div class="chart">';
+  A.filter(function(a){ return a.war && a.war.length; }).forEach(function(n){
+    h += '<div class="row"><a href="#' + n.id + '">' + esc(n.title) + '</a><div class="track">';
+    n.war.forEach(function(w){
+      var hid = w.spoiler && !spoiler;
+      h += '<div class="seg ' + (hid ? "hid" : w.side) + '" style="left:' + pct(w.from) + '%;width:' + (pct(w.to) - pct(w.from)) + '%" title="' + (hid ? "ネタバレありで判読できる" : esc(w.from + "年 " + (w.note || SIDE[w.side].name))) + '">' + (hid ? "" : w.from + "– " + SIDE[w.side].name) + '</div>';
+    });
+    h += '</div></div>';
+  });
+  h += '<div class="axis"><span></span><div class="ticks">';
+  [412, 420, 430, 440, 450, 463].forEach(function(y){ h += '<span style="left:' + pct(y) + '%">' + y + '</span>'; });
+  return h + '</div></div></div></div><p class="note">帯のない期間は、その国の陣営について記録がないことを示す。</p></section>';
+}
+function renderSection(key){
+  var s = sectionOf(key);
+  var h = '<header class="sec-head"><h2>' + s.en + '</h2><p>' + s.jp + '</p></header>';
+  if (s.intro) h += '<p class="sec-intro">' + esc(s.intro) + '</p>';
+  if (key === "war") h += alignmentHTML() + chronHTML(true, "戦時の主な出来事");
+  if (key === "history") h += chronHTML(false, "統合暦 年表");
+  var items = inSection(key);
+  h += '<section class="band"><div class="band-head"><h3>ARTICLES<small>記事 ' + items.length + '本</small></h3></div><div class="band-grid">';
+  items.forEach(function(a){ h += storyHTML(a, inline(a.deck || "")); });
+  return h + '</div></section>';
+}
+function renderArticle(a){
+  var s = sectionOf(a.section) || SECTIONS[0];
+  var h = '<div class="crumb"><a href="#home">HOME</a> ／ <a href="#' + s.key + '">' + s.en + '</a></div>';
+  if (!visible(a)){
+    h += '<header class="art-head"><div class="kicker">' + s.jp + '</div><div class="head-banned"><i></i><i></i></div>' + sealImg("掲載差止", hash(a.id)) + '</header>';
+    h += '<div class="art nofacts"><div class="art-body">' + (a.body || []).slice(0, 3).map(function(l, i){ return censorBlock(l + a.id, i); }).join("") + '</div></div>';
+    return h + '<p class="banned-note">本記事は掲載を差し止められている。紙面の大半が判読できない。</p>';
+  }
+  var hasFacts = (a.facts && a.facts.length) || (a.war && a.war.length);
+  h += '<header class="art-head"><div class="kicker">' + s.jp + (a.year ? " ・ " + esc(a.year) : "") + '</div><h2>' + esc(a.title) + '</h2><div class="deck">' + inline(a.deck || "") + '</div></header>';
+  h += '<div class="art' + (hasFacts ? "" : " nofacts") + '"><div class="art-body">' + bodyHTML(a.body || []) + '</div>';
+  if (hasFacts){
+    h += '<aside class="facts"><h4>RECORD</h4>';
+    if (a.facts && a.facts.length) h += '<dl>' + a.facts.map(function(f){ return '<dt>' + esc(f[0]) + '</dt><dd>' + inline(f[1]) + '</dd>'; }).join("") + '</dl>';
+    if (a.war && a.war.length){
+      h += '<div class="wartrack"><div class="kicker">歯車戦争での動き</div><ol>';
+      a.war.forEach(function(w){
+        var hid = w.spoiler && !spoiler;
+        h += '<li><b>' + w.from + '年</b><span>' + (hid ? inkSpan(7) : '<i class="chip" style="background:' + SIDE[w.side].color + '"></i>' + esc(w.note || SIDE[w.side].name)) + '</span></li>';
+      });
+      h += '</ol><a class="more" href="#war">陣営推移図へ →</a></div>';
+    }
+    h += '</aside>';
+  }
+  h += '</div>';
+  var rel = inSection(a.section).filter(function(x){ return x !== a; });
+  if (rel.length){
+    h += '<section class="related"><div class="band-head"><h3>' + s.en + '<small>同じ欄の記事</small></h3></div><div class="band-grid">';
+    rel.slice(0, 4).forEach(function(x){ h += storyHTML(x, inline(x.deck || "")); });
+    h += '</div></section>';
+  }
+  return h;
+}
+
+/* ── 網点写真：兵器製造所の内部を描き、45度の網点に置き換える ── */
+function drawHalftone(){
+  var cv = document.getElementById("halftone"); if (!cv) return;
+  var W = cv.width, H = cv.height, off = document.createElement("canvas"); off.width = W; off.height = H;
+  var o = off.getContext("2d");
+  var g = o.createLinearGradient(0, 0, 0, H); g.addColorStop(0, "#9a9a9a"); g.addColorStop(.6, "#6a6a6a"); g.addColorStop(1, "#2e2e2e");
+  o.fillStyle = g; o.fillRect(0, 0, W, H);
+  [150, 300, 450, 600].forEach(function(x){
+    o.fillStyle = "#f2f2f2"; o.beginPath(); o.moveTo(x - 34, 120); o.lineTo(x - 34, 40); o.arc(x, 40, 34, Math.PI, 0); o.lineTo(x + 34, 120); o.fill();
+    o.strokeStyle = "#555"; o.lineWidth = 3; o.beginPath(); o.moveTo(x, 6); o.lineTo(x, 120); o.moveTo(x - 34, 70); o.lineTo(x + 34, 70); o.stroke();
+    var b = o.createLinearGradient(x, 120, x + 90, 330); b.addColorStop(0, "rgba(255,255,255,.4)"); b.addColorStop(1, "rgba(255,255,255,0)");
+    o.fillStyle = b; o.beginPath(); o.moveTo(x - 34, 120); o.lineTo(x + 34, 120); o.lineTo(x + 150, 330); o.lineTo(x + 40, 330); o.fill();
+  });
+  o.fillStyle = "#2a2a2a"; o.fillRect(0, 140, W, 14);
+  for (var t = 0; t < W; t += 26){ o.beginPath(); o.moveTo(t, 140); o.lineTo(t + 13, 154); o.lineTo(t + 26, 140); o.strokeStyle = "#3a3a3a"; o.lineWidth = 2; o.stroke(); }
+  o.strokeStyle = "#222"; o.lineWidth = 3; o.beginPath(); o.moveTo(380, 154); o.lineTo(380, 220); o.stroke();
+  o.beginPath(); o.arc(380, 228, 9, -Math.PI * .2, Math.PI * 1.1); o.stroke();
+  o.fillStyle = "#3a3a3a"; o.fillRect(0, 262, W, H - 262);
+  o.fillStyle = "#1f1f1f"; o.fillRect(0, 262, W, 12);
+  for (var c = 0; c < 11; c++){
+    var sx = 30 + c * 64;
+    var sg = o.createLinearGradient(sx, 0, sx + 26, 0); sg.addColorStop(0, "#333"); sg.addColorStop(.4, "#bbb"); sg.addColorStop(1, "#222");
+    o.fillStyle = sg; o.fillRect(sx, 220, 26, 42); o.beginPath(); o.ellipse(sx + 13, 220, 13, 20, 0, Math.PI, 0); o.fill();
+    o.fillStyle = "#111"; o.fillRect(sx - 2, 252, 30, 5);
+  }
+  for (var r = 0; r < W; r += 22){ o.fillStyle = "#151515"; o.beginPath(); o.arc(r, 280, 6, 0, 7); o.fill(); }
+  function gear(x, y, R, T, col, hub){
+    o.save(); o.translate(x, y); o.beginPath();
+    for (var i = 0; i < T; i++){ var a = i / T * 6.283, w = 6.283 / T; [[a - w * .42, .84], [a - w * .26, 1], [a + w * .26, 1], [a + w * .42, .84]].forEach(function(p, k){ var X = Math.cos(p[0]) * R * p[1], Y = Math.sin(p[0]) * R * p[1]; if (!i && !k) o.moveTo(X, Y); else o.lineTo(X, Y); }); }
+    o.closePath(); o.fillStyle = col; o.fill();
+    o.fillStyle = hub; o.beginPath(); o.arc(0, 0, R * .66, 0, 7); o.fill();
+    o.fillStyle = col; for (var s = 0; s < 6; s++){ o.save(); o.rotate(s / 6 * 6.283); o.fillRect(-R * .06, 0, R * .12, R * .66); o.restore(); }
+    o.beginPath(); o.arc(0, 0, R * .2, 0, 7); o.fill(); o.fillStyle = "#888"; o.beginPath(); o.arc(0, 0, R * .07, 0, 7); o.fill();
+    o.restore();
+  }
+  gear(90, 250, 150, 26, "#141414", "#5a5a5a");
+  gear(250, 300, 64, 13, "#1c1c1c", "#4a4a4a");
+  for (var m = 0; m < 22; m++){ var mx = 420 + Math.sin(m) * 160 + m * 9, my = 200 - m * 7; var mg = o.createRadialGradient(mx, my, 0, mx, my, 50); mg.addColorStop(0, "rgba(220,220,220,.22)"); mg.addColorStop(1, "rgba(220,220,220,0)"); o.fillStyle = mg; o.fillRect(mx - 50, my - 50, 100, 100); }
+  var v = o.createRadialGradient(W / 2, H / 2, H * .3, W / 2, H / 2, W * .65); v.addColorStop(0, "rgba(0,0,0,0)"); v.addColorStop(1, "rgba(0,0,0,.55)");
+  o.fillStyle = v; o.fillRect(0, 0, W, H);
+  var img = o.getImageData(0, 0, W, H).data, c2 = cv.getContext("2d"), step = 5.2, ca = Math.cos(Math.PI / 4), sa = Math.sin(Math.PI / 4), D = Math.hypot(W, H);
+  c2.clearRect(0, 0, W, H); c2.fillStyle = "#e2d7ba"; c2.fillRect(0, 0, W, H); c2.fillStyle = "#1b1814";
+  for (var u = -D; u < D; u += step) for (var w2 = -D; w2 < D; w2 += step){
+    var x = W / 2 + u * ca - w2 * sa, y = H / 2 + u * sa + w2 * ca;
+    if (x < 0 || y < 0 || x >= W || y >= H) continue;
+    var i = ((y | 0) * W + (x | 0)) * 4, lum = (img[i] + img[i + 1] + img[i + 2]) / 765;
+    var rr = Math.sqrt(1 - lum) * step * .6; if (rr > .35){ c2.beginPath(); c2.arc(x, y, rr, 0, 6.283); c2.fill(); }
+  }
+}
+
+var view = document.getElementById("view"), lastKey = null;
+function render(){
+  var key = (location.hash || "#home").slice(1) || "home", html, navKey;
+  if (sectionOf(key)){ navKey = key; html = key === "home" ? renderHome() : renderSection(key); }
+  else if (byId[key]){ navKey = byId[key].section; html = renderArticle(byId[key]); }
+  else { navKey = "home"; html = renderHome(); }
+  renderNav(navKey);
+  view.innerHTML = html;
+  drawHalftone();
+  if (lastKey !== null && lastKey !== key){
+    var top = document.getElementById("paper").getBoundingClientRect().top + window.scrollY - 12;
+    if (Math.abs(window.scrollY - top) > 40) window.scrollTo(0, top);
+  }
+  lastKey = key; emerging = false;
+}
+
+/* ── コーヒー ── */
+var paper = document.getElementById("paper"), mug = document.getElementById("mug");
+mug.innerHTML =
+  '<svg viewBox="0 0 80 80" aria-hidden="true"><defs>' +
+  '<linearGradient id="cupg" x1="0" x2="1"><stop offset="0" stop-color="#9d9483"/><stop offset=".35" stop-color="#e9e1cf"/><stop offset=".7" stop-color="#cfc6b2"/><stop offset="1" stop-color="#8a8170"/></linearGradient>' +
+  '<radialGradient id="cofg" cx=".4" cy=".4"><stop offset="0" stop-color="#6b3c16"/><stop offset="1" stop-color="#2c1607"/></radialGradient></defs>' +
+  '<ellipse class="puddle" cx="40" cy="76" rx="34" ry="4" fill="#3a1d08" opacity=".85"/>' +
+  '<path class="pour" d="M14 36 C4 44 2 58 6 78" fill="none" stroke="#4a260b" stroke-width="5" stroke-linecap="round"/>' +
+  '<g class="cup"><ellipse cx="34" cy="74" rx="22" ry="4" fill="rgba(0,0,0,.45)"/>' +
+  '<path d="M54 34c13-2 14 20 1 22" fill="none" stroke="#bfb6a2" stroke-width="5.5" stroke-linecap="round"/>' +
+  '<path d="M12 30h44l-3 40c-.2 3-2.6 4.6-5.4 4.6H20.4c-2.8 0-5.2-1.6-5.4-4.6z" fill="url(#cupg)"/>' +
+  '<path d="M14 40h42M14.6 46h40.8" stroke="#6e2a1c" stroke-width="1.6" opacity=".7"/>' +
+  '<ellipse cx="34" cy="30" rx="22" ry="5" fill="#d9d1bf"/><ellipse cx="34" cy="30.6" rx="19" ry="3.6" fill="url(#cofg)"/>' +
+  '<path d="M20 34v30" stroke="rgba(255,255,255,.45)" stroke-width="2.4" stroke-linecap="round"/></g></svg>' +
+  '<span class="steam"><i></i><i></i><i></i></span><span class="tip"></span>';
+function syncUI(){
+  document.getElementById("spoiler").setAttribute("aria-pressed", spoiler ? "true" : "false");
+  mug.classList.toggle("tipped", spoiler);
+  mug.querySelector(".tip").textContent = spoiler ? "紙面を取り替える" : "コーヒーをこぼす";
+  mug.setAttribute("aria-label", spoiler ? "新しい紙面に取り替える（ネタバレなしに戻す）" : "机のコーヒーをこぼす（ネタバレありにする）");
+}
+function addStain(x, y, animate){
+  var el = document.createElement("img"); el.className = "stain"; el.alt = "";
+  el.src = TEX.stain(1 + Math.floor(Math.random() * 99999));
+  el.style.left = x + "px"; el.style.top = y + "px";
+  paper.appendChild(el);
+  if (animate && !reduce) requestAnimationFrame(function(){ requestAnimationFrame(function(){ el.classList.add("on"); }); });
+  else el.classList.add("on");
+}
+function toggle(fromMug){
+  var rect = paper.getBoundingClientRect();
+  if (!spoiler){
+    var x, y;
+    if (fromMug){
+      var m = mug.getBoundingClientRect();
+      x = Math.max(160, Math.min(rect.width - 160, m.left + m.width / 2 - rect.left));
+      y = 230;
+    } else {
+      x = rect.width * .68;
+      y = Math.max(220, Math.min(rect.height - 220, window.innerHeight * .45 - rect.top));
+    }
+    spoiler = true; syncUI();
+    setTimeout(function(){ addStain(x, y, true); }, fromMug && !reduce ? 650 : 0);
+    setTimeout(function(){ emerging = !reduce; render(); }, reduce ? 0 : (fromMug ? 1100 : 450));
+  } else {
+    spoiler = false; syncUI();
+    paper.querySelectorAll(".stain").forEach(function(s){ s.classList.add("gone"); setTimeout(function(){ s.remove(); }, 800); });
+    render();
+  }
+  try { localStorage.setItem("roster-spoiler", spoiler ? "1" : "0"); } catch(e){}
+}
+mug.addEventListener("click", function(){ toggle(true); });
+document.getElementById("spoiler").addEventListener("click", function(){ toggle(false); });
+window.placeMug = function(x, bottom){ mug.style.left = x + "px"; mug.style.bottom = bottom + "px"; };
+
+/* 古いコーヒーの輪じみ */
+(function(){
+  var c = document.createElement("canvas"); c.width = c.height = 170; var x = c.getContext("2d");
+  for (var i = 0; i < 3; i++){ x.beginPath(); x.ellipse(85 + i, 85 - i, 56 - i * 2, 54 - i, .2, 0, 7); x.strokeStyle = "rgba(120,72,28," + (.2 - i * .05) + ")"; x.lineWidth = 4 + i * 3; x.stroke(); }
+  x.beginPath(); x.arc(85, 85, 58, 4.1, 4.9); x.strokeStyle = "rgba(96,52,16,.28)"; x.lineWidth = 2; x.stroke();
+  var r = document.createElement("img"); r.className = "ring"; r.alt = ""; r.src = c.toDataURL(); r.style.right = "24px"; r.style.top = "160px"; r.width = 150;
+  paper.appendChild(r);
+})();
+
+/* 紙の縁 */
+(function(){
+  var pts = [], R = function(){ return (Math.random() * 3).toFixed(1); };
+  for (var x = 0; x <= 100; x += 2.5) pts.push(x + "% " + R() + "px");
+  for (var y = 0; y <= 100; y += 1.5) pts.push("calc(100% - " + R() + "px) " + y + "%");
+  for (var x2 = 100; x2 >= 0; x2 -= 2.5) pts.push(x2 + "% calc(100% - " + R() + "px)");
+  for (var y2 = 100; y2 >= 0; y2 -= 1.5) pts.push(R() + "px " + y2 + "%");
+  paper.style.clipPath = "polygon(" + pts.join(",") + ")";
+})();
+
+document.getElementById("count").textContent = "収録記事 " + A.length + "本";
+window.addEventListener("hashchange", render);
+syncUI(); render();
+if (spoiler){ var pr = paper.getBoundingClientRect(); addStain(pr.width * .7, 260, false); }
+
+/* 印の書体が届いたら描き直す */
+if (document.fonts && document.fonts.load){
+  Promise.race([
+    document.fonts.load('40px "Yuji Syuku"', "検閲済統合暦閲覧禁止掲載差止"),
+    new Promise(function(r){ setTimeout(r, 3000); })
+  ]).then(function(){ TEX.build(); render(); });
+}
+})();
+</script>
+
+<script>
+/* ── 作業台の道具（上から見たところ） ── */
+(function(){
+"use strict";
+var host = document.getElementById("props"), uid = 0;
+function gear(r, t, kind){
+  var id = "pg" + (uid++), c = kind === "steel" ? ["#e6e6e0", "#a3a39c", "#5c5c56"] : ["#f0c46a", "#b9842f", "#6d4813"];
+  var d = "", w = 6.283 / t, ri = r * .84;
+  for (var i = 0; i < t; i++){
+    var a = i * w;
+    [[a - w * .42, ri], [a - w * .25, r], [a + w * .25, r], [a + w * .42, ri]].forEach(function(p, k){ d += (i || k ? "L" : "M") + (Math.cos(p[0]) * p[1]).toFixed(1) + " " + (Math.sin(p[0]) * p[1]).toFixed(1); });
+  }
+  d += "Z";
+  for (var h = 0; h < 5; h++){ var ha = h / 5 * 6.283 + .3, hx = Math.cos(ha) * r * .5, hy = Math.sin(ha) * r * .5, hr = r * .15; d += "M" + (hx + hr).toFixed(1) + " " + hy.toFixed(1) + "a" + hr.toFixed(1) + " " + hr.toFixed(1) + " 0 1 0 " + (-hr * 2).toFixed(1) + " 0a" + hr.toFixed(1) + " " + hr.toFixed(1) + " 0 1 0 " + (hr * 2).toFixed(1) + " 0Z"; }
+  var s = r + 6;
+  return '<svg width="' + s * 2 + '" height="' + s * 2 + '" viewBox="' + -s + " " + -s + " " + s * 2 + " " + s * 2 + '"><defs><radialGradient id="' + id + '" cx=".38" cy=".32" r=".8"><stop offset="0" stop-color="' + c[0] + '"/><stop offset=".55" stop-color="' + c[1] + '"/><stop offset="1" stop-color="' + c[2] + '"/></radialGradient></defs>' +
+    '<path d="' + d + '" fill="rgba(0,0,0,.45)" transform="translate(4 6)" fill-rule="evenodd"/>' +
+    '<path d="' + d + '" fill="url(#' + id + ')" fill-rule="evenodd" stroke="' + c[2] + '" stroke-width=".8"/>' +
+    '<circle r="' + (r * .74).toFixed(1) + '" fill="none" stroke="rgba(0,0,0,.18)" stroke-width="' + (r * .05).toFixed(1) + '"/>' +
+    '<circle r="' + (r * .27).toFixed(1) + '" fill="url(#' + id + ')" stroke="rgba(0,0,0,.35)"/>' +
+    '<circle r="' + (r * .1).toFixed(1) + '" fill="#24160b"/>' +
+    '<path d="M' + (-r * .6).toFixed(1) + " " + (-r * .55).toFixed(1) + 'A' + (r * .82).toFixed(1) + " " + (r * .82).toFixed(1) + ' 0 0 1 ' + (r * .3).toFixed(1) + " " + (-r * .76).toFixed(1) + '" fill="none" stroke="rgba(255,250,225,.45)" stroke-width="1.5"/></svg>';
+}
+function wrench(){
+  var id = "w" + (uid++);
+  return '<svg width="260" height="70" viewBox="0 0 260 70"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5e5d58"/><stop offset=".3" stop-color="#d8d7d0"/><stop offset=".55" stop-color="#9b9a93"/><stop offset="1" stop-color="#4c4b46"/></linearGradient>' +
+    '<mask id="m' + id + '"><rect width="260" height="70" fill="#fff"/><path d="M232 26h40v18h-40z" fill="#000" transform="rotate(-15 236 35)"/><polygon points="40,35 35,43.7 25,43.7 20,35 25,26.3 35,26.3" fill="#000" transform="translate(-0 0)"/></mask></defs>' +
+    '<g transform="translate(4 6)" fill="rgba(0,0,0,.45)"><circle cx="30" cy="35" r="22"/><path d="M46 28L212 30v10L46 42z"/><circle cx="228" cy="35" r="24"/></g>' +
+    '<g mask="url(#m' + id + ')" fill="url(#' + id + ')"><circle cx="30" cy="35" r="22"/><path d="M46 27L212 29.5v11L46 43z"/><circle cx="228" cy="35" r="24"/></g>' +
+    '<path d="M70 31h120" stroke="rgba(0,0,0,.25)" stroke-width="1"/><text x="130" y="39.5" font-size="7.5" fill="rgba(0,0,0,.45)" font-family="Georgia,serif" text-anchor="middle" letter-spacing="2">19 · FORGED</text></svg>';
+}
+function shell(bullet){
+  var id = "s" + (uid++);
+  return '<svg width="122" height="34" viewBox="0 0 122 34"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#7d5a1e"/><stop offset=".3" stop-color="#f3cf7c"/><stop offset=".6" stop-color="#c39136"/><stop offset="1" stop-color="#6e4d16"/></linearGradient>' +
+    '<linearGradient id="c' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6b3418"/><stop offset=".3" stop-color="#e09a68"/><stop offset="1" stop-color="#5a2a12"/></linearGradient></defs>' +
+    '<ellipse cx="60" cy="30" rx="56" ry="3.5" fill="rgba(0,0,0,.4)"/>' +
+    '<rect x="2" y="5" width="6" height="22" rx="1.5" fill="url(#' + id + ')"/><path d="M8 7h66l10 3.5v11L74 25H8z" fill="url(#' + id + ')"/>' +
+    (bullet ? '<path d="M84 10.5h10c12 0 22 3 26 5.5-4 2.5-14 5.5-26 5.5H84z" fill="url(#c' + id + ')"/>' : '<ellipse cx="84" cy="16" rx="2" ry="5.5" fill="#2a1a08"/>') +
+    '<circle cx="3.5" cy="16" r="3" fill="#a07a34" stroke="rgba(0,0,0,.3)"/></svg>';
+}
+function watch(){
+  var id = "pw" + (uid++), ticks = "";
+  for (var i = 0; i < 60; i++){ var a = i / 60 * 6.283, l = i % 5 ? 2.5 : 6; ticks += '<line x1="' + (Math.cos(a) * 34).toFixed(1) + '" y1="' + (Math.sin(a) * 34).toFixed(1) + '" x2="' + (Math.cos(a) * (34 - l)).toFixed(1) + '" y2="' + (Math.sin(a) * (34 - l)).toFixed(1) + '" stroke="#2a2016" stroke-width="' + (i % 5 ? .6 : 1.4) + '"/>'; }
+  return '<svg width="170" height="200" viewBox="-60 -70 170 200"><defs><radialGradient id="' + id + '" cx=".35" cy=".3"><stop offset="0" stop-color="#f5d48a"/><stop offset=".6" stop-color="#b8862f"/><stop offset="1" stop-color="#6a4512"/></radialGradient></defs>' +
+    '<path d="M0 -50C10 -70 50 -60 60 -30S90 40 100 120" fill="none" stroke="#7a5a22" stroke-width="3.4" stroke-dasharray="5 2.4"/><path d="M0 -50C10 -70 50 -60 60 -30S90 40 100 120" fill="none" stroke="#e0b866" stroke-width="1.2" stroke-dasharray="5 2.4"/>' +
+    '<circle cx="4" cy="6" r="44" fill="rgba(0,0,0,.45)"/>' +
+    '<rect x="-6" y="-56" width="12" height="12" rx="3" fill="url(#' + id + ')"/><circle cx="0" cy="-52" r="9" fill="none" stroke="url(#' + id + ')" stroke-width="3"/>' +
+    '<circle r="44" fill="url(#' + id + ')"/><circle r="38" fill="#efe8d6" stroke="#7a5a22" stroke-width="1.5"/>' + ticks +
+    '<circle cy="16" r="7" fill="none" stroke="#9a8f78" stroke-width=".6"/>' +
+    '<path d="M0 0L-3 -24L0 -27L3 -24Z" fill="#1b1814"/><path d="M0 0L14 9" stroke="#1b1814" stroke-width="2.2" stroke-linecap="round"/><circle r="2.4" fill="#1b1814"/>' +
+    '<path d="M-26 -22A34 34 0 0 1 8 -33" fill="none" stroke="rgba(255,255,255,.7)" stroke-width="2.5" stroke-linecap="round"/></svg>';
+}
+function driver(){
+  var id = "d" + (uid++);
+  return '<svg width="220" height="40" viewBox="0 0 220 40"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#4a1f0e"/><stop offset=".3" stop-color="#b0623a"/><stop offset=".6" stop-color="#7a3a1c"/><stop offset="1" stop-color="#3a170a"/></linearGradient>' +
+    '<linearGradient id="t' + id + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#5a5a56"/><stop offset=".4" stop-color="#e2e2dc"/><stop offset="1" stop-color="#4a4a46"/></linearGradient></defs>' +
+    '<rect x="4" y="12" width="210" height="18" rx="9" fill="rgba(0,0,0,.4)" transform="translate(3 5)"/>' +
+    '<rect x="2" y="8" width="78" height="24" rx="11" fill="url(#' + id + ')"/>' +
+    '<path d="M14 13h56M14 20h58M14 27h56" stroke="rgba(0,0,0,.28)" stroke-width="1.4"/>' +
+    '<rect x="78" y="12" width="12" height="16" rx="2" fill="url(#t' + id + ')"/><rect x="90" y="17" width="110" height="6" fill="url(#t' + id + ')"/><path d="M200 16.5l16 2.2v2.6l-16 2.2z" fill="#6a6a66"/></svg>';
+}
+function nut(){
+  var id = "n" + (uid++);
+  return '<svg width="38" height="38" viewBox="-19 -19 38 38"><defs><linearGradient id="' + id + '" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#d4d3cc"/><stop offset="1" stop-color="#5a5953"/></linearGradient></defs><polygon points="15,2 8,14 -6,14 -13,2 -6,-10 8,-10" fill="rgba(0,0,0,.4)" transform="translate(2 3)"/><polygon points="14,0 7,12.1 -7,12.1 -14,0 -7,-12.1 7,-12.1" fill="url(#' + id + ')" stroke="#4a4944" stroke-width=".8"/><circle r="10" fill="none" stroke="rgba(255,255,255,.25)"/><circle r="5.5" fill="#2a1a0e"/><circle r="5.5" fill="none" stroke="#777" stroke-dasharray="1.2 1"/></svg>';
+}
+function blueprint(){
+  var lines = "";
+  for (var x = 14; x < 230; x += 14) lines += '<path d="M' + x + ' 10V158" stroke="rgba(220,235,255,.08)"/>';
+  for (var y = 14; y < 160; y += 14) lines += '<path d="M10 ' + y + 'H232" stroke="rgba(220,235,255,.08)"/>';
+  return '<svg width="250" height="180" viewBox="0 0 250 180"><rect x="6" y="10" width="236" height="160" fill="rgba(0,0,0,.45)"/><path d="M0 0H232L242 10V160H0Z" fill="#2b4a6b"/><path d="M232 0V10H242" fill="#1d3550"/>' + lines +
+    '<g fill="none" stroke="rgba(230,240,255,.75)" stroke-width="1.1"><path d="M30 60H170L196 64V76L170 80H30Z"/><path d="M60 60V80M100 60V80M140 60V80"/><circle cx="70" cy="112" r="24"/><circle cx="70" cy="112" r="5"/>' +
+    '<path d="M70 88V136M46 112H94M53 95L87 129M87 95L53 129"/><path d="M30 46H196M30 42V50M196 42V50" stroke-dasharray="3 2"/>' +
+    '<rect x="150" y="118" width="80" height="38"/><path d="M150 130H230M150 142H230M190 118V156"/></g>' +
+    '<text x="110" y="40" fill="rgba(230,240,255,.8)" font-size="8" font-family="Georgia,serif" text-anchor="middle" letter-spacing="1">— 1240 —</text></svg>';
+}
+var LEFT = [
+  {h: blueprint(), x: 10, y: 20, r: -8},
+  {h: gear(66, 18), x: 30, y: 40, r: 10},
+  {h: gear(30, 11, "steel"), x: 160, y: 150, r: 0},
+  {h: nut(), x: 196, y: 222, r: 12}, {h: nut(), x: 222, y: 244, r: 40},
+  {h: wrench(), x: 70, y: 380, r: 62},
+  {h: shell(true), x: 130, y: 640, r: -24}, {h: shell(true), x: 120, y: 676, r: -18}, {h: shell(false), x: 40, y: 760, r: 32},
+  {h: gear(44, 13), x: 30, y: 1080, r: 0}, {h: nut(), x: 150, y: 1150, r: 0}
+];
+var RIGHT = [
+  {h: watch(), x: 40, y: 30, r: 10},
+  {h: driver(), x: 10, y: 470, r: -58},
+  {h: gear(36, 12, "steel"), x: 100, y: 880, r: 0},
+  {h: shell(true), x: 40, y: 1220, r: 70}
+];
+var TOP = [ {h: gear(32, 11), x: 6, y: 14}, {h: nut(), x: 86, y: 40}, {h: shell(true), x: 120, y: 26, r: -8}, {h: shell(false), x: 128, y: 58, r: 6}, {h: nut(), x: 270, y: 30} ];
+function add(p, left, top, scale){
+  var d = document.createElement("div"); d.className = "prop"; d.innerHTML = p.h;
+  d.style.left = left + "px"; d.style.top = top + "px";
+  d.style.transform = "rotate(" + (p.r || 0) + "deg)" + (scale ? " scale(" + scale + ")" : ""); d.style.transformOrigin = "0 0";
+  host.appendChild(d);
+}
+function place(){
+  host.innerHTML = "";
+  var W = host.clientWidth, gut = (W - 900) / 2;
+  if (gut >= 150){
+    LEFT.forEach(function(p){ add(p, gut - 290 + p.x, p.y); });
+    RIGHT.forEach(function(p){ add(p, W - gut + 30 + p.x, p.y); });
+  } else {
+    TOP.forEach(function(p){ if (p.x < W - 40) add(p, p.x, p.y, .85); });
+  }
+}
+place();
+var t; window.addEventListener("resize", function(){ clearTimeout(t); t = setTimeout(place, 150); });
+})();
+</script>
+
+<script>
+/* ── 工房：壁・窓・機械・煙。30fpsに抑え、画面外では止める ── */
+(function(){
+"use strict";
+var cv = document.getElementById("workshop"), cx = cv.getContext("2d");
+var reduce = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+var W, H, DPR, bg, fg, L, puff, smoke = [], steam = [], motes = [], clouds = [], stacks = [], running = true, last = 0, t0 = performance.now();
+function rnd(seed){ return function(){ seed = (seed * 16807) % 2147483647; return (seed - 1) / 2147483646; }; }
+function layer(){ var c = document.createElement("canvas"); c.width = W * DPR; c.height = H * DPR; var x = c.getContext("2d"); x.scale(DPR, DPR); return {c: c, x: x}; }
+
+function gearSprite(r, t, pal){
+  var s = Math.ceil((r + 4) * 2 * DPR), c = document.createElement("canvas"); c.width = c.height = s;
+  var x = c.getContext("2d"); x.scale(DPR, DPR); x.translate(r + 4, r + 4);
+  var w = 6.283 / t, ri = r * .85;
+  x.beginPath();
+  for (var i = 0; i < t; i++){ var a = i * w; [[a - w * .42, ri], [a - w * .25, r], [a + w * .25, r], [a + w * .42, ri]].forEach(function(p, k){ var X = Math.cos(p[0]) * p[1], Y = Math.sin(p[0]) * p[1]; if (!i && !k) x.moveTo(X, Y); else x.lineTo(X, Y); }); }
+  x.closePath();
+  for (var h = 0; h < 6; h++){ var ha = h / 6 * 6.283, hx = Math.cos(ha) * r * .5, hy = Math.sin(ha) * r * .5; x.moveTo(hx + r * .14, hy); x.arc(hx, hy, r * .14, 0, 6.283, true); }
+  var g = x.createRadialGradient(-r * .35, -r * .4, r * .1, 0, 0, r * 1.1);
+  g.addColorStop(0, pal[0]); g.addColorStop(.6, pal[1]); g.addColorStop(1, pal[2]);
+  x.fillStyle = g; x.fill("evenodd");
+  x.lineWidth = 1; x.strokeStyle = "rgba(255,220,150,.35)"; x.stroke();
+  x.beginPath(); x.arc(0, 0, r * .74, 0, 6.283); x.strokeStyle = "rgba(0,0,0,.3)"; x.lineWidth = r * .04; x.stroke();
+  x.beginPath(); x.arc(0, 0, r * .24, 0, 6.283); x.fillStyle = pal[1]; x.fill(); x.strokeStyle = "rgba(0,0,0,.4)"; x.lineWidth = 1.5; x.stroke();
+  for (var b = 0; b < 4; b++){ var ba = b / 4 * 6.283 + .4; x.beginPath(); x.arc(Math.cos(ba) * r * .16, Math.sin(ba) * r * .16, r * .025 + .6, 0, 6.283); x.fillStyle = "#1a120b"; x.fill(); }
+  x.beginPath(); x.arc(0, 0, r * .08, 0, 6.283); x.fillStyle = "#120c07"; x.fill();
+  return {c: c, r: r + 4};
+}
+function cloudSprite(){
+  var s = 256, c = document.createElement("canvas"); c.width = c.height = s; var x = c.getContext("2d"), R = rnd(9);
+  for (var i = 0; i < 26; i++){ var px = 70 + R() * 116, py = 80 + R() * 96, r = 30 + R() * 50; var g = x.createRadialGradient(px, py, 0, px, py, r); g.addColorStop(0, "rgba(205,186,160,.22)"); g.addColorStop(1, "rgba(205,186,160,0)"); x.fillStyle = g; x.fillRect(px - r, py - r, r * 2, r * 2); }
+  return c;
+}
+
+function layout(){
+  var narrow = W < 700;
+  L = {
+    narrow: narrow,
+    win: narrow ? {x: W * .07, y: H * .12, w: W * .54, h: H * .64} : {x: W * .1, y: H * .1, w: Math.min(W * .34, 540), h: H * .68},
+    benchY: H * .84
+  };
+  var g = Math.max(44, Math.min(108, W * .072)), gx = narrow ? W * .84 : W * .8, gy = H * .4;
+  L.gears = [
+    {x: gx, y: gy, r: g, t: 18, dir: 1, pal: ["#c99a4a", "#7a5422", "#3a2610"]},
+    {x: gx - g * 1.6, y: gy + g * .66, r: g * .58, t: 10, dir: -1, pal: ["#b0aea6", "#6a6862", "#2e2d2a"]},
+    {x: gx + g * .48, y: gy - g * 1.53, r: g * .55, t: 10, dir: -1, pal: ["#d0a456", "#86602a", "#3e2a12"]},
+    {x: gx + g * 1.3, y: gy + g * .92, r: g * .62, t: 11, dir: -1, pal: ["#c99a4a", "#7a5422", "#3a2610"]}
+  ];
+  L.gears.forEach(function(G){ G.speed = .32 * (18 / G.t) * G.dir; G.sp = gearSprite(G.r, G.t, G.pal); });
+  L.tower = {x: L.win.x + L.win.w * .72, y: L.win.y + L.win.h * .5, r: L.win.w * .07};
+  L.towerSp = gearSprite(L.tower.r, 14, ["#5a3a30", "#3a2420", "#24140f"]);
+  L.gauge = {x: narrow ? W * .73 : W * .56, y: H * .19, r: narrow ? 19 : 28};
+  L.valve = {x: narrow ? W * .92 : W * .66, y: H * .63};
+  L.mugX = narrow ? W * .82 : W * .73;
+}
+
+function winPath(c, w){
+  var r = w.w / 2;
+  c.beginPath(); c.moveTo(w.x, w.y + w.h); c.lineTo(w.x, w.y + r * .6);
+  c.ellipse(w.x + r, w.y + r * .6, r, r * .6, 0, Math.PI, 0); c.lineTo(w.x + w.w, w.y + w.h); c.closePath();
+}
+
+function build(){
+  DPR = Math.min(1.5, window.devicePixelRatio || 1);
+  W = cv.clientWidth; H = cv.clientHeight;
+  cv.width = W * DPR; cv.height = H * DPR;
+  layout();
+  puff = puff || cloudSprite();
+  var B = layer(), s = B.x, R = rnd(2203), w = L.win;
+  bg = B.c;
+
+  /* 煉瓦 */
+  s.fillStyle = "#20150e"; s.fillRect(0, 0, W, H);
+  for (var y = 0, row = 0; y < H; y += 20, row++) for (var x = (row % 2) * -26; x < W; x += 52){
+    var v = 26 + R() * 22; s.fillStyle = "rgb(" + (v + 34 | 0) + "," + (v + 6 | 0) + "," + (v - 10 | 0) + ")"; s.fillRect(x + 1.5, y + 1.5, 49, 17);
+    if (R() < .08){ s.fillStyle = "rgba(0,0,0,.25)"; s.fillRect(x + 1.5, y + 1.5, 49, 17); }
+  }
+  for (var k = 0; k < 10; k++){ var sx = R() * W, sg = s.createLinearGradient(0, 0, 0, H * .7); sg.addColorStop(0, "rgba(0,0,0,.35)"); sg.addColorStop(1, "rgba(0,0,0,0)"); s.fillStyle = sg; s.fillRect(sx, 0, 20 + R() * 60, H * .7); }
+
+  /* 窓の外 */
+  s.save(); winPath(s, w); s.clip();
+  var sky = s.createLinearGradient(0, w.y, 0, w.y + w.h);
+  sky.addColorStop(0, "#2a2030"); sky.addColorStop(.5, "#6e4238"); sky.addColorStop(.82, "#cf8644"); sky.addColorStop(1, "#e8a85a");
+  s.fillStyle = sky; s.fillRect(w.x, w.y, w.w, w.h);
+  var sun = s.createRadialGradient(w.x + w.w * .3, w.y + w.h * .82, 4, w.x + w.w * .3, w.y + w.h * .82, w.w * .5);
+  sun.addColorStop(0, "rgba(255,220,150,.6)"); sun.addColorStop(1, "rgba(255,200,120,0)"); s.fillStyle = sun; s.fillRect(w.x, w.y, w.w, w.h);
+  stacks = [];
+  function skyline(base, minH, maxH, col, win, chim){
+    var x = w.x - 10;
+    while (x < w.x + w.w + 10){
+      var bw = w.w * (.05 + R() * .1), bh = w.h * (minH + R() * (maxH - minH));
+      s.fillStyle = col; s.fillRect(x, base - bh, bw, bh + 4);
+      if (R() < .4){ s.beginPath(); s.moveTo(x, base - bh); for (var q = 0; q < 3; q++){ s.lineTo(x + bw * (q + .8) / 3, base - bh - 10); s.lineTo(x + bw * (q + .8) / 3, base - bh); } s.lineTo(x + bw, base - bh); s.fill(); }
+      if (chim && R() < .5){ var cxp = x + bw * (.3 + R() * .4), ch = w.h * (.1 + R() * .16); s.fillRect(cxp - 3, base - bh - ch, 7, ch); s.fillRect(cxp - 5, base - bh - ch, 11, 3); stacks.push({x: cxp, y: base - bh - ch, rate: .5 + R() * .5}); }
+      if (win) for (var wy = base - bh + 6; wy < base - 4; wy += 9) for (var wx = x + 4; wx < x + bw - 4; wx += 7) if (R() < .12){ s.fillStyle = "rgba(255,190,90," + (.5 + R() * .4) + ")"; s.fillRect(wx, wy, 2.5, 4); }
+      x += bw + R() * 4;
+    }
+  }
+  skyline(w.y + w.h * .9, .18, .42, "#4a2f2a", false, true);
+  var haze = s.createLinearGradient(0, w.y + w.h * .5, 0, w.y + w.h); haze.addColorStop(0, "rgba(200,130,80,0)"); haze.addColorStop(1, "rgba(200,130,80,.35)");
+  s.fillStyle = haze; s.fillRect(w.x, w.y, w.w, w.h);
+  skyline(w.y + w.h, .1, .3, "#2a1b18", true, true);
+  s.strokeStyle = "#3a2622"; s.lineWidth = 3;
+  s.beginPath(); s.moveTo(w.x + w.w * .2, w.y + w.h); s.lineTo(w.x + w.w * .2, w.y + w.h * .3); s.lineTo(w.x + w.w * .5, w.y + w.h * .33); s.moveTo(w.x + w.w * .46, w.y + w.h * .33); s.lineTo(w.x + w.w * .46, w.y + w.h * .5); s.stroke();
+  s.restore();
+
+  /* 壁の図面と工具板 */
+  if (!L.narrow){
+    var bx = w.x + w.w + W * .05, by = H * .3, bw2 = Math.min(160, W * .11), bh2 = bw2 * 1.25;
+    s.save(); s.translate(bx + bw2 / 2, by + bh2 / 2); s.rotate(-.035); s.translate(-bw2 / 2, -bh2 / 2);
+    s.fillStyle = "rgba(0,0,0,.4)"; s.fillRect(4, 6, bw2, bh2);
+    s.fillStyle = "#2b4a6b"; s.fillRect(0, 0, bw2, bh2);
+    s.strokeStyle = "rgba(220,235,255,.09)"; s.lineWidth = 1;
+    for (var gx2 = 8; gx2 < bw2; gx2 += 8){ s.beginPath(); s.moveTo(gx2, 0); s.lineTo(gx2, bh2); s.stroke(); }
+    for (var gy2 = 8; gy2 < bh2; gy2 += 8){ s.beginPath(); s.moveTo(0, gy2); s.lineTo(bw2, gy2); s.stroke(); }
+    s.strokeStyle = "rgba(230,240,255,.75)"; s.lineWidth = 1;
+    s.strokeRect(5, 5, bw2 - 10, bh2 - 10);
+    var u = bw2 / 160;
+    s.beginPath(); s.moveTo(20 * u, 46 * u); s.lineTo(118 * u, 46 * u); s.lineTo(140 * u, 50 * u); s.lineTo(140 * u, 60 * u); s.lineTo(118 * u, 64 * u); s.lineTo(20 * u, 64 * u); s.closePath(); s.stroke();
+    [44, 74, 104].forEach(function(px){ s.beginPath(); s.moveTo(px * u, 46 * u); s.lineTo(px * u, 64 * u); s.stroke(); });
+    s.beginPath(); s.arc(50 * u, 104 * u, 22 * u, 0, 7); s.moveTo(55 * u, 104 * u); s.arc(50 * u, 104 * u, 5 * u, 0, 7); s.stroke();
+    for (var sp = 0; sp < 8; sp++){ var a = sp / 8 * 6.283; s.beginPath(); s.moveTo(50 * u + Math.cos(a) * 5 * u, 104 * u + Math.sin(a) * 5 * u); s.lineTo(50 * u + Math.cos(a) * 22 * u, 104 * u + Math.sin(a) * 22 * u); s.stroke(); }
+    s.setLineDash([3, 2]); s.beginPath(); s.moveTo(20 * u, 34 * u); s.lineTo(140 * u, 34 * u); s.stroke(); s.setLineDash([]);
+    s.strokeRect(96 * u, 150 * u, 52 * u, 34 * u); s.beginPath(); s.moveTo(96 * u, 162 * u); s.lineTo(148 * u, 162 * u); s.moveTo(96 * u, 173 * u); s.lineTo(148 * u, 173 * u); s.stroke();
+    s.fillStyle = "#b08a4a"; [[8, 6], [bw2 - 8, 6]].forEach(function(p){ s.beginPath(); s.arc(p[0], p[1], 3.5, 0, 7); s.fill(); });
+    s.restore();
+    var tx = bx - 10, ty = by + bh2 + 26, tw = bw2 + 30, th = H * .84 - ty - 18;
+    if (th > 60){
+      var wd = s.createLinearGradient(tx, 0, tx + tw, 0); wd.addColorStop(0, "#3a2414"); wd.addColorStop(.5, "#4a3019"); wd.addColorStop(1, "#33200f");
+      s.fillStyle = "rgba(0,0,0,.4)"; s.fillRect(tx + 4, ty + 5, tw, th); s.fillStyle = wd; s.fillRect(tx, ty, tw, th);
+      s.fillStyle = "#1c120a"; [[6, 6], [tw - 6, 6], [6, th - 6], [tw - 6, th - 6]].forEach(function(p){ s.beginPath(); s.arc(tx + p[0], ty + p[1], 2.4, 0, 7); s.fill(); });
+      [0, 1, 2, 3].forEach(function(n){
+        var hx = tx + 18 + n * (tw - 36) / 4, len = th * (.42 + n * .1), wdt = 5 + n;
+        s.fillStyle = "#1c120a"; s.fillRect(hx - 1, ty + 8, 2, 6);
+        s.save(); s.translate(hx, ty + 16);
+        s.fillStyle = "rgba(0,0,0,.35)"; s.fillRect(-wdt / 2 + 3, 3, wdt, len);
+        var st = s.createLinearGradient(-wdt / 2, 0, wdt / 2, 0); st.addColorStop(0, "#5a5a56"); st.addColorStop(.5, "#c6c5bd"); st.addColorStop(1, "#4a4a46");
+        s.fillStyle = st; s.fillRect(-wdt / 2, 0, wdt, len);
+        s.beginPath(); s.arc(0, 0, wdt * 1.1, 0, 7); s.fill();
+        s.fillStyle = "#3a2414"; s.beginPath(); s.arc(0, -1, wdt * .5, 0, 7); s.fill();
+        s.fillStyle = st; s.beginPath(); s.arc(0, len, wdt * 1.4, 0, 7); s.fill();
+        s.fillStyle = "#3a2414"; s.fillRect(-wdt * .55, len + wdt * .3, wdt * 1.1, wdt * 1.4);
+        s.restore();
+      });
+      var hx2 = tx + tw - 16, hl = th * .62;
+      s.fillStyle = "#1c120a"; s.fillRect(hx2 - 1, ty + 8, 2, 6);
+      var hd = s.createLinearGradient(hx2 - 3, 0, hx2 + 3, 0); hd.addColorStop(0, "#4a2c16"); hd.addColorStop(.5, "#8a5a32"); hd.addColorStop(1, "#3a2210");
+      s.fillStyle = hd; s.fillRect(hx2 - 3, ty + 14, 6, hl);
+      var hs = s.createLinearGradient(0, ty + 14 + hl, 0, ty + 26 + hl); hs.addColorStop(0, "#9a9a94"); hs.addColorStop(1, "#4a4a46");
+      s.fillStyle = hs; s.fillRect(hx2 - 13, ty + 12 + hl, 26, 12);
+    }
+  }
+
+  /* 配管 */
+  function pipeH(y, x0, x1, th){
+    var g = s.createLinearGradient(0, y - th / 2, 0, y + th / 2);
+    g.addColorStop(0, "#3a2a18"); g.addColorStop(.3, "#a07a40"); g.addColorStop(.55, "#6e5228"); g.addColorStop(1, "#24180e");
+    s.fillStyle = "rgba(0,0,0,.35)"; s.fillRect(x0, y - th / 2 + 4, x1 - x0, th);
+    s.fillStyle = g; s.fillRect(x0, y - th / 2, x1 - x0, th);
+    for (var x = x0 + 30; x < x1; x += 130){ var fg2 = s.createLinearGradient(0, y - th, 0, y + th); fg2.addColorStop(0, "#4a3820"); fg2.addColorStop(.4, "#9a7840"); fg2.addColorStop(1, "#2a1c0e"); s.fillStyle = fg2; s.fillRect(x, y - th / 2 - 4, 9, th + 8); s.fillStyle = "#1a120a"; s.beginPath(); s.arc(x + 4.5, y - th / 2 - 1, 1.3, 0, 7); s.arc(x + 4.5, y + th / 2 + 1, 1.3, 0, 7); s.fill(); }
+  }
+  function pipeV(x, y0, y1, th){
+    var g = s.createLinearGradient(x - th / 2, 0, x + th / 2, 0);
+    g.addColorStop(0, "#3a2a18"); g.addColorStop(.3, "#a07a40"); g.addColorStop(.55, "#6e5228"); g.addColorStop(1, "#24180e");
+    s.fillStyle = g; s.fillRect(x - th / 2, y0, th, y1 - y0);
+    for (var y = y0 + 60; y < y1; y += 150){ s.fillStyle = "#3a2a16"; s.fillRect(x - th / 2 - 4, y, th + 8, 8); }
+  }
+  pipeH(H * .19, L.gauge.x, W, 16);
+  pipeV(W - 30, 0, L.benchY, 20);
+  pipeH(L.valve.y, L.narrow ? W * .7 : w.x + w.w + 20, W - 30, 12);
+  pipeV(w.x - 30, 0, L.benchY, 12);
+  s.save(); s.translate(L.valve.x, L.valve.y - 22);
+  s.fillStyle = "#4a3820"; s.fillRect(-4, 4, 8, 14);
+  s.strokeStyle = "#8a2e20"; s.lineWidth = 4; s.beginPath(); s.arc(0, 0, 14, 0, 7); s.stroke();
+  for (var sp2 = 0; sp2 < 2; sp2++){ s.save(); s.rotate(sp2 * Math.PI / 2 + .3); s.beginPath(); s.moveTo(-14, 0); s.lineTo(14, 0); s.stroke(); s.restore(); }
+  s.fillStyle = "#5a1a10"; s.beginPath(); s.arc(0, 0, 4, 0, 7); s.fill();
+  s.restore();
+
+  /* 前景：窓枠と上の机 */
+  var F = layer(), f = F.x; fg = F.c;
+  f.save(); winPath(f, w); f.lineWidth = 16; f.strokeStyle = "#160d07"; f.stroke(); f.lineWidth = 2; f.strokeStyle = "rgba(210,160,100,.22)"; f.stroke(); f.clip();
+  f.strokeStyle = "#160d07"; f.lineWidth = 6;
+  for (var i = 1; i < 3; i++){ f.beginPath(); f.moveTo(w.x + w.w * i / 3, w.y); f.lineTo(w.x + w.w * i / 3, w.y + w.h); f.stroke(); }
+  for (var j = 1; j < 4; j++){ var yy = w.y + w.h * .2 + (w.h * .8) * j / 4; f.beginPath(); f.moveTo(w.x, yy); f.lineTo(w.x + w.w, yy); f.stroke(); }
+  f.fillStyle = "rgba(255,255,255,.05)"; f.beginPath(); f.moveTo(w.x + w.w * .55, w.y); f.lineTo(w.x + w.w * .7, w.y); f.lineTo(w.x + w.w * .3, w.y + w.h); f.lineTo(w.x + w.w * .15, w.y + w.h); f.fill();
+  f.restore();
+  var sill = f.createLinearGradient(0, w.y + w.h, 0, w.y + w.h + 12); sill.addColorStop(0, "#5a3a20"); sill.addColorStop(1, "#24160b");
+  f.fillStyle = sill; f.fillRect(w.x - 18, w.y + w.h, w.w + 36, 12);
+
+  var by2 = L.benchY;
+  var bench = f.createLinearGradient(0, by2, 0, H);
+  bench.addColorStop(0, "#7a5230"); bench.addColorStop(.06, "#5e3d22"); bench.addColorStop(.5, "#4a2f1a"); bench.addColorStop(1, "#3a2414");
+  f.fillStyle = bench; f.fillRect(0, by2, W, H - by2);
+  for (var gl = 0; gl < 40; gl++){ var gy3 = by2 + 4 + R() * (H - by2 - 4); f.strokeStyle = "rgba(30,16,6," + (.15 + R() * .2) + ")"; f.lineWidth = .6 + R(); f.beginPath(); f.moveTo(0, gy3); f.bezierCurveTo(W * .3, gy3 + (R() - .5) * 6, W * .6, gy3 + (R() - .5) * 6, W, gy3 + (R() - .5) * 4); f.stroke(); }
+  f.fillStyle = "rgba(255,215,160,.28)"; f.fillRect(0, by2, W, 1.5);
+  var sh = f.createLinearGradient(0, by2, 0, by2 + 18); sh.addColorStop(0, "rgba(0,0,0,.35)"); sh.addColorStop(1, "rgba(0,0,0,0)"); f.fillStyle = sh; f.fillRect(0, by2 + 2, W, 18);
+
+  /* 万力 */
+  var vx = W * (L.narrow ? .05 : .13), vs = L.narrow ? .7 : 1, top = by2 + 6;
+  f.save(); f.translate(vx, top); f.scale(vs, vs);
+  var iron = f.createLinearGradient(0, -60, 0, 0); iron.addColorStop(0, "#5a6064"); iron.addColorStop(.4, "#3a4044"); iron.addColorStop(1, "#202426");
+  f.fillStyle = "rgba(0,0,0,.4)"; f.beginPath(); f.ellipse(60, 4, 70, 6, 0, 0, 7); f.fill();
+  f.fillStyle = iron; f.fillRect(0, -14, 110, 14); f.fillRect(8, -54, 30, 44); f.fillRect(70, -46, 26, 36);
+  f.fillStyle = "#8a9094"; f.fillRect(8, -58, 30, 6); f.fillRect(70, -50, 26, 6);
+  f.strokeStyle = "rgba(0,0,0,.4)"; f.lineWidth = 1; for (var jx = 10; jx < 38; jx += 3){ f.beginPath(); f.moveTo(jx, -58); f.lineTo(jx, -52); f.stroke(); }
+  f.fillStyle = "#9a9a94"; f.fillRect(96, -34, 44, 7); f.fillRect(136, -52, 6, 42);
+  f.fillStyle = "#6a6a64"; f.beginPath(); f.arc(139, -52, 5, 0, 7); f.arc(139, -10, 5, 0, 7); f.fill();
+  f.fillStyle = "#c08a3a"; f.fillRect(38, -46, 32, 22);
+  f.restore();
+
+  /* 組み立て中の砲身 */
+  var px = W * (L.narrow ? .38 : .34), pl = W * (L.narrow ? .26 : .2), py = by2 + 4;
+  f.fillStyle = "rgba(0,0,0,.4)"; f.beginPath(); f.ellipse(px + pl / 2, py + 3, pl / 2 + 20, 5, 0, 0, 7); f.fill();
+  var pg = f.createLinearGradient(0, py - 22, 0, py);
+  pg.addColorStop(0, "#4a4844"); pg.addColorStop(.35, "#c8c4b8"); pg.addColorStop(.6, "#7a766e"); pg.addColorStop(1, "#2e2c28");
+  f.fillStyle = pg; f.beginPath(); f.moveTo(px, py - 24); f.lineTo(px + pl, py - 18); f.lineTo(px + pl, py - 2); f.lineTo(px, py); f.closePath(); f.fill();
+  f.fillStyle = "#3a3632"; [0, .18, .5].forEach(function(k){ f.fillRect(px + pl * k, py - 26 + k * 6, 7, 26 - k * 6); });
+  f.fillStyle = "#151412"; f.beginPath(); f.ellipse(px + pl, py - 10, 3, 7, 0, 0, 7); f.fill();
+  f.fillStyle = pg; f.fillRect(px - 22, py - 28, 24, 28);
+  f.fillStyle = "#b8893a"; f.fillRect(px - 16, py - 24, 3, 20);
+  /* 油差し */
+  if (!L.narrow){
+    var ox = W * .61, oy = by2 + 6;
+    var oc = f.createLinearGradient(ox - 18, 0, ox + 18, 0); oc.addColorStop(0, "#5a4220"); oc.addColorStop(.4, "#c4a050"); oc.addColorStop(1, "#4a3418");
+    f.fillStyle = "rgba(0,0,0,.4)"; f.beginPath(); f.ellipse(ox, oy, 24, 4, 0, 0, 7); f.fill();
+    f.fillStyle = oc; f.beginPath(); f.moveTo(ox - 20, oy); f.lineTo(ox - 16, oy - 26); f.quadraticCurveTo(ox, oy - 36, ox + 16, oy - 26); f.lineTo(ox + 20, oy); f.closePath(); f.fill();
+    f.strokeStyle = "#8a6a30"; f.lineWidth = 3; f.beginPath(); f.moveTo(ox + 6, oy - 30); f.lineTo(ox + 40, oy - 64); f.stroke();
+    f.strokeStyle = "rgba(0,0,0,.4)"; f.lineWidth = 1; f.beginPath(); f.ellipse(ox, oy - 2, 20, 3, 0, 0, Math.PI); f.stroke();
+  }
+  /* ボルト */
+  var bxs = W * (L.narrow ? .67 : .5);
+  for (var bt = 0; bt < 4; bt++){ var bxp = bxs + bt * 15 + R() * 6, byp = by2 + 10 + R() * 10; f.fillStyle = "rgba(0,0,0,.4)"; f.beginPath(); f.ellipse(bxp + 2, byp + 3, 5, 2, 0, 0, 7); f.fill(); f.fillStyle = "#8a8a84"; f.fillRect(bxp - 4, byp - 6, 8, 6); f.fillStyle = "#b0b0a8"; f.fillRect(bxp - 4, byp - 6, 8, 1.5); }
+
+  motes = []; var MR = rnd(5);
+  for (var m = 0; m < (L.narrow ? 22 : 46); m++) motes.push({x: w.x + w.w * MR() * 1.6, y: w.y + w.h * (.2 + MR() * .9), r: .6 + MR() * 1.3, ph: MR() * 6.283, sp: .1 + MR() * .25});
+  clouds = []; var CR = rnd(17);
+  for (var cl = 0; cl < 6; cl++) clouds.push({x: CR() * W, y: H * (.15 + CR() * .65), w: W * (.35 + CR() * .35), h: H * (.25 + CR() * .25), v: (.06 + CR() * .1) * (CR() < .5 ? -1 : 1), a: .35 + CR() * .35});
+
+  if (window.placeMug) window.placeMug(L.mugX, H - by2 - 10);
+}
+
+function frame(now){
+  if (!reduce && running) requestAnimationFrame(frame);
+  if (!reduce && now - last < 32) return;
+  var dt = Math.min(.1, (now - last) / 1000); last = now;
+  var t = (now - t0) / 1000, w = L.win;
+  cx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  cx.drawImage(bg, 0, 0, W, H);
+
+  cx.save(); winPath(cx, w); cx.clip();
+  var T = L.tower;
+  cx.fillStyle = "#3a2420"; cx.fillRect(T.x - T.r * .45, T.y, T.r * .9, w.y + w.h - T.y);
+  cx.save(); cx.translate(T.x, T.y); cx.rotate(t * .25); cx.drawImage(L.towerSp.c, -L.towerSp.r, -L.towerSp.r, L.towerSp.r * 2, L.towerSp.r * 2); cx.restore();
+  if (!reduce) stacks.forEach(function(st){ if (Math.random() < st.rate * .18 && smoke.length < 120) smoke.push({x: st.x, y: st.y, r: 3, a: .38, vx: 6 + Math.random() * 6, vy: -8 - Math.random() * 6}); });
+  for (var i = smoke.length - 1; i >= 0; i--){
+    var p = smoke[i]; p.x += p.vx * dt; p.y += p.vy * dt; p.r += 2.2 * dt; p.a -= .045 * dt;
+    if (p.a <= 0){ smoke.splice(i, 1); continue; }
+    cx.globalAlpha = p.a; cx.drawImage(puff, p.x - p.r * 2, p.y - p.r * 2, p.r * 4, p.r * 4);
+  }
+  cx.globalAlpha = 1;
+  cx.restore();
+
+  var br = .07 + Math.sin(t * .4) * .015;
+  var beam = cx.createLinearGradient(w.x, w.y, w.x + w.w * 1.4, L.benchY);
+  beam.addColorStop(0, "rgba(255,190,120," + br + ")"); beam.addColorStop(1, "rgba(255,190,120,0)");
+  cx.fillStyle = beam; cx.beginPath();
+  cx.moveTo(w.x + w.w * .15, w.y + w.h * .25); cx.lineTo(w.x + w.w * .95, w.y + w.h * .2); cx.lineTo(w.x + w.w * 1.9, L.benchY); cx.lineTo(w.x + w.w * .7, L.benchY); cx.closePath(); cx.fill();
+
+  L.gears.forEach(function(G, n){ cx.save(); cx.translate(G.x, G.y); cx.rotate(t * G.speed + n * .2); cx.drawImage(G.sp.c, -G.sp.r, -G.sp.r, G.sp.r * 2, G.sp.r * 2); cx.restore(); });
+
+  var gg = L.gauge;
+  cx.beginPath(); cx.arc(gg.x, gg.y, gg.r + 5, 0, 7); cx.fillStyle = "#8a6a3a"; cx.fill();
+  cx.beginPath(); cx.arc(gg.x, gg.y, gg.r, 0, 7); cx.fillStyle = "#e6dcc4"; cx.fill();
+  cx.strokeStyle = "#2a2016"; cx.lineWidth = 1.2;
+  for (var mm = 0; mm <= 10; mm++){ var a = Math.PI * .75 + mm / 10 * Math.PI * 1.5; cx.beginPath(); cx.moveTo(gg.x + Math.cos(a) * gg.r * .76, gg.y + Math.sin(a) * gg.r * .76); cx.lineTo(gg.x + Math.cos(a) * gg.r * .92, gg.y + Math.sin(a) * gg.r * .92); cx.stroke(); }
+  cx.strokeStyle = "#b4261b"; cx.lineWidth = 2.5; cx.beginPath(); cx.arc(gg.x, gg.y, gg.r * .84, Math.PI * 1.9, Math.PI * 2.25); cx.stroke();
+  var na = Math.PI * .75 + Math.PI * 1.5 * (.62 + Math.sin(t * 1.3) * .05 + Math.sin(t * 7) * .012);
+  cx.strokeStyle = "#1b1814"; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(gg.x, gg.y); cx.lineTo(gg.x + Math.cos(na) * gg.r * .8, gg.y + Math.sin(na) * gg.r * .8); cx.stroke();
+  cx.fillStyle = "#1b1814"; cx.beginPath(); cx.arc(gg.x, gg.y, 2.5, 0, 7); cx.fill();
+  cx.strokeStyle = "rgba(255,255,255,.35)"; cx.lineWidth = 1.5; cx.beginPath(); cx.arc(gg.x, gg.y, gg.r - 3, 3.6, 4.6); cx.stroke();
+
+  cx.drawImage(fg, 0, 0, W, H);
+
+  if (!reduce && Math.random() < .45) steam.push({x: L.valve.x + 18, y: L.valve.y - 4, r: 4, a: .32, vx: 30 + Math.random() * 30, vy: -22 - Math.random() * 20});
+  for (var s2 = steam.length - 1; s2 >= 0; s2--){
+    var q = steam[s2]; q.x += q.vx * dt; q.y += q.vy * dt; q.vx *= .97; q.r += 9 * dt; q.a -= .14 * dt;
+    if (q.a <= 0){ steam.splice(s2, 1); continue; }
+    cx.globalAlpha = q.a; cx.drawImage(puff, q.x - q.r * 2, q.y - q.r * 2, q.r * 4, q.r * 4);
+  }
+
+  clouds.forEach(function(c){
+    c.x += c.v * 60 * dt; if (c.x > W + c.w) c.x = -c.w; if (c.x < -c.w * 1.2) c.x = W + c.w * .2;
+    cx.globalAlpha = c.a; cx.drawImage(puff, c.x - c.w / 2, c.y - c.h / 2, c.w, c.h);
+  });
+  cx.globalAlpha = 1;
+
+  cx.fillStyle = "rgba(255,226,180,.75)";
+  motes.forEach(function(m){
+    m.x += Math.sin(t * m.sp + m.ph) * .25; m.y -= m.sp * .3; if (m.y < w.y) m.y = L.benchY - 10;
+    cx.globalAlpha = .25 + .45 * (Math.sin(t * 1.5 + m.ph) * .5 + .5);
+    cx.beginPath(); cx.arc(m.x, m.y, m.r, 0, 6.283); cx.fill();
+  });
+  cx.globalAlpha = 1;
+
+  var lx = W * .5 + Math.sin(t * .6) * 3, ly = H * .2;
+  cx.strokeStyle = "#0e0a07"; cx.lineWidth = 2; cx.beginPath(); cx.moveTo(W * .5, 0); cx.lineTo(lx, ly - 22); cx.stroke();
+  var sh2 = cx.createLinearGradient(lx - 34, 0, lx + 34, 0); sh2.addColorStop(0, "#1c1c1a"); sh2.addColorStop(.45, "#4a4a46"); sh2.addColorStop(1, "#1a1a18");
+  cx.fillStyle = sh2; cx.beginPath(); cx.moveTo(lx - 9, ly - 24); cx.lineTo(lx + 9, ly - 24); cx.lineTo(lx + 36, ly); cx.lineTo(lx - 36, ly); cx.closePath(); cx.fill();
+  var fl = .85 + Math.sin(t * 9) * .03 + Math.sin(t * 2.3) * .04;
+  var bulb = cx.createRadialGradient(lx, ly + 4, 1, lx, ly + 4, 70);
+  bulb.addColorStop(0, "rgba(255,228,170," + fl + ")"); bulb.addColorStop(.18, "rgba(255,180,90," + fl * .4 + ")"); bulb.addColorStop(1, "rgba(255,160,70,0)");
+  cx.fillStyle = bulb; cx.beginPath(); cx.arc(lx, ly + 4, 70, 0, 7); cx.fill();
+  var cone = cx.createLinearGradient(0, ly, 0, L.benchY);
+  cone.addColorStop(0, "rgba(255,200,130," + .1 * fl + ")"); cone.addColorStop(1, "rgba(255,200,130,0)");
+  cx.fillStyle = cone; cx.beginPath(); cx.moveTo(lx - 34, ly); cx.lineTo(lx + 34, ly); cx.lineTo(lx + 230, L.benchY); cx.lineTo(lx - 230, L.benchY); cx.closePath(); cx.fill();
+}
+
+var rt;
+window.addEventListener("resize", function(){ clearTimeout(rt); rt = setTimeout(function(){ build(); last = 0; if (reduce || !running) frame(performance.now()); }, 150); });
+build();
+if ("IntersectionObserver" in window){
+  new IntersectionObserver(function(es){ var vis = es[0].isIntersecting; if (vis && !running){ running = true; if (!reduce) requestAnimationFrame(frame); } else if (!vis) running = false; }).observe(cv);
+}
+requestAnimationFrame(frame);
+})();
+</script>

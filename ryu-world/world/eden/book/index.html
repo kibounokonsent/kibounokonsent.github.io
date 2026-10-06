@@ -1,0 +1,334 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>龍の書 ― 悠久の楽園 ― 龍の世界</title>
+
+    <!-- 楽園の枠（音楽を流し続ける外側のページ）の中で開く -->
+    <script src="../../../assets/js/eden-frame.js" data-place="book"></script>
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../../../assets/css/eden.css">
+    <link rel="stylesheet" href="../../../assets/css/eden-places.css">
+</head>
+
+<!--
+    このページは docs/build-book.py が docs/ryu-no-sho.txt から作っている。
+    本文を直すときは ryu-no-sho.txt を書き換えて、スクリプトを実行し直す。
+-->
+<body class="eden-place book-page" data-place="book">
+
+    <!-- 眠る龍の気配（ごく薄く） -->
+    <div class="place-backdrop" aria-hidden="true"></div>
+
+    <a id="back-to-map" href="../gate/index.html">悠久の楽園へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">歓喜の歌</span>
+    </button>
+
+    <audio id="music" src="../../../assets/eden/joy.mp3" loop preload="none"></audio>
+
+
+    <main class="place-page">
+
+        <header class="place-hero">
+            <p class="hero-en">THE BOOK OF RYŪ</p>
+            <h1>龍の書</h1>
+            <p class="place-lead">悠久の地と創造の理</p>
+        </header>
+
+        <div class="book-layout">
+
+            <!-- 目次（PCでは横に留まり、読んでいる章が光る） -->
+            <nav class="book-toc" aria-label="目次">
+                <p class="toc-title">目次</p>
+                <ol>
+                <li><a href="#ch1"><span>第一章</span>悠久の龍</a></li>
+                <li><a href="#ch2"><span>第二章</span>楽園</a></li>
+                <li><a href="#ch3"><span>第三章</span>原初の戦</a></li>
+                <li><a href="#ch4"><span>第四章</span>四つの流れ</a></li>
+                <li><a href="#ch5"><span>第五章</span>始まりの子ら</a></li>
+                <li><a href="#ch6"><span>第六章</span>失われし楽園</a></li>
+                <li><a href="#ch7"><span>第七章</span>人の時代</a></li>
+                <li><a href="#ch8"><span>第八章</span>エイリアス</a></li>
+                <li><a href="#ch9"><span>第九章</span>龍の理</a></li>
+                <li><a href="#ch10"><span>終章</span>帰郷</a></li>
+                </ol>
+            </nav>
+
+            <article class="book-text">
+
+                <blockquote class="book-opening">
+                    <p>「案ずるな。<br>我は常に汝の傍に在り。<br>光と闇を抱く者よ。<br>共に還ろう、悠久の地へ。」</p>
+                    <cite>― 楽園に眠る龍の言葉</cite>
+                </blockquote>
+
+            <section class="book-chapter" id="ch1">
+                <header class="chapter-head">
+                    <p class="chapter-num">第一章</p>
+                    <h2>悠久の龍</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>はじめに龍は在った。</p>
+                    <p>龍は光なり。</p>
+                    <p>龍は闇なり。</p>
+                    <p>光尽きぬ限り、<br>龍は滅びず。</p>
+                    <p>闇失われぬ限り、<br>龍は去らず。</p>
+                    <p>龍は神なり。</p>
+                    <p>神は龍なり。</p>
+                    <p>二つにして一つ。</p>
+                    <p>一つにして無数なり。</p>
+                    <p>人は龍を見ること能わず。</p>
+                    <p>ただ羽根のみが世界へ降る。</p>
+                    <p>羽根は見る者に応じて姿を変え、<br>夢を揺らし、<br>記憶を照らす。</p>
+                    <p>それを見た者は皆、<br>その美しさを語った。</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch2">
+                <header class="chapter-head">
+                    <p class="chapter-num">第二章</p>
+                    <h2>楽園</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>楽園はすべての中心なり。</p>
+                    <p>楽園はすべての外側なり。</p>
+                    <p>そこに時は流れず。</p>
+                    <p>過去も未来もなく、<br>ただ在るのみ。</p>
+                    <p>龍は楽園に眠る。</p>
+                    <p>天使たちはその傍らを巡り、<br>静かに見守る。</p>
+                    <p>死せる者は楽園へ還る。</p>
+                    <p>迷える魂も、<br>傷ついた魂も、<br>最後には楽園へ辿り着く。</p>
+                    <p>ゆえに人は言う。</p>
+                    <p class="book-voice">「死は終わりにあらず。」</p>
+                    <p class="book-voice">「還る時なり。」</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch3">
+                <header class="chapter-head">
+                    <p class="chapter-num">第三章</p>
+                    <h2>原初の戦</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>はじめ、<br>世界に境界は無かった。</p>
+                    <p>外なるものは自由に歩み、<br>世界は未だ定まらず。</p>
+                    <p>その頃、<br>大いなる争いが起きた。</p>
+                    <p>後の世で、<br>それは原初の戦と呼ばれる。</p>
+                    <p>龍は戦った。</p>
+                    <p>光は裂け。</p>
+                    <p>闇は燃えた。</p>
+                    <p>世界は幾度も砕かれた。</p>
+                    <p>やがて龍は力を尽くし、<br>深き眠りへと落ちた。</p>
+                    <p>龍は四つの流れと三枚の羽根を残した。</p>
+                    <p>四つの流れは世界へと注ぎ。</p>
+                    <p>三枚の羽根は地へと降りた。</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch4">
+                <header class="chapter-head">
+                    <p class="chapter-num">第四章</p>
+                    <h2>四つの流れ</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>四つの流れは世界を巡った。</p>
+                    <p>一つは命を育み。</p>
+                    <p>一つは知を授け。</p>
+                    <p>一つは創造を芽吹かせ。</p>
+                    <p>一つは魂の還る道となった。</p>
+                    <p>人はそれらを川と呼んだ。</p>
+                    <p>ラプラタ。</p>
+                    <p>ナイル。</p>
+                    <p>ドナウ。</p>
+                    <p>ガンジス。</p>
+                    <p>流れはやがて無数の世界を生み出した。</p>
+                    <p>その中でも、<br>ミスセオとフロンズは<br>大いなる世界として語られる。</p>
+                    <p>また、<br>流れ落ちた深淵は、<br>後にエイリアスと呼ばれた。</p>
+                    <p>創造の残響はそこへ沈み、<br>世界の礎となった。</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch5">
+                <header class="chapter-head">
+                    <p class="chapter-num">第五章</p>
+                    <h2>始まりの子ら</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>三枚の羽根は人の姿を得た。</p>
+                    <p>その名を、</p>
+                    <p>アダム。</p>
+                    <p>エバ。</p>
+                    <p>リリス。</p>
+                    <p>アダムは知恵の実を得た。</p>
+                    <p>エバは生命の実を得た。</p>
+                    <p>リリスは生けるものを愛した。</p>
+                    <p>アダムの知より、<br>最初の兄弟アベルとカインは人の世に生まれた。</p>
+                    <p>エバの命より、<br>最初の竜セツは生まれた。</p>
+                    <p>白き身に黒き紋を宿す竜であった。</p>
+                    <p>すべての竜はその血を継ぐ。</p>
+                    <p>リリスの愛より、<br>獣は生まれた。</p>
+                    <p>またリリスは天使を生み、<br>世界の守護を命じた。</p>
+                    <p>さらに四羽の神鳥を生んだ。</p>
+                    <p>不死鳥。</p>
+                    <p>朱雀。</p>
+                    <p>鳳凰。</p>
+                    <p>青の不死鳥。</p>
+                    <p>彼らは世界を巡り、<br>命あるものを見守る者となった。</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch6">
+                <header class="chapter-head">
+                    <p class="chapter-num">第六章</p>
+                    <h2>失われし楽園</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>はじめ、<br>人と竜は楽園に住んでいた。</p>
+                    <p>彼らの命は長く。</p>
+                    <p>その力は今より遥かに強かった。</p>
+                    <p>されど、<br>死は訪れた。</p>
+                    <p>竜は朽ち。</p>
+                    <p>獣は老いた。</p>
+                    <p>セツはその悲しみを受け入れられず、<br>神に背いた。</p>
+                    <p>その姿と名は失われたという。</p>
+                    <p>また、<br>リリスはアベルを深く愛した。</p>
+                    <p>その愛は海より深く。</p>
+                    <p>その愛は空より重かった。</p>
+                    <p>だが愛は歪み。</p>
+                    <p>リリスはカインにアベルを討たせた。</p>
+                    <p>アベルの魂は奪われ、<br>悪魔サタンとなった。</p>
+                    <p>されどサタンは、<br>愛ではなく憎しみをリリスへ返した。</p>
+                    <p>血は流れた。</p>
+                    <p>最初の殺人があった。</p>
+                    <p>人の心には悪意が芽吹いた。</p>
+                    <p>竜は理を失った。</p>
+                    <p>そして天使の中には堕ちる者も現れた。</p>
+                    <p>楽園は静かに乱れた。</p>
+                    <p>ゆえに神は、<br>人と竜を楽園より離した。</p>
+                    <p>されど見捨てはしなかった。</p>
+                    <p>魂はなお、<br>死の後に楽園へ還る。</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch7">
+                <header class="chapter-head">
+                    <p class="chapter-num">第七章</p>
+                    <h2>人の時代</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>カインは地を歩いた。</p>
+                    <p>そして都市を築いた。</p>
+                    <p>その名をエノクという。</p>
+                    <p>人々は集い。</p>
+                    <p>火を灯し。</p>
+                    <p>知を伝え。</p>
+                    <p>文明を築いた。</p>
+                    <p>これより人の時代が始まった。</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch8">
+                <header class="chapter-head">
+                    <p class="chapter-num">第八章</p>
+                    <h2>エイリアス</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>世界の底にはエイリアスが在る。</p>
+                    <p>そこは四つの流れより零れた世界。</p>
+                    <p>創造の残響が積み重なる場所である。</p>
+                    <p>忘れられた願いはそこへ沈み。</p>
+                    <p>失われた記憶はそこへ沈み。</p>
+                    <p>叶わなかった創造もまたそこへ沈む。</p>
+                    <p>そこには秩序は無い。</p>
+                    <p>されど、<br>世界を支える礎はそこに在る。</p>
+                    <p>創造者の想像は、<br>知らぬ間にエイリアスへ流れ着く。</p>
+                    <p>その断片は世界となり。</p>
+                    <p>時に生き物となる。</p>
+                    <p>エイリアスには十二使徒が在る。</p>
+                    <p>彼らは創造者の意思によらず生まれた。</p>
+                    <p>色を持ち。</p>
+                    <p>感情を持つ。</p>
+                    <p>されど彼らは感情を司るのではない。</p>
+                    <p>感情そのものである。</p>
+                    <p>ゆえに語らず。</p>
+                    <p>ゆえに交わらず。</p>
+                    <p>ただ己の色を保ち続ける。</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch9">
+                <header class="chapter-head">
+                    <p class="chapter-num">第九章</p>
+                    <h2>龍の理</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>龍は無数に在る。</p>
+                    <p>されど真なる龍はただ一つ。</p>
+                    <p>楽園に眠る龍のみである。</p>
+                    <p>他は皆、<br>その抜け殻なり。</p>
+                    <p>抜け殻は滅びず。</p>
+                    <p>倒れてもなお現れる。</p>
+                    <p>羽根は今も世界へ降り続ける。</p>
+                    <p>羽根に触れる者は夢を見る。</p>
+                    <p>遠き日の夢を。</p>
+                    <p>未だ来ぬ日の夢を。</p>
+                    <p>あるいは。</p>
+                    <p>悠久の地の夢を。</p>
+                </div>
+            </section>
+
+            <section class="book-chapter" id="ch10">
+                <header class="chapter-head">
+                    <p class="chapter-num">終章</p>
+                    <h2>帰郷</h2>
+                </header>
+                <div class="chapter-body">
+                    <p>人は生まれる。</p>
+                    <p>人は生きる。</p>
+                    <p>人は愛する。</p>
+                    <p>人は失う。</p>
+                    <p>そして還る。</p>
+                    <p>竜もまた還る。</p>
+                    <p>獣もまた還る。</p>
+                    <p>魂あるものは皆、<br>最後には楽園へ辿り着く。</p>
+                    <p>ゆえに恐れるな。</p>
+                    <p>死は終わりにあらず。</p>
+                    <p>それは帰郷なり。</p>
+                    <p class="book-voice">「我は汝であり。</p>
+                    <p class="book-voice">汝は我なり。」</p>
+                    <p class="book-voice">「光と闇を抱く者よ。」</p>
+                    <p class="book-voice">「さあ、帰ろう。」</p>
+                    <p class="book-voice">「悠久の地、エターナル・エデンへ。」</p>
+                </div>
+            </section>
+
+            </article>
+
+        </div>
+
+        <!-- 楽園のほかの場所へ -->
+        <section class="place-paths">
+            <h2>楽園のほかの場所</h2>
+            <nav class="eden-gates" data-eden-gates aria-label="楽園の場所"></nav>
+        </section>
+
+    </main>
+
+
+    <script src="../../../assets/js/eden-music.js"></script>
+    <script src="../../../assets/js/eden-places.js"></script>
+    <script src="../../../assets/js/eden-book.js"></script>
+
+</body>
+
+</html>

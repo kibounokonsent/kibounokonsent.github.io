@@ -1,0 +1,994 @@
+<title>伽藍堂 妖怪資料</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Yuji+Syuku&family=Shippori+Mincho:wght@400;600;800&family=Klee+One:wght@400;600&display=swap">
+<style>
+/* がらんとした暗い堂の床に、破れた古紙が一枚ずつ置かれている。灯りは一つ。紙の外から瘴気が蠢き寄る。 */
+/* 堂の闇に固定した単一テーマ */
+:root{
+  --yuka:#1b1410;
+  --yami:#070504;
+  --ink:#1f1813;
+  --ink-soft:#57483a;
+  --ink-faint:rgba(31,24,19,.22);
+  --shu:#a52a20;
+  --sun:#d39718;
+  --note:#34425a;
+  --sumi:#120c09;
+  --f-brush:"Yuji Syuku","Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Noto Serif CJK JP",serif;
+  --f-body:"Shippori Mincho","Hiragino Mincho ProN","Yu Mincho","Noto Serif JP","Noto Serif CJK JP",serif;
+  --f-hand:"Klee One","Hiragino Maru Gothic ProN","Yu Gothic","Noto Sans JP","Noto Sans CJK JP",sans-serif;
+  color-scheme:dark;
+}
+[hidden]{display:none!important}
+html{background:var(--yami);overflow-x:hidden;overflow-y:scroll;scrollbar-gutter:stable}
+body{
+  margin:0;color:var(--ink);font-family:var(--f-body);font-size:16px;line-height:1.95;
+  background-color:var(--yuka);background-size:420px 420px;
+  min-height:100vh;padding-inline:16px;padding-block:34px 70px;overflow-x:hidden;
+  -webkit-font-smoothing:antialiased;
+}
+
+/* ── 堂の空気（すべて静止画か、transform/opacityだけで動く） ── */
+.yami{position:fixed;inset:0;pointer-events:none;z-index:0;
+  background:radial-gradient(70% 60% at 50% 38%, transparent 0%, rgba(7,5,4,.55) 55%, rgba(7,5,4,.96) 100%)}
+.kiri{position:fixed;left:0;top:0;width:100%;height:100%;z-index:5;pointer-events:none}
+.hikari{position:fixed;inset:0;z-index:6;pointer-events:none;opacity:0;
+  background:
+    linear-gradient(115deg, transparent 22%, rgba(255,214,140,.07) 32%, rgba(255,226,160,.26) 42%, rgba(255,238,196,.2) 51%, rgba(255,214,140,.06) 61%, transparent 70%),
+    radial-gradient(45% 32% at 18% 6%, rgba(255,232,180,.3), transparent 70%)}
+.kakera{position:fixed;inset:0;z-index:2;pointer-events:none;opacity:0;transition:opacity 3s ease}
+.kakera.on{opacity:1}
+.kakera span{position:absolute;padding:6px 12px 8px;background:#8e7f63;color:#241a12;font:15px var(--f-brush);letter-spacing:.2em;
+  box-shadow:0 8px 16px rgba(0,0,0,.6);
+  clip-path:polygon(3% 8%,22% 0,48% 6%,74% 1%,97% 9%,100% 52%,95% 94%,63% 100%,36% 93%,8% 100%,0 60%);
+  animation:tadayou var(--d) ease-in-out var(--dl) infinite alternate;will-change:transform}
+@keyframes tadayou{from{transform:translate3d(0,0,0) rotate(var(--r0))}to{transform:translate3d(var(--dx),var(--dy),0) rotate(var(--r1))}}
+
+/* ── 紙 ── */
+.stage{position:relative;z-index:3;max-width:780px;margin:0 auto;perspective:2400px}
+.kasane{position:absolute;left:0;right:0;top:0;height:min(960px,calc(100vh - 110px));pointer-events:none}
+.kasane i{position:absolute;inset:0;background:#4a3c2b;
+  clip-path:polygon(1% 0,30% .4%,62% 0,99% .6%,100% 30%,99.4% 70%,100% 99%,64% 100%,33% 99.5%,0 100%,.5% 60%,0 22%)}
+.kasane i:nth-child(1){transform:rotate(-2.2deg) translate(-14px,14px);background:#3b3024}
+.kasane i:nth-child(2){transform:rotate(1.6deg) translate(16px,22px);background:#2c241b}
+.sheet{position:relative;transform:translate3d(var(--sx,0),0,0) rotate(var(--tilt,0deg));transform-origin:left center;
+  padding:clamp(34px,6vw,70px) clamp(24px,6vw,76px) 92px;min-height:min(960px,calc(100vh - 110px))}
+.sheet > .kage{position:absolute;inset:14px -6px -18px 10px;background:rgba(0,0,0,.75);filter:blur(16px);z-index:-1;border-radius:6px}
+.sheet > canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
+.sheet > canvas.kami{z-index:0}
+.sheet > canvas.urami{z-index:1;opacity:0;transform:scaleX(-1);transition:opacity 10s ease 20s}
+.sheet > canvas.s1{z-index:2;opacity:0;transition:opacity 5s ease 3s}
+.sheet > canvas.s2{z-index:2;opacity:0;transition:opacity 9s ease 11s}
+.sheet > canvas.shiro{z-index:2;opacity:0;transition:opacity 8s ease 6s}
+.sheet.ikiru > canvas.urami{opacity:var(--ura,0)}
+.sheet.ikiru > canvas.s1{opacity:var(--o1,0)}
+.sheet.ikiru > canvas.s2{opacity:var(--o2,0)}
+.sheet.ikiru > canvas.shiro{opacity:1}
+.sheet.zawameku > canvas.s1,.sheet.zawameku > canvas.s2{opacity:1;transition:opacity 3s ease 0s}
+.sheet.zawameku > canvas.urami{opacity:.3;transition:opacity 4s ease 1s}
+.sheet.hareru > canvas.s1,.sheet.hareru > canvas.s2,.sheet.hareru > canvas.urami{opacity:.12;transition:opacity 2s ease 0s}
+.sheet.rinne.ikiru > canvas.s2{animation:iki 6.5s ease-in-out 12s infinite alternate}
+@keyframes iki{from{opacity:var(--o2)}to{opacity:calc(var(--o2) * .25)}}
+.leaf{position:relative;z-index:3}
+.sheet.rinne .leaf{animation:zure 7s steps(1) infinite}
+@keyframes zure{0%{transform:none}47%{transform:translate3d(1px,-.5px,0)}48%{transform:translate3d(-1.5px,.5px,0)}49%{transform:none}81%{transform:translate3d(.8px,0,0)}82%{transform:none}}
+.sheet.yuku{position:fixed;z-index:4;pointer-events:none;will-change:transform,opacity;margin:0;box-sizing:border-box}
+.sheet.yuku.fwd{animation:mekuru .85s cubic-bezier(.45,.05,.3,1) forwards}
+.sheet.yuku.back{transform-origin:right center;animation:modosu .85s cubic-bezier(.45,.05,.3,1) forwards}
+@keyframes mekuru{
+  from{transform:perspective(2400px) translate3d(var(--sx),0,0) rotate(var(--tilt)) rotateY(0deg) translateX(0);opacity:1}
+  70%{opacity:.85}
+  to{transform:perspective(2400px) translate3d(var(--sx),0,0) rotate(var(--tilt)) rotateY(-96deg) translateX(-4%);opacity:0}}
+@keyframes modosu{
+  from{transform:perspective(2400px) translate3d(var(--sx),0,0) rotate(var(--tilt)) rotateY(0deg) translateX(0);opacity:1}
+  70%{opacity:.85}
+  to{transform:perspective(2400px) translate3d(var(--sx),0,0) rotate(var(--tilt)) rotateY(96deg) translateX(4%);opacity:0}}
+.sheet.matsu{opacity:0}
+.sheet.oku{animation:oku .55s ease-out both}
+@keyframes oku{
+  from{transform:translate3d(var(--sx),-10px,0) rotate(calc(var(--tilt) - .6deg));opacity:0}
+  to{transform:translate3d(var(--sx),0,0) rotate(var(--tilt));opacity:1}}
+.sheet.kuru .leaf{animation:sumiiri 1s ease both}
+@keyframes sumiiri{from{opacity:0}to{opacity:1}}
+@media (prefers-reduced-motion:reduce){
+  .sheet.yuku{display:none}
+  .sheet.oku{animation:none}
+  .sheet.kuru .leaf,.sheet.rinne .leaf,.kakera span{animation:none}
+}
+
+/* ── 操作部 ── */
+.corner{position:absolute;bottom:6px;width:62px;height:62px;border:0;padding:0;cursor:pointer;background:none;z-index:4}
+.corner span{position:absolute;inset:0;transition:transform .25s ease}
+.corner.next{right:6px}
+.corner.next span{background:linear-gradient(135deg,transparent 50%,#bba87f 50%,#d8c8a3 70%,#a8915f 100%);clip-path:polygon(100% 0,100% 100%,0 100%);transform-origin:100% 100%}
+.corner.prev{left:6px}
+.corner.prev span{background:linear-gradient(225deg,transparent 50%,#bba87f 50%,#d8c8a3 70%,#a8915f 100%);clip-path:polygon(0 0,100% 100%,0 100%);transform-origin:0 100%}
+.corner:hover span,.corner:focus-visible span{transform:scale(1.2)}
+.corner em{position:absolute;bottom:9px;font:600 12px var(--f-hand);color:var(--ink-soft);font-style:normal;letter-spacing:.1em;white-space:nowrap}
+.corner.next em{right:66px}
+.corner.prev em{left:66px}
+.folio{position:absolute;left:0;right:0;bottom:28px;text-align:center;font:14px var(--f-brush);color:var(--ink-soft);letter-spacing:.3em;z-index:3}
+.idx{position:absolute;top:22px;right:24px;z-index:4;width:40px;height:40px;border:2px solid var(--shu);border-radius:4px;color:var(--shu);font:20px var(--f-brush);display:grid;place-items:center;background:transparent;cursor:pointer;transform:rotate(4deg);opacity:.85;transition:opacity .2s,transform .2s}
+.idx:hover,.idx:focus-visible{opacity:1;transform:rotate(-2deg) scale(1.06)}
+button:focus-visible{outline:2px dashed var(--shu);outline-offset:4px}
+.hint{position:relative;z-index:3;max-width:780px;margin:30px auto 0;text-align:center;color:#7d6c57;font:12px var(--f-hand);letter-spacing:.12em}
+
+/* ── 紙面の書式 ── */
+h1,h2,h3{font-family:var(--f-brush);font-weight:400;margin:0;color:var(--ink)}
+h3{text-wrap:balance}
+.midashi{display:flex;gap:28px;align-items:flex-start;margin-bottom:26px}
+.midashi h2{writing-mode:vertical-rl;font-size:clamp(42px,7vw,66px);line-height:1.05;letter-spacing:.14em;flex:none;text-shadow:0 0 1px rgba(31,24,19,.7),1px 1px 0 rgba(31,24,19,.12)}
+.midashi .lede-box{min-width:0;padding-top:6px}
+.yomi{font:600 12px var(--f-hand);letter-spacing:.35em;color:var(--ink-soft);margin:0 0 6px}
+p{margin:0 0 1em;max-width:34em}
+.lede{font-size:17px}
+h3{font-size:24px;margin:32px 0 10px;letter-spacing:.06em}
+h3::before{content:"一";display:inline-block;margin-right:.4em;color:var(--shu);font-size:.8em;transform:translateY(-.1em)}
+b,strong{font-weight:800}
+.sen{height:10px;margin:26px 0;background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 10' preserveAspectRatio='none'><path d='M2 6 C80 3 160 7 240 4.5 S360 5 398 4' stroke='%231f1813' stroke-width='1.6' fill='none' stroke-linecap='round' opacity='.55'/></svg>") center/100% 100% no-repeat}
+.chuki{font-family:var(--f-hand);color:var(--note);font-size:15px;line-height:1.6;transform:rotate(-1.2deg);transform-origin:left}
+.yohaku{position:absolute;right:-10px;font-family:var(--f-hand);color:var(--note);font-size:14px;line-height:1.5;transform:rotate(-4deg);max-width:8.5em;opacity:.92}
+del{text-decoration:none;background:linear-gradient(transparent 46%,var(--ink) 46%,var(--ink) 54%,transparent 54%);opacity:.6}
+.shuin{display:inline-grid;place-items:center;border:2.5px solid var(--shu);color:var(--shu);font-family:var(--f-brush);padding:2px 8px;border-radius:3px;letter-spacing:.15em;opacity:.85;transform:rotate(var(--r,-6deg));font-size:15px;line-height:1.4;
+  -webkit-mask-image:radial-gradient(circle at 30% 40%,#000 55%,rgba(0,0,0,.55) 75%,#000 90%);mask-image:radial-gradient(circle at 30% 40%,#000 55%,rgba(0,0,0,.55) 75%,#000 90%)}
+.shuin.maru{border-radius:50%;width:62px;height:62px;padding:0;font-size:22px;letter-spacing:0}
+.shuin.oki{position:absolute;z-index:4}
+.tobu{all:unset;cursor:pointer;font:18px var(--f-brush);letter-spacing:.15em;border-bottom:1px solid var(--shu);line-height:1.8}
+.tobu:hover{color:var(--shu)}
+.mikisai{color:var(--ink-soft);letter-spacing:.4em}
+
+/* 墨塗り（ネタバレなし） */
+body.fuseru [data-netabare]{background:var(--sumi);color:transparent!important;border-radius:2px 1px 3px 1px;box-decoration-break:clone;-webkit-box-decoration-break:clone;
+  box-shadow:0 0 0 2px var(--sumi);user-select:none;text-shadow:none!important}
+body.fuseru [data-netabare] *{visibility:hidden}
+body.fuseru div[data-netabare],body.fuseru ol[data-netabare],body.fuseru ul[data-netabare],body.fuseru p[data-netabare]{display:block;margin-block:6px 16px;
+  background:repeating-linear-gradient(180deg,var(--sumi) 0 1.35em,transparent 1.35em 1.95em)}
+.fuuin{margin:40px auto;text-align:center;max-width:none}
+.fuuin .shuin{font-size:40px;width:96px;height:96px;padding:0;border-width:4px;border-radius:50%}
+
+/* 表紙 */
+.hyoushi-men{min-height:min(820px,calc(100vh - 200px));display:flex;flex-direction:column;align-items:center;justify-content:center;gap:34px;position:relative}
+.hyoushi-men .daisen{border:1.5px solid rgba(31,24,19,.6);padding:30px 24px;background:rgba(255,248,230,.18);box-shadow:inset 0 0 0 7px rgba(31,24,19,0),inset 0 0 0 8px rgba(31,24,19,.3)}
+.hyoushi-men h1{writing-mode:vertical-rl;font-size:clamp(74px,15vw,128px);letter-spacing:.2em;line-height:1;text-shadow:0 0 2px rgba(31,24,19,.55)}
+.hyoushi-men .fuku{position:absolute;left:clamp(0px,3vw,30px);top:10px;writing-mode:vertical-rl;font:15px var(--f-brush);letter-spacing:.5em;color:var(--ink-soft)}
+.erabu{display:flex;flex-wrap:wrap;justify-content:center;gap:18px 26px}
+.erabu button{all:unset;cursor:pointer;display:grid;justify-items:center;gap:2px;padding:10px 18px;border:2.5px solid var(--shu);color:var(--shu);border-radius:3px;transition:background .2s}
+.erabu button b{font:400 21px var(--f-brush);letter-spacing:.22em}
+.erabu button small{font:12px var(--f-hand);letter-spacing:.1em}
+.erabu button:nth-child(1){transform:rotate(-2.5deg)}
+.erabu button:nth-child(2){transform:rotate(2deg)}
+.erabu button:hover,.erabu button:focus-visible{background:rgba(165,42,32,.08)}
+.erabu button[aria-pressed="true"]{background:var(--shu);color:#efe3c8}
+.erabu-chu{font:13px var(--f-hand);color:var(--ink-soft);letter-spacing:.1em;margin:0;text-align:center;max-width:none}
+
+/* 目次 */
+.mokuji{list-style:none;margin:0;padding:0;max-width:30em}
+.mokuji li{break-inside:avoid}
+.mokuji button{all:unset;cursor:pointer;display:flex;align-items:baseline;gap:10px;padding:7px 2px;width:100%;box-sizing:border-box;border-bottom:1px dotted rgba(31,24,19,.38);font:21px var(--f-brush);letter-spacing:.12em}
+.mokuji .ko button{font-size:17px;padding-left:1.1em}
+.mokuji .ko button::before{content:"└";font:13px var(--f-body);color:var(--ink-soft);margin-right:2px}
+.mokuji button small{margin-left:auto;font:13px var(--f-body);color:var(--ink-soft);letter-spacing:.05em}
+.mokuji button.yonda span::after{content:"・";color:var(--shu)}
+.mokuji button:hover span{color:var(--shu)}
+.kumi{font:600 12px var(--f-hand);letter-spacing:.35em;color:var(--ink-soft);margin:20px 0 0}
+.mokuji-shita{display:flex;flex-wrap:wrap;gap:12px 28px;align-items:center;margin-top:30px}
+.kirikae{all:unset;cursor:pointer;border:2px solid var(--shu);color:var(--shu);padding:3px 12px;font:15px var(--f-brush);letter-spacing:.15em;border-radius:2px}
+.arata{all:unset;cursor:pointer;font:13px var(--f-hand);color:var(--note);border-bottom:1px dashed var(--note)}
+
+/* 流れ */
+.nagare{list-style:none;margin:10px 0 0;padding:0;counter-reset:n}
+.nagare li{counter-increment:n;display:grid;grid-template-columns:44px 1fr;gap:14px;align-items:baseline;position:relative;padding:8px 0;font-size:18px}
+.nagare li::before{content:counter(n,cjk-ideographic);font:22px var(--f-brush);text-align:center;color:var(--ink-soft)}
+.nagare li::after{content:"";position:absolute;left:21px;top:44px;bottom:-6px;width:1.5px;background:var(--ink-faint)}
+.nagare li:last-child::after{display:none}
+.nagare li.shu::before{color:var(--shu)}
+.nagare small{display:block;font-size:14px;color:var(--ink-soft);line-height:1.7}
+.nagare .t{min-width:0}
+.modoru{margin:6px 0 0 58px;font:15px var(--f-hand);color:var(--note)}
+.kusari{margin:0 0 1em;padding:0;list-style:none;font-size:16px}
+.kusari li+li::before{content:"↓";display:block;color:var(--ink-soft);line-height:1.2;margin:2px 0}
+
+/* 図録 */
+.zuroku{border:1.5px solid rgba(31,24,19,.62);margin:8px 0 22px;background:rgba(255,248,230,.12)}
+.zuroku .zu{position:relative;aspect-ratio:16/10;max-width:100%;border-bottom:1.5px solid rgba(31,24,19,.62);overflow:hidden}
+.zuroku .zu canvas{position:absolute;inset:0;width:100%;height:100%;will-change:opacity}
+.zuroku .zu .na{position:absolute;top:10px;left:12px;font:14px var(--f-brush);letter-spacing:.3em;color:var(--ink-soft);z-index:1}
+.zuroku dl{margin:0;display:grid;grid-template-columns:6em 1fr}
+.zuroku dt,.zuroku dd{margin:0;padding:10px 14px;border-bottom:1px solid rgba(31,24,19,.22)}
+.zuroku dt{font:16px var(--f-brush);letter-spacing:.2em;border-right:1px solid rgba(31,24,19,.22)}
+.zuroku dd{min-width:0}
+.zuroku dt:last-of-type,.zuroku dd:last-of-type{border-bottom:0}
+.ichiran{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:24px}
+.ichiran button{all:unset;cursor:pointer;display:grid;gap:6px}
+.ichiran .chiisa{position:relative;aspect-ratio:4/3;border:1.2px solid rgba(31,24,19,.5);background:rgba(255,248,230,.1)}
+.ichiran canvas{position:absolute;inset:0;width:100%;height:100%}
+.ichiran .nm{font:26px var(--f-brush);letter-spacing:.2em;display:flex;align-items:baseline;gap:10px}
+.ichiran .nm small{font:13px var(--f-hand);color:var(--ink-soft);letter-spacing:.08em}
+.ichiran button:hover .nm{color:var(--shu)}
+
+/* 対照・問い */
+.tsui{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:14px 0 20px}
+.tsui > div{padding:12px 14px;min-width:0}
+.tsui .kuro{border-left:3px solid var(--ink)}
+.tsui .hi{border-left:3px solid var(--sun)}
+.tsui .shiro{border-left:3px solid #f6f1e4;background:rgba(255,253,246,.42)}
+.tsui b{display:block;font:20px var(--f-brush);font-weight:400;letter-spacing:.15em}
+.toi{margin:34px auto 10px;text-align:center;font:clamp(24px,4.6vw,36px)/1.5 var(--f-brush);letter-spacing:.1em;max-width:none}
+.toi .h{color:#fffaf0;text-shadow:0 0 1px var(--ink),0 0 2px var(--ink),0 0 14px rgba(255,255,255,.9)}
+.toi .y{text-shadow:0 0 8px rgba(0,0,0,.5)}
+.cap{text-align:center;font:13px var(--f-hand);color:var(--ink-soft);letter-spacing:.15em}
+
+/* 光・選択 */
+.hikari-ire{all:unset;cursor:pointer;border:2px solid var(--sun);color:#7a5408;padding:4px 14px;border-radius:2px;font:16px var(--f-brush);letter-spacing:.2em;transform:rotate(-2deg);display:inline-block}
+.hikari-ire[aria-pressed="true"]{background:rgba(211,151,24,.18)}
+.sentaku{display:flex;flex-wrap:wrap;gap:22px;justify-content:center;margin:20px 0 6px}
+.sentaku button{all:unset;cursor:pointer;border:2.5px solid var(--shu);color:var(--shu);padding:10px 20px;font:21px var(--f-brush);letter-spacing:.2em;border-radius:3px;transition:background .2s}
+.sentaku button:nth-child(1){transform:rotate(-3deg)}
+.sentaku button:nth-child(2){transform:rotate(2deg)}
+.sentaku button:hover,.sentaku button:focus-visible{background:rgba(165,42,32,.08)}
+.sentaku button[aria-pressed="true"]{background:var(--shu);color:#efe3c8}
+.ketsumatsu li,.ketsumatsu .ato{opacity:0}
+.ketsumatsu.mieru li{animation:arawa .9s ease forwards}
+.ketsumatsu.mieru li:nth-child(2){animation-delay:1.2s}
+.ketsumatsu.mieru li:nth-child(3){animation-delay:2.6s}
+.ketsumatsu.mieru li:nth-child(4){animation-delay:3.8s}
+.ketsumatsu.mieru .ato{animation:arawa 1s ease 5s forwards}
+@keyframes arawa{to{opacity:1}}
+.himawari-zu{max-width:460px;margin:6px auto 4px}
+.himawari-zu svg{width:100%;height:auto;display:block}
+
+@media (max-width:560px){
+  .midashi{gap:16px}
+  .midashi h2{font-size:42px}
+  .tsui{grid-template-columns:1fr}
+  .yohaku{position:static;transform:rotate(-2deg);display:block;margin:6px 0 14px;max-width:none}
+  .corner em{display:none}
+  .zuroku dl{grid-template-columns:4.6em 1fr}
+  .kasane{display:none}
+  .kakera span:nth-child(n+6){display:none}
+}
+</style>
+
+<div class="yami" aria-hidden="true"></div>
+<div class="kakera" id="kakera" aria-hidden="true"></div>
+<main class="stage" id="stage" lang="ja">
+  <div class="kasane" aria-hidden="true"><i></i><i></i></div>
+</main>
+<canvas class="kiri" id="kiri" aria-hidden="true"></canvas>
+<div class="hikari" id="hikari" aria-hidden="true"></div>
+<p class="hint">紙の角をめくる　／　← → キー　／　左右にスワイプ</p>
+
+
+<!-- ════════════════════════════════════════════════════════════
+     記　事
+     ────────────────────────────────────────────────────────────
+     足し方：似ている <template> をひとつコピーして、題と中身を書き換える。
+     並び順＝頁の順。目次・妖怪一覧・頁番号・前後の頁は自動でできる。
+
+     data-id        頁の名前（英数字。URLの #〇〇 になる）
+     data-title     縦書きの大見出し
+     data-yomi      見出し横の小さな添え書き
+     data-group     目次での組（記録／妖怪／物語。新しい名前で新しい組）
+     data-parent    親の頁の data-id（目次で子として並ぶ）
+     data-shouki    瘴気の濃さ 0〜5
+     data-boro      紙の傷み 0〜1（省略すると瘴気の濃さから決まる）
+     data-hikari    差し込む陽の光 0〜1
+     data-style     紙の性質（空白区切り）kigen=古い起源の紙 onnen=黒と白
+                    rinne=不安定 kiyome=整った神聖な紙 kurai=暗い紙
+     data-tag       妖怪一覧で名前の横に出る札
+     data-netabare  頁ごと伏せる（ネタバレなしのとき封印される）
+
+     ネタバレ：伏せたい所に data-netabare をつける。
+       <span data-netabare>文字</span>   → ネタバレなしのとき墨で塗りつぶす
+       <div data-netabare>…</div>        → まとまりごと塗りつぶす
+
+     中で使える書き方：
+     <p class="lede">導入文　<h3>小見出し
+     <ol class="nagare"><li>番号つきの記録（li class="shu" で朱の番号、<small>で補足）
+     <ul class="kusari"><li>↓でつながる流れ
+     <div class="zuroku" data-zu="名之図"><dl><dt>項目</dt><dd>内容</dd></dl></div> 妖怪図＋項目
+     <div class="tsui"><div class="kuro">…</div><div class="hi">…</div></div> 対照（kuro/hi/shiro）
+     <p class="chuki">手書きの注釈　<span class="yohaku" style="top:300px">余白の書き込み
+     <span class="shuin">印</span>（class="shuin oki" style="right:8%;top:120px" で紙の上に置く）
+     <del>二重線　<div class="sen"></div>墨の区切り線
+     <button class="tobu" data-go="頁のid">→ …</button> 別の頁へ
+     <p class="mikisai">未記</p> まだ書かれていない欄
+     ════════════════════════════════════════════════════════════ -->
+<div id="kiji" hidden>
+
+<template data-id="hyoushi" data-title="表紙" data-shouki="1" data-boro="0.55" data-style="hyoushi">
+  <div class="hyoushi-men">
+    <span class="fuku">妖怪資料</span>
+    <div class="daisen"><h1>伽藍堂</h1></div>
+    <div class="erabu" role="group" aria-label="読み方を選ぶ">
+      <button data-netabare-sentaku="nashi" aria-pressed="false"><b>伏せて読む</b><small>ネタバレなし</small></button>
+      <button data-netabare-sentaku="ari" aria-pressed="false"><b>すべて読む</b><small>ネタバレあり</small></button>
+    </div>
+    <p class="erabu-chu">選ぶと資料が開く。あとから目次で変えられる。</p>
+  </div>
+</template>
+
+<template data-id="mokuji" data-title="目次" data-yomi="もくじ" data-shouki="1">
+  <p class="lede">綴じられた記録の順。名をたどれば、その頁がひらく。</p>
+  <div data-auto="mokuji"></div>
+</template>
+
+<template data-id="sekai" data-title="世界" data-yomi="妖怪のはじまり" data-group="記録" data-shouki="1">
+  <p class="lede">もとより、この世に妖怪はいなかった。妖怪は、人の死と負の感情のなかから生まれたものである。</p>
+  <ol class="nagare">
+    <li><span class="t">妖怪の存在しなかった時代<small>この世界に、妖怪はまだいない。</small></span></li>
+    <li><span class="t">戦争<small>大量の死と、負の感情が生まれる。</small></span></li>
+    <li><span class="t">濃い瘴気<small>死と負の感情から、きわめて濃い瘴気が生じる。</small></span></li>
+    <li class="shu"><span class="t">骨骸馬、生まれる<small>その瘴気から、世界で初めての妖怪が生まれる。</small></span></li>
+    <li><span class="t">妖怪の発生<small>骨骸馬は己の身体の一部を切り離し、そこから妖怪を作る。</small></span></li>
+    <li><span class="t">現在<small>いま在る妖怪はみな、骨骸馬から生まれたもの。</small></span></li>
+  </ol>
+  <div class="sen"></div>
+  <p class="chuki">骨骸馬は、妖怪たちの「母」にあたる。</p>
+</template>
+
+<template data-id="shouki" data-title="瘴気" data-yomi="妖怪の糧" data-group="記録" data-shouki="3">
+  <p class="lede">瘴気は、妖怪が生きるために必要なもの。妖怪は人間に寄生し、宿主を少しずつ蝕んで<b>負の感情</b>を生ませる。その負の感情から生じる瘴気を得て、妖怪は育つ。</p>
+  <p>ゆえに人間は、ただの餌ではない。<b>瘴気を生み出させるための宿主</b>である。</p>
+  <h3>生存の環</h3>
+  <ol class="nagare">
+    <li><span class="t">人間へ寄生する</span></li>
+    <li><span class="t">宿主に負の感情を生ませる</span></li>
+    <li><span class="t">瘴気を得る</span></li>
+    <li><span class="t">成長する</span></li>
+    <li class="shu"><span class="t">宿主を殺す</span></li>
+    <li><span class="t">大量の瘴気を得る</span></li>
+    <li><span class="t">分裂し、新しい妖怪を作る</span></li>
+    <li><span class="t">小さく弱い妖怪になる</span></li>
+    <li><span class="t">新しい人間へ寄生する</span></li>
+  </ol>
+  <p class="modoru">↺ そして再び育つ。一へ戻る。</p>
+  <h3>陽の光</h3>
+  <p>陽の光には正のエネルギーがある。負の感情と瘴気を糧とする妖怪にとって、それは害になる。</p>
+  <div class="tsui">
+    <div class="kuro"><b>寄生中</b>陽の光に弱い。</div>
+    <div class="hi"><b>寄生していない</b>陽の光の影響を受けない。</div>
+  </div>
+  <p>妖怪が太陽に弱いのではない。<b>寄生しているから</b>、陽の光に弱いのである。</p>
+  <p><button class="hikari-ire" data-hikari="0.9" aria-pressed="false">光を当てる</button></p>
+</template>
+
+<template data-id="yokai" data-title="妖怪" data-yomi="妖怪図録" data-group="妖怪" data-shouki="2">
+  <p class="lede">いま記録にある妖怪。いずれも、何らかの形で骨骸馬の一部から生まれている。</p>
+  <div data-auto="ichiran"></div>
+</template>
+
+<template data-id="fuhai" data-title="腐敗" data-yomi="妖怪" data-group="妖怪" data-parent="yokai" data-shouki="3" data-boro="0.8">
+  <p class="lede">骨骸馬から生まれた妖怪のひとつ。</p>
+  <span class="shuin oki" style="right:8%;top:120px">未詳</span>
+  <div class="zuroku" data-zu="腐敗之図">
+    <dl>
+      <dt>分類</dt><dd>妖怪</dd>
+      <dt>発生</dt><dd class="mikisai">未記</dd>
+      <dt>性質</dt><dd class="mikisai">未記</dd>
+      <dt>備考</dt><dd class="mikisai">未記</dd>
+    </dl>
+  </div>
+  <p class="chuki">此の頁、まだ書き込まれていない。</p>
+</template>
+
+<template data-id="akago" data-title="赤子" data-yomi="妖怪" data-group="妖怪" data-parent="yokai" data-shouki="3">
+  <p class="lede">骨骸馬から生まれた妖怪のひとつ。</p>
+  <span class="shuin oki" style="right:8%;top:120px">未詳</span>
+  <div class="zuroku" data-zu="赤子之図">
+    <dl>
+      <dt>分類</dt><dd>妖怪</dd>
+      <dt>発生</dt><dd class="mikisai">未記</dd>
+      <dt>性質</dt><dd class="mikisai">未記</dd>
+      <dt>備考</dt><dd class="mikisai">未記</dd>
+    </dl>
+  </div>
+  <p class="chuki">此の頁、まだ書き込まれていない。</p>
+</template>
+
+<template data-id="kotsugaiba" data-title="骨骸馬" data-yomi="最初の妖怪" data-group="妖怪" data-parent="yokai" data-shouki="5" data-boro="1" data-style="kigen" data-tag="起源">
+  <p class="lede">戦争が生んだ濃い瘴気から、世界で初めて生まれた妖怪。妖怪たちの母であり、起源。</p>
+  <span class="shuin oki" style="right:7%;top:160px">起源</span>
+  <div class="zuroku" data-zu="骨骸馬之図">
+    <dl>
+      <dt>分類</dt><dd>最初の妖怪。妖怪の母。</dd>
+      <dt>発生</dt><dd>戦争によって生まれた濃い瘴気から。</dd>
+      <dt>性質</dt><dd>自分の身体の一部を切り離し、その一部から新たな妖怪を作る。</dd>
+      <dt>足跡</dt><dd>各地を渡り歩きながら、妖怪を生み出してきた。</dd>
+      <dt>備考</dt><dd>自ら太刀を作り出す。第三章にて主人公たちと対峙。<span data-netabare><del>討伐</del>　討てず、逃亡。</span></dd>
+    </dl>
+  </div>
+  <p class="chuki">いま在る妖怪はみな、これの一部だったもの。</p>
+  <p><button class="tobu" data-go="dai3">→ 第三章の記録</button></p>
+</template>
+
+<template data-id="rinne" data-title="輪廻" data-yomi="第四章の妖怪" data-group="妖怪" data-parent="yokai" data-shouki="4" data-style="rinne" data-tag="第四章">
+  <p class="lede">ひとりの少年に寄生していた妖怪。第四章の中心にある。</p>
+  <div class="zuroku" data-zu="輪廻之図">
+    <dl>
+      <dt>分類</dt><dd>妖怪</dd>
+      <dt>寄生</dt><dd>少年に寄生する。少年は陽の光を浴びると強い痛みを感じる。</dd>
+      <dt>発生</dt><dd><span data-netabare>少年の死によって生まれる。</span></dd>
+      <dt>末路</dt><dd><span data-netabare>怨念に殺される。</span></dd>
+    </dl>
+  </div>
+  <p><button class="tobu" data-go="dai4">→ 第四章の記録</button></p>
+</template>
+
+<template data-id="onnen" data-title="怨念" data-yomi="主人公 ／ 妖怪を狩る妖怪" data-group="妖怪" data-parent="yokai" data-shouki="3" data-style="onnen" data-tag="主人公">
+  <p class="lede">骨骸馬によって作られた妖怪。けれど、ほかの妖怪とは大きく異なる。</p>
+  <div class="zuroku" data-zu="怨念之図">
+    <dl>
+      <dt>分類</dt><dd>妖怪。伽藍堂の主人公。</dd>
+      <dt>発生</dt><dd>妖怪に寄生された人間が抱いた、<b>その妖怪への恨み・憎しみ</b>から。</dd>
+      <dt>瘴気</dt><dd>妖怪を殺し、その妖怪の瘴気を取り込む。</dd>
+      <dt>内在</dt><dd>内に<b>人間の魂</b>がある。その魂は、ほかの人間と共鳴することがある。</dd>
+    </dl>
+  </div>
+  <h3>ふたつの記録</h3>
+  <div class="tsui">
+    <div class="kuro"><b>妖怪として</b><ul class="kusari"><li>妖怪</li><li>寄生</li><li>人間の恨み</li><li>怨念</li></ul></div>
+    <div class="shiro"><b>人の側に残るもの</b><ul class="kusari"><li>人間の魂</li><li>ほかの人間との共鳴</li></ul></div>
+  </div>
+  <h3>逆の生き方</h3>
+  <div class="tsui">
+    <div class="kuro"><b>ふつうの妖怪</b><ul class="kusari"><li>人間に寄生する</li><li>瘴気を得る</li></ul></div>
+    <div class="kuro"><b>怨念</b><ul class="kusari"><li>妖怪を殺す</li><li>その瘴気を取り込む</li></ul></div>
+  </div>
+  <p>妖怪でありながら、妖怪を憎む側にいる。けれど妖怪を殺すからといって、人の側とも言いきれない。怨念自身もまた、妖怪だからである。</p>
+  <p class="toi">私は<span class="y">妖怪</span>側なのか、<span class="h">人</span>側なのか……？</p>
+  <p class="cap">第四章にて、この問いに向き合う</p>
+</template>
+
+<template data-id="dai1" data-title="第一章" data-yomi="章記録" data-group="物語" data-shouki="1">
+  <p class="lede mikisai">未記</p>
+  <p class="chuki">此の章、まだ記されていない。</p>
+</template>
+
+<template data-id="dai2" data-title="第二章" data-yomi="章記録" data-group="物語" data-shouki="1">
+  <p class="lede mikisai">未記</p>
+  <p class="chuki">此の章、まだ記されていない。</p>
+</template>
+
+<template data-id="dai3" data-title="第三章" data-yomi="章記録 ／ 骨骸馬" data-group="物語" data-shouki="4" data-style="kigen">
+  <p class="lede">主人公たちは、妖怪の起源である骨骸馬と対峙する。</p>
+  <ol class="nagare">
+    <li><span class="t">骨骸馬と相対する</span></li>
+    <li><span class="t">骨骸馬、自ら太刀を作り出す<small>その太刀で、主人公たちを阻む。</small></span></li>
+    <li class="shu"><span class="t"><span data-netabare>倒せない</span></span></li>
+    <li><span class="t"><span data-netabare>骨骸馬、逃亡する</span></span></li>
+  </ol>
+  <div class="sen"></div>
+  <div data-netabare>
+    <p>倒して終わる相手ではなかった。妖怪の起源を目の前にしながら、取り逃がす。</p>
+    <p class="chuki">決着は、まだついていない。</p>
+  </div>
+  <p><button class="tobu" data-go="kotsugaiba">→ 骨骸馬の図録</button></p>
+</template>
+
+<template data-id="dai4" data-title="第四章" data-yomi="章記録 ／ 輪廻" data-group="物語" data-shouki="3">
+  <p class="lede">妖怪を神として崇める村。輪廻に寄生された少年。陽の光と、ひまわり畑。</p>
+  <p>怨念は、輪廻に寄生された少年と暮らすことになる。けれど、妖怪に寄生された人間を救うことはできない。</p>
+  <h3>綴じられた記録</h3>
+  <ol class="nagare">
+    <li><span class="t"><button class="tobu" data-go="mura">村</button><small>妖怪を神として崇拝する。</small></span></li>
+    <li><span class="t"><button class="tobu" data-go="kaminoko">神の子</button><small>妖怪に寄生された人間。</small></span></li>
+    <li><span class="t"><button class="tobu" data-go="shounen">少年</button><small>輪廻に寄生されている。</small></span></li>
+    <li class="shu"><span class="t"><button class="tobu" data-go="himawari">ひまわり</button><small>行くか、行かないか。</small></span></li>
+    <li><span class="t"><button class="tobu" data-go="rinne">輪廻</button><small>妖怪図録へ。</small></span></li>
+  </ol>
+</template>
+
+<template data-id="mura" data-title="村" data-yomi="第四章" data-group="物語" data-parent="dai4" data-shouki="3">
+  <p class="lede">妖怪を<b>神として崇拝する村</b>がある。</p>
+  <p>妖怪に寄生された人間は、この村で<b>「神の子」</b>として扱われる。</p>
+  <p>村は神の子を隔離し、陽の光から遠ざける。寄生中の妖怪は、陽の光に弱いからである。</p>
+  <div class="tsui">
+    <div class="hi"><b>見かけ</b>神の子だから、大切にしている。</div>
+    <div class="kuro"><b>実のところ</b><span data-netabare>中にいる妖怪を育て、孵化させるために隔離している。</span></div>
+  </div>
+  <span class="yohaku" style="top:250px">……本当に<br>そうなのか？</span>
+  <p><button class="tobu" data-go="kaminoko">→ 神の子</button></p>
+</template>
+
+<template data-id="kaminoko" data-title="神の子" data-yomi="第四章" data-group="物語" data-parent="dai4" data-shouki="4" data-style="kiyome" data-boro="0.15">
+  <span class="shuin oki maru" style="right:9%;top:70px;--r:8deg">神</span>
+  <span class="shuin oki" style="left:7%;bottom:120px;--r:-9deg">禁</span>
+  <p class="lede">妖怪に寄生された人間を、村は「神の子」と呼ぶ。</p>
+  <div class="sen"></div>
+  <ul class="kusari">
+    <li>妖怪に寄生される</li>
+    <li>神の子として隔離される</li>
+    <li>陽の光から遠ざけられる</li>
+    <li><span data-netabare>中にいる妖怪が育つ</span></li>
+    <li><span data-netabare><b>孵化</b></span></li>
+  </ul>
+  <div class="sen"></div>
+  <p data-netabare>守られているように見える。そのじつ、育てられているのは中の妖怪である。</p>
+</template>
+
+<template data-id="shounen" data-title="少年" data-yomi="第四章 ／ 神の子" data-group="物語" data-parent="dai4" data-shouki="3" data-hikari="0.3">
+  <p class="lede">輪廻に寄生された少年。怨念とともに暮らす。</p>
+  <p>少年には夢がある。<b>ひまわり畑の絵を描きたい</b>。</p>
+  <div class="tsui">
+    <div class="hi"><b>行きたい場所</b>ひまわり畑</div>
+    <div class="kuro"><b>避けなければならないもの</b>陽の光</div>
+  </div>
+  <p>寄生されている少年は、陽の光を浴びると強い痛みを感じる。行きたい場所と、避けなければならないものが、同じところにある。</p>
+  <p><button class="tobu" data-go="himawari">→ ひまわり</button></p>
+</template>
+
+<template data-id="himawari" data-title="ひまわり" data-yomi="第四章 ／ 選択" data-group="物語" data-parent="dai4" data-shouki="3" data-hikari="0.85" data-style="kurai">
+  <div class="himawari-zu"></div>
+  <p class="cap">図　ひまわり</p>
+  <div class="sen"></div>
+  <p>少年を、ひまわり畑へ。</p>
+  <div class="sentaku" role="group" aria-label="第四章の選択">
+    <button data-sentaku="iku" aria-pressed="false">行く</button>
+    <button data-sentaku="ikanai" aria-pressed="false">行かない</button>
+  </div>
+  <div class="ketsumatsu" hidden>
+    <ol class="nagare">
+      <li><span class="t" data-erabi></span></li>
+      <li class="shu"><span class="t"><span data-netabare>少年は死ぬ</span><small><span data-netabare>どちらを選んでも。</span></small></span></li>
+      <li><span class="t"><span data-netabare>輪廻が生まれる</span></span></li>
+      <li><span class="t"><span data-netabare>怨念が輪廻を殺す</span></span></li>
+    </ol>
+    <div class="ato">
+      <div class="sen"></div>
+      <p>その過程で、怨念は向き合うことになる。</p>
+      <ul class="kusari"><li>人間とは何なのか</li><li>妖怪とは何なのか</li><li>自分はどちら側なのか</li><li>妖怪を神として崇める村を、どう見るのか</li></ul>
+    </div>
+  </div>
+</template>
+
+</div>
+<!-- ═══════════ 記事ここまで ═══════════ -->
+
+
+<script>
+(()=>{
+const K=n=>{const d="〇一二三四五六七八九"; if(n<=10) return n===10?"十":d[n]; if(n<20) return "十"+d[n-10]; const t=Math.floor(n/10),o=n%10; return d[t]+"十"+(o?d[o]:"");};
+const hash=s=>{let h=2166136261; for(const ch of s){h^=ch.codePointAt(0); h=Math.imul(h,16777619);} return h>>>0;};
+const rng=a=>()=>{a|=0;a=a+0x6D2B79F5|0;let t=Math.imul(a^a>>>15,1|a);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296;};
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const reduce=matchMedia("(prefers-reduced-motion: reduce)").matches;
+const $=id=>document.getElementById(id);
+const mk=(w,h)=>{const c=document.createElement("canvas"); c.width=Math.max(1,Math.round(w)); c.height=Math.max(1,Math.round(h)); return c;};
+const store={get(k,d){try{const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch(e){return d;}},set(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+
+/* ── 記事 ── */
+const kiji=[...document.querySelectorAll("#kiji template")].map(t=>{
+  const shouki=+(t.dataset.shouki??2), style=(t.dataset.style||"").split(/\s+/).filter(Boolean);
+  const boro=t.dataset.boro!=null?+t.dataset.boro:.3+shouki*.1;
+  return {id:t.dataset.id,title:t.dataset.title||"",yomi:t.dataset.yomi||"",group:t.dataset.group||"",parent:t.dataset.parent||"",
+    shouki,hikari:+(t.dataset.hikari||0),style,tag:t.dataset.tag||"",boro:clamp(boro),fuuin:t.hasAttribute("data-netabare"),tpl:t};
+});
+const byId=Object.fromEntries(kiji.map((k,i)=>[k.id,i])); const N=kiji.length;
+let yonda=new Set(store.get("garando.yonda",[]));
+let netabare=store.get("garando.netabare",null);
+const setNetabare=v=>{ netabare=v; store.set("garando.netabare",v); document.body.classList.toggle("fuseru",v!=="ari");
+  document.querySelectorAll(".stage [data-netabare]").forEach(e=>e.setAttribute("aria-hidden",v!=="ari")); };
+document.body.classList.toggle("fuseru",netabare!=="ari");
+
+/* ════ 一度だけ描く素材 ════ */
+// 床（堂の板張り）
+(()=>{
+  const S=420,c=mk(S,S),x=c.getContext("2d"),r=rng(5);
+  x.fillStyle="#1d1611"; x.fillRect(0,0,S,S);
+  const pw=S/4;
+  for(let p=0;p<4;p++){
+    const x0=p*pw, base=24+r()*10;
+    x.fillStyle=`rgb(${base+8},${base},${base-6})`; x.fillRect(x0,0,pw,S);
+    for(let i=0;i<46;i++){
+      x.strokeStyle=`rgba(${r()<.5?10:60},${r()<.5?6:44},4,${.15+r()*.25})`; x.lineWidth=.5+r()*1.4;
+      let gx=x0+r()*pw; x.beginPath(); x.moveTo(gx,0);
+      for(let y=0;y<=S;y+=12){ gx+=Math.sin(y*.02+i)*.8+(r()-.5)*.6; x.lineTo(clamp(gx,x0+1,x0+pw-1),y); }
+      x.stroke();
+    }
+    x.fillStyle="rgba(0,0,0,.85)"; x.fillRect(x0,0,2,S);
+    x.fillStyle="rgba(255,220,170,.04)"; x.fillRect(x0+2,0,1,S);
+  }
+  document.body.style.backgroundImage=`url(${c.toDataURL("image/jpeg",.8)})`;
+})();
+
+// 瘴気のかたまり（黒と白）。小さな絵を一度だけ作り、あとは貼るだけ
+const kemuriTex=white=>{
+  const S=96,c=mk(S,S),x=c.getContext("2d"),r=rng(white?31:13);
+  for(let i=0;i<60;i++){
+    const a=r()*Math.PI*2, d=Math.pow(r(),.7)*S*.3, px=S/2+Math.cos(a)*d, py=S/2+Math.sin(a)*d, rad=S*(.07+r()*.16);
+    const g=x.createRadialGradient(px,py,0,px,py,rad), col=white?"236,230,218":"6,4,3", al=white?.09:.22;
+    g.addColorStop(0,`rgba(${col},${al})`); g.addColorStop(1,`rgba(${col},0)`);
+    x.fillStyle=g; x.beginPath(); x.arc(px,py,rad,0,Math.PI*2); x.fill();
+  }
+  return c;
+};
+const KURO=kemuriTex(false), SHIRO=kemuriTex(true);
+
+// 紙の繊維
+const sen=(()=>{
+  const S=256,c=mk(S,S),x=c.getContext("2d"),r=rng(21);
+  const img=x.createImageData(S,S);
+  for(let i=0;i<img.data.length;i+=4){ const v=r(); img.data[i]=v<.5?80:255; img.data[i+1]=v<.5?60:250; img.data[i+2]=v<.5?30:235; img.data[i+3]=Math.floor(r()*r()*34); }
+  x.putImageData(img,0,0);
+  for(let i=0;i<140;i++){
+    x.strokeStyle=r()<.6?`rgba(110,85,50,${.08+r()*.12})`:`rgba(255,250,236,${.2+r()*.2})`; x.lineWidth=.4+r()*.8;
+    let px=r()*S,py=r()*S,a=r()*Math.PI*2; x.beginPath(); x.moveTo(px,py);
+    for(let k=0;k<8;k++){ a+=(r()-.5)*.6; px+=Math.cos(a)*3; py+=Math.sin(a)*3; x.lineTo(px,py); }
+    x.stroke();
+  }
+  return c;
+})();
+
+/* ════ 墨の図 ════ */
+const Sumi={
+  zu(x,ox,oy,w,h,seed,big){
+    const r=rng(seed), cx=ox+w*(.42+r()*.16), cy=oy+h*(.48+r()*.08), md=Math.min(w,h);
+    let px=cx,py=cy;
+    for(let i=0;i<(big?40:26);i++){
+      px+=(r()-.5)*w*.13; py+=(r()-.5)*h*.13; px=clamp(px,ox+w*.16,ox+w*.84); py=clamp(py,oy+h*.18,oy+h*.84);
+      const rad=(big?.13:.1)*md*(.35+r()*1.1), a=.07+r()*.15, g=x.createRadialGradient(px,py,0,px,py,rad);
+      g.addColorStop(0,`rgba(28,22,18,${a})`); g.addColorStop(.6,`rgba(28,22,18,${a*.45})`); g.addColorStop(1,"rgba(28,22,18,0)");
+      x.fillStyle=g; x.beginPath(); x.arc(px,py,rad,0,Math.PI*2); x.fill();
+    }
+    x.lineCap="round";
+    for(let s=0;s<(big?10:6);s++){
+      let ang=r()*Math.PI*2; const len=md*(.22+r()*.4), steps=36, pts=[];
+      let sx=cx+(r()-.5)*w*.32, sy=cy+(r()-.5)*h*.32;
+      for(let i=0;i<=steps;i++){ pts.push([sx,sy]); sx+=Math.cos(ang)*len/steps; sy+=Math.sin(ang)*len/steps; ang+=(r()-.5)*.32; }
+      const nb=big?11:8, wmax=(big?.05:.04)*md, dry=.15+r()*.35;
+      for(let b=0;b<nb;b++){
+        const off=b/(nb-1)-.5; x.strokeStyle=`rgba(20,15,12,${.35+r()*.5})`; x.lineWidth=.6+r()*1.4; x.beginPath(); let pen=false;
+        for(let i=1;i<pts.length;i++){
+          const t=i/steps, prof=Math.sin(Math.PI*Math.pow(t,.7)), [x0,y0]=pts[i-1],[x1,y1]=pts[i], nx=-(y1-y0), ny=x1-x0, nl=Math.hypot(nx,ny)||1, o=off*wmax*prof*2;
+          if(t>.45 && r()<dry*t){ pen=false; continue; }
+          const X=x1+nx/nl*o, Y=y1+ny/nl*o; if(!pen){x.moveTo(X,Y);pen=true;} else x.lineTo(X,Y);
+        }
+        x.stroke();
+      }
+    }
+    for(let i=0;i<(big?70:38);i++){ const a=r()*Math.PI*2, d=md*(.18+r()*.42); x.fillStyle=`rgba(20,15,12,${.3+r()*.5})`; x.beginPath(); x.arc(cx+Math.cos(a)*d*1.3,cy+Math.sin(a)*d,r()*2.2+.3,0,Math.PI*2); x.fill(); }
+  },
+  // 図録：にじんだ版と、はっきりした版を重ねる（読み進めると入れ替わる）
+  futae(box,seed,big){
+    const w=box.clientWidth||400,h=box.clientHeight||250,dpr=Math.min(devicePixelRatio||1,2);
+    const a=mk(w*dpr,h*dpr), ax=a.getContext("2d"); ax.scale(dpr,dpr); this.zu(ax,0,0,w,h,seed,big);
+    const b=mk(w*dpr,h*dpr), bx=b.getContext("2d"); bx.filter="blur(7px)"; bx.globalAlpha=.8; bx.drawImage(a,0,0);
+    a.style.opacity=0; box.append(b,a); return a;
+  },
+  himawari(el){
+    const r=rng(9),W=440,H=360;
+    const flower=(cx,cy,R,rot)=>{let s=""; for(let i=0;i<18;i++){const a=rot+i*Math.PI*2/18+(r()-.5)*.12,len=R*(1.55+r()*.25),mx=cx+Math.cos(a)*R*1.15,my=cy+Math.sin(a)*R*1.15;
+      s+=`<ellipse cx="${mx.toFixed(1)}" cy="${my.toFixed(1)}" rx="${(len*.42).toFixed(1)}" ry="${(R*.26).toFixed(1)}" transform="rotate(${(a*180/Math.PI).toFixed(1)} ${mx.toFixed(1)} ${my.toFixed(1)})" fill="#d39718" fill-opacity=".82" stroke="#1f1813" stroke-width="1.1" stroke-opacity=".7"/>`;}
+      s+=`<circle cx="${cx}" cy="${cy}" r="${R}" fill="#4f3318" fill-opacity=".9" stroke="#1f1813" stroke-width="1.4"/>`;
+      for(let i=0;i<40;i++){const a=r()*Math.PI*2,d=Math.sqrt(r())*R*.9; s+=`<circle cx="${(cx+Math.cos(a)*d).toFixed(1)}" cy="${(cy+Math.sin(a)*d).toFixed(1)}" r="1.3" fill="#1f1813" fill-opacity=".6"/>`;} return s;};
+    const stem=(x1,y1,x2,y2)=>`<path d="M${x1} ${y1} C${x1+(r()-.5)*30} ${(y1+y2)/2} ${x2+(r()-.5)*20} ${(y1+y2)/2+20} ${x2} ${y2}" stroke="#4d5a2a" stroke-width="3" fill="none" stroke-linecap="round" stroke-opacity=".85"/>`;
+    const lf=(x,y,d)=>`<path d="M${x} ${y} q${d*28} -22 ${d*52} -4 q${-d*24} 18 ${-d*52} 4z" fill="#6b7a35" fill-opacity=".6" stroke="#1f1813" stroke-opacity=".5"/>`;
+    el.innerHTML=`<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="ひまわりの図"><path d="M10 ${H-24} C120 ${H-34} 300 ${H-18} ${W-10} ${H-28}" stroke="#1f1813" stroke-opacity=".35" fill="none"/>${stem(150,140,160,H-26)}${stem(300,108,292,H-26)}${stem(70,212,82,H-26)}${lf(156,250,-1)}${lf(294,220,1)}${lf(80,290,1)}${flower(150,140,30,.2)}${flower(300,108,38,.5)}${flower(70,212,20,.9)}</svg>`;
+  }
+};
+
+/* ════ 古紙を描く（頁ごとに一度だけ） ════ */
+function katachi(w,h,r,boro,koma){
+  const m=5*koma, jag=(1.2+boro*3.2)*koma, step=7*koma, pts=[];
+  const corner=r()<.35+boro*.55 ? (20+r()*50*boro+20)*koma : 0;
+  const edge=(x0,y0,x1,y1,nx,ny)=>{
+    const L=Math.hypot(x1-x0,y1-y0), n=Math.max(2,Math.round(L/step)); let bite=0,bl=0,bd=0;
+    for(let i=0;i<=n;i++){
+      const t=i/n; let d=m+r()*jag;
+      if(bite<=0 && r()<.02*boro && i>2 && i<n-2){ bl=3+(r()*7|0); bite=bl; bd=(6+r()*18*boro)*koma; }
+      if(bite>0){ d+=Math.sin(Math.PI*(1-bite/bl))*bd; bite--; }
+      pts.push([x0+(x1-x0)*t+nx*d, y0+(y1-y0)*t+ny*d]);
+    }
+  };
+  edge(corner,0,w,0,0,1); edge(w,0,w,h,-1,0); edge(w,h,0,h,0,-1); edge(0,h,0,corner,1,0);
+  if(corner){ const n=8; for(let i=1;i<n;i++){ const t=i/n; pts.push([corner*t+(r()-.5)*7*koma+m, corner*(1-t)+(r()-.5)*7*koma+m]); } }
+  return pts;
+}
+const pathOf=(x,pts)=>{ x.beginPath(); pts.forEach(([a,b],i)=>i?x.lineTo(a,b):x.moveTo(a,b)); x.closePath(); };
+
+function kamiwoKaku(sh,k){
+  const w=sh.offsetWidth, h=sh.offsetHeight; if(w<10||h<10) return;
+  sh.dataset.size=w+"x"+h;
+  const seed=hash(k.id), boro=k.boro, kigen=k.style.includes("kigen"), kurai=k.style.includes("kurai"), kiyome=k.style.includes("kiyome");
+  const c=sh.querySelector("canvas.kami"); c.width=w; c.height=h;
+  const x=c.getContext("2d"), r=rng(seed), pts=katachi(w,h,r,boro,1);
+  x.clearRect(0,0,w,h); x.save(); pathOf(x,pts); x.clip();
+  x.fillStyle=kurai?"#b3a07a":kigen?"#d2bd92":kiyome?"#e9dfc6":"#dfcfab"; x.fillRect(0,0,w,h);
+  for(let i=0;i<14;i++){
+    const px=r()*w,py=r()*h,rad=(.15+r()*.35)*Math.max(w,h)*.5, g=x.createRadialGradient(px,py,0,px,py,rad), dark=r()<.5;
+    const col=dark?"150,110,50":"255,245,220", a=dark?.08+boro*.1:.12;
+    g.addColorStop(0,`rgba(${col},${a})`); g.addColorStop(1,`rgba(${col},0)`); x.fillStyle=g; x.fillRect(0,0,w,h);
+  }
+  x.fillStyle=x.createPattern(sen,"repeat"); x.fillRect(0,0,w,h);
+  for(let i=0;i<(kiyome?0:1+Math.round(boro*2));i++){
+    const px=r()*w,py=r()*h,rad=60+r()*160, g=x.createRadialGradient(px,py,rad*.6,px,py,rad);
+    g.addColorStop(0,"rgba(140,100,50,0)"); g.addColorStop(.86,`rgba(130,90,40,${.05+boro*.06})`); g.addColorStop(.93,`rgba(110,75,30,${.12+boro*.12})`); g.addColorStop(1,"rgba(110,75,30,0)");
+    x.fillStyle=g; x.beginPath(); x.arc(px,py,rad,0,Math.PI*2); x.fill();
+  }
+  for(let c2=0;c2<4+boro*10;c2++){
+    const cx=r()*w,cy=r()*h;
+    for(let i=0;i<6+r()*14;i++){ x.fillStyle=`rgba(${120+r()*30|0},${80+r()*20|0},40,${.12+r()*.3})`; x.beginPath(); x.arc(cx+(r()-.5)*40,cy+(r()-.5)*40,.5+r()*2.6,0,Math.PI*2); x.fill(); }
+  }
+  const fold=(x0,y0,x1,y1)=>{ x.lineWidth=1; x.strokeStyle=`rgba(70,50,25,${.18+boro*.12})`; x.beginPath(); x.moveTo(x0,y0); x.lineTo(x1,y1); x.stroke();
+    x.strokeStyle="rgba(255,250,235,.3)"; x.beginPath(); x.moveTo(x0+1.2,y0+1.2); x.lineTo(x1+1.2,y1+1.2); x.stroke(); };
+  fold(w*.5+(r()-.5)*8,0,w*.5+(r()-.5)*8,h);
+  const nf=Math.max(1,Math.round(h/700)); for(let y=1;y<=nf;y++){ const fy=h*y/(nf+1); fold(0,fy,w,fy+(r()-.5)*6); }
+  const yake=kigen?"55,28,10":"90,60,25";
+  { const q=4, b=mk(w/q,h/q), bx=b.getContext("2d"), qp=pts.map(([a,c])=>[a/q,c/q]);
+    bx.filter="blur(4px)"; bx.lineWidth=70/q; bx.strokeStyle=`rgba(${yake},${.34*(.5+boro*.9)})`; pathOf(bx,qp); bx.stroke();
+    bx.filter="blur(1.2px)"; bx.lineWidth=16/q; bx.strokeStyle=`rgba(${yake},${.38*(.5+boro*.9)})`; pathOf(bx,qp); bx.stroke();
+    x.drawImage(b,0,0,w,h); }
+  x.lineWidth=1.4; x.strokeStyle=`rgba(40,22,8,${.35+boro*.3})`; pathOf(x,pts); x.stroke();
+  x.restore();
+  // 虫食い（向こうの床が見える）
+  const holes=kiyome?0:Math.round(boro*7+r()*2), pad=Math.min(70,w*.09);
+  for(let i=0;i<holes;i++){
+    const side=r(); let hx,hy;
+    if(side<.4){ hx=r()<.5?8+r()*pad:w-8-r()*pad; hy=r()*h; } else if(side<.7){ hx=r()*w; hy=r()<.5?8+r()*pad*.6:h-8-r()*pad*.6; } else { hx=r()<.5?10+r()*pad:w-10-r()*pad; hy=h*.2+r()*h*.6; }
+    const n=3+(r()*4|0), base=(3+r()*7)*(.6+boro*.8), blobs=[];
+    for(let j=0;j<n;j++) blobs.push([hx+(r()-.5)*base*2,hy+(r()-.5)*base*2,base*(.4+r()*.7)]);
+    for(const [bx,by,br] of blobs){ const g=x.createRadialGradient(bx,by,br,bx,by,br*2.4); g.addColorStop(0,"rgba(80,45,15,.55)"); g.addColorStop(1,"rgba(80,45,15,0)"); x.fillStyle=g; x.beginPath(); x.arc(bx,by,br*2.4,0,Math.PI*2); x.fill(); }
+    x.globalCompositeOperation="destination-out"; for(const [bx,by,br] of blobs){ x.beginPath(); x.arc(bx,by,br,0,Math.PI*2); x.fill(); } x.globalCompositeOperation="source-over";
+  }
+  for(let i=0;i<Math.round(boro*4);i++){ // 裂け
+    const side=r()*4|0, p=.15+r()*.7, len=(14+r()*36)*(.5+boro), wd=2+r()*4;
+    let sx,sy,dx,dy; if(side===0){sx=w*p;sy=0;dx=0;dy=1}else if(side===1){sx=w;sy=h*p;dx=-1;dy=0}else if(side===2){sx=w*p;sy=h;dx=0;dy=-1}else{sx=0;sy=h*p;dx=1;dy=0}
+    const ex=sx+dx*len+(r()-.5)*10, ey=sy+dy*len+(r()-.5)*10;
+    x.globalCompositeOperation="destination-out"; x.beginPath(); x.moveTo(sx-dy*wd,sy-dx*wd); x.lineTo(ex,ey); x.lineTo(sx+dy*wd,sy+dx*wd); x.closePath(); x.fill(); x.globalCompositeOperation="source-over";
+  }
+
+  // 瘴気の染み（二段）・人の白・裏の影 ― 半分の大きさで描く
+  const hw=Math.round(w/2), hh=Math.round(h/2), hp=katachi(hw,hh,rng(seed),boro,.5), md=Math.min(hw,hh), lv=clamp(k.shouki/5);
+  const shimi=(cv,reach,count,seed2)=>{
+    cv.width=hw; cv.height=hh; const s=cv.getContext("2d"), rr=rng(seed2);
+    s.save(); pathOf(s,hp); s.clip();
+    for(let i=0;i<count;i++){
+      const side=rr()*4|0, p=rr(); const px=side===0?p*hw:side===1?hw:side===2?p*hw:0, py=side===0?0:side===1?p*hh:side===2?hh:p*hh;
+      const R=md*(.08+rr()*.2)*reach;
+      for(let j=0;j<5;j++){ const bx=px+(rr()-.5)*R, by=py+(rr()-.5)*R, br=R*(.5+rr()*.8), a=.35+rr()*.35, g=s.createRadialGradient(bx,by,0,bx,by,br);
+        g.addColorStop(0,`rgba(16,9,6,${a})`); g.addColorStop(.55,`rgba(24,13,7,${a*.55})`); g.addColorStop(.85,`rgba(40,22,10,${a*.15})`); g.addColorStop(1,"rgba(40,22,10,0)");
+        s.fillStyle=g; s.beginPath(); s.arc(bx,by,br,0,Math.PI*2); s.fill(); }
+    }
+    [[0,0],[hw,0],[0,hh],[hw,hh]].forEach(([px,py])=>{ const R=md*.35*reach, g=s.createRadialGradient(px,py,0,px,py,R); g.addColorStop(0,"rgba(14,8,5,.6)"); g.addColorStop(1,"rgba(14,8,5,0)"); s.fillStyle=g; s.fillRect(0,0,hw,hh); });
+    s.restore();
+    s.save(); s.globalCompositeOperation="destination-out"; s.translate(hw/2,hh*.46); s.scale(hw*.55,hh*.58);
+    const g=s.createRadialGradient(0,0,0,0,0,1), pr=kiyome?.97:.85; g.addColorStop(0,`rgba(0,0,0,${pr})`); g.addColorStop(.62,`rgba(0,0,0,${pr*.85})`); g.addColorStop(1,"rgba(0,0,0,0)");
+    s.fillStyle=g; s.fillRect(-1,-1,2,2); s.restore();
+  };
+  shimi(sh.querySelector("canvas.s1"),.7+lv*.5,Math.round(5+lv*8),seed+1);
+  shimi(sh.querySelector("canvas.s2"),1+lv*.8,Math.round(6+lv*12),seed+2);
+  const sc=sh.querySelector("canvas.shiro"); sc.width=hw; sc.height=hh;
+  if(k.style.includes("onnen")){ const s=sc.getContext("2d"), rr=rng(seed+3); s.save(); pathOf(s,hp); s.clip();
+    for(let i=0;i<5;i++){ const px=hw*(.15+rr()*.7), py=hh*(.1+rr()*.8), R=md*(.12+rr()*.14), g=s.createRadialGradient(px,py,0,px,py,R);
+      g.addColorStop(0,"rgba(253,250,242,.85)"); g.addColorStop(.6,"rgba(250,246,236,.45)"); g.addColorStop(1,"rgba(250,246,236,0)"); s.fillStyle=g; s.beginPath(); s.arc(px,py,R,0,Math.PI*2); s.fill(); }
+    s.restore(); }
+  const uc=sh.querySelector("canvas.urami"); uc.width=hw; uc.height=hh;
+  if(k.shouki>=3){ const t=mk(hw,hh), tx=t.getContext("2d"), s=Math.min(hw*.85,hh*.6); Sumi.zu(tx,(hw-s)/2,hh*.12,s,s*.75,seed,true);
+    const u=uc.getContext("2d"); u.filter="blur(3px)"; u.drawImage(t,0,0); }
+}
+
+/* ════ 堂の空気：灯りと瘴気を、粗いキャンバス1枚に少ない回数で描く ════ */
+const Kuuki=(()=>{
+  const c=$("kiri"), x=c.getContext("2d"), D=6; let W=0,H=0;
+  const size=()=>{ W=Math.ceil(innerWidth/D); H=Math.ceil(innerHeight/D); c.width=W; c.height=H; };
+  size(); addEventListener("resize",size);
+  const r=rng(3), puffs=[];
+  const spots=[[0,.1],[0,.5],[0,.9],[1,.15],[1,.55],[1,.92],[.5,0],[.5,1],[.2,1],[.8,0],[.12,.3],[.88,.72],[.05,.7],[.95,.35],[.3,0],[.7,1]];
+  spots.forEach(([u,v],i)=>puffs.push({u:u+(r()-.5)*.1,v:v+(r()-.5)*.1,s:.45+r()*.4,a:.6+r()*.4,ph:r()*6.28,sp:.05+r()*.06,ax:.06+r()*.08,ay:.05+r()*.07,w:i%3===1,dep:.6+r()*.8}));
+  const st={lv:0,lvT:0,light:0,lightT:0,pulse:0,mode:"",glow:1};
+  let px=0,py=0,tx=0,ty=0; const hk={el:$("hikari"),o:""};
+  if(!reduce) addEventListener("pointermove",e=>{ tx=(e.clientX/innerWidth-.5); ty=(e.clientY/innerHeight-.5); },{passive:true});
+  let last=0,T=0;
+  function frame(now){
+    requestAnimationFrame(frame);
+    const every=reduce?500:55; if(now-last<every) return;
+    const dt=Math.min(.2,(now-last)/1000); last=now; T+=dt*(st.mode==="rinne"?2.6:1);
+    st.lv+=(st.lvT-st.lv)*Math.min(1,dt*.9); st.light+=(st.lightT-st.light)*Math.min(1,dt*1.3); st.pulse*=Math.pow(.5,dt/.5);
+    px+=(tx-px)*.15; py+=(ty-py)*.15;
+    const ho=st.light.toFixed(2); if(ho!==hk.o){ hk.o=ho; hk.el.style.opacity=ho; }
+    x.clearRect(0,0,W,H);
+    // 灯り（ゆらぐ）
+    let fl=.86+.08*Math.sin(T*3.1)+.05*Math.sin(T*7.3+1)+(Math.sin(T*1.3)>.97?-.15:0);
+    const gx=W*.5,gy=H*.3,gr=Math.max(W,H)*.55, g=x.createRadialGradient(gx,gy,0,gx,gy,gr);
+    const ga=.2*fl*st.glow; g.addColorStop(0,`rgba(255,170,85,${ga})`); g.addColorStop(.5,`rgba(255,140,60,${ga*.3})`); g.addColorStop(1,"rgba(255,140,60,0)");
+    x.fillStyle=g; x.fillRect(0,0,W,H);
+    // 瘴気
+    let m=clamp(st.lv+st.pulse)*(1-st.light*.8);
+    if(st.mode==="rinne"){ m*=.75+.3*Math.sin(T*1.7); if(r()<.06) m*=.4; }
+    if(m>.01){
+      const big=Math.max(W,H), flee=st.light*.25;
+      for(const p of puffs){
+        const sp=reduce?0:1;
+        const X=(p.u+Math.sin(T*p.sp+p.ph)*p.ax*sp-px*.05*p.dep - flee*(.6-p.u))*W, Y=(p.v+Math.cos(T*p.sp*.8+p.ph)*p.ay*sp-py*.05*p.dep + flee*(p.v-.2))*H;
+        const S=big*p.s*(1+.15*Math.sin(T*.4+p.ph))*(.8+m*.5);
+        x.globalAlpha=clamp(p.a*m*(p.w&&st.mode==="onnen"?1.2:1));
+        x.drawImage(p.w&&st.mode==="onnen"?SHIRO:KURO,X-S/2,Y-S/2,S,S);
+        if(m>.5){ x.globalAlpha=clamp(p.a*(m-.5)); x.drawImage(KURO,X-S*.35,Y-S*.35,S*.7,S*.7); }
+      }
+      x.globalAlpha=1;
+      // 紙の読む場所は空ける
+      x.save(); x.globalCompositeOperation="destination-out"; x.translate(W/2,H*.5); x.scale(W*.34,H*.52);
+      const h=x.createRadialGradient(0,0,0,0,0,1); h.addColorStop(0,"rgba(0,0,0,.92)"); h.addColorStop(.6,"rgba(0,0,0,.7)"); h.addColorStop(1,"rgba(0,0,0,0)");
+      x.fillStyle=h; x.fillRect(-1,-1,2,2); x.restore();
+    }
+  }
+  requestAnimationFrame(frame);
+  return {
+    get lv(){return st.lvT},
+    set(lv,light){ if(lv!=null) st.lvT=lv; if(light!=null){ st.lightT=light; const cur=document.querySelector(".sheet:not(.yuku)"); if(cur) cur.classList.toggle("hareru",light>.6); } },
+    jump(lv){ st.lv=st.lvT=lv; },
+    uzuku(){ st.pulse=.35; },
+    mode(m){ st.mode=m; },
+    glow(v){ st.glow=v; }
+  };
+})();
+
+/* ════ 頁 ════ */
+const stage=$("stage"), kakera=$("kakera");
+let cur=-1, zuList=[], opened=0;
+const taintOf=()=>clamp((yonda.size-2)/Math.max(1,N-2));
+const levelFor=k=>k.style.includes("hyoushi")?.3:clamp(.12+k.shouki/5*.62+taintOf()*.3);
+
+function midashi(k,frag){
+  const h=document.createElement("header"); h.className="midashi";
+  const h2=document.createElement("h2"); h2.textContent=k.title; h.appendChild(h2);
+  const box=document.createElement("div"); box.className="lede-box";
+  if(k.yomi){ const p=document.createElement("p"); p.className="yomi"; p.textContent=k.yomi; box.appendChild(p); }
+  frag.querySelectorAll(":scope > .lede").forEach(l=>box.appendChild(l)); h.appendChild(box); return h;
+}
+
+function makeSheet(i){
+  const k=kiji[i], sh=document.createElement("article");
+  sh.className="sheet "+k.style.join(" ");
+  const r=rng(hash(k.id)); sh.style.setProperty("--tilt",((r()-.5)*1.4).toFixed(2)+"deg"); sh.style.setProperty("--sx",((r()-.5)*14).toFixed(1)+"px");
+  const lv=k.shouki/5;
+  sh.style.setProperty("--o1",clamp(.35+lv*.6).toFixed(2)); sh.style.setProperty("--o2",clamp(lv*.95-.1).toFixed(2)); sh.style.setProperty("--ura",k.shouki>=3?(.05+lv*.13).toFixed(2):"0");
+  sh.innerHTML=`<div class="kage"></div><canvas class="kami"></canvas><canvas class="urami"></canvas><canvas class="s1"></canvas><canvas class="s2"></canvas><canvas class="shiro"></canvas><div class="leaf"></div>
+    <button class="idx" data-nav="mokuji" aria-label="目次へ" title="目次">目</button>
+    <button class="corner prev" data-nav="prev" aria-label="前の頁"><span></span><em></em></button>
+    <button class="corner next" data-nav="next" aria-label="次の頁"><span></span><em></em></button><div class="folio"></div>`;
+  const leaf=sh.querySelector(".leaf"), frag=k.tpl.content.cloneNode(true);
+  if(k.fuuin && netabare!=="ari"){
+    leaf.appendChild(midashi(k,document.createDocumentFragment()));
+    leaf.insertAdjacentHTML("beforeend",`<p class="fuuin"><span class="shuin">封</span></p><p class="cap">この頁は伏せられている。目次で「すべて読む」にすると開く。</p>`);
+  } else {
+    if(!k.style.includes("hyoushi")) leaf.appendChild(midashi(k,frag));
+    leaf.appendChild(frag);
+  }
+  leaf.querySelectorAll('[data-auto="mokuji"]').forEach(el=>el.replaceWith(mokuji()));
+  leaf.querySelectorAll('[data-auto="ichiran"]').forEach(el=>el.replaceWith(ichiran()));
+  leaf.querySelectorAll(".shuin:not([style*='--r'])").forEach(s=>s.style.setProperty("--r",((r()-.5)*16).toFixed(1)+"deg"));
+  leaf.querySelectorAll(".himawari-zu").forEach(el=>Sumi.himawari(el));
+  leaf.querySelectorAll("[data-netabare]").forEach(e=>e.setAttribute("aria-hidden",netabare!=="ari"));
+  leaf.querySelectorAll("[data-netabare-sentaku]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.netabareSentaku===netabare));
+  leaf.querySelectorAll("[data-hikari]").forEach(b=>b.addEventListener("click",()=>{
+    const on=b.getAttribute("aria-pressed")!=="true"; b.setAttribute("aria-pressed",on); b.textContent=on?"光を遮る":"光を当てる"; Kuuki.set(null,on?+b.dataset.hikari:k.hikari);
+  }));
+  leaf.querySelectorAll(".sentaku").forEach(b=>sentaku(b,sh));
+  const pv=sh.querySelector(".prev"), nx=sh.querySelector(".next");
+  pv.hidden=i===0; nx.hidden=i===N-1||i===0;
+  pv.querySelector("em").textContent=i>0?kiji[i-1].title:""; nx.querySelector("em").textContent=i<N-1?kiji[i+1].title:"";
+  sh.querySelector(".folio").textContent=i===0?"":`— ${K(i)} —`;
+  sh.querySelector(".idx").hidden=i<=1;
+  return sh;
+}
+
+function mokuji(){
+  const wrap=document.createElement("div");
+  const groups=[]; kiji.forEach(k=>{ if(k.group && !groups.includes(k.group)) groups.push(k.group); });
+  let html="";
+  for(const g of groups){ html+=`<p class="kumi">${g}</p><ul class="mokuji">`;
+    kiji.forEach((k,i)=>{ if(k.group!==g) return; html+=`<li class="${k.parent?"ko":""}"><button data-go="${k.id}" class="${yonda.has(k.id)?"yonda":""}"><span>${k.title}</span><small>${K(i)}</small></button></li>`; });
+    html+=`</ul>`; }
+  wrap.innerHTML=html; const ul=wrap;
+  const sita=document.createElement("div"); sita.className="mokuji-shita";
+  const kr=document.createElement("button"); kr.className="kirikae";
+  const label=()=>kr.textContent=netabare==="ari"?"いま：すべて読む（ネタバレあり）":"いま：伏せて読む（ネタバレなし）";
+  label(); kr.addEventListener("click",()=>{ setNetabare(netabare==="ari"?"nashi":"ari"); label(); });
+  const re=document.createElement("button"); re.className="arata"; re.textContent="紙を新しくする（読んだ記録を消す）";
+  re.addEventListener("click",()=>{ yonda=new Set(["hyoushi","mokuji"]); store.set("garando.yonda",[...yonda]); ul.querySelectorAll(".yonda").forEach(b=>b.classList.remove("yonda")); Kuuki.set(levelFor(kiji[cur])); akari(); });
+  sita.append(kr,re); wrap.appendChild(sita); return wrap;
+}
+
+function ichiran(){
+  const d=document.createElement("div"); d.className="ichiran";
+  kiji.forEach(k=>{ if(k.group!=="妖怪"||!k.tpl.content.querySelector(".zuroku")) return;
+    const b=document.createElement("button"); b.dataset.go=k.id; b.innerHTML=`<div class="chiisa"></div><span class="nm"></span>`;
+    b.querySelector(".nm").textContent=k.title; if(k.tag){ const s=document.createElement("small"); s.textContent=k.tag; b.querySelector(".nm").appendChild(s); }
+    d.appendChild(b);
+    requestAnimationFrame(()=>{ const box=b.querySelector(".chiisa"), bw=box.clientWidth||200, bh=box.clientHeight||150, dpr=Math.min(devicePixelRatio||1,2), c=mk(bw*dpr,bh*dpr), x=c.getContext("2d"); x.scale(dpr,dpr); Sumi.zu(x,0,0,bw,bh,hash(k.id),k.shouki>=5); box.appendChild(c); });
+  });
+  return d;
+}
+
+function sentaku(box,sh){
+  const out=box.parentElement.querySelector(".ketsumatsu"); if(!out) return; const erabi=out.querySelector("[data-erabi]");
+  box.querySelectorAll("[data-sentaku]").forEach(b=>b.addEventListener("click",()=>{
+    box.querySelectorAll("[data-sentaku]").forEach(x=>x.setAttribute("aria-pressed","false")); b.setAttribute("aria-pressed","true");
+    const iku=b.dataset.sentaku==="iku";
+    erabi.innerHTML=iku?"ひまわり畑に行く<small>陽の光のもとへ。</small>":"ひまわり畑に行かない<small>陽の光から遠ざかる。</small>";
+    out.hidden=false; out.classList.remove("mieru"); void out.offsetWidth; out.classList.add("mieru");
+    sh.classList.remove("zawameku");
+    if(iku){ Kuuki.set(null,1); setTimeout(()=>{ Kuuki.set(Math.min(1,Kuuki.lv+.35),0); Kuuki.uzuku(); sh.classList.add("zawameku"); },2400); }
+    else { Kuuki.set(Math.min(1,Kuuki.lv+.3),0); Kuuki.uzuku(); setTimeout(()=>sh.classList.add("zawameku"),700); }
+  }));
+}
+
+function kakeraOn(on){
+  if(on && !kakera.childElementCount){
+    const words=kiji.filter(k=>k.group).map(k=>k.title).concat(["寄生","陽の光","太刀","負の感情"]), r=rng(77);
+    [[3,8],[80,6],[89,33],[2,42],[85,63],[5,76],[72,88],[28,91],[13,22],[91,86]].forEach(([l,t],i)=>{
+      const s=document.createElement("span"); s.textContent=words[(i*3)%words.length]; s.style.left=l+"%"; s.style.top=t+"%";
+      const v={d:(18+r()*20)+"s",dl:(-r()*20)+"s",dx:((r()-.5)*60)+"px",dy:((r()-.5)*60)+"px",r0:((r()-.5)*24)+"deg",r1:((r()-.5)*24)+"deg"};
+      for(const k in v) s.style.setProperty("--"+k,v[k]); kakera.appendChild(s); });
+  }
+  clearTimeout(kakeraOn.t); if(on) kakeraOn.t=setTimeout(()=>kakera.classList.add("on"),2200); else kakera.classList.remove("on");
+}
+const akari=()=>Kuuki.glow(1-taintOf()*.6);
+
+function go(i,{push=true}={}){
+  if(i<0||i>=N||i===cur) return;
+  const dir=i>cur?"fwd":"back", old=stage.querySelector(".sheet:not(.yuku)");
+  if(old){
+    if(reduce) old.remove();
+    else {
+      // 今の紙を画面に留めたまま、めくる（スクロールしても動かない）
+      const rc=old.getBoundingClientRect(), w=old.offsetWidth, h=old.offsetHeight;
+      old.style.left=(rc.left+rc.width/2-w/2)+"px"; old.style.top=(rc.top+rc.height/2-h/2)+"px";
+      old.style.width=w+"px"; old.style.height=h+"px";
+      old.classList.remove("oku","kuru","matsu"); old.classList.add("yuku",dir); setTimeout(()=>old.remove(),900);
+    }
+  }
+  cur=i; const k=kiji[i]; yonda.add(k.id); store.set("garando.yonda",[...yonda]);
+  const sh=makeSheet(i); sh.classList.add("matsu"); stage.appendChild(sh); scrollTo(0,0);
+  Kuuki.mode(k.style.includes("onnen")?"onnen":k.style.includes("rinne")?"rinne":"");
+  Kuuki.set(levelFor(k),k.hikari);
+  if(k.style.includes("hyoushi")){ Kuuki.jump(0); setTimeout(()=>{ if(kiji[cur]===k) Kuuki.set(.4); },1500); } else Kuuki.uzuku();
+  kakeraOn(k.style.includes("hyoushi")); akari();
+  if(push){ try{ history.replaceState(null,"","#"+k.id); }catch(e){} }
+  // めくりが動き出してから、重い描画をする
+  const draw=()=>{
+    if(!sh.isConnected) return;
+    zuList=[...sh.querySelectorAll(".zuroku[data-zu]")].map(z=>{
+      const f=document.createElement("div"); f.className="zu"; f.innerHTML=`<span class="na"></span>`; f.querySelector(".na").textContent=z.dataset.zu; z.prepend(f);
+      return Sumi.futae(f,hash(k.id),k.shouki>=5);
+    });
+    kamiwoKaku(sh,k);
+    sh.classList.remove("matsu"); sh.classList.add("oku","kuru");
+    requestAnimationFrame(()=>requestAnimationFrame(()=>sh.classList.add("ikiru")));
+    opened=performance.now(); nozoku();
+  };
+  if(old && !reduce) requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(draw,30))); else draw();
+}
+
+/* 覗き込む：スクロールしたときだけ計算 */
+let nzPending=false;
+function nozoku(){
+  nzPending=false; if(!zuList.length) return;
+  const vh=innerHeight, tm=clamp((performance.now()-opened)/1000/24)*.5;
+  for(const c of zuList){ const rc=c.getBoundingClientRect(); const p=Math.max(tm,clamp((vh*.6-rc.top)/(vh*.45))); c.style.opacity=p.toFixed(2); }
+}
+addEventListener("scroll",()=>{ if(!nzPending){ nzPending=true; requestAnimationFrame(nozoku); } },{passive:true});
+setInterval(()=>{ if(zuList.length && performance.now()-opened<26000) nozoku(); },1000);
+
+/* 大きさが変わったら紙を描き直す（間引く） */
+let rsT=0; new ResizeObserver(()=>{ clearTimeout(rsT); rsT=setTimeout(()=>{ const sh=stage.querySelector(".sheet:not(.yuku)"); if(sh && sh.dataset.size!==sh.offsetWidth+"x"+sh.offsetHeight) kamiwoKaku(sh,kiji[cur]); },180); }).observe(stage);
+document.fonts && document.fonts.ready.then(()=>{ const sh=stage.querySelector(".sheet:not(.yuku)"); if(sh && sh.dataset.size!==sh.offsetWidth+"x"+sh.offsetHeight) kamiwoKaku(sh,kiji[cur]); });
+
+/* 操作 */
+document.addEventListener("click",e=>{
+  const g=e.target.closest("[data-go]"); if(g && byId[g.dataset.go]!=null) return go(byId[g.dataset.go]);
+  const n=e.target.closest("[data-nav]"); if(n){ const v=n.dataset.nav; return go(v==="prev"?cur-1:v==="next"?cur+1:byId.mokuji); }
+  const s=e.target.closest("[data-netabare-sentaku]"); if(s){ setNetabare(s.dataset.netabareSentaku); s.parentElement.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b===s)); setTimeout(()=>go(byId.mokuji),300); }
+});
+document.addEventListener("keydown",e=>{ if(e.key==="ArrowRight"&&cur>0) go(cur+1); if(e.key==="ArrowLeft") go(cur-1); });
+let sx=null,sy=null;
+stage.addEventListener("touchstart",e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY},{passive:true});
+stage.addEventListener("touchend",e=>{ if(sx===null) return; const dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy; if(Math.abs(dx)>70&&Math.abs(dx)>Math.abs(dy)*1.6&&cur>0) go(cur+(dx<0?1:-1)); sx=null; },{passive:true});
+
+const start=byId[(location.hash||"").slice(1)];
+go(netabare && start!=null ? start : 0,{push:false});
+})();
+</script>

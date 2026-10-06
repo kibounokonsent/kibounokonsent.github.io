@@ -1,11 +1,11 @@
 このフォルダに以下のファイル名で画像を置くと、Explorer内の
 Entity Databaseで自動的に表示されます（無い間はプレースホルダー表示）。
 
-危険度アイコン（正方形推奨）:
-  images/theos.png
-  images/kindynos.png
-  images/epimeleia.png
-  images/asphales.png
+危険度エンブレム（js/danger-data.js の image で指定）:
+  images/T.svg   テオス
+  images/K.svg   キンディノス
+  images/E.svg   エピメレイア
+  images/A.svg   アスファレス
 
 紛異体の収容画像（個体識別番号に対応）:
   images/UN-R-276-RL.png   （深い深い闇の中へ）

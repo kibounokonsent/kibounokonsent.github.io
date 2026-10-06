@@ -1,0 +1,57 @@
+伽藍堂 妖怪資料 ― 記事の追加方法
+
+index.html の下のほうにある「記　事」の区画に、記事が <template> で並んでいます。
+並び順がそのまま頁の順になります。目次・妖怪一覧・頁番号・前後の頁の案内は自動で作られます。
+
+■ 足し方
+1. 似ている記事の <template> … </template> をまるごとコピーする
+2. 貼りたい位置（前後の記事のあいだ）に貼る
+3. data-id と data-title を書き換え、中身を書き換える
+
+■ 例：新しい妖怪を足す
+<template data-id="nanika" data-title="〇〇" data-yomi="妖怪" data-group="妖怪" data-parent="yokai" data-shouki="3">
+  <p class="lede">導入の一文。</p>
+  <div class="zuroku" data-zu="〇〇之図">
+    <dl>
+      <dt>分類</dt><dd>妖怪</dd>
+      <dt>性質</dt><dd>……</dd>
+    </dl>
+  </div>
+</template>
+→ data-group="妖怪" で .zuroku がある記事は、妖怪一覧に自動で並びます。
+
+■ 設定の意味
+data-id      頁の名前（英数字。URLの #〇〇 になる）
+data-title   縦書きの大見出し
+data-yomi    見出し横の小さな添え書き
+data-group   目次での組（記録／妖怪／物語。新しい名前を書けば新しい組になる）
+data-parent  親の頁の data-id（書くと目次で子として並ぶ）
+data-shouki  瘴気の濃さ 0〜5
+data-hikari  差し込む陽の光 0〜1
+data-boro    紙の傷み 0〜1（破れ・虫食い・焼けの多さ。省略すると瘴気の濃さから決まる）
+data-style   紙の性質（空白区切りで複数可）
+             kigen=古い起源の紙 / onnen=黒と白 / rinne=不安定
+             kiyome=整った神聖な紙 / kurai=暗い紙
+data-tag     妖怪一覧で名前の横に出る短い札
+
+■ 中で使える書き方
+<p class="lede">            見出し横の導入文
+<h3>                        小見出し
+<ol class="nagare"><li>     番号つきの記録（<li class="shu">で朱の番号、<small>で補足）
+<ul class="kusari"><li>     ↓でつながる流れ
+<div class="zuroku" data-zu="名">  妖怪図＋項目表
+<div class="tsui"><div class="kuro">…</div><div class="hi">…</div></div>  左右の対照（kuro / hi / shiro）
+<p class="chuki">           手書きの注釈
+<span class="yohaku" style="top:300px">  余白への書き込み
+<span class="shuin">印</span>         朱印（class="shuin oki" style="right:8%;top:120px" で紙の上に置く）
+<del>                       二重線
+<div class="sen"></div>     墨の区切り線
+<button class="tobu" data-go="頁のid">→ …</button>  別の頁へ飛ぶ
+<p class="mikisai">未記</p>  まだ書かれていない欄
+
+■ ネタバレ
+表紙で「伏せて読む（ネタバレなし）」「すべて読む（ネタバレあり）」を選べます（目次でも切替可）。
+伏せたい所に data-netabare をつけると、ネタバレなしのとき墨で塗りつぶされます。
+<span data-netabare>倒せない</span>        文字だけ塗る
+<div data-netabare> … </div>            まとまりごと塗る
+<template data-netabare ...>             頁ごと「封」にする

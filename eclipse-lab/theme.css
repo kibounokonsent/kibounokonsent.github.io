@@ -1276,3 +1276,112 @@ button{
 .photo-status{
     color:var(--shu);
 }
+
+
+/* ==========================================================
+   危険度エンブレム（images/A・E・K・T.svg）
+========================================================== */
+
+.danger-icon{
+    vertical-align:middle;
+}
+
+.danger-icon img{
+    filter:drop-shadow(0 1px 0 rgba(0,0,0,.15));
+    user-select:none;
+}
+
+/* ファイル一覧：紛異体は枠つき一文字の代わりにエンブレム */
+.file-glyph.glyph-emblem{
+    border:none !important;
+    padding:0;
+}
+
+.file-glyph.glyph-emblem img{
+    width:22px;
+    height:22px;
+    object-fit:contain;
+}
+
+#file-list .file.is-read .file-glyph.glyph-emblem img{
+    opacity:.72;
+}
+
+/* 調書の右上に押された標章 */
+.dossier-emblem{
+    position:absolute;
+    top:22px;
+    right:22px;
+    line-height:0;
+    transform:rotate(-6deg);
+    opacity:.95;
+    pointer-events:none;
+}
+
+.dossier .entity-id,
+.dossier .entity-meta{
+    padding-right:96px;
+}
+
+@media (max-width:600px){
+    .dossier-emblem{ top:16px; right:12px; }
+    .dossier-emblem .danger-icon{ width:58px !important; height:58px !important; }
+    .dossier .entity-id{ padding-right:66px; }
+    .dossier .entity-meta{ padding-right:0; }
+}
+
+/* 未開示の紛異体：標章だけ見えるが、色は抜けている */
+.locked-emblem{
+    line-height:0;
+    margin-bottom:16px;
+}
+
+.locked-emblem img{
+    filter:grayscale(1) contrast(.9);
+    opacity:.55;
+}
+
+/* 危険度分類規程の別表 */
+.danger-legend{
+    margin-top:28px;
+    padding-top:18px;
+    border-top:1px solid var(--paper-rule);
+}
+
+.danger-legend-title{
+    font-size:12px;
+    letter-spacing:.08em;
+    color:var(--ink-sub);
+    margin-bottom:14px;
+}
+
+.danger-legend-grid{
+    display:grid;
+    grid-template-columns:repeat(4, minmax(0, 1fr));
+    gap:12px;
+}
+
+.danger-legend-item{
+    margin:0;
+    display:flex;
+    flex-direction:column;
+    align-items:center;
+    gap:8px;
+}
+
+.danger-legend-item figcaption{
+    font-size:13px;
+    color:var(--ink);
+    letter-spacing:.04em;
+    text-align:center;
+}
+
+.danger-legend-code{
+    font-family:var(--font-sys);
+    font-weight:700;
+    margin-right:6px;
+}
+
+@media (max-width:520px){
+    .danger-legend-grid{ grid-template-columns:repeat(2, minmax(0, 1fr)); }
+}
