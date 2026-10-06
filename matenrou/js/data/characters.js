@@ -34,5 +34,20 @@ CHARACTERS.push(
   appearance: '',
   setting: '',
   related: ['demon', 'demon-ranks', 'seven-sins']
+},
+
+{
+  id: 'twentaso', type: 'demon',
+  name: 'ツヴェンタソ',
+  contract: '', kind: '色欲',
+  forms: [
+    { rank: '霊級', image: 'assets/characters/Twentaso.svg' },
+    { rank: '命級', image: 'assets/characters/Twentaso2.svg' },
+    { rank: '王級', image: 'assets/characters/Twentaso3.svg' },
+    { rank: '司級', image: 'assets/characters/Twentaso4.svg' }
+  ],
+  appearance: '',
+  setting: '',
+  related: ['demon', 'demon-ranks', 'seven-sins']
 }
 );
