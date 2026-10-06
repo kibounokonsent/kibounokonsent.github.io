@@ -254,9 +254,54 @@
         this.junk = [...main.querySelectorAll('[data-role="junk"] > path')].map((n) => n.cloneNode(true));
         wrapIn(main);
         const ghosts = ['hl-shadow', 'hl-a', 'hl-b'].map((c) => { const g = ghost(c); wrapIn(g); return g; });
-        box.replaceChildren(ghosts[0], main, ghosts[1], ghosts[2]);
+        /* ゆれは SVG の中ではなく、包んだ箱ごと動かす（GPU で動くので、ロゴを描き直さない） */
+        const shake = document.createElement('div');
+        shake.className = 'hl-shake';
+        shake.append(ghosts[0], main, ghosts[1], ghosts[2]);
+        box.replaceChildren(shake);
         box.classList.add('is-live');
+        this.glow(box);
       } catch (e) { /* 読み込めない（file:// で開いた等）ときは <img> のまま表示 */ }
+    },
+    /* ロゴの赤い光：毎フレーム計算させず、1回だけ canvas に焼き付けて後ろに置く */
+    glow(box) {
+      const url = URL.createObjectURL(new Blob([this.cache], { type: 'image/svg+xml' }));
+      const img = new Image();
+      const draw = () => {
+        if (!box.isConnected) return;
+        const W = box.clientWidth, H = W * (img.naturalHeight / img.naturalWidth || .45);
+        if (!W) return;
+        const pad = 160, s = 0.5, K = [1.3, 1.3];   // 半分の解像度で十分（ぼかしなので）。K は元の CSS の光と同じ明るさに合わせた係数
+        const cv = document.createElement('canvas');
+        cv.width = Math.ceil((W + pad * 2) * s); cv.height = Math.ceil((H + pad * 2) * s);
+        const ctx = cv.getContext('2d'), off = (W + pad * 2) * 2;
+        /* CSS の drop-shadow(30px) drop-shadow(80px) と同じ重ね方：2つ目の光は「ロゴ＋1つ目の光」から広がる */
+        const l1 = document.createElement('canvas'); l1.width = cv.width; l1.height = cv.height;
+        const c1 = l1.getContext('2d');
+        c1.shadowColor = `rgba(200,20,28,${.4 * K[0]})`; c1.shadowBlur = 30 * s;
+        c1.drawImage(img, pad * s, pad * s, W * s, H * s);              // ロゴ＋1つ目の光
+        ctx.save();
+        ctx.shadowColor = `rgba(120,5,10,${.45 * K[1]})`; ctx.shadowBlur = 80 * s; ctx.shadowOffsetX = off * s;
+        ctx.drawImage(l1, -off * s, 0);                                  // 2つ目の光（本体は画面外に描き、影だけを残す）
+        ctx.restore();
+        ctx.save();
+        ctx.shadowColor = `rgba(200,20,28,${.4 * K[0]})`; ctx.shadowBlur = 30 * s; ctx.shadowOffsetX = off * s;
+        ctx.drawImage(img, (pad - off) * s, pad * s, W * s, H * s);      // 1つ目の光
+        ctx.restore();
+        /* canvas のままだと独立したレイヤーになり、毎フレーム合成されるので、ただの画像にする */
+        let el = box.querySelector(':scope > .hl-glow');
+        if (!el) { el = document.createElement('img'); el.className = 'hl-glow'; el.alt = ''; el.setAttribute('aria-hidden', 'true'); box.prepend(el); }
+        el.src = cv.toDataURL('image/png');
+        el.style.cssText = `left:${-pad}px;top:${-pad}px;width:${W + pad * 2}px;height:${H + pad * 2}px`;
+        this.glowW = W;
+      };
+      img.onload = () => { draw(); URL.revokeObjectURL(url); };
+      img.src = url;
+      if (!this.onResize) {
+        let tm;
+        this.onResize = () => { clearTimeout(tm); tm = setTimeout(() => { const b = document.querySelector('.hl.is-live'); if (b && b.clientWidth !== this.glowW) this.glow(b); }, 200); };
+        addEventListener('resize', this.onResize);
+      }
     },
     /* 化け字に一瞬だけ差し替えて、元に戻す */
     moji(count, minMs, maxMs) {
@@ -270,7 +315,7 @@
         if (box.dataset['m' + i]) return;
         const alts = [...main.querySelectorAll(`[data-alt-i="${i}"]`)];
         const v = Math.floor(Math.random() * alts.length);
-        const set = (on) => box.querySelectorAll('svg').forEach((svg) => {
+        const set = (on) => box.querySelectorAll('svg:not(.hl-a):not(.hl-b)').forEach((svg) => {   // 色ずれ用の2枚はふだん見えないので触らない（描き直しを減らす）
           const g = svg.querySelector(`[data-i="${i}"]`);
           const a = svg.querySelectorAll(`[data-alt-i="${i}"]`)[v];
           if (g) g.style.display = on ? 'none' : '';
@@ -305,7 +350,7 @@
         if (box.dataset[key]) return;
         const tpl = this.junk[Math.floor(Math.random() * this.junk.length)];
         const added = [];
-        box.querySelectorAll('svg').forEach((svg) => {
+        box.querySelectorAll('svg:not(.hl-a):not(.hl-b)').forEach((svg) => {   // 色ずれ用の2枚はふだん見えないので触らない（描き直しを減らす）
           const grp = svg.querySelector(`[data-role="${L.role}"]`);
           if (!grp) return;
           const orig = [...grp.children].filter((c) => !c.classList.contains('hl-junk'))[L.k];
@@ -565,11 +610,17 @@
         k += d + rnd(.02, .12);
       }
     },
-    /* 記録を開いたときの、カルテをめくる音 */
+    /* ページ切り替え：電波を合わせるような「ザッ…」と、カルテをめくる音 */
     page() {
       const c = audio(); if (!c) return; const o = this.out(c, .16), t = c.currentTime;
-      this.noise(c, o, t, .16, .8, 'bandpass', 3200, 1300, 1.2);
-      this.noise(c, o, t + .1, .09, .4, 'bandpass', 2400, 1800, 1.5);
+      const n = c.createBufferSource(); n.buffer = crunchBuf(c, .4);
+      const hp = c.createBiquadFilter(); hp.type = 'highpass'; hp.frequency.value = 600;
+      const g = c.createGain();
+      [[0, .55], [.06, .2], [.1, .5], [.16, .12], [.22, .3]].forEach(([k, v]) => g.gain.setValueAtTime(v, t + k));  // 画面の点滅と同じ刻み
+      g.gain.exponentialRampToValueAtTime(.001, t + .38);
+      n.connect(hp); hp.connect(g); g.connect(o); n.start(t);
+      this.tone(c, o, 'sine', 7800, 7600, t, .25, .05);                    // ブラウン管の「キーン」
+      this.noise(c, o, t + .2, .14, .45, 'bandpass', 3200, 1300, 1.2);     // カルテをめくる
     },
     /* 精神が大きく削れたとき：心臓が跳ねる */
     thump(vol = .7) {
@@ -850,10 +901,12 @@
     },
   };
   /* 心拍に合わせて、ゲージと画面がかすかに脈打つ */
+  const BEAT_SEL = '#sanity, .site-footer .ecg, .fx-vignette';
   function pulseUI() {
-    const root = document.documentElement, g = $('#sanity');
-    root.classList.add('is-beat'); g && g.classList.add('is-beat');
-    setTimeout(() => { root.classList.remove('is-beat'); g && g.classList.remove('is-beat'); }, 140);
+    if (document.visibilityState !== 'visible') return;
+    const els = document.querySelectorAll(BEAT_SEL);   // ページ全体ではなく、光らせる部品だけに印を付ける
+    els.forEach((e) => e.classList.add('is-beat'));
+    setTimeout(() => els.forEach((e) => e.classList.remove('is-beat')), 140);
   }
   /* 作者確認用：コンソールで khSfx('wail') などと打つと、その音だけ鳴らせる */
   window.khSfx = (name) => {
@@ -1577,6 +1630,21 @@
     return `<div class="empty empty--big"><p class="empty-en">404 ／ MISSING PATIENT</p><p>この記録は存在しない。最初から、存在しなかった。</p><a class="btn btn--ghost" href="#/">受付へ戻る</a></div>`;
   }
 
+  /* ページ切り替えの瞬間：走査線・砂嵐・色ずれの帯をかぶせる */
+  let tuneTimer = 0;
+  function tuneFx() {
+    if (!fxActive()) return;
+    const root = document.documentElement;
+    document.querySelectorAll('#trans .trans-band').forEach((b) => {
+      b.style.setProperty('--y', rnd(8, 80).toFixed(1) + 'vh');
+      b.style.setProperty('--h', rnd(1.5, 6).toFixed(1) + 'vh');
+    });
+    root.classList.remove('is-trans'); void root.offsetWidth;
+    root.classList.add('is-trans');
+    clearTimeout(tuneTimer);
+    tuneTimer = setTimeout(() => root.classList.remove('is-trans'), 650);
+  }
+
   /* ───────── router ───────── */
   const app = $('#app');
   function route(keepScroll) {
@@ -1596,6 +1664,7 @@
     app.classList.remove('is-in'); void app.offsetWidth;
     app.innerHTML = spoilerBanner() + html;
     app.classList.add('is-in');
+    tuneFx();
     document.title = title;
     if (keepScroll !== true) window.scrollTo(0, 0);
     $('#search-input').value = head === 'search' ? (params.get('q') || '') : '';

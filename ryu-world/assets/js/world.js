@@ -122,9 +122,21 @@ document.addEventListener("DOMContentLoaded", () => {
     const tip = document.getElementById("world-tip");
     const resetButton = document.getElementById("view-reset");
 
-    const reduceMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-    ).matches;
+    const Tuning = window.RyuTuning || null;
+
+    // 「揺らぎ」を止めているときは、動きを静止させる（調律：ryu-tuning.js）
+    let reduceMotion = Tuning
+        ? Tuning.get("motion") === "off"
+        : window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    // 「眺め」：立体（3d）か、真上からの平面（flat）か
+    let flatMode = Tuning ? Tuning.get("view") === "flat" : false;
+
+    const sound = {
+        select: (k) => Tuning?.select(k),
+        cue: (n) => Tuning?.cue(n),
+        mood: (m) => Tuning?.mood(m)
+    };
 
     const coarse = window.matchMedia("(pointer: coarse)").matches;
 
@@ -467,10 +479,13 @@ document.addEventListener("DOMContentLoaded", () => {
         // 指でずらした量
         panX: 0, panY: 0, panXTarget: 0, panYTarget: 0,
         // 情報パネルを開いたとき、地図をパネルの無い側へ寄せる量
-        offX: 0, offY: 0, offXTarget: 0, offYTarget: 0
+        offX: 0, offY: 0, offXTarget: 0, offYTarget: 0,
+        // 0 = 立体（遠近あり）、1 = 平面（真上から、遠近なし）
+        flat: 0, flatTarget: 0
     };
 
-    const clampTilt = (t) => clamp(t, TILT_MIN, TILT_MAX);
+    const clampTilt = (t) => (flatMode ? 0 : clamp(t, TILT_MIN, TILT_MAX));
+    const restTilt = () => (flatMode ? 0 : TILT_REST);
 
     let W = 0;
     let H = 0;
@@ -479,7 +494,7 @@ document.addEventListener("DOMContentLoaded", () => {
     let narrow = false;
 
     // 投影の係数（毎フレーム更新）
-    const cam = { cs: 1, ss: 0, ct: 1, st: 0, S: 1, tx: 0, ty: 0, ox: 0, oy: 0 };
+    const cam = { cs: 1, ss: 0, ct: 1, st: 0, S: 1, tx: 0, ty: 0, ox: 0, oy: 0, invP: 1 / PERSPECTIVE };
 
     function setupCamera() {
         const t = rad(view.tilt);
@@ -493,6 +508,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cam.ty = H / 2 + Z_CENTER * cam.st * cam.S + view.offY + view.panY;
         cam.ox = W / 2;
         cam.oy = H * PERSPECTIVE_ORIGIN_Y;
+        cam.invP = (1 - view.flat) / PERSPECTIVE;
     }
 
     /* 3Dの点 → 画面上の点 [x, y, 手前ほど大きい奥行き, 遠近の倍率] */
@@ -504,7 +520,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const X = x1 * cam.S + cam.tx;
         const Y = y2 * cam.S + cam.ty;
         const Z = z2 * cam.S;
-        const f = PERSPECTIVE / (PERSPECTIVE - Z);
+        const f = 1 / (1 - Z * cam.invP);
         return [cam.ox + (X - cam.ox) * f, cam.oy + (Y - cam.oy) * f, Z, f];
     }
 
@@ -527,6 +543,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const brOf = (k) => tone[k || "_"].br;
     const liftOf = (k) => (k ? tone[k].lift : 0);
+
+    /*
+     * 平面の眺めでは、真上から見ると重なってしまう大いなる世界を
+     * 上下に離して並べる（上：フロンズ、中：楽園、下：ミスセオ）。
+     */
+    const FLAT_SPREAD = { fronz: -140, misseo: 140 };
+    const spreadOf = (k) => (FLAT_SPREAD[k] || 0) * view.flat;
 
     let selectedWorld = null;
     let hoverKey = null;
@@ -665,7 +688,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function drawCrystal(c, sorted) {
 
         const lift = liftOf(c.world);
-        const [bx, by, bz] = c.pos;
+        const [bx, by0, bz] = c.pos;
+        const by = by0 + spreadOf(c.world);
         const br = () => brOf(c.world);
 
         c.faces.forEach((face) => {
@@ -1334,13 +1358,15 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!lb.img) return;
 
             const lift = liftOf(lb.world);
-            const q = P(lb.pos[0], lb.pos[1], lb.pos[2] + lift);
+            const q = P(lb.pos[0], lb.pos[1] + spreadOf(lb.world), lb.pos[2] + lift);
             const k = cam.S * q[3];
+            // 平面では、楽園の名前を結晶の少し上へ
+            const dy = lb.world === "eden" ? lb.dy - 30 * view.flat : lb.dy;
             const isLit = lb.world && (lb.world === selectedWorld || lb.world === hoverKey);
             const img = isLit ? lb.lit : lb.img;
 
             let x = q[0] + lb.dx * k;
-            const y = q[1] + lb.dy * k;
+            const y = q[1] + dy * k;
 
             // 画面の端からはみ出さないように寄せる（スマホの縦長画面向け）
             const textW = img.w - img.pad * 2;
@@ -1445,6 +1471,7 @@ document.addEventListener("DOMContentLoaded", () => {
         view.panY = approach(view.panY, view.panYTarget, 1 - Math.exp(-dt / 0.12), 0.3);
         view.offX = approach(view.offX, view.offXTarget, k, 0.3);
         view.offY = approach(view.offY, view.offYTarget, k, 0.3);
+        view.flat = approach(view.flat, view.flatTarget, k, 0.001);
 
         // エイリアス選択時だけ、世界全体がゆっくり沈む
         const slow = selectedWorld === "alias";
@@ -1484,7 +1511,8 @@ document.addEventListener("DOMContentLoaded", () => {
             view.panX === view.panXTarget &&
             view.panY === view.panYTarget &&
             view.offX === view.offXTarget &&
-            view.offY === view.offYTarget;
+            view.offY === view.offYTarget &&
+            view.flat === view.flatTarget;
 
         // 自動回転だけなら、ゆっくりなので毎秒30コマで十分
         return changing || !(settled || (autoSpin && view.tilt === view.tiltTarget));
@@ -1687,6 +1715,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function clearSelection() {
 
+        if (selectedWorld) {
+            sound.cue("close");
+            sound.mood("base");
+        }
+
         selectedWorld = null;
 
         page.classList.remove("is-alias", "is-eden-dim");
@@ -1706,6 +1739,9 @@ document.addEventListener("DOMContentLoaded", () => {
         if (!data) return;
 
         selectedWorld = key;
+
+        sound.select(key);
+        sound.mood(["eden", "alias", "abyss", "soul"].includes(key) ? key : "base");
 
         page.classList.toggle("is-alias", key === "alias");
         page.classList.toggle("is-eden-dim", key !== "eden");
@@ -1739,6 +1775,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     function setHover(key) {
         if (key === hoverKey) return;
+        if (key) sound.cue("tick");
         hoverKey = key;
         stage.classList.toggle("is-pointing", Boolean(key));
         wake();
@@ -1770,20 +1807,31 @@ document.addEventListener("DOMContentLoaded", () => {
      * タップ／クリック          … 世界を選ぶ
      */
 
-    if (hint) {
+    function updateHint() {
+        if (!hint) return;
         hint.textContent = coarse
-            ? "ドラッグで回す・ピンチで拡大・タップで選ぶ"
-            : "ドラッグで回す・傾ける ／ ホイールで拡大";
+            ? (flatMode ? "ドラッグで動かす・ピンチで拡大・タップで選ぶ" : "ドラッグで回す・ピンチで拡大・タップで選ぶ")
+            : flatMode
+                ? "ドラッグで動かす ／ ホイールで拡大"
+                : "ドラッグで回す・傾ける ／ ホイールで拡大";
     }
 
+    updateHint();
+
     // 到着：真上からの同心円 → ゆっくり傾いて、縦の軸が見えてくる
+    if (flatMode) {
+        view.flat = view.flatTarget = 1;
+        view.spin = view.spinTarget = 0;
+        autoSpin = false;
+    }
+
     if (reduceMotion) {
-        view.tilt = view.tiltTarget = TILT_REST;
+        view.tilt = view.tiltTarget = restTilt();
         view.spin = view.spinTarget = 0;
     } else {
         window.setTimeout(() => {
-            view.tiltTarget = TILT_REST;
-            view.spinTarget = 0;
+            view.tiltTarget = restTilt();
+            view.spinTarget = flatMode ? view.spinTarget : 0;
             wake();
         }, 1200);
     }
@@ -1825,7 +1873,8 @@ document.addEventListener("DOMContentLoaded", () => {
     function startDrag(id, x, y, moved) {
         gesture = {
             type: "drag", id, x, y, moved,
-            tilt: view.tiltTarget, spin: view.spinTarget
+            tilt: view.tiltTarget, spin: view.spinTarget,
+            panX: view.panXTarget, panY: view.panYTarget
         };
     }
 
@@ -1900,9 +1949,16 @@ document.addEventListener("DOMContentLoaded", () => {
                     // 下へドラッグすると手前に起き上がり、真上からの視点へ近づく
                     const ddx = p[0] - gesture.x;
                     const ddy = p[1] - gesture.y;
-                    const touchK = event.pointerType === "mouse" ? 1 : 0.85;
-                    view.tiltTarget = clampTilt(gesture.tilt - ddy * 0.22 * touchK);
-                    view.spinTarget = gesture.spin + ddx * 0.28 * touchK;
+                    if (flatMode) {
+                        // 平面の眺め：地図そのものをずらす
+                        view.panXTarget = gesture.panX + ddx;
+                        view.panYTarget = gesture.panY + ddy;
+                        clampPan();
+                    } else {
+                        const touchK = event.pointerType === "mouse" ? 1 : 0.85;
+                        view.tiltTarget = clampTilt(gesture.tilt - ddy * 0.22 * touchK);
+                        view.spinTarget = gesture.spin + ddx * 0.28 * touchK;
+                    }
                     wake();
                 }
 
@@ -2006,7 +2062,7 @@ document.addEventListener("DOMContentLoaded", () => {
             Math.abs(view.zoomTarget - 1) > 0.02 ||
             Math.abs(view.panXTarget) > 4 ||
             Math.abs(view.panYTarget) > 4 ||
-            Math.abs(view.tiltTarget - TILT_REST) > 3;
+            Math.abs(view.tiltTarget - restTilt()) > 3;
         resetButton.classList.toggle("is-shown", changed);
     }
 
@@ -2015,8 +2071,9 @@ document.addEventListener("DOMContentLoaded", () => {
         view.zoomTarget = 1;
         view.panXTarget = 0;
         view.panYTarget = 0;
-        view.tiltTarget = TILT_REST;
+        view.tiltTarget = restTilt();
         updateResetButton();
+        sound.cue("close");
         wake();
     });
 
@@ -2033,7 +2090,14 @@ document.addEventListener("DOMContentLoaded", () => {
             ArrowRight: [0, 10]
         }[event.key];
 
-        if (step) {
+        if (step && flatMode) {
+            event.preventDefault();
+            view.panXTarget -= step[1] * 4;
+            view.panYTarget += step[0] * 6;
+            clampPan();
+            updateResetButton();
+            wake();
+        } else if (step) {
             event.preventDefault();
             stopAuto();
             view.tiltTarget = clampTilt(view.tiltTarget + step[0]);
@@ -2068,6 +2132,33 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     panelClose?.addEventListener("click", clearSelection);
+
+    /* ---------- 調律が変わったとき ---------- */
+
+    window.addEventListener("ryu-tuning", (event) => {
+
+        const { key, value } = event.detail;
+
+        if (key === "motion") {
+            reduceMotion = value === "off";
+            if (reduceMotion) autoSpin = false;
+        }
+
+        if (key === "view") {
+            flatMode = value === "flat";
+            view.flatTarget = flatMode ? 1 : 0;
+            view.tiltTarget = restTilt();
+            // 平面は北を上に固定する（回さない）
+            if (flatMode) view.spinTarget = Math.round(view.spinTarget / 360) * 360;
+            stopAuto();
+            updateHint();
+            updateResetButton();
+        }
+
+        lastDraw = -Infinity;
+        wake();
+
+    });
 
     // 別のタブに移っている間は描かない（電池の節約）
     document.addEventListener("visibilitychange", () => {

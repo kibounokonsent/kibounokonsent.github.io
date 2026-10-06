@@ -533,10 +533,11 @@
         #050506;
 }
 
+/* 生命の木：楽園には色が無いので、背後はごく淡い灰。黒い光が浮かぶように */
 .tree-page[data-tone="dark"] .place-backdrop {
     background:
-        radial-gradient(ellipse at 50% 42%, rgba(96, 48, 150, 0.2), transparent 58%),
-        #040306;
+        radial-gradient(ellipse at 50% 42%, rgba(255, 255, 255, 0.09), transparent 58%),
+        #050506;
 }
 
 /* 木が最初の画面に収まるよう、見出しは小さめに */
@@ -600,11 +601,44 @@
     mix-blend-mode: screen;
 }
 
-/* 黒い球の木（生命の木）：黒い球の縁に、昏い紫の光がにじむ */
+/*
+ * 黒い球の木（生命の木）：黒い光。
+ * 球の闇が膨らんで白い蔓を呑み込み、縁にだけ細い光輪（皆既の縁）が残る。
+ */
 [data-tone="dark"] .sphere {
-    background: radial-gradient(circle, transparent 46%, rgba(6, 6, 6, 0.55) 60%, transparent 76%);
+    background:
+        radial-gradient(
+            circle,
+            #000 0%,
+            rgba(0, 0, 0, 0.94) 40%,
+            rgba(0, 0, 0, 0.6) 58%,
+            rgba(0, 0, 0, 0.18) 68%,
+            transparent 74%
+        );
 
-    box-shadow: 0 0 34px 8px rgba(86, 86, 86, 0.45);
+    box-shadow:
+        0 0 46px 20px rgba(0, 0, 0, 0.88),
+        0 0 110px 40px rgba(0, 0, 0, 0.5);
+}
+
+[data-tone="dark"] .sphere::after {
+    content: "";
+
+    position: absolute;
+    inset: -8%;
+
+    border-radius: 50%;
+
+    background:
+        radial-gradient(
+            circle,
+            transparent 50%,
+            rgba(255, 255, 255, 0.42) 53%,
+            rgba(255, 255, 255, 0.08) 57%,
+            transparent 62%
+        );
+
+    mix-blend-mode: screen;
 }
 
 @keyframes sphereLight {

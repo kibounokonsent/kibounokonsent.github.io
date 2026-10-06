@@ -316,6 +316,7 @@ document.addEventListener("DOMContentLoaded", () => {
         chapterThree?.classList.remove("is-unstable");
 
         crackLayer?.classList.add("is-cracking");
+        window.RyuTuning?.cue("shatter");
         chapterThree?.classList.add("is-shattering");
 
         window.setTimeout(() => {
@@ -349,6 +350,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     onLineVisible("line-conflict", () => {
         pulseClass(chapterThreeText, "is-trembling", 700);
+        window.RyuTuning?.cue("tremble");
         // ここから「世界が砕かれた」までの間、光と闇が押し合い続ける
         chapterThree?.classList.add("is-unstable");
     });
@@ -356,9 +358,12 @@ document.addEventListener("DOMContentLoaded", () => {
     onLineVisible("line-fought", () => {
         pulseClass(globalDragon, "is-pulsing-strong", 1400);
         pulseClass(globalDragon, "is-crossing", 3600);
+        window.RyuTuning?.cue("fought");
     });
 
     onLineVisible("line-light-tear", () => {
+
+        window.RyuTuning?.cue("tear");
 
         // 一本だけでなく、時間差で複数の裂け目を走らせる
         const tearSpecs = [
@@ -405,6 +410,8 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     onLineVisible("line-dark-burn", () => {
+
+        window.RyuTuning?.cue("smolder");
         pulseClass(chapterThree, "is-smoldering", 1900);
     });
 
@@ -485,6 +492,8 @@ document.addEventListener("DOMContentLoaded", () => {
                     `.river-name[data-river="${key}"]`
                 );
 
+                window.RyuTuning?.cue(`river-${key}`);
+
                 if (group) {
 
                     group.classList.add("is-named", "is-name-pulse");
@@ -505,7 +514,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     }
 
-    onLineVisible("rivers-seed-trigger", flickerRivers);
+    onLineVisible("rivers-seed-trigger", () => {
+        window.RyuTuning?.cue("flicker");
+        flickerRivers();
+    });
 
     onLineVisible("river-names-trigger", nameRivers);
 
@@ -1263,6 +1275,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
     if (document.fonts && document.fonts.ready) {
         document.fonts.ready.then(remeasure);
+    }
+
+    /*
+     * ------------------------------------------------------
+     * 音：「無数の世界」が生まれる瞬間に、光の粒の音を降らせる
+     * （音そのものは ryu-tuning.js。音を静めていれば鳴らない）
+     * ------------------------------------------------------
+     */
+
+    const birthTrigger = document.getElementById("world-birth-trigger");
+
+    if (birthTrigger && "IntersectionObserver" in window) {
+        const birthObserver = new IntersectionObserver((entries) => {
+            if (entries.some((en) => en.isIntersecting)) {
+                window.RyuTuning?.cue("birth");
+                birthObserver.disconnect();
+            }
+        }, { threshold: 0.6 });
+        birthObserver.observe(birthTrigger);
     }
 
 });

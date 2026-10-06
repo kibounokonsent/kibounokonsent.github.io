@@ -23,6 +23,15 @@
     "use strict";
 
     const PREF_KEY = "ryu-eden-music";
+
+    // 調律の「響き」を静めているときは、自分からは流さない（ryu-tuning.js）
+    function tuningSilenced() {
+        try {
+            return JSON.parse(localStorage.getItem("ryu-tuning") || "{}").sound === "off";
+        } catch (e) {
+            return false;
+        }
+    }
     const POS_KEY = "ryu-eden-music-pos";
 
     function init(audio, button) {
@@ -152,10 +161,28 @@
 
         setPressed(false);
 
+        // 調律が変わったら（中の場所で変えられても）、曲もそれに従う
+        const followTuning = () => {
+            if (tuningSilenced()) {
+                setPressed(false);
+                fadeTo(0, 800);
+            } else if (wanted && audio.paused) {
+                play();
+            }
+        };
+
+        window.addEventListener("storage", (e) => {
+            if (e.key === "ryu-tuning") followTuning();
+        });
+
+        window.addEventListener("ryu-tuning", (e) => {
+            if (e.detail.key === "sound") followTuning();
+        });
+
         return {
             play,
             start() {
-                if (wanted) play();
+                if (wanted && !tuningSilenced()) play();
             },
             get wanted() {
                 return wanted;

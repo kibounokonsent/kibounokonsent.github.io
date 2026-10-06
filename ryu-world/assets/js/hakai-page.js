@@ -158,7 +158,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     body.classList.add("is-ready");
     player.start();
 
-    if (musicWanted) {
+    // 調律の「響き」を静めているときは、自分からは流さない（ryu-tuning.js）
+    const tuningSilenced = () => window.RyuTuning?.get("sound") === "off";
+
+    window.addEventListener("ryu-tuning", (e) => {
+        if (e.detail.key !== "sound") return;
+        if (e.detail.value === "off") {
+            setPressed(false);
+            fadeTo(0, 800);
+        } else if (musicWanted && music.paused) {
+            playMusic();
+        }
+    });
+
+    if (musicWanted && !tuningSilenced()) {
         playMusic();
     }
 
