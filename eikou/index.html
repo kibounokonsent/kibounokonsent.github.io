@@ -102,7 +102,7 @@ mark{background:var(--acc-soft);color:var(--ink);font-weight:700}
 .hero-logo svg{width:min(100%,440px);height:auto;aspect-ratio:54.98/22.83;display:block;margin:0 auto;filter:var(--logo-filter);position:relative;z-index:1}
 .epic{margin:22px 0 0;font-family:var(--f-display);font-weight:800;font-size:clamp(21px,4.6vw,32px);letter-spacing:.42em;padding-left:.42em;position:relative;z-index:1}
 .hero .kicker{margin:8px 0 0;font-size:12px;letter-spacing:.5em;padding-left:.5em;color:var(--mute);position:relative;z-index:1}
-.hero .scene{height:clamp(150px,24vw,230px);margin:14px -20px 0}
+.hero .scene{height:clamp(150px,24vw,230px);margin:14px -20px 0;position:relative;z-index:1}
 .hero .note{position:absolute;left:0;right:0;bottom:12px;font-size:11px;color:var(--mute);letter-spacing:.1em}
 .hero .note button{all:unset;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 
@@ -173,6 +173,7 @@ h3::before{content:"";width:10px;height:10px;border-radius:50%;flex:none;backgro
 .back:hover{color:var(--ink)}
 .ahead{padding:28px 0 22px;margin-bottom:26px;border-bottom:1px solid var(--line)}
 .ahead .lede{margin-bottom:0}
+.page > .ahead.plain{border-bottom:0;padding:6px 0 6px;margin-bottom:18px}
 .ahead.light{border-top:2px solid var(--G);background:linear-gradient(180deg,color-mix(in oklab,var(--G) 7%,transparent),transparent 80%)}
 .ahead.dark{border-top:2px solid var(--R);background:linear-gradient(180deg,color-mix(in oklab,var(--R) 7%,transparent),transparent 80%)}
 .ahead.chap{border-top:2px solid var(--chc)}
@@ -243,7 +244,7 @@ dl.gloss dd{margin:0;font-size:14px;color:var(--text2);min-width:0}
 .novel-text{font-family:var(--f-display);font-size:16.5px;line-height:2.2;max-width:34em;margin-inline:auto}
 .novel-text p{margin:0}
 .novel-text .gap{height:1.1em}
-.novel-head{text-align:center;padding:40px 0 30px;margin-bottom:30px;border-bottom:1px solid var(--line);border-top:2px solid var(--chc,transparent)}
+.novel-head{text-align:center;padding:40px 0 30px;margin:22px 0 30px;border-bottom:1px solid var(--line);border-top:2px solid var(--chc,transparent)}
 .novel-head .num{font-family:var(--f-latin);font-size:13px;letter-spacing:.3em;color:var(--mute)}
 .novel-head h2{font-family:var(--f-latin);font-size:30px;letter-spacing:.2em;margin:6px 0}
 .novelnav{display:flex;justify-content:space-between;gap:12px;margin:40px auto 0;max-width:34em;padding-top:16px;border-top:1px solid var(--line);font-size:13px}
@@ -408,7 +409,7 @@ footer .links{display:flex;gap:16px}
 .cta:hover{filter:brightness(1.08)}
 .reveal .q{font-size:clamp(22px,5vw,32px)}
 /* トップ：あなたの竜の翼がロゴの後ろで開く */
-.hero-wings{position:absolute;left:50%;top:18px;width:min(120%,980px);transform:translateX(-50%);color:var(--ink);opacity:.07;pointer-events:none}
+.hero-wings{position:absolute;left:50%;top:18px;width:min(120%,980px);transform:translateX(-50%);color:var(--ink);opacity:.07;pointer-events:none;z-index:0;-webkit-mask-image:linear-gradient(#000 55%,transparent 88%);mask-image:linear-gradient(#000 55%,transparent 88%)}
 .hero-wings svg{display:block;width:100%;height:auto;overflow:visible}
 .hero-wings g g{transform-box:fill-box}
 .hero-wings .pt-wl{transform-origin:100% 20%;animation:ptWing 1.6s cubic-bezier(.2,.8,.2,1) both}
@@ -468,13 +469,13 @@ header{view-transition-name:hdr}
 .fx svg{width:100%;height:100%}
 /* 翼：静かに閉じて画面を覆い、ひと呼吸だけ揺れて、静かに開く */
 .wingfx{position:absolute;inset:0;overflow:hidden;color:var(--wc);--T:1.05s}
-.wingfx .shade{position:absolute;inset:0;background:color-mix(in oklab,var(--wc),#000 45%);animation:shade var(--T) ease-in-out both}
-@keyframes shade{0%,18%{opacity:0}40%,62%{opacity:1}84%,100%{opacity:0}}
+.wingfx .shade{position:absolute;inset:0;background:color-mix(in oklab,var(--wc),#000 55%);animation:wingShade var(--T) ease-in-out both}
+@keyframes wingShade{0%,18%{opacity:0}40%,62%{opacity:.92}84%,100%{opacity:0}}
 .wingfx .arm{position:absolute;top:30vh;width:0;height:0}
 .wingfx .arm.l{left:-14vw;animation:armL var(--T) both}
 .wingfx .arm.r{right:-14vw;animation:armR var(--T) both}
-.wingfx .arm svg{position:absolute;top:-60vh;height:200vh;width:auto;display:block;overflow:visible;color:var(--wc);
-  filter:drop-shadow(0 10px 30px rgba(0,0,0,.25))}
+.wingfx .arm svg{position:absolute;top:-60vh;height:200vh;width:auto;display:block;overflow:visible;color:color-mix(in oklab,var(--wc) 72%,#0b0c12);
+  filter:drop-shadow(0 0 1px color-mix(in oklab,var(--wg) 70%,transparent)) drop-shadow(0 10px 30px rgba(0,0,0,.3))}
 .wingfx .arm.l svg{left:0;transform-origin:0 30%;animation:foldL var(--T) both}
 .wingfx .arm.r svg{right:0;transform-origin:100% 30%;animation:foldR var(--T) both}
 /* 外 → 閉じる → ひと呼吸 → 開く。どの区間もゆっくり入ってゆっくり止まる */
@@ -742,8 +743,10 @@ figure.record.al figcaption{color:var(--al-mute)}
 .apostles i{position:absolute;width:5px;height:42px;border-radius:3px;background:hsl(var(--h) 55% 58%);opacity:.38;box-shadow:0 0 14px 2px hsl(var(--h) 60% 50% / .45);filter:blur(.4px)}
 .apostles i.l{left:10px}.apostles i.r{right:10px}
 .abyss-mouth{position:relative;z-index:1;display:block;width:min(80%,520px);height:120px;margin:70px auto 0;border-radius:50%;background:radial-gradient(ellipse at 50% 40%,#000 45%,rgba(0,0,0,0) 70%),radial-gradient(ellipse at 50% 50%,rgba(204,26,49,.16),transparent 72%);box-shadow:inset 0 10px 30px #000,0 -1px 0 rgba(204,26,49,.28),0 0 50px rgba(204,26,49,.12);text-decoration:none;display:flex;align-items:flex-end;justify-content:center}
-.abyss-mouth span{transform:translateY(34px);font-size:12px;letter-spacing:.5em;color:#5f5a52;transition:color .3s}
-.abyss-mouth:hover span,.abyss-mouth:focus-visible span{color:#a59f92}
+.abyss-mouth{transition:box-shadow .6s ease,transform .6s ease;animation:mouthBreath 6s ease-in-out infinite}
+.abyss-mouth:hover,.abyss-mouth:focus-visible{animation-play-state:paused;transform:scale(1.03);box-shadow:inset 0 10px 30px #000,0 -1px 0 rgba(204,26,49,.55),0 0 80px rgba(204,26,49,.3);outline:none}
+@keyframes mouthBreath{0%,100%{box-shadow:inset 0 10px 30px #000,0 -1px 0 rgba(204,26,49,.28),0 0 50px rgba(204,26,49,.12)}50%{box-shadow:inset 0 10px 30px #000,0 -1px 0 rgba(204,26,49,.4),0 0 70px rgba(204,26,49,.2)}}
+.al-dt.void{min-height:1.2em;letter-spacing:.6em;color:#3d3a35}
 @media (max-width:600px){.apostles i{width:3px;height:30px}.apostles i.l{left:4px}.apostles i.r{right:4px}}
 </style>
 
@@ -1094,7 +1097,7 @@ const FRAGMENTS = [
   {rec:['「案ずるな。','我は常に汝の傍に在り。','光と闇を抱く者よ。','共に還ろう、悠久の地へ。」'],by:'楽園に眠る龍の言葉'},
   {rec:['「我は汝であり。汝は我なり。」','「光と闇を抱く者よ。」','「さあ、帰ろう。」','「悠久の地、エターナル・エデンへ。」'],by:'龍の書より　帰郷'},
   {open:'「光と闇を抱く者」とは、誰のことか。'}]},
- {id:'f17',kind:'伝承',title:'刹那の奈落',body:['エイリアスのさらに底。すべての下に口を開ける、深い奈落。',{open:'そこに何があるのか。記録は、まだ無い。'}]},
+ {id:'f17',kind:'伝承',title:'',hidden:true,body:['エイリアスのさらに底。すべての下に口を開ける、深い奈落。',{open:'そこに何があるのか。記録は、まだ無い。'}]},
  {id:'f13',kind:'出所不明',title:'竜の里についての情報',body:[{note:'出所不明。信憑性はなく、検証されていない。'},{list:['平和な場所に、鳳凰が現れるという。','竜の里へ続く森は迷いやすく、幻覚が起きるという。','人間は、竜の里に入れないという。','赤い鳳凰だけが、その場所を知っているという。']},{open:'どれが本当なのか。'}]},
 ];
 
@@ -1940,11 +1943,12 @@ function renderAlias(sub){
     const i = FRAGMENTS.findIndex(f=>f.id===sub), f = FRAGMENTS[i];
     if(!f) return `<div class="alias"><div class="al-wrap al-doc"><a class="al-back" href="#alias">エイリアスへ戻る</a><h2 class="al-dt">この断片は、もう残っていない</h2></div></div>`;
     read.add(f.id); store.set('eikou-alias-read', JSON.stringify([...read]));
-    const prev = FRAGMENTS[i-1], next = FRAGMENTS[i+1];
+    const LIST = FRAGMENTS.filter(x=>!x.hidden), j = LIST.indexOf(f);
+    const prev = f.hidden ? null : LIST[j-1], next = f.hidden ? null : LIST[j+1];
     return `<div class="alias">${abyssDragon()}<div class="al-wrap al-doc">
       <a class="al-back" href="#alias">エイリアスへ戻る</a>
       <p class="al-kind ${KIND[f.kind]}">${f.kind}</p>
-      <h2 class="al-dt">${f.title}</h2>
+      <h2 class="al-dt${f.title?'':' void'}"${f.title?'':' aria-label="名のない記録"'}>${f.title||'……'}</h2>
       <div class="al-body">${f.body.map(alBlock).join('')}</div>
       <nav class="al-nav"><span>${prev?`<a href="#alias-${prev.id}">${prev.title}</a>`:''}</span><span>${next?`<a href="#alias-${next.id}">${next.title}</a>`:''}</span></nav>
     </div></div>`;
@@ -1959,13 +1963,13 @@ function renderAlias(sub){
       <p class="al-sub">四つの流れから零れ落ちた深淵。<br>忘れられた願い、失われた記憶、叶わなかった創造が沈む、世界の底。</p>
       <p class="al-obs">${who}は、五度目の一年の、その先にいる。<br>拾いあげた記録は、${all}のうち${n}。${n>=all?'<b>──見られている。</b>':''}</p>
       ${n>=4 && n<all?`<p class="al-whisper">見ているのは、あなただけではない。</p>`:''}
-      <ul class="al-frags">${FRAGMENTS.map((f,i)=>`<li style="--x:${(r()*16).toFixed(1)}%;--i:${i}"><a class="frag ${KIND[f.kind]}${read.has(f.id)?' seen':''}" href="#alias-${f.id}"><span class="tt">${f.title}</span><span class="k">${f.kind}</span></a></li>`).join('')}</ul>
+      <ul class="al-frags">${FRAGMENTS.filter(f=>!f.hidden).map((f,i)=>`<li style="--x:${(r()*16).toFixed(1)}%;--i:${i}"><a class="frag ${KIND[f.kind]}${read.has(f.id)?' seen':''}" href="#alias-${f.id}"><span class="tt">${f.title}</span><span class="k">${f.kind}</span></a></li>`).join('')}</ul>
       <div class="al-out">
         <p>雷電が覚醒できなかったとき、世界は最初へ戻る。</p>
         <button type="button" class="dark-btn ghost" data-rebirth>最初へ戻る</button>
       </div>
     </div>
-    <div class="apostles" aria-hidden="true">${APOSTLES}</div><a class="abyss-mouth" href="#alias-f17"><span>刹那の奈落</span></a></div>`;
+    <div class="apostles" aria-hidden="true">${APOSTLES}</div><a class="abyss-mouth" href="#alias-f17" aria-label="さらに底へ"></a></div>`;
 }
 function aliasAfter(){
   const eye = document.getElementById('alEye'); if(!eye) return;

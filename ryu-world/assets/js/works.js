@@ -52,7 +52,7 @@ const WORKS = [
 "しかし、マガイラボの崩壊によってマガイモノは世界へ解き放たれ、人類にとって脅威となった。やがて、その存在を再び管理するため、新たな施設「Eclipse Lab（エクリプスラボ）」が設立される。\n\n" +
 "そこでは、かつての管理体制を遥かに上回る厳格な規律のもと、紛異体となったマガイモノが徹底的に管理されている。感情や倫理さえ排除された管理の先にあるのは、人類の未来か、それとも――。",
 
-        url: "https://kibounokonsent.github.io/eclipse-lab/Eclipse_Lab.html"
+        url: "https://kibounokonsent.github.io/magai-eclipse-archive/Eclipse_Lab.html"
     },
     { world: "fronz", era: 5, title: "氷河世界", tentative: true, summary: "", url: "" },
     {

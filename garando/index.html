@@ -46,13 +46,13 @@ body{
 @keyframes tadayou{from{transform:translate3d(0,0,0) rotate(var(--r0))}to{transform:translate3d(var(--dx),var(--dy),0) rotate(var(--r1))}}
 
 /* ── 紙 ── */
-.stage{position:relative;z-index:3;max-width:780px;margin:0 auto;perspective:2400px}
+.stage{position:relative;z-index:3;max-width:780px;margin:0 auto}
 .kasane{position:absolute;left:0;right:0;top:0;height:min(960px,calc(100vh - 110px));pointer-events:none}
 .kasane i{position:absolute;inset:0;background:#4a3c2b;
   clip-path:polygon(1% 0,30% .4%,62% 0,99% .6%,100% 30%,99.4% 70%,100% 99%,64% 100%,33% 99.5%,0 100%,.5% 60%,0 22%)}
 .kasane i:nth-child(1){transform:rotate(-2.2deg) translate(-14px,14px);background:#3b3024}
 .kasane i:nth-child(2){transform:rotate(1.6deg) translate(16px,22px);background:#2c241b}
-.sheet{position:relative;transform:translate3d(var(--sx,0),0,0) rotate(var(--tilt,0deg));transform-origin:left center;
+.sheet{position:relative;transform:translate3d(var(--sx,0),0,0) rotate(var(--tilt,0deg));transform-origin:50% 100%;
   padding:clamp(34px,6vw,70px) clamp(24px,6vw,76px) 92px;min-height:min(960px,calc(100vh - 110px))}
 .sheet > .kage{position:absolute;inset:14px -6px -18px 10px;background:rgba(0,0,0,.75);filter:blur(16px);z-index:-1;border-radius:6px}
 .sheet > canvas{position:absolute;left:0;top:0;width:100%;height:100%;pointer-events:none}
@@ -73,27 +73,25 @@ body{
 .leaf{position:relative;z-index:3}
 .sheet.rinne .leaf{animation:zure 7s steps(1) infinite}
 @keyframes zure{0%{transform:none}47%{transform:translate3d(1px,-.5px,0)}48%{transform:translate3d(-1.5px,.5px,0)}49%{transform:none}81%{transform:translate3d(.8px,0,0)}82%{transform:none}}
-.sheet.yuku{position:fixed;z-index:4;pointer-events:none;will-change:transform,opacity;margin:0;box-sizing:border-box}
-.sheet.yuku.fwd{animation:mekuru .85s cubic-bezier(.45,.05,.3,1) forwards}
-.sheet.yuku.back{transform-origin:right center;animation:modosu .85s cubic-bezier(.45,.05,.3,1) forwards}
-@keyframes mekuru{
-  from{transform:perspective(2400px) translate3d(var(--sx),0,0) rotate(var(--tilt)) rotateY(0deg) translateX(0);opacity:1}
-  70%{opacity:.85}
-  to{transform:perspective(2400px) translate3d(var(--sx),0,0) rotate(var(--tilt)) rotateY(-96deg) translateX(-4%);opacity:0}}
-@keyframes modosu{
-  from{transform:perspective(2400px) translate3d(var(--sx),0,0) rotate(var(--tilt)) rotateY(0deg) translateX(0);opacity:1}
-  70%{opacity:.85}
-  to{transform:perspective(2400px) translate3d(var(--sx),0,0) rotate(var(--tilt)) rotateY(96deg) translateX(4%);opacity:0}}
-.sheet.matsu{opacity:0}
-.sheet.oku{animation:oku .55s ease-out both}
-@keyframes oku{
-  from{transform:translate3d(var(--sx),-10px,0) rotate(calc(var(--tilt) - .6deg));opacity:0}
-  to{transform:translate3d(var(--sx),0,0) rotate(var(--tilt));opacity:1}}
+.sheet.yuku{position:fixed;z-index:4;pointer-events:none;will-change:transform;margin:0;box-sizing:border-box;transform-origin:50% 100%}
+.sheet.yuku.fwd{animation:hiku .78s cubic-bezier(.5,0,.25,1) forwards}
+.sheet.yuku.nokoru{z-index:1}
+.sheet.kaeru{z-index:5;transform-origin:50% 100%;will-change:transform;animation:kaeru .78s cubic-bezier(.3,0,.2,1) both}
+.sheet.yuku > .kage,.sheet.kaeru > .kage{inset:22px -14px -30px 18px;background:rgba(0,0,0,.85)}
+@keyframes hiku{
+  0%{transform:translate3d(var(--sx),0,0) rotate(var(--tilt)) scale(1)}
+  18%{transform:translate3d(calc(var(--sx) - 1.5%),-6px,0) rotate(calc(var(--tilt) - 1deg)) scale(1.015)}
+  100%{transform:translate3d(calc(var(--sx) - 120%),20px,0) rotate(calc(var(--tilt) - 7deg)) scale(1.015)}}
+@keyframes kaeru{
+  0%{transform:translate3d(calc(var(--sx) - 120%),20px,0) rotate(calc(var(--tilt) - 7deg)) scale(1.015)}
+  82%{transform:translate3d(calc(var(--sx) + .4%),-4px,0) rotate(calc(var(--tilt) + .3deg)) scale(1.01)}
+  100%{transform:translate3d(var(--sx),0,0) rotate(var(--tilt)) scale(1)}}
+.sheet.matsu{visibility:hidden}
 .sheet.kuru .leaf{animation:sumiiri 1s ease both}
 @keyframes sumiiri{from{opacity:0}to{opacity:1}}
 @media (prefers-reduced-motion:reduce){
   .sheet.yuku{display:none}
-  .sheet.oku{animation:none}
+  .sheet.kaeru{animation:none}
   .sheet.kuru .leaf,.sheet.rinne .leaf,.kakera span{animation:none}
 }
 
@@ -111,6 +109,16 @@ body{
 .folio{position:absolute;left:0;right:0;bottom:28px;text-align:center;font:14px var(--f-brush);color:var(--ink-soft);letter-spacing:.3em;z-index:3}
 .idx{position:absolute;top:22px;right:24px;z-index:4;width:40px;height:40px;border:2px solid var(--shu);border-radius:4px;color:var(--shu);font:20px var(--f-brush);display:grid;place-items:center;background:transparent;cursor:pointer;transform:rotate(4deg);opacity:.85;transition:opacity .2s,transform .2s}
 .idx:hover,.idx:focus-visible{opacity:1;transform:rotate(-2deg) scale(1.06)}
+.ensyutsu{all:unset;position:absolute;top:28px;right:78px;z-index:4;cursor:pointer;border:2px solid var(--sun);color:#7a5408;padding:1px 9px;border-radius:2px;font:13px var(--f-brush);letter-spacing:.12em;transform:rotate(-3deg);opacity:.85;line-height:1.7}
+.ensyutsu:hover,.ensyutsu:focus-visible{opacity:1;background:rgba(211,151,24,.12)}
+body.akarui .kiri,body.akarui .kakera{display:none}
+body.akarui .hikari{opacity:.28!important}
+body.akarui .sheet > canvas.s1,body.akarui .sheet > canvas.s2,body.akarui .sheet > canvas.urami,body.akarui .sheet > canvas.shiro{display:none}
+body.akarui .sheet.rinne .leaf{animation:none}
+.erabu-dan{display:grid;gap:12px;justify-items:center}
+.erabu.chiisai button{padding:6px 14px;border-color:var(--sun);color:#7a5408}
+.erabu.chiisai button b{font-size:17px}
+.erabu.chiisai button[aria-pressed="true"]{background:var(--sun);color:#2a1d08}
 button:focus-visible{outline:2px dashed var(--shu);outline-offset:4px}
 .hint{position:relative;z-index:3;max-width:780px;margin:30px auto 0;text-align:center;color:#7d6c57;font:12px var(--f-hand);letter-spacing:.12em}
 
@@ -305,7 +313,11 @@ body.fuseru div[data-netabare],body.fuseru ol[data-netabare],body.fuseru ul[data
       <button data-netabare-sentaku="nashi" aria-pressed="false"><b>伏せて読む</b><small>ネタバレなし</small></button>
       <button data-netabare-sentaku="ari" aria-pressed="false"><b>すべて読む</b><small>ネタバレあり</small></button>
     </div>
-    <p class="erabu-chu">選ぶと資料が開く。あとから目次で変えられる。</p>
+    <div class="erabu chiisai" role="group" aria-label="演出">
+      <button data-ensyutsu-sentaku="on" aria-pressed="false"><b>光を遮る</b><small>演出あり</small></button>
+      <button data-ensyutsu-sentaku="off" aria-pressed="false"><b>光を当てる</b><small>演出オフ</small></button>
+    </div>
+    <p class="erabu-chu">読み方を選ぶと資料が開く。どちらも、あとから変えられる。</p>
   </div>
 </template>
 
@@ -571,6 +583,12 @@ let netabare=store.get("garando.netabare",null);
 const setNetabare=v=>{ netabare=v; store.set("garando.netabare",v); document.body.classList.toggle("fuseru",v!=="ari");
   document.querySelectorAll(".stage [data-netabare]").forEach(e=>e.setAttribute("aria-hidden",v!=="ari")); };
 document.body.classList.toggle("fuseru",netabare!=="ari");
+let ensyutsu=store.get("garando.ensyutsu",true);
+const ensLabel=()=>ensyutsu?"光を当てる（演出オフ）":"光を遮る（演出あり）";
+const setEnsyutsu=v=>{ ensyutsu=v; store.set("garando.ensyutsu",v); document.body.classList.toggle("akarui",!v);
+  document.querySelectorAll("[data-nav='ensyutsu'],.kirikae-ens").forEach(b=>{ b.textContent=b.classList.contains("ensyutsu")?(v?"光を当てる":"光を遮る"):"いま："+(v?"光を遮っている（演出あり）":"光を当てている（演出オフ）"); b.setAttribute("aria-label",ensLabel()); b.title=ensLabel(); });
+  document.querySelectorAll("[data-ensyutsu-sentaku]").forEach(b=>b.setAttribute("aria-pressed",(b.dataset.ensyutsuSentaku==="on")===v)); };
+document.body.classList.toggle("akarui",!ensyutsu);
 
 /* ════ 一度だけ描く素材 ════ */
 // 床（堂の板張り）
@@ -784,6 +802,7 @@ const Kuuki=(()=>{
   function frame(now){
     requestAnimationFrame(frame);
     const every=reduce?500:55; if(now-last<every) return;
+    if(!ensyutsu){ last=now; return; }
     const dt=Math.min(.2,(now-last)/1000); last=now; T+=dt*(st.mode==="rinne"?2.6:1);
     st.lv+=(st.lvT-st.lv)*Math.min(1,dt*.9); st.light+=(st.lightT-st.light)*Math.min(1,dt*1.3); st.pulse*=Math.pow(.5,dt/.5);
     px+=(tx-px)*.15; py+=(ty-py)*.15;
@@ -847,6 +866,7 @@ function makeSheet(i){
   sh.style.setProperty("--o1",clamp(.35+lv*.6).toFixed(2)); sh.style.setProperty("--o2",clamp(lv*.95-.1).toFixed(2)); sh.style.setProperty("--ura",k.shouki>=3?(.05+lv*.13).toFixed(2):"0");
   sh.innerHTML=`<div class="kage"></div><canvas class="kami"></canvas><canvas class="urami"></canvas><canvas class="s1"></canvas><canvas class="s2"></canvas><canvas class="shiro"></canvas><div class="leaf"></div>
     <button class="idx" data-nav="mokuji" aria-label="目次へ" title="目次">目</button>
+    <button class="ensyutsu" data-nav="ensyutsu"></button>
     <button class="corner prev" data-nav="prev" aria-label="前の頁"><span></span><em></em></button>
     <button class="corner next" data-nav="next" aria-label="次の頁"><span></span><em></em></button><div class="folio"></div>`;
   const leaf=sh.querySelector(".leaf"), frag=k.tpl.content.cloneNode(true);
@@ -872,6 +892,8 @@ function makeSheet(i){
   pv.querySelector("em").textContent=i>0?kiji[i-1].title:""; nx.querySelector("em").textContent=i<N-1?kiji[i+1].title:"";
   sh.querySelector(".folio").textContent=i===0?"":`— ${K(i)} —`;
   sh.querySelector(".idx").hidden=i<=1;
+  const eb=sh.querySelector(".ensyutsu"); eb.hidden=i===0; eb.textContent=ensyutsu?"光を当てる":"光を遮る"; eb.setAttribute("aria-label",ensLabel()); eb.title=ensLabel();
+  leaf.querySelectorAll("[data-ensyutsu-sentaku]").forEach(b=>b.setAttribute("aria-pressed",(b.dataset.ensyutsuSentaku==="on")===ensyutsu));
   return sh;
 }
 
@@ -889,7 +911,9 @@ function mokuji(){
   label(); kr.addEventListener("click",()=>{ setNetabare(netabare==="ari"?"nashi":"ari"); label(); });
   const re=document.createElement("button"); re.className="arata"; re.textContent="紙を新しくする（読んだ記録を消す）";
   re.addEventListener("click",()=>{ yonda=new Set(["hyoushi","mokuji"]); store.set("garando.yonda",[...yonda]); ul.querySelectorAll(".yonda").forEach(b=>b.classList.remove("yonda")); Kuuki.set(levelFor(kiji[cur])); akari(); });
-  sita.append(kr,re); wrap.appendChild(sita); return wrap;
+  const ke=document.createElement("button"); ke.className="kirikae kirikae-ens"; ke.style.borderColor="var(--sun)"; ke.style.color="#7a5408";
+  ke.textContent="いま："+(ensyutsu?"光を遮っている（演出あり）":"光を当てている（演出オフ）"); ke.addEventListener("click",()=>setEnsyutsu(!ensyutsu));
+  sita.append(kr,ke,re); wrap.appendChild(sita); return wrap;
 }
 
 function ichiran(){
@@ -928,39 +952,59 @@ function kakeraOn(on){
 }
 const akari=()=>Kuuki.glow(1-taintOf()*.6);
 
-function go(i,{push=true}={}){
+let nobori=0;
+function go(i,opt={}){
   if(i<0||i>=N||i===cur) return;
-  const dir=i>cur?"fwd":"back", old=stage.querySelector(".sheet:not(.yuku)");
+  // 紙の途中を読んでいたら、まず紙の頭まで目を戻してからめくる
+  if(!reduce && scrollY>4){
+    const id=++nobori, t0=performance.now();
+    scrollTo({top:0,behavior:"smooth"});
+    const wait=()=>{ if(id!==nobori) return; if(scrollY<2||performance.now()-t0>700){ scrollTo(0,0); mekuru(i,opt); } else requestAnimationFrame(wait); };
+    requestAnimationFrame(wait); return;
+  }
+  nobori++; mekuru(i,opt);
+}
+function mekuru(i,{push=true}={}){
+  if(i<0||i>=N||i===cur) return;
+  const fwd=i>cur, old=stage.querySelector(".sheet:not(.yuku)");
+  stage.querySelectorAll(".sheet.yuku").forEach(e=>e.remove());
   if(old){
+    old.classList.remove("kaeru","kuru","matsu");
     if(reduce) old.remove();
     else {
-      // 今の紙を画面に留めたまま、めくる（スクロールしても動かない）
-      const rc=old.getBoundingClientRect(), w=old.offsetWidth, h=old.offsetHeight;
-      old.style.left=(rc.left+rc.width/2-w/2)+"px"; old.style.top=(rc.top+rc.height/2-h/2)+"px";
+      // 今の紙を画面に留める（スクロールしても動かない）
+      const sr=stage.getBoundingClientRect(), w=old.offsetWidth, h=old.offsetHeight;
+      old.style.left=(sr.left+old.offsetLeft)+"px"; old.style.top=(sr.top+old.offsetTop)+"px";
       old.style.width=w+"px"; old.style.height=h+"px";
-      old.classList.remove("oku","kuru","matsu"); old.classList.add("yuku",dir); setTimeout(()=>old.remove(),900);
+      old.classList.add("yuku",fwd?"fwd":"nokoru");
+      setTimeout(()=>old.remove(),fwd?820:840);
     }
   }
   cur=i; const k=kiji[i]; yonda.add(k.id); store.set("garando.yonda",[...yonda]);
-  const sh=makeSheet(i); sh.classList.add("matsu"); stage.appendChild(sh); scrollTo(0,0);
+  const sh=makeSheet(i); stage.appendChild(sh); scrollTo(0,0);
   Kuuki.mode(k.style.includes("onnen")?"onnen":k.style.includes("rinne")?"rinne":"");
   Kuuki.set(levelFor(k),k.hikari);
   if(k.style.includes("hyoushi")){ Kuuki.jump(0); setTimeout(()=>{ if(kiji[cur]===k) Kuuki.set(.4); },1500); } else Kuuki.uzuku();
   kakeraOn(k.style.includes("hyoushi")); akari();
   if(push){ try{ history.replaceState(null,"","#"+k.id); }catch(e){} }
-  // めくりが動き出してから、重い描画をする
   const draw=()=>{
-    if(!sh.isConnected) return;
     zuList=[...sh.querySelectorAll(".zuroku[data-zu]")].map(z=>{
       const f=document.createElement("div"); f.className="zu"; f.innerHTML=`<span class="na"></span>`; f.querySelector(".na").textContent=z.dataset.zu; z.prepend(f);
       return Sumi.futae(f,hash(k.id),k.shouki>=5);
     });
     kamiwoKaku(sh,k);
-    sh.classList.remove("matsu"); sh.classList.add("oku","kuru");
     requestAnimationFrame(()=>requestAnimationFrame(()=>sh.classList.add("ikiru")));
     opened=performance.now(); nozoku();
   };
-  if(old && !reduce) requestAnimationFrame(()=>requestAnimationFrame(()=>setTimeout(draw,30))); else draw();
+  if(old && !reduce && !fwd){
+    // 戻る：前の紙が左から重なってくる（描いてから動かす）
+    sh.classList.add("matsu"); draw();
+    requestAnimationFrame(()=>{ sh.classList.remove("matsu"); sh.classList.add("kaeru"); setTimeout(()=>sh.classList.remove("kaeru"),820); });
+  } else if(old && !reduce){
+    // 進む：上の紙が持ち上がって左へ退く。下の紙はその間に描く
+    sh.classList.add("matsu");
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{ draw(); sh.classList.remove("matsu"); }));
+  } else draw();
 }
 
 /* 覗き込む：スクロールしたときだけ計算 */
@@ -980,8 +1024,9 @@ document.fonts && document.fonts.ready.then(()=>{ const sh=stage.querySelector("
 /* 操作 */
 document.addEventListener("click",e=>{
   const g=e.target.closest("[data-go]"); if(g && byId[g.dataset.go]!=null) return go(byId[g.dataset.go]);
-  const n=e.target.closest("[data-nav]"); if(n){ const v=n.dataset.nav; return go(v==="prev"?cur-1:v==="next"?cur+1:byId.mokuji); }
-  const s=e.target.closest("[data-netabare-sentaku]"); if(s){ setNetabare(s.dataset.netabareSentaku); s.parentElement.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b===s)); setTimeout(()=>go(byId.mokuji),300); }
+  const n=e.target.closest("[data-nav]"); if(n){ const v=n.dataset.nav; if(v==="ensyutsu") return setEnsyutsu(!ensyutsu); return go(v==="prev"?cur-1:v==="next"?cur+1:byId.mokuji); }
+  const es=e.target.closest("[data-ensyutsu-sentaku]"); if(es) return setEnsyutsu(es.dataset.ensyutsuSentaku==="on");
+  const s=e.target.closest("[data-netabare-sentaku]"); if(s){ setNetabare(s.dataset.netabareSentaku); s.parentElement.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",b===s)); setTimeout(()=>go(byId.mokuji),450); }
 });
 document.addEventListener("keydown",e=>{ if(e.key==="ArrowRight"&&cur>0) go(cur+1); if(e.key==="ArrowLeft") go(cur-1); });
 let sx=null,sy=null;
