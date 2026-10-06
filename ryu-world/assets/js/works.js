@@ -54,7 +54,12 @@ const WORKS = [
 
         url: "https://kibounokonsent.github.io/magai-eclipse-archive/magai-eclipse-archive.html"
     },
-    { world: "fronz", era: 5, title: "氷河世界", tentative: true, summary: "", url: "" },
+    { world: "fronz", era: 5, title: "フロスタン", tentative: true, summary: "寒さが、日に日に強くなっていた。\n\n" +
+"雪は止まず、獲物は姿を消し、採れるものも少なくなっていく。遠くでは、氷河期を眠って過ごすためにコールドスリープへ入った人々もいた。しかし、残された者たちに眠る余裕はなかった。\n\n" +
+"人々は暖を取るため、巨大なジェネレーターやボイラーを造った。壊れれば直し、燃料が尽きれば探しに行く。ただ生きるために、それを繰り返すしかなかった。\n\n" +
+"いつまで、この寒さが続くのか。いつになれば、暖かさは戻るのか。\n\n" +
+"答えを知る者はいない。それでも今日を生きるため、人々は選び続ける。"
+, url: "https://kibounokonsent.github.io/frostan/index.html" },
     {
         world: "fronz", era: 6, title: "ROSTER", genre: "スチームパンク",
         summary:

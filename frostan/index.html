@@ -1,0 +1,1060 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>フロスタン</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Stencil+Display:wght@700;900&family=IBM+Plex+Mono:wght@400;500&family=Shippori+Mincho+B1:wght@500;700;800&family=Zen+Kaku+Gothic+New:wght@400;500;700&display=swap">
+<style>
+/* Layout: 全画面に固定したボイラー集落の情景（遠景・中景・手前）。その上に左ナビ＋右の資料本文、画面下に火室と燃料の操作盤。
+   色は「外の鋼と雪」と「ボイラーの琥珀」の二つだけ。琥珀・パネル色・霜は温度に応じてJSが書き換える。単一テーマ。 */
+:root{
+  --bg:#1c252c;
+  --panel:rgba(40,49,56,.93);
+  --panel-solid:#283138;
+  --line:#44535e;
+  --fg:#dde5ea;
+  --muted:#97a7b1;
+  --frost:#eef5f8;
+  --ember:#e9a24c;
+  --ember-glow:rgba(233,162,76,.24);
+  --warn:#d46c4c;
+  --cold:#86b6cc;
+  --fire:.8;
+  --fr:72%;
+  --frost-o:.2;
+  --bar-h:88px;
+  --f-plate:"Big Shoulders Stencil Display","Impact","Arial Narrow",sans-serif;
+  --f-head:"Shippori Mincho B1","Hiragino Mincho ProN","Yu Mincho",serif;
+  --f-body:"Zen Kaku Gothic New","Hiragino Sans","Yu Gothic",sans-serif;
+  --f-mono:"IBM Plex Mono","SFMono-Regular",Consolas,monospace;
+  color-scheme:dark;
+}
+html{background:var(--bg)}
+body{background:var(--bg);color:var(--fg);font-family:var(--f-body);font-size:16px;line-height:1.9;overflow-x:hidden;padding-bottom:calc(var(--bar-h) + env(safe-area-inset-bottom,0px))}
+body.noboiler{padding-bottom:0}
+*{box-sizing:border-box}
+button{font:inherit}
+:focus-visible{outline:2px solid var(--ember);outline-offset:3px}
+#scene{position:fixed;inset:0;width:100%;height:100%;display:block;z-index:0;pointer-events:none}
+
+/* ---------- HERO ---------- */
+.hero{position:relative;z-index:1;min-height:clamp(480px,84vh,780px);display:flex;align-items:flex-end;padding-inline:clamp(16px,6vw,80px);padding-block:40px clamp(28px,7vh,64px)}
+.plate-wrap{display:flex;flex-direction:column;align-items:flex-start;gap:16px;max-width:100%}
+.nameplate{position:relative;padding:18px 34px 16px;background:linear-gradient(160deg,#3b4953,#222c33 70%);border:1px solid #57676f;box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 12px 34px rgba(0,0,0,.4);max-width:100%}
+.nameplate i{position:absolute;width:7px;height:7px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#9aa8b0,#3b464d)}
+.nameplate i:nth-of-type(1){top:8px;left:9px}.nameplate i:nth-of-type(2){top:8px;right:9px}.nameplate i:nth-of-type(3){bottom:8px;left:9px}.nameplate i:nth-of-type(4){bottom:8px;right:9px}
+.nameplate small{display:block;font-family:var(--f-mono);font-size:11px;letter-spacing:.22em;color:var(--muted)}
+.nameplate h1{margin:2px 0 0;font-family:var(--f-plate);font-weight:900;font-size:clamp(56px,11vw,120px);line-height:.9;letter-spacing:.06em;color:var(--frost);text-shadow:0 0 24px var(--ember-glow)}
+.nameplate .sub{margin-top:8px;font-family:var(--f-mono);font-size:12px;color:var(--ember);letter-spacing:.12em}
+.catch{font-family:var(--f-head);font-weight:700;font-size:clamp(21px,3.2vw,30px);color:var(--frost);text-shadow:0 2px 16px rgba(0,0,0,.7);margin:0;letter-spacing:.08em}
+.entries{display:flex;flex-wrap:wrap;gap:10px}
+.btn{font-weight:700;font-size:15px;letter-spacing:.08em;color:#1d1408;background:var(--ember);border:0;padding:11px 20px;cursor:pointer;box-shadow:0 0 24px var(--ember-glow)}
+.btn.btn-sub{background:rgba(20,27,32,.6);color:var(--frost);border:1px solid var(--frost);box-shadow:none}
+.btn:hover{filter:brightness(1.1)}
+.hero-note{margin:0;max-width:30em;font-size:13.5px;line-height:1.8;color:var(--frost);background:rgba(18,24,29,.55);padding:8px 12px;border-left:2px solid var(--ember)}
+
+/* ---------- ARCHIVE ---------- */
+.archive{position:relative;z-index:1;max-width:1200px;margin:0 auto;padding-inline:16px;padding-block:24px 64px;display:grid;grid-template-columns:270px minmax(0,1fr);gap:36px;align-items:start}
+.side{position:sticky;top:calc(env(safe-area-inset-top,0px) + 16px);max-height:calc(100vh - var(--bar-h) - 32px);overflow-y:auto;background:var(--panel);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid var(--line);padding:18px 14px 14px;display:flex;flex-direction:column;gap:16px}
+body.noboiler .side{max-height:calc(100vh - 32px)}
+.brand{font-family:var(--f-plate);font-weight:900;font-size:30px;letter-spacing:.12em;line-height:1;color:var(--frost)}
+.brand span{display:block;font-family:var(--f-mono);font-weight:400;font-size:10px;letter-spacing:.2em;color:var(--muted);margin-top:6px}
+.navgroup h3{margin:0 0 4px;display:flex;justify-content:space-between;align-items:baseline;font-family:var(--f-head);font-size:15px;color:var(--frost);border-bottom:1px solid var(--line);padding-bottom:4px}
+.navgroup h3 small{font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:var(--muted);font-weight:400}
+.nav{list-style:none;margin:0;padding:0;display:flex;flex-direction:column}
+.nav button{all:unset;box-sizing:border-box;display:grid;grid-template-columns:28px minmax(0,1fr) auto;align-items:center;gap:4px;width:100%;padding:5px 8px;cursor:pointer;font-size:14.5px;color:var(--muted);border-left:2px solid transparent;transition:color .2s,background .2s}
+.nav button:hover{color:var(--fg);background:rgba(255,255,255,.04)}
+.nav button[aria-current="page"]{color:var(--frost);border-left-color:var(--ember);background:linear-gradient(90deg,var(--ember-glow),transparent)}
+.nav button:focus-visible{outline:2px solid var(--ember);outline-offset:-2px}
+.nav .n{font-family:var(--f-mono);font-size:11px;color:var(--muted)}
+.nav .tag{font-size:10px;letter-spacing:.06em;color:var(--warn);border:1px solid var(--warn);padding:0 4px;line-height:1.5}
+.nav .hid{letter-spacing:.1em}
+
+.doc{min-width:0}
+.doc-head{padding-top:clamp(90px,16vh,170px);padding-bottom:24px;display:flex;flex-direction:column;gap:6px;background:linear-gradient(to bottom,rgba(18,24,29,0),rgba(18,24,29,.62) 55%);padding-inline:clamp(22px,4vw,52px)}
+.kicker{font-family:var(--f-mono);font-size:12px;letter-spacing:.22em;color:var(--ember);text-shadow:0 1px 6px rgba(0,0,0,.8)}
+.doc h2{margin:0;font-family:var(--f-head);font-weight:800;font-size:clamp(32px,5vw,52px);line-height:1.25;color:var(--frost);text-wrap:balance;text-shadow:0 2px 18px rgba(0,0,0,.75)}
+.lede{margin:10px 0 0;max-width:36em;font-family:var(--f-head);font-weight:500;font-size:clamp(17px,2vw,20px);line-height:1.8;color:var(--frost);text-shadow:0 1px 10px rgba(0,0,0,.85)}
+.doc-body{background:var(--panel);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);border:1px solid var(--line);padding-block:36px 28px;padding-inline:clamp(22px,4vw,52px)}
+.body{display:flex;flex-direction:column;gap:24px;max-width:40em;margin-inline:auto}
+.body p{margin:0}
+.body h4{margin:10px 0 -6px;font-family:var(--f-head);font-size:21px;color:var(--frost)}
+.quote{margin:4px 0;padding:8px 0 8px 24px;border-left:3px solid var(--ember);font-family:var(--f-head);font-weight:700;font-size:clamp(19px,2.4vw,24px);line-height:1.7;color:var(--frost)}
+.quote cite{display:block;margin-top:6px;font-family:var(--f-mono);font-style:normal;font-weight:400;font-size:11px;letter-spacing:.14em;color:var(--muted)}
+.plain{margin:0;padding-left:1.6em}
+.seq{list-style:none;margin:0 0 0 6px;padding:0;border-left:1px solid var(--line)}
+.seq li{position:relative;padding:6px 0 6px 26px}
+.seq li::before{content:"";position:absolute;left:-4px;top:17px;width:7px;height:7px;background:var(--cold);transform:rotate(45deg)}
+.seq li span{font-family:var(--f-mono);font-size:11px;color:var(--muted);margin-right:10px}
+
+.record{position:relative;background:rgba(0,0,0,.18);border:1px solid var(--line);font-family:var(--f-mono);font-size:13.5px;line-height:1.7;padding:16px 18px 14px;max-width:31em}
+.record::before{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(255,255,255,.018) 0 1px,transparent 1px 3px)}
+.rec-title{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-weight:500;letter-spacing:.14em;color:var(--frost);border-bottom:1px dashed var(--line);padding-bottom:8px;margin-bottom:8px}
+.rec-title i{font-style:normal;font-size:11px;color:var(--muted);letter-spacing:.1em}
+.rec-row{display:grid;grid-template-columns:8.5em minmax(0,1fr);gap:10px;font-variant-numeric:tabular-nums}
+.rec-row dt{color:var(--muted)}
+.rec-row dd{margin:0}
+.rec-row dd.w{color:var(--warn)}
+.rec-row dd.ok{color:var(--ember)}
+.rec-note{margin-top:8px;padding-top:8px;border-top:1px dashed var(--line);white-space:pre-line}
+
+.choice{border:1px solid var(--line);border-left:3px solid var(--warn);padding:14px 18px;background:linear-gradient(90deg,rgba(212,108,76,.09),transparent 60%)}
+.choice .q{font-family:var(--f-mono);font-size:11px;letter-spacing:.2em;color:var(--warn)}
+.choice .s{font-weight:700;margin:2px 0 8px}
+.choice .ab{display:flex;flex-wrap:wrap;gap:6px 18px;font-family:var(--f-head);font-weight:700;font-size:18px;color:var(--frost)}
+.choice .ab span::before{content:"□ ";color:var(--muted);font-family:var(--f-mono);font-size:14px}
+
+.meters{display:flex;flex-direction:column;gap:6px;font-family:var(--f-mono);font-size:13.5px;max-width:31em;background:rgba(0,0,0,.18);border:1px solid var(--line);padding:14px 18px}
+.meter{display:grid;grid-template-columns:6.5em 1fr 3.2em;align-items:center;gap:12px;font-variant-numeric:tabular-nums}
+.bar{display:flex;gap:3px}
+.bar i{flex:1;height:10px;background:rgba(255,255,255,.06);border:1px solid var(--line)}
+.bar i.on{background:var(--ember);border-color:var(--ember)}
+.bar.low i.on{background:var(--warn);border-color:var(--warn)}
+.meter .v{text-align:right;color:var(--muted)}
+
+.esc{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:2px}
+.esc li{display:grid;grid-template-columns:3.4em 1fr;gap:10px;padding:8px 12px;background:rgba(212,108,76,var(--a));border-left:2px solid var(--warn)}
+.esc li span{font-family:var(--f-mono);font-size:11px;color:var(--muted);padding-top:3px}
+
+.spoil{display:flex;flex-wrap:wrap;align-items:center;gap:10px 16px;padding:14px 16px;border:1px dashed var(--warn);background:repeating-linear-gradient(135deg,rgba(212,108,76,.06) 0 8px,transparent 8px 16px)}
+.spoil span{font-weight:700;color:var(--warn);font-size:14px}
+.spoil button,.gate button{cursor:pointer;background:transparent;color:var(--frost);border:1px solid var(--frost);padding:4px 14px;font-size:14px}
+.spoil button:hover,.gate button:hover{background:var(--frost);color:var(--bg)}
+.gate{display:flex;flex-direction:column;gap:12px;align-items:flex-start;padding:22px;border:1px dashed var(--warn)}
+.gate b{font-family:var(--f-head);font-size:20px;color:var(--frost)}
+.gate small{color:var(--muted)}
+
+.pager{max-width:40em;margin-inline:auto;margin-top:40px;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;border-top:1px solid var(--line);padding-top:14px}
+.pager button{all:unset;cursor:pointer;font-size:14px;color:var(--muted);padding:4px 0}
+.pager button:hover{color:var(--frost)}
+.pager button b{font-weight:700;color:var(--fg)}
+
+.final-q{font-family:var(--f-head);font-weight:800;font-size:clamp(28px,4.6vw,44px);line-height:1.5;color:var(--frost);margin:8px 0}
+.final-btns{display:flex;flex-wrap:wrap;gap:14px}
+.final-btns button{font-family:var(--f-head);font-weight:700;font-size:20px;letter-spacing:.08em;padding:14px 28px;cursor:pointer;background:transparent;color:var(--frost);border:1px solid var(--frost)}
+.final-btns button:hover{background:var(--frost);color:var(--bg)}
+.ending .chosen{font-family:var(--f-mono);font-size:12px;letter-spacing:.2em;color:var(--muted)}
+.ending p.big{font-family:var(--f-head);font-weight:700;font-size:clamp(22px,3.4vw,30px);line-height:1.8;color:var(--frost)}
+
+/* nav hide */
+.side-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.navtoggle{cursor:pointer;background:transparent;color:var(--muted);border:1px solid var(--line);padding:3px 9px;font-size:12px;letter-spacing:.06em;white-space:nowrap}
+.navtoggle:hover{color:var(--frost);border-color:var(--frost)}
+#navOpen{position:fixed;z-index:60;top:calc(env(safe-area-inset-top,0px) + 12px);left:16px;display:flex;align-items:center;gap:6px;background:rgba(18,24,29,.82);color:var(--frost);border:1px solid var(--line);padding:6px 12px;cursor:pointer;font-size:13px;letter-spacing:.08em}
+body:not(.navhidden) #navOpen{display:none}
+body.navhidden .side{display:none}
+body.navhidden .archive{grid-template-columns:minmax(0,1fr);max-width:920px}
+
+/* freeze / game over */
+body.iced .hero,body.iced .archive,body.iced .boilerbar,body.iced .setbtn,body.iced #navOpen{pointer-events:none;filter:saturate(.15) brightness(1.12) blur(1.5px);transition:filter 2s}
+#freeze{position:fixed;inset:0;z-index:75;display:flex;align-items:center;justify-content:center;padding:16px;background:radial-gradient(ellipse at center,rgba(220,234,242,.25),rgba(236,245,250,.7))}
+.fz{max-width:440px;width:100%;text-align:center;background:rgba(232,242,247,.92);color:#20313c;border:1px solid #b9cdd8;box-shadow:0 20px 60px rgba(60,90,110,.35),inset 0 0 40px rgba(255,255,255,.8);padding:30px 26px 24px;display:flex;flex-direction:column;gap:12px;align-items:center}
+.fz b{font-family:var(--f-plate);font-weight:900;font-size:clamp(48px,10vw,72px);letter-spacing:.12em;line-height:.95;color:#4f7d96}
+.fz h3{margin:0;font-family:var(--f-head);font-size:22px;color:#1d2c36}
+.fz p{margin:0;font-size:14.5px;line-height:1.8;color:#3a4d59}
+.fz dl{margin:4px 0;display:grid;grid-template-columns:auto auto;gap:2px 18px;font-family:var(--f-mono);font-size:13px;font-variant-numeric:tabular-nums}
+.fz dt{color:#6a808d;text-align:right}.fz dd{margin:0;text-align:left;color:#1d2c36}
+.fz button{margin-top:6px;cursor:pointer;font-weight:700;font-size:15px;letter-spacing:.08em;background:#e9a24c;color:#1d1408;border:0;padding:11px 22px}
+.fz button:hover{filter:brightness(1.08)}
+
+/* ---------- FROST ---------- */
+#frost{position:fixed;inset:0;pointer-events:none;z-index:40;opacity:var(--frost-o);
+  background:
+   radial-gradient(ellipse at center,transparent var(--fr),rgba(226,239,245,.35) calc(var(--fr) + 16%),rgba(244,250,252,.82) 100%),
+   url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='260' height='260'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.03 .55' numOctaves='3' seed='3'/><feColorMatrix values='0 0 0 0 .92  0 0 0 0 .97  0 0 0 0 1  0 0 0 2.4 -1.25'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>"),
+   url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='300' height='300'><filter id='f'><feTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='3' seed='7'/><feColorMatrix values='0 0 0 0 .93  0 0 0 0 .97  0 0 0 0 1  0 0 0 1.7 -.78'/></filter><rect width='100%' height='100%' filter='url(%23f)'/></svg>");
+  -webkit-mask-image:radial-gradient(ellipse at center,transparent var(--fr),#000 calc(var(--fr) + 26%));
+          mask-image:radial-gradient(ellipse at center,transparent var(--fr),#000 calc(var(--fr) + 26%))}
+
+/* ---------- BOILER BAR ---------- */
+.boilerbar{position:fixed;left:0;right:0;bottom:0;z-index:45;background:linear-gradient(180deg,#232c33,#171e23);border-top:1px solid #4b5a64;box-shadow:0 -8px 24px rgba(0,0,0,.35);padding-bottom:env(safe-area-inset-bottom,0px)}
+.bb-in{max-width:1200px;margin:0 auto;height:var(--bar-h);padding-inline:16px;display:flex;align-items:center;gap:clamp(10px,2vw,22px)}
+.firebox{position:relative;flex:none;width:96px;height:66px;border:2px solid #5b6a73;background:#0f1417;cursor:pointer;padding:0;overflow:hidden;box-shadow:inset 0 0 0 4px #1d252b}
+.firebox::before{content:"";position:absolute;inset:6px;background:radial-gradient(ellipse at 50% 85%,rgba(255,214,140,calc(var(--fire)*1)),rgba(233,120,40,calc(var(--fire)*.85)) 45%,rgba(120,40,10,calc(var(--fire)*.6)) 75%,transparent 100%);animation:flick 1.3s infinite alternate ease-in-out}
+.firebox::after{content:"";position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 10px,#2a3238 10px 13px)}
+.firebox.drop{border-color:var(--ember);box-shadow:0 0 0 3px var(--ember-glow),inset 0 0 0 4px #1d252b}
+.firebox.flash::before{animation:flare .9s ease-out}
+.firebox span{position:absolute;left:0;right:0;bottom:2px;z-index:1;text-align:center;font-family:var(--f-mono);font-size:10px;letter-spacing:.2em;color:#cfd9de;text-shadow:0 1px 3px #000}
+@keyframes flick{from{opacity:.86;transform:scaleY(.96)}to{opacity:1;transform:scaleY(1.04)}}
+@keyframes flare{0%{filter:brightness(2.2) saturate(1.3)}100%{filter:none}}
+.bgauge{flex:none;width:92px;text-align:center;font-family:var(--f-mono);line-height:1.1}
+.bgauge svg{display:block;width:92px;height:auto}
+.bgauge b{font-size:10px;letter-spacing:.14em;color:var(--muted);font-weight:400}
+.fuels{display:flex;gap:8px;flex:none}
+.fuel{position:relative;width:62px;height:62px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;border:1px solid #4b5a64;background:#20282e;color:var(--fg);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;font-size:12px;padding:0}
+.fuel:hover{border-color:var(--ember)}
+.fuel svg{width:34px;height:28px}
+.fuel[disabled]{cursor:default;opacity:.45;border-style:dashed}
+.fuel[disabled] svg{visibility:hidden}
+.fuel.dragging{opacity:.3}
+.hint{font-size:12.5px;line-height:1.6;color:var(--muted);min-width:0;flex:1}
+.thermo{flex:none;text-align:right;font-family:var(--f-mono);line-height:1.25;font-variant-numeric:tabular-nums}
+.thermo small{display:block;font-size:10px;letter-spacing:.2em;color:var(--muted)}
+.thermo .tc{font-size:26px;color:var(--frost)}
+.thermo .st{font-size:11px;letter-spacing:.12em;color:var(--ember)}
+.thermo .st.bad{color:var(--warn)}
+.dragghost{position:fixed;z-index:90;pointer-events:none;width:44px;height:36px;transform:translate(-50%,-50%)}
+.fly{position:fixed;z-index:90;pointer-events:none;width:34px;height:28px;transition:transform .55s cubic-bezier(.45,-.2,.7,1),opacity .55s}
+.puff{position:fixed;z-index:46;width:30px;height:30px;border-radius:50%;background:radial-gradient(circle,rgba(238,245,248,.7),rgba(238,245,248,0) 70%);pointer-events:none;animation:puff 1.7s ease-out forwards}
+@keyframes puff{from{transform:translate(-50%,-50%) scale(.4);opacity:.95}to{transform:translate(calc(-50% + var(--dx)),calc(-50% - 90px)) scale(3);opacity:0}}
+#toast{position:fixed;left:50%;bottom:calc(var(--bar-h) + env(safe-area-inset-bottom,0px) + 18px);transform:translateX(-50%);z-index:70;text-align:center;font-family:var(--f-mono);pointer-events:none;padding:10px 22px;background:rgba(18,24,29,.9);border:1px solid var(--warn);max-width:calc(100% - 32px)}
+#toast b{display:block;font-family:var(--f-plate);font-weight:900;font-size:clamp(28px,5vw,44px);letter-spacing:.1em;line-height:1;color:var(--warn)}
+#toast.good{border-color:var(--ember)}#toast.good b{color:var(--ember)}
+#toast span{font-size:12px;letter-spacing:.14em;color:var(--muted)}
+
+/* ---------- SETTINGS ---------- */
+.setbtn{position:fixed;z-index:60;top:calc(env(safe-area-inset-top,0px) + 12px);right:16px;display:flex;align-items:center;gap:6px;background:rgba(18,24,29,.82);color:var(--frost);border:1px solid var(--line);padding:6px 12px;cursor:pointer;font-size:13px;letter-spacing:.08em}
+.setbtn svg{width:16px;height:16px}
+.setpanel{position:fixed;z-index:61;top:calc(env(safe-area-inset-top,0px) + 54px);right:16px;width:min(330px,calc(100vw - 32px));max-height:calc(100vh - var(--bar-h) - 80px);overflow-y:auto;background:var(--panel-solid);border:1px solid var(--line);box-shadow:0 18px 40px rgba(0,0,0,.5);padding:16px 18px;display:flex;flex-direction:column;gap:10px;font-size:14px}
+.setpanel h3{margin:4px 0 0;font-family:var(--f-mono);font-size:11px;font-weight:500;letter-spacing:.22em;color:var(--ember)}
+.sw{display:flex;align-items:center;justify-content:space-between;gap:12px;cursor:pointer;padding:3px 0}
+.sw input{appearance:none;-webkit-appearance:none;flex:none;width:38px;height:20px;border:1px solid var(--line);background:#161c20;position:relative;cursor:pointer;margin:0}
+.sw input::after{content:"";position:absolute;top:2px;left:2px;width:14px;height:14px;background:var(--muted);transition:transform .15s,background .15s}
+.sw input:checked{border-color:var(--ember)}
+.sw input:checked::after{transform:translateX(18px);background:var(--ember)}
+.setrow{display:flex;gap:8px}
+.setrow button,.setclose{flex:1;cursor:pointer;background:transparent;color:var(--fg);border:1px solid var(--line);padding:5px 8px;font-size:13px}
+.setrow button:hover,.setclose:hover{border-color:var(--frost)}
+.rad{display:grid;grid-template-columns:auto 1fr;gap:2px 10px;align-items:start;cursor:pointer}
+.rad input{margin:6px 0 0;accent-color:var(--ember)}
+.rad small{grid-column:2;color:var(--muted);font-size:12px;line-height:1.5}
+
+#storm{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:80}
+#storm.on{pointer-events:auto}
+
+@media (max-width:860px){
+  .archive{grid-template-columns:minmax(0,1fr);gap:16px}
+  .side{position:relative;top:auto;max-height:none;gap:10px}
+  body.noboiler .side{max-height:none}
+  .brand{font-size:24px}
+  .navgroup{min-width:0}
+  .navscroll{overflow-x:auto}
+  .nav{flex-direction:row;width:max-content}
+  .nav button{grid-template-columns:auto auto auto;border-left:0;border-bottom:2px solid transparent;padding:6px 10px;white-space:nowrap}
+  .nav button[aria-current="page"]{border-bottom-color:var(--ember)}
+  .hint{display:none}
+}
+@media (max-width:560px){
+  :root{--bar-h:76px}
+  .bgauge{display:none}
+  .firebox{width:78px;height:56px}
+  .fuel{width:52px;height:54px;font-size:11px}
+  .fuel svg{width:28px;height:22px}
+  .thermo .tc{font-size:20px}
+  .bb-in{justify-content:space-between}
+  .rec-row{grid-template-columns:6.8em minmax(0,1fr)}
+  .meter{grid-template-columns:5em 1fr 3em;gap:8px}
+  .nameplate{padding:16px 22px 14px}
+}
+@media (max-width:380px){.fuels{gap:5px}.fuel{width:46px}.thermo small{display:none}}
+</style>
+</head>
+<body>
+<canvas id="scene" aria-hidden="true"></canvas>
+
+<header class="hero" id="top">
+  <div class="plate-wrap">
+    <div class="nameplate"><i></i><i></i><i></i><i></i>
+      <small>GARHYURA REGION · BOILER SETTLEMENT RECORDS</small>
+      <h1>FROSTAN</h1>
+      <div class="sub">ガルヒューラ地方 ボイラー集落 記録保管</div>
+    </div>
+    <p class="catch">氷河期を生きるために。</p>
+    <div class="entries">
+      <button class="btn" data-enter="story-hero">ストーリーを読む</button>
+      <button class="btn btn-sub" data-enter="world-frostan">世界設定を読む</button>
+    </div>
+    <p class="hero-note">寒い記録を読むほど、この場所は冷えていきます。画面下の火室に石炭や薪をくべて、火を絶やさないでください。</p>
+  </div>
+</header>
+
+<main class="archive" id="archive">
+  <nav class="side" aria-label="資料">
+    <div class="side-top"><div class="brand">FROSTAN<span>記録保管 / 第一ボイラー室</span></div><button class="navtoggle" id="navHide" aria-label="資料一覧を隠す">隠す</button></div>
+    <div class="navgroup"><h3>ストーリー<small>STORY</small></h3><div class="navscroll"><ul class="nav" id="navStory"></ul></div></div>
+    <div class="navgroup"><h3>世界設定<small>WORLD</small></h3><div class="navscroll"><ul class="nav" id="navWorld"></ul></div></div>
+  </nav>
+  <article class="doc" id="doc" aria-live="polite"></article>
+</main>
+
+<div id="frost" aria-hidden="true"></div>
+
+<section class="boilerbar" id="boilerbar" aria-label="ボイラー操作盤">
+  <div class="bb-in">
+    <button class="firebox" id="firebox" aria-label="火室（選んだ燃料をここへ投入）"><span>火室</span></button>
+    <div class="bgauge" aria-hidden="true">
+      <svg viewBox="0 0 200 118">
+        <g id="ticks"></g>
+        <path d="M20 100 A80 80 0 0 1 180 100" fill="none" stroke="#56656f" stroke-width="2"/>
+        <path id="hotArc" fill="none" stroke="#d46c4c" stroke-width="5"/>
+        <path id="coldArc" fill="none" stroke="#86b6cc" stroke-width="5"/>
+        <g id="needle"><line x1="100" y1="100" x2="100" y2="30" stroke="var(--ember)" stroke-width="4" stroke-linecap="round"/></g>
+        <circle cx="100" cy="100" r="9" fill="#232c33" stroke="var(--ember)" stroke-width="3"/>
+      </svg>
+      <b>PRESSURE <span id="gNum">72</span></b>
+    </div>
+    <div class="fuels" id="fuels"></div>
+    <p class="hint">燃料をドラッグして火室へ。クリックでも投入できます。放っておくと火は弱まります。</p>
+    <div class="thermo" aria-live="polite"><small>居住区 気温</small><span class="tc" id="tc">6 ℃</span><div class="st" id="st">燃焼良好</div></div>
+  </div>
+</section>
+
+<button class="setbtn" id="setBtn" aria-expanded="false" aria-controls="setPanel"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3.2"/><path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3M5.3 5.3l2.1 2.1M16.6 16.6l2.1 2.1M5.3 18.7l2.1-2.1M16.6 7.4l2.1-2.1"/></svg>設定</button>
+<div class="setpanel" id="setPanel" hidden role="dialog" aria-label="設定">
+  <h3>演出</h3>
+  <div id="fxList"></div>
+  <div class="setrow"><button data-all="1">すべてON</button><button data-all="0">すべてOFF</button></div>
+  <h3>ネタバレ</h3>
+  <label class="rad"><input type="radio" name="spoil" value="0" id="sp0">ネタバレなし<small>物語の核心（主人公の父、最後の選択など）を隠します。記事ごとに表示もできます。</small></label>
+  <label class="rad"><input type="radio" name="spoil" value="1" id="sp1">ネタバレあり<small>すべての記録をそのまま表示します。</small></label>
+  <button class="setclose" id="setClose">閉じる</button>
+</div>
+
+<button id="navOpen" aria-label="資料一覧を表示"><svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M4 6h16M4 12h16M4 18h16"/></svg>資料一覧</button>
+<div id="freeze" hidden role="alertdialog" aria-labelledby="fzT"><div class="fz"><b>FROZEN</b><h3 id="fzT">火が絶え、資料集は凍りついた。</h3><p>ボイラーが止まり、居住区の熱は失われた。記録を読む手も、ここで止まる。</p><dl><dt>読んだ記録</dt><dd id="fzRead">0 件</dd><dt>最低気温</dt><dd id="fzMin">—</dd></dl><button id="fzBtn">火を起こし直す</button></div></div>
+<div id="toast" hidden><b id="toastB">BOILER OFFLINE</b><span id="toastS"></span></div>
+<canvas id="storm" aria-hidden="true"></canvas>
+
+<script>
+/* ======================= DATA ======================= */
+/* scene: snow 吹雪 / fog 視界の悪さ / people 人の気配 / machine 機械の目立ち / yard 燃料置き場の量 / rival 別集落の灯り
+   chill: 記事を開いた瞬間に下がる温度（負なら暖まる） */
+const SCENE_DEF={snow:.45,fog:.3,people:.35,machine:.3,yard:.6,rival:0};
+const PAGES=[
+ /* ---------- STORY ---------- */
+ {id:'story-hero',sec:'story',n:'01',title:'主人公',en:'THE MAN',chill:4,scene:{people:.65,snow:.4},
+  lede:'名前は残っていない。ボイラー集落に暮らす、一人の男。',
+  body:[
+   ['p','物語の中心にいるのは、名もなき男である。彼はガルヒューラ地方のボイラー集落で生まれ、巨大なボイラーの熱が届く範囲で育った。'],
+   ['p','彼は、先に眠った人々を恨んでいる。選ばれた人々は安全な施設でコールドスリープに入り、氷河期を眠って過ごす。残された自分たちには、その選択肢すらなかった。'],
+   ['quote','我々は世界に見捨てられた。','名もなき男'],
+   ['p','けれども、それは絶望だけの言葉ではない。彼の中で、その言葉はすぐに次の言葉へとつながっている。'],
+   ['quote','ならば抗ってやる。','名もなき男'],
+   ['p','眠った人々が未来を待つなら、自分たちはここで生きる。それが彼の考えの根にある。'],
+   ['spoil',
+     ['p','物語が始まる時点で、彼はすでに集落のリーダーになっている。望んでなったわけではない。その経緯は「父親の死」と「リーダーになるまで」に記録されている。']],
+  ]},
+ {id:'story-father',sec:'story',n:'02',title:'父親の死',en:"FATHER'S DEATH",spoiler:true,chill:16,scene:{snow:.8,fog:.6,people:.2},
+  lede:'物語が始まったとき、父はすでにいない。',
+  body:[
+   ['p','主人公の父は、この集落のリーダーだった。そして物語の始まりより前に、寒さによって死んでいる。'],
+   ['p','事故でも争いでもない。誰かに奪われたわけでもない。ただ寒さが、一人の人間の体温を奪いきった。この時代、それは珍しい死に方ではなかった。'],
+   ['record','集落台帳','記入者不明',[['前任者','死亡','w'],['死因','寒冷による','w'],['後任','前任者の息子'],['経緯','繰り上げ']],'葬儀は短く済ませた。\n火の番を空けるわけにはいかない。'],
+   ['p','父の死は、物語のきっかけである。氷河期がどういうものかを、主人公はこれ以上ない形で知っている。'],
+  ]},
+ {id:'story-leader',sec:'story',n:'03',title:'リーダーになるまで',en:'SUCCESSION',spoiler:true,chill:6,scene:{people:.75,snow:.35},
+  lede:'なりたくてなったのではない。立たざるを得なかった。',
+  body:[
+   ['p','父が死んだことで、主人公は繰り上げという形で集落のリーダーになった。選挙も、儀式もない。誰かが立たなければ、明日の配給も、火の番の割り当ても決まらない。'],
+   ['p','彼はリーダーの座を望んでいなかった。けれど、それを断る余裕も、この集落にはなかった。'],
+   ['p','その日から、彼が背負うものは変わった。自分ひとりが今日を生きることではなく、集落の全員が明日を迎えられるかどうか。'],
+   ['record','当番割り当て','新任者の初日',[['火の番','決定','ok'],['外出班','決定'],['配給量','前任者の方針を継続'],['住人','六十三名']],'父の字で書かれた帳面を、そのまま使っている。'],
+  ]},
+ {id:'story-shortage',sec:'story',n:'04',title:'食料・燃料不足',en:'SHORTAGE',chill:14,scene:{yard:.1,snow:.6,fog:.4},
+  lede:'足りないものは、ある日まとめて訪れるのではない。毎日、少しずつ減っていく。',
+  body:[
+   ['p','物語の序盤、集落を締め付けるのは食料と燃料の不足である。動物は寒さから隠れ、植物は枯れていく。燃やせるものも減っていく。'],
+   ['choice','食料がない','狩りに行くか。','採集するか。'],
+   ['p','狩りは得られるものが大きいが、帰らない者が出る。採集は比較的安全だが、持ち帰れる量は少ない。'],
+   ['choice','燃料が足りない','ボイラーを弱めるか。','燃料を探しに行くか。'],
+   ['p','弱めれば燃料は長くもつが、体の弱い者から寒さに負けていく。探しに行けば、吹雪の中へ人を送ることになる。'],
+   ['record','報告','貯蔵庫・燃料置き場',[['食料','■■□□□','w'],['燃料','残り 9 日分','w'],['狩猟班','帰還せず','w']],'どれを選んでも、正しかったかどうかは数日後にしか分からない。'],
+  ]},
+ {id:'story-choices',sec:'story',n:'05',title:'選択の連続',en:'CHOICES',chill:8,scene:{machine:.6},
+  lede:'英雄的な事件はない。生きるための小さな選択が、積み重なっていくだけだ。',
+  body:[
+   ['p','この物語は、大きな事件を次々に解決していく話ではない。主人公の前に現れるのは、毎日の小さな選択である。'],
+   ['choice','ジェネレーターが故障する','修理するか。','部品を探すか。'],
+   ['choice','他の集落との関係','交易するか。','断るか。'],
+   ['p','一つひとつの選択は小さい。けれど、どれも誰かの明日に関わっている。'],
+   ['spoil',
+     ['p','選択は、物語が進むにつれて少しずつ重くなっていく。'],
+     ['esc',['どうやって食料を得るか','誰に食料を渡すか','誰を危険な場所へ送るか','自分たちが生きるために、他の人間を犠牲にするか']],
+     ['p','最後の問いにたどり着いたとき、物語は終わりに近づいている。']],
+  ]},
+ {id:'story-rivalry',sec:'story',n:'06',title:'集落間の対立',en:'RIVALRY',chill:12,scene:{rival:1,snow:.55,fog:.25},
+  lede:'助け合えば生き延びられるかもしれない。けれど、渡せば自分たちの分が減る。',
+  body:[
+   ['p','この地方にあるボイラー集落は、主人公たちの集落だけではない。どの集落も、同じように食料、燃料、発電源、物資、部品を必要としている。'],
+   ['p','はじめは交易と交渉で成り立っていた関係も、資源が減るにつれて硬くなっていく。相手を助けることは、自分たちの不足を増やすことでもあった。'],
+   ['spoil',
+     ['record','見張り報告','東の尾根',[['隣の集落','煙突から煙あり','ok'],['推定','燃料・食料に余裕あり'],['距離','徒歩で半日'],['当集落','食料 残り 3 日','w']],'報告は以上。\n判断は長に任せる。'],
+     ['p','主人公たちの集落は、限界まで追い込まれていく。そして、半日歩いた先には、まだ火の消えていない集落がある。']],
+  ]},
+ {id:'story-final',sec:'story',n:'07',title:'最後の選択',en:'THE CHOICE',spoiler:true,final:true,chill:20,scene:{rival:1,snow:1,fog:.55,people:.1}},
+ {id:'story-end',sec:'story',n:'08',title:'物語の終わり',en:'THE END',spoiler:true,chill:6,scene:{snow:.5,fog:.45,people:.3},
+  lede:'物語は、選択の瞬間で終わる。',
+  body:[
+   ['p','主人公が「襲撃するか、しないか」を選んだ瞬間に、物語は終わる。'],
+   ['p','襲撃した後どうなったのか。襲撃しなかった場合どうなったのか。主人公たちは生き残ったのか。別の集落はどうなったのか。そのどれも描かれない。'],
+   ['p','正解も示されない。どちらを選んでも、それはこの時代を生きた人間が、生きるために下した選択である。'],
+   ['quote','八千年という長大な氷河期の、ほんの最初。その中で一人の人間が、生きるための選択をする。','物語の終わりに'],
+  ]},
+
+ /* ---------- WORLD ---------- */
+ {id:'world-frostan',sec:'world',n:'01',title:'フロスタン文明',en:'FROSTAN',chill:4,scene:{},
+  lede:'ガルヒューラ地方に存在した民族、そしてその文明。氷河期のはじまりを、眠らずに生きた人々。',
+  body:[
+   ['p','フロスタンは、極寒の中で生活を続けるために巨大ジェネレーターを建設し、ボイラーを中心に暮らした人々である。いわゆる古代文明とは別の文明として扱う。'],
+   ['p','ただし、彼らは高度な文明を築いたわけではない。氷河期はあまりに過酷で、文明を大きく発展させる余裕そのものがなかった。'],
+   ['list',['食料が足りない','燃料が足りない','発電源が足りない','物資が足りない','動物が姿を隠す','植物が枯れる','太陽が姿を見せない','設備が古びていく']],
+   ['p','ジェネレーターを作ったのは発展のためではなく、必要だったからだ。ボイラーを守り続けたのは研究のためではなく、止まれば人が死ぬからだ。'],
+   ['quote','我々は世界に見捨てられた。ならば抗ってやる。','ボイラー集落に残る言葉'],
+   ['p','フロスタン文明の偉大さは、高度な文明を築いたことにはない。それほど過酷な環境の中で、生活を途切れさせなかったことにある。'],
+  ]},
+ {id:'world-iceage',sec:'world',n:'02',title:'氷河期',en:'ICE AGE',chill:22,scene:{snow:1,fog:.95,people:0,rival:0},
+  lede:'人々が想像していた「長い冬」ではなかった。生活そのものを、少しずつ締め上げていく環境だった。',
+  body:[
+   ['p','八千年続く氷河期。それがこの時代の最大の敵である。氷河期はただそこにあり、日ごとに何かを奪っていく。'],
+   ['h','失われていった順'],
+   ['seq',['動物が寒さから隠れる','狩猟が難しくなる','植物が枯れていく','採集が難しくなる','食料が減る','燃料が減る','発電源が減る','太陽が姿を見せなくなる']],
+   ['record','観測記録','屋外観測所',[['外気温','計測不能（下限に張り付く）','w'],['太陽確認','なし　連続 41 日','w'],['積雪','前回記録を更新'],['視程','12 m']],'観測員、凍傷のため交代。'],
+   ['p','そして、これがいつ終わるのかを知る者は一人もいなかった。彼らは何千年を生き抜くつもりで暮らしていたのではない。今日を生きる。それを繰り返していただけだ。'],
+  ]},
+ {id:'world-climate',sec:'world',n:'03',title:'気候',en:'CLIMATE',chill:20,scene:{snow:.95,fog:.8,people:.05},
+  lede:'晴れ間は珍しく、吹雪は日常だった。',
+  body:[
+   ['p','氷河期のガルヒューラ地方では、外気は昼も夜もほとんど変わらず冷え込んでいた。太陽が出ない日が続き、昼間でも空は鈍い灰色のままだった。'],
+   ['p','風は強く、雪は横から吹きつける。数歩先の建物が見えなくなることも珍しくない。外での作業は、短く、必ず複数人で行うことが決まりになっていた。'],
+   ['record','気象日誌','第一ボイラー室 屋上',[['天候','吹雪'],['風','北西　強','w'],['外気','−52 ℃','w'],['日照','なし'],['視程','8 m','w']],''],
+   ['record','屋外作業の目安','掲示',[['晴れ間','二時間まで'],['曇天','一時間まで'],['吹雪','外出禁止','w'],['夜間','原則禁止','w']],'規則を破った者が戻らなかった日から、この掲示がある。'],
+  ]},
+ {id:'world-generator',sec:'world',n:'04',title:'ジェネレーター',en:'GENERATOR',chill:3,scene:{machine:1,snow:.35},
+  lede:'灯りと動力を生む巨大な機械。止まらないように、毎日だれかが手を入れている。',
+  body:[
+   ['p','巨大ジェネレーターは、フロスタン文明が極寒の中で生きるために生み出した重要な技術である。照明、送風、ポンプ、工作機械。集落の多くがこの一台に頼っていた。'],
+   ['p','ただし万能ではない。設備は古び、部品は足りなくなり、発電源も減っていく。運転を続けることそのものが、修理と維持の連続だった。'],
+   ['record','GENERATOR 03','運転日誌',[['STATUS','運転中','ok'],['FUEL','18%','w'],['出力','定格の 61%'],['WARNING','冷却系統に異常','w']],'異音、昨夜より増加。'],
+   ['quote','壊れたものを直し、古い設備を使い続ける。','整備班の手帳より'],
+  ]},
+ {id:'world-boiler',sec:'world',n:'05',title:'ボイラー',en:'BOILER',chill:-6,scene:{machine:.85,people:.5,snow:.3},
+  lede:'これが止まれば、人が死ぬ。',
+  body:[
+   ['p','ボイラーは人々が温もりを得るための設備であり、集落はその周りにできた。便利な機械というより、生活そのものに近い存在だった。'],
+   ['p','燃料が尽きること、配管が凍ること、火室が割れること。そのどれもが、集落全体の危機を意味した。だからボイラーの火は、昼も夜も誰かが見ている。'],
+   ['record','BOILER 01','第一ボイラー室',[['圧力','72','ok'],['燃料','残り 9 日分','w'],['配管','北側 2 系統 凍結'],['居住区','4 ℃']],'給炭は少しずつ、絶やさずに。'],
+   ['quote','温もりがなくなれば、人間は生きられない。','第一ボイラー室の壁に刻まれた文字'],
+  ]},
+ {id:'world-settlement-boiler',sec:'world',n:'06',title:'ボイラー集落',en:'BOILER SETTLEMENT',chill:3,scene:{people:.8,machine:.5,snow:.3},
+  lede:'巨大なボイラーを中心に、人が寄り集まってできた場所。',
+  body:[
+   ['p','ガルヒューラ地方には、巨大ボイラーを中心とした集落が点在していた。熱が届く距離が、そのまま集落の大きさになった。'],
+   ['h','集落の構成（中心から外へ）'],
+   ['seq',['ボイラー室と火室','居住区','食料庫・燃料置き場','工作室・発電棟','外周の防雪壁']],
+   ['p','ボイラー、ジェネレーター、食料、燃料、物資、修理設備。どれか一つが欠けても、集落は長くはもたない。新しい設備を作る余裕はなく、古い設備を直しながら使い続けるのが、集落の暮らし方だった。'],
+  ]},
+ {id:'world-food',sec:'world',n:'07',title:'食料',en:'FOOD',chill:8,scene:{people:.45,yard:.5},
+  lede:'食べ物を得ることは、そのまま危険へ出ていくことだった。',
+  body:[
+   ['p','集落の食料は、狩猟と採集、そして蓄えに頼っていた。氷河期が進むにつれ、そのどれもが細っていく。'],
+   ['p','配給は一日二回から一回へ、量も少しずつ減らされていった。食料庫の帳簿は、集落でいちばん注意深く読まれる記録だった。'],
+   ['record','食料備蓄','貯蔵庫 B',[['残量','■■□□□','w'],['見込み','十一日分'],['配給','一日二回 → 一回へ変更','w']],'備考：\n狩猟班、帰還せず。'],
+  ]},
+ {id:'world-hunting',sec:'world',n:'08',title:'狩猟・採集',en:'HUNTING & GATHERING',chill:14,scene:{snow:.7,fog:.55,people:.4,yard:.4},
+  lede:'獲物は寒さから隠れ、草木は枯れていく。',
+  body:[
+   ['p','はじめのうちは、狩りと採集で食いつなぐことができた。だが動物は寒さから身を隠し、姿を見せなくなっていった。採れる植物も、年を追うごとに減っていった。'],
+   ['p','狩猟班は数人で編成され、決められた日数で戻ることになっている。戻らなかった班の名前は、帳面に線を引かれずに残された。'],
+   ['record','狩猟班 出発記録','東門',[['編成','四名'],['予定','二日'],['帰還','未','w'],['獲物','—']],'三日目、捜索は出さないと決まった。'],
+  ]},
+ {id:'world-fuel',sec:'world',n:'09',title:'燃料',en:'FUEL',chill:10,scene:{yard:.15,machine:.4},
+  lede:'火を燃やすものが尽きれば、集落も尽きる。',
+  body:[
+   ['p','ボイラーを動かす燃料は、石炭と薪が中心だった。石炭は長く燃え、薪はすぐに熱を出す。どちらも、手に入れるのは年々難しくなっていった。'],
+   ['p','森は枯れ、掘りやすい場所の石炭は掘り尽くされた。やがて使われなくなった建物を解体し、その木材を燃やすようになる。'],
+   ['meters',[['石炭',2],['薪',1],['解体材',3],['予備燃料',1]]],
+   ['record','燃料置き場','搬入記録',[['石炭','残りわずか','w'],['薪','解体材で補充'],['次回搬入','未定','w']],''],
+  ]},
+ {id:'world-life',sec:'world',n:'10',title:'生活',en:'DAILY LIFE',chill:2,scene:{people:1,snow:.18,fog:.15,machine:.2},
+  lede:'一日の目標は、明日の朝を迎えること。',
+  body:[
+   ['p','フロスタンの生活は、ボイラーの周りに集まることから始まる。人々は熱の届く範囲に寝床を寄せ、食事をとり、交代で設備を見張った。'],
+   ['p','暮らしの中心にあるのは仕事というより当番である。火を絶やさない番、計器を読む番、雪を掻く番、外へ出る者を見送る番。'],
+   ['record','ボイラー当番表','第七週',[['夜番 一','計器読み・給炭'],['夜番 二','配管の凍結確認'],['朝番','排雪・煙突の点検'],['欠員','二名（外出班に編入）','w']],'夜番は二人一組を守ること。\nひとりで眠りこむと、火も人も冷える。'],
+   ['p','楽しみがなかったわけではない。ただ、それらはいつも「今日を越えた後」に置かれていた。'],
+  ]},
+ {id:'world-coldsleep',sec:'world',n:'11',title:'コールドスリープ',en:'COLD SLEEP',chill:12,scene:{fog:.55,snow:.55,people:.15},
+  lede:'選ばれた人々は眠り、残された人々は起きていた。',
+  body:[
+   ['p','氷河期を乗り越えるため、一部の人々が安全な施設へ送られ、コールドスリープに入った。彼らにとって氷河期は、眠って待てば過ぎていくものだった。'],
+   ['p','すべての人間が眠ることを許されたわけではない。眠れなかった人々にとって、氷河期は待つものではなく、毎日を実際に生きるものだった。'],
+   ['record','搬送名簿（写し）','原本所在不明',[['搬送先','記載なし'],['搬送人数','記載なし'],['選定基準','記載なし','w'],['当集落からの搬送','0 名','w']],'残された者に、最後まで説明はなかった。'],
+   ['p','残された人々を待っていたのは、極寒の中で死を待つ生活だった。それでも一部の人々は、それを受け入れなかった。'],
+  ]},
+ {id:'world-resources',sec:'world',n:'12',title:'資源',en:'RESOURCES',chill:14,scene:{yard:0,snow:.6,people:.2},
+  lede:'すべては有限で、すべてが少しずつ減っていく。',
+  body:[
+   ['p','資源の問題は、ある日いきなり訪れるのではない。帳簿の数字が、毎週わずかずつ小さくなっていく。その積み重ねが、ある日限界になる。'],
+   ['meters',[['食料',2],['燃料',2],['発電源',1],['物資',3],['部品',1]]],
+   ['p','補充の当てはない。新しい鉱脈も、新しい森も、雪の下に消えた。残っているのは、すでに手の中にあるものと、まだ他の集落の手の中にあるものだけだ。'],
+   ['record','在庫照会','倉庫番',[['燃料','前月比 −31%','w'],['部品','規格品 在庫なし','w'],['発電源','予備ひとつ'],['次回補充','未定','w']],''],
+  ]},
+ {id:'world-settlements',sec:'world',n:'13',title:'集落',en:'SETTLEMENTS',chill:8,scene:{rival:1,snow:.4,fog:.2},
+  lede:'晴れた夜には、遠くに別の集落の灯りが見える。',
+  body:[
+   ['p','ガルヒューラ地方には、いくつものボイラー集落があった。互いの距離は徒歩で半日から数日。吹雪の合間には、遠くの煙突から上がる煙が見えた。'],
+   ['p','集落どうしは、物資や部品をやり取りすることもあった。互いに助け合えば生き延びられる可能性がある。けれど、相手に渡せば自分たちの分が減る。'],
+   ['record','近隣集落一覧','外出班のまとめ',[['東の尾根','半日　煙あり','ok'],['北の谷','二日　不明'],['南の旧発電所','一日　灯り消失','w']],'灯りが見えるうちは、まだ誰かがいる。'],
+  ]},
+];
+
+/* ======================= STATE / SETTINGS ======================= */
+const $=s=>document.querySelector(s);
+const clamp=(v,a=0,b=1)=>Math.max(a,Math.min(b,v));
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const REDUCED=matchMedia('(prefers-reduced-motion: reduce)').matches;
+const FX_KEYS=[['trans','ページ遷移'],['snow','吹雪'],['temp','温度変化'],['boiler','ボイラー'],['steam','蒸気'],['frost','霜']];
+function load(k){try{const v=localStorage.getItem(k);return v?JSON.parse(v):null}catch(e){return null}}
+function save(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+const fx=Object.assign({trans:!REDUCED,snow:!REDUCED,temp:true,boiler:true,steam:!REDUCED,frost:true},load('frostan-fx')||{});
+let spoilOn=!!load('frostan-spoil');
+const revealed=new Set();
+const S={F:80,T:76,page:null,offline:false,frozen:false,freezeT:0,warned:false,minT:76};
+const visited=new Set();
+
+/* ======================= RENDER ======================= */
+const canSee=p=>!p.spoiler||spoilOn||revealed.has(p.id);
+const dispTitle=p=>canSee(p)?p.title:'非公開記録';
+const secName=p=>p.sec==='story'?'STORY':'WORLD';
+
+function block(b,key){
+  const [t,...a]=b;
+  if(t==='spoil'){
+    if(spoilOn||revealed.has(key)) return a.map((x,i)=>block(x,key+'.'+i)).join('');
+    return `<div class="spoil"><span>ネタバレを含みます</span><button data-reveal="${key}">表示する</button></div>`;
+  }
+  if(t==='p') return `<p>${esc(a[0])}</p>`;
+  if(t==='h') return `<h4>${esc(a[0])}</h4>`;
+  if(t==='quote') return `<blockquote class="quote">${esc(a[0])}<cite>— ${esc(a[1])}</cite></blockquote>`;
+  if(t==='list') return `<ul class="plain">${a[0].map(x=>`<li>${esc(x)}</li>`).join('')}</ul>`;
+  if(t==='seq') return `<ol class="seq">${a[0].map((x,i)=>`<li><span>${String(i+1).padStart(2,'0')}</span>${esc(x)}</li>`).join('')}</ol>`;
+  if(t==='record'){const [title,sub,rows,note]=a;
+    return `<div class="record"><div class="rec-title">${esc(title)}<i>${esc(sub)}</i></div><dl style="margin:0">${rows.map(r=>`<div class="rec-row"><dt>${esc(r[0])}</dt><dd class="${r[2]||''}">${esc(r[1])}</dd></div>`).join('')}</dl>${note?`<div class="rec-note">${esc(note)}</div>`:''}</div>`;}
+  if(t==='choice') return `<div class="choice"><div class="q">選択</div><div class="s">${esc(a[0])}</div><div class="ab"><span>${esc(a[1])}</span><span>${esc(a[2])}</span></div></div>`;
+  if(t==='meters') return `<div class="meters">${a[0].map(([k,v])=>`<div class="meter"><span>${esc(k)}</span><div class="bar ${v<=1?'low':''}">${[0,1,2,3,4].map(i=>`<i class="${i<v?'on':''}"></i>`).join('')}</div><span class="v">${v}/5</span></div>`).join('')}</div>`;
+  if(t==='esc') return `<ol class="esc">${a[0].map((x,i)=>`<li style="--a:${(.05+i*.06).toFixed(2)}"><span>段階 ${i+1}</span>${esc(x)}</li>`).join('')}</ol>`;
+  return '';
+}
+function pager(p){
+  const i=PAGES.indexOf(p),prev=PAGES[i-1],next=PAGES[i+1];
+  return `<nav class="pager">${prev?`<button data-go="${prev.id}">← <b>${esc(dispTitle(prev))}</b></button>`:'<span></span>'}${next?`<button data-go="${next.id}"><b>${esc(dispTitle(next))}</b> →</button>`:''}</nav>`;
+}
+function finalHTML(){
+  return `<div class="body" id="finalBox">
+    <p>集落の食料は尽きかけている。ボイラーの燃料も、あと数日しかもたない。</p>
+    <p>半日歩いた先の集落には、まだ煙が上がっている。食料も、燃料もある。</p>
+    <p>集落の長は、父の跡を継いだ名もなき男だ。彼は最後の選択を迫られている。記録を読んできたあなたも、いまその場所に立っている。</p>
+    <p class="final-q">他の集落を、襲撃するか。<br>襲撃しないか。</p>
+    <div class="final-btns"><button data-c="襲撃する">襲撃する</button><button data-c="襲撃しない">襲撃しない</button></div>
+  </div>`;
+}
+function renderDoc(){
+  const p=S.page, vis=canSee(p);
+  let inner;
+  if(!vis) inner=`<div class="gate"><b>この記録はストーリーの核心に触れます。</b><small>ネタバレを含むため、内容を伏せています。設定の「ネタバレあり」で常に表示することもできます。</small><button data-reveal-page="${p.id}">表示する</button></div>`;
+  else if(p.final) inner=finalHTML();
+  else inner=`<div class="body">${p.body.map((b,i)=>block(b,p.id+'-'+i)).join('')}</div>`;
+  $('#doc').innerHTML=`<header class="doc-head"><span class="kicker">${secName(p)} ${p.n} · ${vis?esc(p.en):'CLASSIFIED'}</span><h2>${esc(dispTitle(p))}</h2>${vis&&p.lede?`<p class="lede">${esc(p.lede)}</p>`:''}${vis&&p.final?`<p class="lede">物語の最後、主人公は一つの選択を迫られる。</p>`:''}</header><div class="doc-body">${inner}${pager(p)}</div>`;
+}
+function renderNav(){
+  const item=p=>`<li><button data-go="${p.id}" ${S.page===p?'aria-current="page"':''}><span class="n">${p.n}</span><span class="${canSee(p)?'':'hid'}">${esc(dispTitle(p))}</span>${p.spoiler&&!canSee(p)?'<span class="tag">ネタバレ</span>':''}</button></li>`;
+  $('#navStory').innerHTML=PAGES.filter(p=>p.sec==='story').map(item).join('');
+  $('#navWorld').innerHTML=PAGES.filter(p=>p.sec==='world').map(item).join('');
+  const cur=document.querySelector('.nav [aria-current="page"]');
+  if(cur&&innerWidth<=860){const sc=cur.closest('.navscroll');sc.scrollLeft=cur.offsetLeft-sc.clientWidth/2+cur.offsetWidth/2;}
+}
+function showPage(p){
+  S.page=p; visited.add(p.id); renderNav(); renderDoc();
+  scene.tgt=Object.assign({},SCENE_DEF,p.scene||{});
+  try{history.replaceState(null,'','#'+p.id)}catch(e){}
+}
+function archTop(){return $('#archive').getBoundingClientRect().top+scrollY}
+
+/* ======================= NAVIGATION ======================= */
+let busy=false;
+async function go(id,{fromHero=false}={}){
+  const p=PAGES.find(x=>x.id===id); if(!p||busy) return;
+  if(p===S.page && !fromHero) return;
+  busy=true;
+  const apply=()=>{
+    showPage(p);
+    if(fx.temp) S.T=clamp(S.T-p.chill,0,100);
+    scrollTo(0,archTop());
+  };
+  if(fx.trans){
+    await storm.run({intensity:.7+Math.max(0,p.chill)/60,onPeak:()=>{apply();Object.assign(scene.cur,scene.tgt);}});
+  }else apply();
+  busy=false;
+}
+document.addEventListener('click',e=>{
+  const t=e.target;
+  const g=t.closest('[data-go]'); if(g){go(g.dataset.go);return;}
+  const en=t.closest('[data-enter]'); if(en){go(en.dataset.enter,{fromHero:true});return;}
+  const r=t.closest('[data-reveal]'); if(r){revealed.add(r.dataset.reveal);renderDoc();return;}
+  const rp=t.closest('[data-reveal-page]'); if(rp){revealed.add(rp.dataset.revealPage);renderNav();renderDoc();return;}
+  const c=t.closest('[data-c]'); if(c){choose(c.dataset.c);return;}
+});
+
+async function choose(c){
+  if(busy) return; busy=true;
+  const run=()=>{
+    const box=$('#finalBox'); if(!box) return;
+    box.outerHTML=`<div class="body ending">
+      <span class="chosen">選択　${esc(c)}</span>
+      <p class="big">記録はここで途切れている。</p>
+      <p>その後どうなったのかは、どこにも書かれていない。彼らが生き残ったのか。隣の集落がどうなったのか。</p>
+      <p>八千年という長い氷河期の、ほんの最初。その中で一人の人間が、生きるための選択をした。</p>
+      <div class="final-btns"><button data-go="story-end">物語の終わりについて</button></div>
+    </div>`;
+    if(fx.temp) S.T=clamp(S.T-10,0,100);
+  };
+  if(fx.trans) await storm.run({intensity:1.2,dur:2200,onPeak:run}); else run();
+  busy=false;
+}
+
+/* ======================= SETTINGS UI ======================= */
+$('#fxList').innerHTML=FX_KEYS.map(([k,l])=>`<label class="sw" for="fx-${k}"><span>${l}</span><input type="checkbox" id="fx-${k}" data-fx="${k}"></label>`).join('');
+function syncSettings(){
+  FX_KEYS.forEach(([k])=>{$('#fx-'+k).checked=!!fx[k]});
+  $('#sp0').checked=!spoilOn; $('#sp1').checked=spoilOn;
+  document.body.classList.toggle('noboiler',!fx.boiler);
+  $('#boilerbar').hidden=!fx.boiler;
+  $('#frost').hidden=!fx.frost;
+}
+function applyFx(){save('frostan-fx',fx);syncSettings();if(!fx.boiler)hideToast();}
+$('#fxList').addEventListener('change',e=>{const k=e.target.dataset.fx;if(k){fx[k]=e.target.checked;applyFx();}});
+document.querySelectorAll('[data-all]').forEach(b=>b.addEventListener('click',()=>{const v=b.dataset.all==='1';FX_KEYS.forEach(([k])=>fx[k]=v);applyFx();}));
+document.querySelectorAll('input[name=spoil]').forEach(r=>r.addEventListener('change',()=>{spoilOn=$('#sp1').checked;save('frostan-spoil',spoilOn);renderNav();renderDoc();}));
+const setBtn=$('#setBtn'),setPanel=$('#setPanel');
+function setOpen(o){setPanel.hidden=!o;setBtn.setAttribute('aria-expanded',o);if(o)setPanel.querySelector('input').focus();}
+setBtn.addEventListener('click',()=>setOpen(setPanel.hidden));
+$('#setClose').addEventListener('click',()=>{setOpen(false);setBtn.focus();});
+document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!setPanel.hidden){setOpen(false);setBtn.focus();}});
+document.addEventListener('pointerdown',e=>{if(!setPanel.hidden&&!setPanel.contains(e.target)&&!setBtn.contains(e.target))setOpen(false);});
+
+/* nav toggle */
+function setNav(hidden){document.body.classList.toggle('navhidden',hidden);save('frostan-navhidden',hidden);}
+setNav(!!load('frostan-navhidden'));
+$('#navHide').addEventListener('click',()=>{setNav(true);$('#navOpen').focus();});
+$('#navOpen').addEventListener('click',()=>{setNav(false);$('#navHide').focus();});
+
+/* ======================= BOILER BAR ======================= */
+const ICON={
+ coal:`<svg viewBox="0 0 34 28"><path d="M3 22 L8 10 L16 7 L22 11 L30 9 L32 20 L24 26 L10 26Z" fill="#23292d" stroke="#57636b" stroke-width="1"/><path d="M8 10 L16 7 L14 15Z" fill="#3a444b"/><path d="M22 11 L30 9 L27 16Z" fill="#323b41"/></svg>`,
+ wood:`<svg viewBox="0 0 34 28"><rect x="2" y="8" width="26" height="13" rx="6" fill="#7b5236"/><path d="M6 11h16M8 17h14" stroke="#5d3c27" stroke-width="1.2"/><ellipse cx="27" cy="14.5" rx="5" ry="6.5" fill="#c99a68"/><ellipse cx="27" cy="14.5" rx="2.6" ry="3.6" fill="none" stroke="#9c714a" stroke-width="1"/></svg>`
+};
+const FUEL={coal:{label:'石炭',F:30,T:3,refill:8000},wood:{label:'薪',F:16,T:7,refill:5000}};
+const slots=['coal','coal','wood'].map(t=>({t,ok:true}));
+function renderFuels(){
+  $('#fuels').innerHTML=slots.map((s,i)=>`<button class="fuel" data-slot="${i}" ${s.ok?'':'disabled'} aria-label="${FUEL[s.t].label}を火室へ投入">${ICON[s.t]}<span>${s.ok?FUEL[s.t].label:'運搬中'}</span></button>`).join('');
+}
+renderFuels();
+const firebox=$('#firebox');
+let selected=null;
+
+function feed(i){
+  const s=slots[i]; if(!s||!s.ok) return;
+  const f=FUEL[s.t];
+  const wasOff=S.F<=0.5;
+  S.F=Math.min(100,S.F+f.F);
+  if(fx.temp) S.T=clamp(S.T+f.T,0,100);
+  s.ok=false; renderFuels();
+  setTimeout(()=>{s.ok=true;renderFuels();},f.refill);
+  firebox.classList.remove('flash'); void firebox.offsetWidth; firebox.classList.add('flash');
+  scene.burst=1; puffAt(firebox,6);
+  if(wasOff){S.offline=false;toast('再点火','火が戻りました',true);}
+}
+function flyTo(fromEl,i){
+  const a=fromEl.getBoundingClientRect(),b=firebox.getBoundingClientRect();
+  if(REDUCED){feed(i);return;}
+  const d=document.createElement('div');d.className='fly';d.innerHTML=ICON[slots[i].t];
+  d.style.left=(a.left+a.width/2-17)+'px';d.style.top=(a.top+a.height/2-14)+'px';
+  document.body.appendChild(d);
+  requestAnimationFrame(()=>{d.style.transform=`translate(${b.left+b.width/2-a.left-a.width/2}px,${b.top+b.height/2-a.top-a.height/2}px) scale(.6)`;d.style.opacity='.2';});
+  setTimeout(()=>{d.remove();feed(i);},560);
+}
+/* drag or click */
+let drag=null,suppressClick=false;
+$('#fuels').addEventListener('pointerdown',e=>{
+  const b=e.target.closest('.fuel'); if(!b||b.disabled) return;
+  drag={b,i:+b.dataset.slot,x:e.clientX,y:e.clientY,ghost:null,id:e.pointerId};
+  try{b.setPointerCapture(e.pointerId)}catch(_){}
+});
+$('#fuels').addEventListener('pointermove',e=>{
+  if(!drag||e.pointerId!==drag.id) return;
+  if(!drag.ghost&&Math.hypot(e.clientX-drag.x,e.clientY-drag.y)>6){
+    drag.ghost=document.createElement('div');drag.ghost.className='dragghost';drag.ghost.innerHTML=ICON[slots[drag.i].t];
+    document.body.appendChild(drag.ghost);drag.b.classList.add('dragging');
+  }
+  if(drag.ghost){
+    drag.ghost.style.left=e.clientX+'px';drag.ghost.style.top=e.clientY+'px';
+    const r=firebox.getBoundingClientRect(),over=e.clientX>r.left-20&&e.clientX<r.right+20&&e.clientY>r.top-30&&e.clientY<r.bottom+20;
+    firebox.classList.toggle('drop',over);drag.over=over;
+  }
+});
+function endDrag(e){
+  if(!drag||e.pointerId!==drag.id) return;
+  if(drag.ghost){
+    drag.ghost.remove();drag.b.classList.remove('dragging');firebox.classList.remove('drop');
+    if(drag.over) feed(drag.i);
+    suppressClick=true;setTimeout(()=>suppressClick=false,50);
+  }
+  drag=null;
+}
+$('#fuels').addEventListener('pointerup',endDrag);
+$('#fuels').addEventListener('pointercancel',endDrag);
+$('#fuels').addEventListener('click',e=>{
+  const b=e.target.closest('.fuel'); if(!b||b.disabled) return;
+  if(suppressClick){suppressClick=false;return;}
+  flyTo(b,+b.dataset.slot);
+});
+firebox.addEventListener('click',()=>{
+  const i=slots.findIndex(s=>s.ok);
+  if(i>=0){const b=document.querySelector(`.fuel[data-slot="${i}"]`);flyTo(b,i);}
+  else toast('燃料なし','運搬を待っています',false,true);
+});
+
+function puffAt(el,n){
+  if(!fx.steam||REDUCED) return;
+  const r=el.getBoundingClientRect();
+  for(let k=0;k<n;k++){
+    const s=document.createElement('span');s.className='puff';
+    s.style.left=(r.left+r.width*(.25+Math.random()*.5))+'px';s.style.top=(r.top+6)+'px';
+    s.style.setProperty('--dx',((Math.random()-.5)*70)+'px');s.style.animationDelay=(k*80)+'ms';
+    document.body.appendChild(s);setTimeout(()=>s.remove(),2300);
+  }
+}
+let toastT=0;
+function toast(b,s,good,small){
+  const t=$('#toast');$('#toastB').textContent=b;$('#toastS').textContent=s;
+  t.classList.toggle('good',!!good);t.hidden=false;
+  clearTimeout(toastT);toastT=setTimeout(()=>t.hidden=true,small?1600:3200);
+}
+function hideToast(){$('#toast').hidden=true}
+
+/* gauge ticks */
+(function(){
+  let s='';
+  for(let v=0;v<=100;v+=10){
+    const a=Math.PI*(1-v/100),r2=v%50?72:66;
+    s+=`<line x1="${(100+Math.cos(a)*80).toFixed(1)}" y1="${(100-Math.sin(a)*80).toFixed(1)}" x2="${(100+Math.cos(a)*r2).toFixed(1)}" y2="${(100-Math.sin(a)*r2).toFixed(1)}" stroke="#97a7b1" stroke-width="${v%50?2:3}"/>`;
+  }
+  $('#ticks').innerHTML=s;
+  const arc=(a0,a1,r)=>{const p=v=>{const a=Math.PI*(1-v/100);return[(100+Math.cos(a)*r).toFixed(1),(100-Math.sin(a)*r).toFixed(1)]};const [x0,y0]=p(a0),[x1,y1]=p(a1);return`M${x0} ${y0} A${r} ${r} 0 0 1 ${x1} ${y1}`};
+  $('#hotArc').setAttribute('d',arc(85,100,86));$('#coldArc').setAttribute('d',arc(0,25,86));
+})();
+
+/* ======================= COLOR UTIL ======================= */
+const lerp=(a,b,t)=>a+(b-a)*t;
+const mix=(a,b,t)=>a.map((v,i)=>Math.round(v+(b[i]-v)*t));
+const rgba=(c,a=1)=>`rgba(${c[0]},${c[1]},${c[2]},${a})`;
+
+/* ======================= STORM TRANSITION ======================= */
+const storm={
+  c:$('#storm'),
+  run({intensity=1,dur=1500,onPeak}={}){
+    return new Promise(res=>{
+      const c=this.c,dpr=Math.min(devicePixelRatio||1,1.5),w=innerWidth,h=innerHeight;
+      c.width=Math.round(w*dpr);c.height=Math.round(h*dpr);
+      const ctx=c.getContext('2d');ctx.setTransform(dpr,0,0,dpr,0,0);
+      c.classList.add('on');
+      const snowy=fx.snow;
+      const N=snowy?Math.round(700+500*Math.min(1,intensity)):0;
+      const ps=Array.from({length:N},()=>({x:-Math.random()*w*1.4,y:Math.random()*h*1.1-h*.05,v:(1600+Math.random()*2600),l:10+Math.random()*60,a:.25+Math.random()*.7,d:20+Math.random()*160}));
+      const gusts=Array.from({length:snowy?9:0},()=>({x:-Math.random()*w,y:Math.random()*h,r:120+Math.random()*260,v:900+Math.random()*900}));
+      const t0=performance.now();let last=t0,peaked=false;
+      const ease=x=>x*x*(3-2*x);
+      const step=now=>{
+        const t=Math.min(1,(now-t0)/dur),dt=Math.min(.05,(now-last)/1000);last=now;
+        /* 白さ: 0-0.2 で覆い、0.2-0.66 は完全に見えない、0.66-1 で抜ける */
+        const A=t<.22?ease(t/.22):t<.48?1:1-ease((t-.48)/.52);
+        ctx.clearRect(0,0,w,h);
+        ctx.fillStyle=`rgba(232,240,244,${A.toFixed(3)})`;ctx.fillRect(0,0,w,h);
+        for(const g of gusts){
+          g.x+=g.v*dt; if(g.x-g.r>w) g.x=-g.r;
+          const gr=ctx.createRadialGradient(g.x,g.y,0,g.x,g.y,g.r);
+          gr.addColorStop(0,`rgba(176,194,205,${(.28*A).toFixed(3)})`);gr.addColorStop(1,'rgba(176,194,205,0)');
+          ctx.fillStyle=gr;ctx.fillRect(g.x-g.r,g.y-g.r,g.r*2,g.r*2);
+        }
+        ctx.lineCap='round';
+        const vis=Math.sin(t*Math.PI);
+        for(const p of ps){
+          p.x+=p.v*dt;p.y+=p.d*dt;
+          if(p.x-p.l>w&&t<.8){p.x=-Math.random()*240;p.y=Math.random()*h;}
+          if(p.y>h+20)p.y=-20;
+          const col=A>.85?`rgba(150,172,186,${(p.a*.55*vis).toFixed(3)})`:`rgba(250,253,255,${(p.a*vis).toFixed(3)})`;
+          ctx.strokeStyle=col;ctx.lineWidth=1+p.a*2.4;
+          ctx.beginPath();ctx.moveTo(p.x,p.y);ctx.lineTo(p.x-p.l,p.y-p.l*p.d/p.v);ctx.stroke();
+        }
+        if(!peaked&&t>=.3){peaked=true;onPeak&&onPeak();}
+        if(t<1)requestAnimationFrame(step);else{ctx.clearRect(0,0,w,h);c.classList.remove('on');res();}
+      };
+      requestAnimationFrame(step);
+    });
+  }
+};
+
+/* ======================= SCENE ======================= */
+const scene={c:$('#scene'),cur:{...SCENE_DEF},tgt:{...SCENE_DEF},burst:0,flakes:[],steam:[],walkers:[],far:[],houses:[],w:0,h:0,ctx:null,fan:0};
+function sceneFit(){
+  const c=scene.c,dpr=Math.min(devicePixelRatio||1,1.5);
+  scene.w=innerWidth;scene.h=innerHeight;
+  c.width=Math.round(scene.w*dpr);c.height=Math.round(scene.h*dpr);
+  scene.ctx=c.getContext('2d');scene.ctx.setTransform(dpr,0,0,dpr,0,0);
+  let sd=11;const rnd=()=>{sd=(sd*16807)%2147483647;return(sd-1)/2147483646};
+  const w=scene.w;scene.far=[];
+  let x=-20;while(x<w*.7){const bw=26+rnd()*70,bh=18+rnd()*46;scene.far.push({x,bw,bh,lit:rnd()<.45,lx:rnd()});x+=bw+8+rnd()*50;}
+  scene.houses=[.05,.17,.42,.66,.93].map(f=>({x:f*w,bw:56+rnd()*30,bh:30+rnd()*18}));
+}
+sceneFit();addEventListener('resize',sceneFit);
+for(let i=0;i<560;i++)scene.flakes.push({x:Math.random(),y:Math.random(),z:Math.random()});
+for(let i=0;i<7;i++)scene.walkers.push({x:Math.random(),dir:Math.random()<.5?-1:1,sp:.008+Math.random()*.01,ph:Math.random()*6});
+
+function drawScene(dt,now,fire,cold){
+  const {ctx,w,h}=scene,P=scene.cur;
+  const fog=clamp(P.fog+cold*.18);
+  const hz=h*.6,mg=hz+h*.1;
+  const flick=.92+Math.sin(now/170)*.04+Math.random()*.04;
+  const horizonC=mix([152,170,181],[226,234,238],fog);
+  /* sky */
+  let g=ctx.createLinearGradient(0,0,0,hz);
+  g.addColorStop(0,rgba(mix([56,70,80],[150,165,175],fog*.75)));
+  g.addColorStop(1,rgba(horizonC));
+  ctx.fillStyle=g;ctx.fillRect(0,0,w,hz+2);
+  /* hills */
+  ctx.fillStyle=rgba(mix([100,118,130],horizonC,.3+fog*.65));
+  ctx.beginPath();ctx.moveTo(0,hz+2);for(let x=0;x<=w+30;x+=30)ctx.lineTo(x,hz-16-Math.sin(x*.004+1)*14-Math.sin(x*.012)*6);ctx.lineTo(w,hz+2);ctx.fill();
+  /* rival settlement lights */
+  if(P.rival>.01){
+    const rx=w*.13,ry=hz-22,a=P.rival*(1-fog*.6);
+    const rg=ctx.createRadialGradient(rx,ry,2,rx,ry,80);rg.addColorStop(0,`rgba(240,170,84,${(.45*a).toFixed(3)})`);rg.addColorStop(1,'rgba(240,170,84,0)');
+    ctx.fillStyle=rg;ctx.fillRect(rx-80,ry-80,160,160);
+    ctx.fillStyle=`rgba(60,72,80,${(.8*a).toFixed(3)})`;ctx.fillRect(rx+10,ry-34,5,30);
+    for(let k=0;k<9;k++){ctx.fillStyle=`rgba(255,196,110,${(a*(.6+Math.sin(now/400+k)*.3)).toFixed(3)})`;ctx.fillRect(rx-40+k*9+(k%3)*2,ry-2+(k%2)*5,2.5,2.5);}
+    if(fx.steam&&Math.random()<.25)scene.steam.push({x:rx+12,y:ry-34,r:3,a:.35*a,vx:12,vy:-10,far:1});
+  }
+  /* far facility */
+  const fx0=w*.82,tw=Math.max(58,w*.07),th=h*.3,fc=mix([50,62,70],horizonC,fog*.8);
+  ctx.fillStyle=rgba(fc);
+  ctx.fillRect(fx0-tw/2,hz-th,tw,th);
+  ctx.beginPath();ctx.ellipse(fx0,hz-th,tw/2,tw*.28,0,Math.PI,0);ctx.fill();
+  ctx.fillRect(fx0+tw/2-4,hz-th*.46,tw*1.5,th*.46);
+  ctx.fillRect(fx0-tw*1.3,hz-th*.3,tw*.9,th*.3);
+  const chs=[[fx0-tw*.18,h*.13,10],[fx0+tw*.95,h*.1,8],[fx0+tw*1.5,h*.07,6]];
+  for(const [x,ch,cw] of chs){ctx.fillRect(x-cw/2,hz-th*(x>fx0?.46:1)-ch,cw,ch);}
+  const la=fire*(1-fog*.65);
+  for(let k=0;k<8;k++){ctx.fillStyle=`rgba(244,176,88,${(la*flick*(k%3?0.8:1)).toFixed(3)})`;ctx.fillRect(fx0-tw*.3+(k%4)*tw*.2,hz-th*.82+Math.floor(k/4)*th*.22,3,4);}
+  for(let k=0;k<6;k++){ctx.fillStyle=`rgba(244,176,88,${(la*.8).toFixed(3)})`;ctx.fillRect(fx0+tw*.7+k*tw*.2,hz-th*.3,3,3);}
+  if(fx.steam){for(const [x,ch] of chs){if(Math.random()<.35*fire+.05)scene.steam.push({x,y:hz-th*(x>fx0?.46:1)-ch,r:4+Math.random()*4,a:.4*(1-fog*.5),vx:18+Math.random()*16,vy:-14-Math.random()*10,far:1});}}
+  /* buried buildings */
+  for(const b of scene.far){
+    ctx.fillStyle=rgba(mix([66,80,90],horizonC,.25+fog*.7));
+    ctx.fillRect(b.x,hz-b.bh,b.bw,b.bh+4);
+    ctx.fillStyle=rgba(mix([214,224,229],horizonC,fog*.5));ctx.fillRect(b.x-2,hz-b.bh-4,b.bw+4,6);
+    if(b.lit){ctx.fillStyle=`rgba(244,176,88,${(fire*.8*(1-fog*.85)).toFixed(3)})`;ctx.fillRect(b.x+b.bw*b.lx*.7+4,hz-b.bh*.6,3,3);}
+  }
+  /* fog A */
+  ctx.fillStyle=`rgba(226,234,239,${(fog*.55).toFixed(3)})`;ctx.fillRect(0,0,w,hz+h*.05);
+  /* ground */
+  g=ctx.createLinearGradient(0,hz,0,h);
+  g.addColorStop(0,rgba(mix([196,208,215],[230,238,242],fog*.6)));g.addColorStop(1,rgba(mix([226,234,238],[244,248,250],cold*.6)));
+  ctx.fillStyle=g;ctx.fillRect(0,hz,w,h-hz);
+  /* --- mid layer --- */
+  const midC=mix([48,59,67],horizonC,fog*.5);
+  const M=P.machine;
+  /* pipe line */
+  const py=mg-h*.075;
+  ctx.strokeStyle=rgba(mix(mix([60,74,84],[112,126,136],M),horizonC,fog*.45));ctx.lineWidth=5+M*2;
+  ctx.beginPath();ctx.moveTo(-10,py);ctx.lineTo(fx0-tw*1.3,py);ctx.lineTo(fx0-tw*1.3,hz-th*.15);ctx.stroke();
+  ctx.lineWidth=2;for(let x=30;x<fx0-tw*1.3;x+=90){ctx.beginPath();ctx.moveTo(x,py);ctx.lineTo(x,mg);ctx.stroke();
+    if(M>.4){ctx.fillStyle=`rgba(244,176,88,${(M*fire*.8*(.6+Math.sin(now/300+x)*.4)).toFixed(3)})`;ctx.fillRect(x-2,py-6,4,3);}}
+  /* generator */
+  const gx=w*.3;
+  ctx.fillStyle=rgba(midC);ctx.fillRect(gx-64,mg-60,128,60);
+  ctx.beginPath();ctx.moveTo(gx-70,mg-60);ctx.lineTo(gx,mg-78);ctx.lineTo(gx+70,mg-60);ctx.fill();
+  ctx.fillStyle=rgba(mix([214,224,229],horizonC,fog*.4));ctx.fillRect(gx-70,mg-62,140,4);
+  scene.fan+=dt*(.6+M*5)*(.2+fire);
+  ctx.save();ctx.translate(gx+30,mg-32);ctx.strokeStyle=rgba(mix([120,134,144],[200,210,216],M));ctx.lineWidth=2;
+  ctx.beginPath();ctx.arc(0,0,15,0,6.283);ctx.stroke();
+  for(let k=0;k<3;k++){ctx.rotate(2.094);ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(Math.cos(scene.fan)*13,Math.sin(scene.fan)*13);ctx.stroke();}
+  ctx.restore();
+  ctx.fillStyle=`rgba(244,176,88,${(fire*(.4+M*.6)*flick).toFixed(3)})`;ctx.fillRect(gx-48,mg-38,8,10);ctx.fillRect(gx-30,mg-38,8,10);
+  if(M>.5){ctx.fillStyle=`rgba(160,214,150,${(M*(.5+Math.sin(now/250)*.5)).toFixed(3)})`;ctx.fillRect(gx+52,mg-54,4,4);}
+  if(fx.steam&&Math.random()<.2*fire+M*.1)scene.steam.push({x:gx-10,y:mg-78,r:4,a:.45,vx:20,vy:-16});
+  /* houses */
+  for(const hs of scene.houses){
+    if(Math.abs(hs.x-gx)<110||Math.abs(hs.x-w*.55)<90) continue;
+    ctx.fillStyle=rgba(midC);ctx.fillRect(hs.x-hs.bw/2,mg-hs.bh,hs.bw,hs.bh);
+    ctx.beginPath();ctx.moveTo(hs.x-hs.bw/2-5,mg-hs.bh);ctx.lineTo(hs.x,mg-hs.bh-16);ctx.lineTo(hs.x+hs.bw/2+5,mg-hs.bh);ctx.fill();
+    ctx.fillStyle=rgba(mix([226,234,238],horizonC,fog*.3));ctx.beginPath();ctx.moveTo(hs.x-hs.bw/2-5,mg-hs.bh);ctx.lineTo(hs.x,mg-hs.bh-16);ctx.lineTo(hs.x+hs.bw/2+5,mg-hs.bh);ctx.lineTo(hs.x+hs.bw/2+5,mg-hs.bh+3);ctx.lineTo(hs.x,mg-hs.bh-12);ctx.lineTo(hs.x-hs.bw/2-5,mg-hs.bh+3);ctx.fill();
+    const wa=fire*(.45+P.people*.55)*flick;
+    ctx.fillStyle=`rgba(246,182,96,${wa.toFixed(3)})`;ctx.fillRect(hs.x-hs.bw*.3,mg-hs.bh*.65,7,8);ctx.fillRect(hs.x+hs.bw*.12,mg-hs.bh*.65,7,8);
+    if(fx.steam&&Math.random()<.05*fire*(.5+P.people))scene.steam.push({x:hs.x+hs.bw*.25,y:mg-hs.bh-10,r:3,a:.35,vx:14,vy:-10});
+  }
+  /* fuel yard */
+  const yx=w*.55,Y=P.yard;
+  ctx.strokeStyle=rgba(midC);ctx.lineWidth=2;
+  for(let k=0;k<6;k++){ctx.beginPath();ctx.moveTo(yx-60+k*24,mg);ctx.lineTo(yx-60+k*24,mg-18);ctx.stroke();}
+  ctx.beginPath();ctx.moveTo(yx-62,mg-12);ctx.lineTo(yx+62,mg-12);ctx.stroke();
+  if(Y>.02){
+    ctx.fillStyle='#262d32';ctx.beginPath();ctx.moveTo(yx-52,mg);ctx.quadraticCurveTo(yx-24,mg-44*Y,yx+4,mg);ctx.fill();
+    ctx.fillStyle=rgba(mix([226,234,238],horizonC,fog*.3));ctx.beginPath();ctx.ellipse(yx-24,mg-22*Y,10*Y+2,3,0,0,6.283);ctx.fill();
+    const rows=Math.round(Y*4);
+    for(let r=0;r<rows;r++)for(let k=0;k<4-(r>1?1:0);k++){ctx.fillStyle='#6d4a31';ctx.fillRect(yx+12+k*11+(r%2)*5,mg-6-r*6,10,5);ctx.fillStyle='#b48b5e';ctx.fillRect(yx+20+k*11+(r%2)*5,mg-6-r*6,2,5);}
+  }
+  /* people */
+  const pa=P.people*(1-fog*.4);
+  if(pa>.02){
+    for(const wk of scene.walkers){
+      wk.x+=wk.dir*wk.sp*dt;if(wk.x>1.05)wk.x=-.05;if(wk.x<-.05)wk.x=1.05;
+      const x=wk.x*w,y=mg+6+((wk.ph*7)%10),bob=Math.sin(now/180+wk.ph)*1;
+      ctx.fillStyle=`rgba(32,40,46,${pa.toFixed(3)})`;
+      ctx.fillRect(x-3,y-14+bob,6,11);ctx.beginPath();ctx.arc(x,y-17+bob,3,0,6.283);ctx.fill();
+      ctx.fillRect(x-3+(Math.sin(now/180+wk.ph)>0?1:-1),y-3,2,4);ctx.fillRect(x+1,y-3,2,4);
+      ctx.fillStyle=`rgba(255,196,110,${(pa*fire*.9).toFixed(3)})`;ctx.fillRect(x+wk.dir*5,y-9,2.5,3);
+    }
+  }
+  /* fog B */
+  ctx.fillStyle=`rgba(230,237,241,${(fog*.28).toFixed(3)})`;ctx.fillRect(0,0,w,h);
+  /* --- near layer --- */
+  const ny=h*.7;
+  const nearC=[28,36,42];
+  ctx.fillStyle=rgba(nearC);
+  ctx.beginPath();if(ctx.roundRect)ctx.roundRect(-30,ny,Math.max(150,w*.17)+30,h-ny+30,22);else ctx.rect(-30,ny,Math.max(150,w*.17)+30,h-ny+30);ctx.fill();
+  const bw=Math.max(150,w*.17);
+  ctx.strokeStyle=`rgba(244,170,80,${(.15+fire*.5).toFixed(3)})`;ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,ny+2);ctx.lineTo(bw-20,ny+2);ctx.stroke();
+  ctx.fillStyle='#4a5862';for(let x=14;x<bw-10;x+=22){ctx.beginPath();ctx.arc(x,ny+12,2.2,0,6.283);ctx.fill();}
+  /* firebox door on foreground boiler */
+  const dx=bw*.18,dy=ny+h*.07,dw=bw*.38,dh=Math.min(70,h*.09);
+  ctx.fillStyle='#11171a';ctx.fillRect(dx,dy,dw,dh);
+  ctx.fillStyle=`rgba(250,160,70,${(fire*.85*flick).toFixed(3)})`;ctx.fillRect(dx+4,dy+4,dw-8,dh-8);
+  ctx.fillStyle=rgba(nearC);for(let x=dx+8;x<dx+dw-4;x+=9)ctx.fillRect(x,dy+4,3,dh-8);
+  /* foreground gauge */
+  const gcx=bw*.78,gcy=ny+h*.06,gr=Math.min(22,10+w*.012);
+  ctx.fillStyle='#d7dfe3';ctx.beginPath();ctx.arc(gcx,gcy,gr,0,6.283);ctx.fill();
+  ctx.strokeStyle='#3b464d';ctx.lineWidth=3;ctx.stroke();
+  const ga=Math.PI*(1-pressure/100);ctx.strokeStyle='#b84a2c';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(gcx,gcy);ctx.lineTo(gcx+Math.cos(ga)*gr*.8,gcy-Math.sin(ga)*gr*.8);ctx.stroke();
+  /* foreground pipe up */
+  ctx.fillStyle='#232c32';ctx.fillRect(bw*.55,h*.35,16,ny-h*.35+4);ctx.fillRect(-10,h*.35,bw*.55+26,16);
+  ctx.fillStyle='#3a464e';ctx.fillRect(bw*.55-3,ny-10,22,8);ctx.fillRect(bw*.55-3,h*.35+20,22,6);
+  /* right foreground fuel: coal + logs */
+  const cy=h*.9,ch=h*.07*(.35+Y*.65);
+  ctx.fillStyle='#1b2125';ctx.beginPath();ctx.moveTo(w*.82,h+5);ctx.quadraticCurveTo(w*.92,cy-ch*1.6,w+20,h*.86-ch);ctx.lineTo(w+20,h+5);ctx.fill();
+  const logs=Math.max(1,Math.round(2+Y*5));
+  for(let k=0;k<logs;k++){const lx=w*.76+(k%3)*24+(Math.floor(k/3)%2)*12,ly=h*.94-Math.floor(k/3)*20;
+    ctx.fillStyle='#5a3c27';ctx.beginPath();ctx.arc(lx,ly,10,0,6.283);ctx.fill();ctx.fillStyle='#a37a52';ctx.beginPath();ctx.arc(lx,ly,6,0,6.283);ctx.fill();}
+  /* warm glow from boiler */
+  const wg=ctx.createRadialGradient(bw*.4,ny+h*.1,10,bw*.4,ny+h*.1,Math.max(w,h)*.45);
+  wg.addColorStop(0,`rgba(240,150,60,${(fire*.28).toFixed(3)})`);wg.addColorStop(1,'rgba(240,150,60,0)');
+  ctx.fillStyle=wg;ctx.fillRect(0,0,w,h);
+  /* steam particles */
+  for(let i=scene.steam.length-1;i>=0;i--){const p=scene.steam[i];
+    p.x+=p.vx*dt*(1+P.snow);p.y+=p.vy*dt;p.r+=(p.far?6:10)*dt;p.a-=.13*dt;
+    if(p.a<=0){scene.steam.splice(i,1);continue;}
+    ctx.fillStyle=`rgba(236,241,244,${p.a.toFixed(3)})`;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,6.283);ctx.fill();}
+  if(scene.steam.length>380)scene.steam.splice(0,scene.steam.length-380);
+  if(scene.burst>0&&fx.steam){for(let k=0;k<3;k++)scene.steam.push({x:bw*.3+Math.random()*bw*.3,y:ny-4,r:8,a:.6*scene.burst,vx:10+Math.random()*30,vy:-50-Math.random()*40});scene.burst=Math.max(0,scene.burst-dt*.7);}
+  /* snow */
+  if(fx.snow){
+    const amt=clamp(P.snow*(.75+cold*.35)),n=Math.round(60+500*amt),wind=60+amt*900;
+    ctx.lineCap='round';
+    for(let i=0;i<n;i++){const f=scene.flakes[i];
+      f.x+=(wind*(.35+f.z)*dt)/w;f.y+=((40+70*f.z)*(.6+amt*.6)*dt)/h;
+      if(f.x>1.03){f.x=-.03;f.y=Math.random();}if(f.y>1.03){f.y=-.03;}
+      const len=1.5+f.z*16*amt;
+      ctx.strokeStyle=`rgba(246,250,252,${(.35+.55*f.z).toFixed(3)})`;ctx.lineWidth=.8+f.z*2.2;
+      ctx.beginPath();ctx.moveTo(f.x*w,f.y*h);ctx.lineTo(f.x*w-len,f.y*h-len*.18);ctx.stroke();}
+  }
+  /* cold wash */
+  if(cold>.05){ctx.fillStyle=`rgba(236,243,247,${(cold*.24).toFixed(3)})`;ctx.fillRect(0,0,w,h);}
+}
+
+/* ======================= MAIN LOOP ======================= */
+let pressure=72,lastUI=0,lastT=performance.now();
+const needle=$('#needle'),gNum=$('#gNum'),tcEl=$('#tc'),stEl=$('#st'),root=document.documentElement;
+const tempC=T=>Math.round(-38+T*.56);
+function freezeStart(){
+  S.frozen=true;S.freezeT=0;document.body.classList.add('iced');hideToast();
+  S.frStart=parseFloat(getComputedStyle(root).getPropertyValue('--fr'))||40;
+  S.foStart=parseFloat(getComputedStyle(root).getPropertyValue('--frost-o'))||.6;
+}
+function freezeShow(){
+  $('#fzRead').textContent=visited.size+' 件';
+  $('#fzMin').textContent=tempC(S.minT)+' ℃';
+  $('#freeze').hidden=false;$('#fzBtn').focus();
+}
+$('#fzBtn').addEventListener('click',()=>{
+  $('#freeze').hidden=true;document.body.classList.remove('iced');
+  S.frozen=false;S.F=70;S.T=55;S.offline=false;S.warned=false;S.minT=55;
+  scene.burst=1;toast('再点火','火が戻りました。記録を読み続けられます',true);
+  lastT=performance.now();requestAnimationFrame(loop);
+});
+function loop(now){
+  const dt=Math.min(.05,(now-lastT)/1000);lastT=now;
+  if(S.frozen){
+    S.freezeT+=dt;const k=clamp(S.freezeT/2.4);
+    root.style.setProperty('--fr',lerp(S.frStart,0,k).toFixed(1)+'%');
+    root.style.setProperty('--frost-o',lerp(S.foStart,1,k).toFixed(3));
+    if(S.freezeT<2.4) requestAnimationFrame(loop); else freezeShow();
+    return;
+  }
+  /* physics */
+  if(fx.boiler){
+    const before=S.F;
+    S.F=Math.max(0,S.F-dt*.42);
+    if(before>0&&S.F<=0&&!S.offline){S.offline=true;toast('BOILER OFFLINE','火が消えました。燃料をくべてください');}
+  }else{S.F=80;S.offline=false;}
+  const fire=fx.boiler?S.F/100:.8;
+  if(fx.temp){
+    const amb=S.page?clamp(Math.max(0,S.page.chill)/22):.2;
+    const target=clamp(S.F*.95+6-amb*34,0,100);
+    S.T+=(target-S.T)*Math.min(1,dt*.06);
+  }else S.T=78;
+  const cold=fx.temp?1-S.T/100:.22;
+  S.minT=Math.min(S.minT,S.T);
+  if(fx.boiler&&fx.temp&&S.F<=0){
+    if(S.T<30&&!S.warned){S.warned=true;toast('凍結が近い','燃料をくべないと、資料集が凍りつきます');}
+    if(S.T<10){freezeStart();requestAnimationFrame(loop);return;}
+  }
+  if(S.F>0)S.warned=false;
+  const pTarget=fx.boiler?(S.F>0?S.F*.9+(REDUCED?0:Math.sin(now/650)*1.6+(Math.random()-.5)*2):0):72;
+  pressure+=(pTarget-pressure)*Math.min(1,dt*4);
+  /* scene params ease */
+  for(const k in scene.tgt)scene.cur[k]+=(scene.tgt[k]-scene.cur[k])*Math.min(1,dt*1.2);
+  drawScene(dt,now,fire,cold);
+  needle.setAttribute('transform',`rotate(${(-90+pressure*1.8).toFixed(2)} 100 100)`);
+  /* UI vars, throttled */
+  if(now-lastUI>140){
+    lastUI=now;
+    const warm=clamp(fire*1.3);
+    root.style.setProperty('--ember',rgba(mix([128,152,166],[233,162,76],warm)));
+    root.style.setProperty('--ember-glow',`rgba(233,162,76,${(.26*fire).toFixed(3)})`);
+    const pc=mix([42,50,56],[30,44,56],cold);
+    root.style.setProperty('--panel',rgba(pc,.93));root.style.setProperty('--panel-solid',rgba(pc));
+    root.style.setProperty('--line',rgba(mix([68,82,92],[78,102,118],cold)));
+    root.style.setProperty('--fire',fire.toFixed(3));
+    root.style.setProperty('--fr',(76-cold*52).toFixed(1)+'%');
+    root.style.setProperty('--frost-o',clamp(.08+Math.pow(cold,1.15)*1.05,0,.95).toFixed(3));
+    gNum.textContent=Math.round(pressure);
+    tcEl.textContent=`${tempC(S.T)} ℃`;
+    const st=!fx.boiler?'—':S.F<=0?'BOILER OFFLINE':S.F<20?'消えかけ':S.F<55?'火力低下':'燃焼良好';
+    if(stEl.textContent!==st){stEl.textContent=st;stEl.classList.toggle('bad',S.F<20);}
+  }
+  requestAnimationFrame(loop);
+}
+
+/* ======================= INIT ======================= */
+syncSettings();
+(function(){
+  let p=PAGES.find(x=>x.id==='world-frostan');
+  try{const h=location.hash.slice(1);const q=PAGES.find(x=>x.id===h);if(q)p=q;}catch(e){}
+  showPage(p);Object.assign(scene.cur,scene.tgt);
+  requestAnimationFrame(loop);
+})();
+</script>
+
+</body>
+</html>
