@@ -2323,56 +2323,6 @@ nav a.active {
 }
 
 /* ==========================================================
-   SOUND BUTTON（タップ音のON/OFF）
-========================================================== */
-
-.sound-toggle {
-    position: fixed;
-    right: 16px;
-    bottom: 16px;
-    z-index: 10000;
-
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-
-    padding: 10px 16px;
-
-    border-radius: 999px;
-    border: 1px solid rgba(255, 213, 74, 0.45);
-
-    background: rgba(17, 17, 17, 0.92);
-    color: var(--accent-color);
-
-    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
-    font-size: 0.95rem;
-    font-weight: 700;
-    letter-spacing: 0.06em;
-
-    cursor: pointer;
-
-    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
-
-    transition: transform .2s ease, border-color .2s ease, color .2s ease;
-}
-
-.sound-toggle:hover {
-    transform: translateY(-2px);
-    border-color: rgba(255, 213, 74, 0.8);
-}
-
-.sound-toggle:focus-visible {
-    outline: 2px solid var(--accent-color);
-    outline-offset: 3px;
-}
-
-.sound-toggle.muted {
-    color: #9a9a9a;
-    border-color: rgba(255, 255, 255, 0.2);
-}
-
-
-/* ==========================================================
    SECTION LABEL / MISC（追加ページ用）
 ========================================================== */
 

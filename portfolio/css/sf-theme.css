@@ -1,0 +1,1041 @@
+/* ==========================================================
+   SF THEME（style.css の後に読み込む上書き用）
+   ----------------------------------------------------------
+   このファイルを外せば、元のデザインに戻る。
+   色や光の強さを変えたいときは、まず下の :root の変数を触る。
+
+   目次
+     1. 変数
+     2. 背景（回路模様）
+     3. ヘッダー / ☰メニュー
+     4. ボタン（四角＋ホバーで発光）
+     5. カード
+     6. 見出し・余白
+     7. ホーム：ヒーロー / PICK UP
+     8. 目次（イラスト・Web作品ページ）
+     9. SETTINGS（☰メニューの設定を反映）
+    10. レスポンシブ
+========================================================== */
+
+
+/* ==========================================================
+   1. 変数
+========================================================== */
+
+:root {
+    --accent-rgb: 255, 213, 74;
+
+    /* 回路模様の濃さ（0〜1）。ページごとに下で上書きしている */
+    --circuit-line: 0.09;
+    --circuit-pulse: 0.28;
+
+    /* 回路模様が1タイル分流れるのにかかる時間（大きいほどゆっくり） */
+    --circuit-speed: 48s;
+
+    /* ホバー時の発光 */
+    --glow-size: 18px;
+    --glow-alpha: 0.38;
+
+    --header-height: 64px;
+}
+
+
+/* ==========================================================
+   2. 背景（回路模様）
+========================================================== */
+
+.bg-circuit {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    overflow: hidden;
+    pointer-events: none;
+
+    /* 画面の中央（本文があるところ）は薄く、端ほどはっきり */
+    -webkit-mask-image: radial-gradient(ellipse 70% 65% at 50% 45%, rgba(0, 0, 0, 0.35), #000 100%);
+            mask-image: radial-gradient(ellipse 70% 65% at 50% 45%, rgba(0, 0, 0, 0.35), #000 100%);
+}
+
+.circuit-svg {
+    position: absolute;
+    left: 0;
+    top: -240px;              /* タイル1枚分、上にはみ出させておく */
+    width: 100%;
+    height: calc(100% + 240px);
+
+    animation: circuit-flow var(--circuit-speed) linear infinite;
+    will-change: transform;
+}
+
+.circuit-base {
+    fill: none;
+    stroke: rgb(var(--accent-rgb));
+    stroke-width: 1.2;
+    stroke-linecap: square;
+    opacity: var(--circuit-line);
+}
+
+.circuit-pulse {
+    fill: none;
+    stroke: rgb(var(--accent-rgb));
+    stroke-width: 1.5;
+    stroke-linecap: butt;
+
+    /* 長めの光（90）と、さらに長い空白（900）。線がときどき流れる程度にする */
+    stroke-dasharray: 90 900;
+    opacity: var(--circuit-pulse);
+
+    animation: circuit-pulse 14s linear infinite;
+}
+
+/* 2本目は時間をずらして、同時に光らないようにする */
+.pulse-late {
+    animation-delay: -7s;
+}
+
+@keyframes circuit-flow {
+    from { transform: translateY(0); }
+    to   { transform: translateY(240px); }
+}
+
+@keyframes circuit-pulse {
+    from { stroke-dashoffset: 0; }
+    to   { stroke-dashoffset: -990; }
+}
+
+/* イラストページは作品が主役なので、模様をさらに控えめに */
+body[data-page="illustration"] {
+    --circuit-line: 0.05;
+    --circuit-pulse: 0.16;
+}
+
+
+/* ==========================================================
+   3. ヘッダー / ☰メニュー
+========================================================== */
+
+.page-shell {
+    padding-top: 0;
+}
+
+.site-header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+
+    display: block;
+    padding: 0;
+
+    /* .page-shell の幅を飛び出して、画面の端から端まで広げる */
+    margin: 0 calc(50% - 50vw) 32px;
+}
+
+.header-inner {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+    gap: 20px;
+
+    max-width: 1100px;
+    min-height: var(--header-height);
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+/* 背景（すりガラス）と下線は疑似要素で、画面幅いっぱいに */
+.site-header::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    background: rgba(5, 5, 5, 0.72);
+    -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+
+    border-bottom: 1px solid rgba(var(--accent-rgb), 0.16);
+    transition: background .25s ease;
+}
+
+.site-header.is-scrolled::before {
+    background: rgba(5, 5, 5, 0.9);
+}
+
+/* 下線の上を走る短い光のライン */
+.site-header::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 1px;
+
+    background:
+        linear-gradient(90deg,
+            transparent 0%,
+            rgba(var(--accent-rgb), 0.9) 8%,
+            transparent 22%) no-repeat;
+    background-size: 100% 100%;
+
+    animation: header-scan 9s ease-in-out infinite;
+    pointer-events: none;
+}
+
+@keyframes header-scan {
+    0%   { background-position: -40vw 0; }
+    60%  { background-position: 100vw 0; }
+    100% { background-position: 100vw 0; }
+}
+
+
+/* ブランド（左上のロゴ） */
+
+.brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    text-decoration: none;
+    font-size: 1.05rem;
+}
+
+.brand-icon {
+    width: 32px;
+    height: 32px;
+    object-fit: cover;
+
+    border: 1px solid rgba(var(--accent-rgb), 0.45);
+}
+
+.brand-text {
+    color: var(--accent-color);
+}
+
+
+/* PC用のナビ */
+
+.header-nav {
+    margin-left: auto;
+    display: flex;
+    flex-wrap: nowrap;
+    gap: 4px;
+}
+
+.nav-link {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+
+    padding: 8px 14px;
+
+    color: var(--text-muted);
+    text-decoration: none;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+
+    border: 1px solid transparent;
+    border-radius: 0;
+    background: none;
+    box-shadow: none;
+
+    transition: color .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+.nav-link .nav-code {
+    display: none;
+}
+
+.nav-link:hover,
+.nav-link:focus-visible {
+    color: var(--accent-color);
+    border-color: rgba(var(--accent-rgb), 0.4);
+    background: rgba(var(--accent-rgb), 0.06);
+    box-shadow: 0 0 var(--glow-size) rgba(var(--accent-rgb), calc(var(--glow-alpha) * 0.6));
+    outline: none;
+    transform: none;
+}
+
+/* 今いるページ：下に光るバー */
+.nav-link.active {
+    color: var(--accent-color);
+    background: none;
+    border-color: transparent;
+    transform: none;
+}
+
+.nav-link.active::before {
+    content: "";
+    position: absolute;
+    left: 14px;
+    right: 14px;
+    bottom: 2px;
+    height: 2px;
+
+    background: var(--accent-color);
+    box-shadow: 0 0 10px rgba(var(--accent-rgb), 0.8);
+}
+
+
+/* ☰ボタン */
+
+.menu-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+
+    height: 40px;
+    padding: 0 12px;
+
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--accent-color);
+    border: 1px solid rgba(var(--accent-rgb), 0.35);
+    border-radius: 0;
+
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.16em;
+
+    cursor: pointer;
+    transition: border-color .2s ease, box-shadow .2s ease, background .2s ease;
+}
+
+.menu-toggle:hover,
+.menu-toggle:focus-visible,
+.menu-open .menu-toggle {
+    border-color: rgba(var(--accent-rgb), 0.9);
+    background: rgba(var(--accent-rgb), 0.08);
+    box-shadow: 0 0 var(--glow-size) rgba(var(--accent-rgb), var(--glow-alpha));
+    outline: none;
+}
+
+.menu-bars {
+    position: relative;
+    display: block;
+    width: 18px;
+    height: 12px;
+}
+
+.menu-bars i {
+    position: absolute;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    background: currentColor;
+    transition: transform .25s ease, opacity .2s ease, top .25s ease;
+}
+
+.menu-bars i:nth-child(1) { top: 0; }
+.menu-bars i:nth-child(2) { top: 5px; width: 70%; }
+.menu-bars i:nth-child(3) { top: 10px; }
+
+/* 開いているときは × に変形 */
+.menu-open .menu-bars i:nth-child(1) { top: 5px; transform: rotate(45deg); }
+.menu-open .menu-bars i:nth-child(2) { opacity: 0; }
+.menu-open .menu-bars i:nth-child(3) { top: 5px; transform: rotate(-45deg); }
+
+
+/* 設定パネル */
+
+.system-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    right: max(20px, calc(50vw - 530px));
+
+    width: min(340px, calc(100vw - 24px));
+    padding: 18px 20px 20px;
+
+    background: rgba(8, 8, 8, 0.96);
+    border: 1px solid rgba(var(--accent-rgb), 0.4);
+
+    /* 左上と右下の角を斜めに切る */
+    clip-path: polygon(14px 0, 100% 0, 100% calc(100% - 14px), calc(100% - 14px) 100%, 0 100%, 0 14px);
+
+    opacity: 0;
+    transform: translateY(-6px);
+    transition: opacity .18s ease, transform .18s ease;
+}
+
+.system-panel.is-open {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.panel-title {
+    margin: 0 0 10px;
+
+    color: var(--accent-color);
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.2em;
+}
+
+.panel-nav {
+    display: none;       /* PCではヘッダーにナビがあるので隠す（スマホで表示） */
+    margin-bottom: 18px;
+}
+
+.panel-link {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+
+    padding: 9px 4px;
+
+    color: var(--text-main);
+    text-decoration: none;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.panel-link .nav-code {
+    min-width: 64px;
+    color: rgba(var(--accent-rgb), 0.7);
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.14em;
+}
+
+.panel-link.active,
+.panel-link:hover {
+    color: var(--accent-color);
+}
+
+.setting-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+
+    padding: 10px 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.setting-row:last-child {
+    border-bottom: 0;
+}
+
+.setting-name {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.3;
+}
+
+.setting-code {
+    color: rgba(var(--accent-rgb), 0.7);
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    font-size: 0.62rem;
+    letter-spacing: 0.18em;
+}
+
+.setting-label {
+    color: var(--text-main);
+    font-size: 0.95rem;
+}
+
+/* ON / OFF スイッチ */
+.setting-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    flex: none;
+
+    min-width: 76px;
+    height: 32px;
+    padding: 0 12px;
+
+    background: rgba(255, 255, 255, 0.03);
+    color: #8a8a8a;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    border-radius: 0;
+
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.14em;
+
+    cursor: pointer;
+    transition: color .2s ease, border-color .2s ease, background .2s ease, box-shadow .2s ease;
+}
+
+/* 左のランプ */
+.setting-switch::before {
+    content: "";
+    width: 7px;
+    height: 7px;
+    background: #444;
+    transition: background .2s ease, box-shadow .2s ease;
+}
+
+.setting-switch[aria-checked="true"] {
+    color: var(--accent-color);
+    border-color: rgba(var(--accent-rgb), 0.7);
+    background: rgba(var(--accent-rgb), 0.1);
+}
+
+.setting-switch[aria-checked="true"]::before {
+    background: var(--accent-color);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.9);
+}
+
+.setting-switch:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 2px;
+}
+
+
+/* ==========================================================
+   4. ボタン（四角＋ホバーで発光）
+   ----------------------------------------------------------
+   ホバーすると、四隅に「照準」のようなカギ括弧が寄ってくる。
+   色はカードのテーマ色（--theme-rgb）に自動で合わせる。
+========================================================== */
+
+.button,
+.art-card a,
+.contact-card a,
+.watch-button,
+.mooncore-link,
+.work-link,
+.mooncore button {
+    --btn-rgb: var(--theme-rgb, 255, 213, 74);
+
+    position: relative;
+    border-radius: 0;
+    box-shadow: none;
+}
+
+.button::after,
+.art-card a::after,
+.contact-card a::after,
+.watch-button::after,
+.mooncore-link::after,
+.work-link::after,
+.mooncore button::after {
+    content: "";
+    position: absolute;
+    inset: -9px;
+    pointer-events: none;
+
+    --c: rgba(var(--btn-rgb), 0.95);
+    background:
+        linear-gradient(var(--c), var(--c)) left top / 10px 2px,
+        linear-gradient(var(--c), var(--c)) left top / 2px 10px,
+        linear-gradient(var(--c), var(--c)) right bottom / 10px 2px,
+        linear-gradient(var(--c), var(--c)) right bottom / 2px 10px;
+    background-repeat: no-repeat;
+
+    opacity: 0;
+    transition: inset .18s ease, opacity .18s ease;
+}
+
+.button:hover::after,
+.button:focus-visible::after,
+.art-card a:hover::after,
+.art-card a:focus-visible::after,
+.contact-card a:hover::after,
+.watch-button:hover::after,
+.mooncore-link:hover::after,
+.work-link:hover::after,
+.mooncore button:hover::after {
+    inset: -5px;
+    opacity: 1;
+}
+
+.button:hover,
+.button:focus-visible,
+.art-card a:hover,
+.art-card a:focus-visible,
+.contact-card a:hover,
+.watch-button:hover,
+.mooncore-link:hover,
+.work-link:hover,
+.mooncore button:hover {
+    transform: none;
+    outline: none;
+
+    border-color: rgba(var(--btn-rgb), 0.9);
+    box-shadow:
+        0 0 var(--glow-size) rgba(var(--btn-rgb), var(--glow-alpha)),
+        inset 0 0 12px rgba(var(--btn-rgb), 0.16);
+    text-shadow: 0 0 8px rgba(var(--btn-rgb), 0.55);
+}
+
+/* メインボタン（黄色） */
+.button.primary {
+    color: #111;
+    text-shadow: none;
+}
+
+.button.primary:hover,
+.button.primary:focus-visible {
+    color: #111;
+    text-shadow: none;
+    box-shadow:
+        0 0 calc(var(--glow-size) * 1.4) rgba(var(--accent-rgb), calc(var(--glow-alpha) + 0.15));
+}
+
+.button.secondary {
+    border-color: rgba(var(--accent-rgb), 0.3);
+}
+
+
+/* ==========================================================
+   5. カード
+========================================================== */
+
+.art-card,
+.contact-card {
+    border-radius: 2px;
+}
+
+/* 左上と右下にテーマ色のカギ括弧 */
+.art-card::after,
+.contact-card::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+
+    --c: rgba(var(--theme-rgb), 0.7);
+    background:
+        linear-gradient(var(--c), var(--c)) left top / 18px 2px,
+        linear-gradient(var(--c), var(--c)) left top / 2px 18px,
+        linear-gradient(var(--c), var(--c)) right bottom / 18px 2px,
+        linear-gradient(var(--c), var(--c)) right bottom / 2px 18px;
+    background-repeat: no-repeat;
+
+    opacity: 0.55;
+    transition: opacity .2s ease;
+}
+
+.art-card:hover::after {
+    opacity: 1;
+}
+
+.art-card:hover {
+    box-shadow:
+        0 12px 28px rgba(0, 0, 0, 0.3),
+        0 0 24px rgba(var(--theme-rgb), 0.1);
+}
+
+.art-card img {
+    border-radius: 2px;
+}
+
+.mooncore-card,
+.kanel,
+.ryu,
+.eclipse {
+    border-radius: 2px;
+}
+
+
+/* ==========================================================
+   6. 見出し・余白
+========================================================== */
+
+/* セクション見出し：■ 見出し ───── */
+.section-heading h2,
+.section-block > h2 {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.section-heading h2::before,
+.section-block > h2::before {
+    content: "";
+    flex: none;
+    width: 8px;
+    height: 8px;
+    background: var(--accent-color);
+    box-shadow: 0 0 8px rgba(var(--accent-rgb), 0.7);
+}
+
+.section-heading h2::after,
+.section-block > h2::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(var(--accent-rgb), 0.45), transparent);
+}
+
+/* ホーム：セクション同士の間をしっかり空ける */
+body[data-page="index"] main > section + section {
+    margin-top: 64px;
+}
+
+/* 日本語の折り返しを文節単位に（対応ブラウザのみ） */
+.lead,
+.art-card p,
+.title-text {
+    word-break: auto-phrase;
+}
+
+.lead {
+    text-wrap: balance;
+}
+
+/* 固定ヘッダーの下に見出しが隠れないように */
+section[id] {
+    scroll-margin-top: calc(var(--header-height) + 16px);
+}
+
+/* 本文を少しだけ明るく、読みやすく */
+.art-card p,
+.art-card li {
+    color: #e2ddd2;
+}
+
+
+/* ==========================================================
+   7. ホーム：ヒーロー / PICK UP
+========================================================== */
+
+.hero {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+
+    padding: 72px 24px 64px;
+    border: 1px solid rgba(var(--accent-rgb), 0.22);
+}
+
+/* コンセントズ（希望）の背景 */
+.hero::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+
+    background: url("../images/kibou-bg.webp") center / 100% 100% no-repeat;
+    opacity: 0.55;
+}
+
+/* 中央を暗くして文字を読みやすく。下は黒に溶かす */
+.hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+
+    background:
+        radial-gradient(ellipse 62% 58% at 50% 48%, rgba(5, 5, 5, 0.92) 30%, rgba(5, 5, 5, 0.55) 100%),
+        linear-gradient(180deg, transparent 70%, rgba(5, 5, 5, 0.85));
+}
+
+.hero-icon {
+    border-radius: 0;
+    border: 1px solid rgba(var(--accent-rgb), 0.55);
+    box-shadow: 0 0 24px rgba(var(--accent-rgb), 0.25);
+}
+
+/* PICK UP（代表作のサムネイル） */
+
+.pickup-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+}
+
+.pickup-item {
+    --theme-rgb: var(--pickup-rgb, 255, 213, 74);
+
+    position: relative;
+    display: block;
+
+    color: var(--text-main);
+    text-decoration: none;
+
+    background: rgba(14, 14, 14, 0.95);
+    border: 1px solid rgba(var(--theme-rgb), 0.3);
+
+    transition: border-color .2s ease, box-shadow .2s ease;
+}
+
+.pickup-item::after {
+    content: "";
+    position: absolute;
+    inset: -1px;
+    pointer-events: none;
+
+    --c: rgba(var(--theme-rgb), 0.9);
+    background:
+        linear-gradient(var(--c), var(--c)) left top / 16px 2px,
+        linear-gradient(var(--c), var(--c)) left top / 2px 16px,
+        linear-gradient(var(--c), var(--c)) right bottom / 16px 2px,
+        linear-gradient(var(--c), var(--c)) right bottom / 2px 16px;
+    background-repeat: no-repeat;
+}
+
+.pickup-item:hover,
+.pickup-item:focus-visible {
+    border-color: rgba(var(--theme-rgb), 0.85);
+    box-shadow: 0 0 var(--glow-size) rgba(var(--theme-rgb), calc(var(--glow-alpha) * 0.7));
+    outline: none;
+}
+
+.pickup-thumb {
+    aspect-ratio: 4 / 3;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+
+    background:
+        radial-gradient(circle at 50% 55%, rgba(var(--theme-rgb), 0.22), transparent 65%),
+        #0b0b0b;
+    border-bottom: 1px solid rgba(var(--theme-rgb), 0.2);
+}
+
+.pickup-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    padding: 14px;
+
+    transition: transform .35s ease;
+}
+
+.pickup-thumb.cover img {
+    object-fit: cover;
+    padding: 0;
+}
+
+.pickup-item:hover .pickup-thumb img {
+    transform: scale(1.04);
+}
+
+.pickup-caption {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 12px 16px 14px;
+}
+
+.pickup-code {
+    color: rgba(var(--theme-rgb), 0.85);
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    font-size: 0.64rem;
+    letter-spacing: 0.2em;
+}
+
+.pickup-title {
+    font-weight: 700;
+    letter-spacing: 0.04em;
+}
+
+.pickup-more {
+    margin-top: 18px;
+    text-align: right;
+}
+
+
+/* ==========================================================
+   8. 目次（イラスト・Web作品ページ）
+========================================================== */
+
+.jump-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 8px;
+
+    max-width: 900px;
+    margin: 8px auto 12px;
+}
+
+.jump-list a {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 6px 12px;
+
+    color: var(--text-muted);
+    text-decoration: none;
+    font-size: 0.92rem;
+
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.12);
+
+    transition: color .2s ease, border-color .2s ease, box-shadow .2s ease;
+}
+
+.jump-no {
+    color: var(--accent-color);
+    font-family: 'Orbitron', 'Segoe UI', sans-serif;
+    font-size: 0.66rem;
+    letter-spacing: 0.1em;
+}
+
+.jump-list a:hover,
+.jump-list a:focus-visible {
+    color: var(--accent-color);
+    border-color: rgba(var(--accent-rgb), 0.7);
+    box-shadow: 0 0 calc(var(--glow-size) * 0.7) rgba(var(--accent-rgb), calc(var(--glow-alpha) * 0.6));
+    outline: none;
+}
+
+
+/* style.css の「nav a」（丸いボタン）を打ち消す */
+.panel-link,
+.jump-list a {
+    border-radius: 0;
+    box-shadow: none;
+    transform: none;
+}
+
+.panel-link {
+    justify-content: flex-start;
+    background: none;
+    border: 0;
+    border-bottom: 1px dashed rgba(255, 255, 255, 0.08);
+}
+
+.panel-link:hover,
+.panel-link.active {
+    background: rgba(var(--accent-rgb), 0.06);
+    border-color: rgba(255, 255, 255, 0.08);
+    transform: none;
+}
+
+.jump-list a:hover {
+    background: rgba(var(--accent-rgb), 0.06);
+    transform: none;
+}
+
+.jump-list {
+    margin-bottom: 36px;
+}
+
+
+/* ==========================================================
+   9. SETTINGS（☰メニューの設定を反映）
+========================================================== */
+
+/* 背景アニメーション OFF：模様は止めて、光の粒は消す */
+html[data-motion="off"] .circuit-svg,
+html[data-motion="off"] .site-header::after {
+    animation: none;
+}
+
+html[data-motion="off"] .circuit-pulse {
+    display: none;
+}
+
+html[data-motion="off"] {
+    scroll-behavior: auto;
+}
+
+/* 光の演出 OFF：発光・文字の光彩を消す（枠線の変化だけ残す） */
+html[data-glow="off"] {
+    --glow-size: 0px;
+    --glow-alpha: 0;
+}
+
+html[data-glow="off"] *,
+html[data-glow="off"] *::before,
+html[data-glow="off"] *::after {
+    text-shadow: none !important;
+}
+
+html[data-glow="off"] .button:hover,
+html[data-glow="off"] .art-card a:hover,
+html[data-glow="off"] .art-card a:focus-visible,
+html[data-glow="off"] .nav-link:hover,
+html[data-glow="off"] .menu-toggle:hover,
+html[data-glow="off"] .pickup-item:hover,
+html[data-glow="off"] .jump-list a:hover,
+html[data-glow="off"] .hero-icon,
+html[data-glow="off"] .art-card:hover {
+    box-shadow: none !important;
+}
+
+html[data-glow="off"] .site-header::after {
+    display: none;
+}
+
+/* 文字を大きくする */
+html[data-text="large"] {
+    font-size: 112.5%;
+}
+
+html[data-text="large"] .art-card p,
+html[data-text="large"] .art-card li {
+    line-height: 1.85;
+}
+
+
+/* ==========================================================
+   10. レスポンシブ
+========================================================== */
+
+@media (max-width: 860px) {
+
+    /* ヘッダーのナビは☰メニューの中へ */
+    .header-nav {
+        display: none;
+    }
+
+    .menu-toggle {
+        margin-left: auto;
+    }
+
+    .panel-nav {
+        display: block;
+    }
+}
+
+@media (max-width: 760px) {
+
+    .pickup-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    .pickup-grid > :first-child {
+        grid-column: 1 / -1;
+    }
+
+    .hero {
+        padding: 52px 18px 44px;
+    }
+
+    .hero::before {
+        background-size: cover;
+    }
+}
+
+@media (max-width: 600px) {
+
+    :root {
+        --header-height: 56px;
+    }
+
+    .header-inner {
+        padding: 0 12px;
+    }
+
+    .brand-text {
+        font-size: 0.95rem;
+    }
+
+    .system-panel {
+        right: 12px;
+    }
+
+    body[data-page="index"] main > section + section {
+        margin-top: 48px;
+    }
+
+    .jump-list {
+        justify-content: flex-start;
+    }
+}
+
+@media print {
+    .bg-circuit,
+    .site-header,
+    .jump-list {
+        display: none !important;
+    }
+}

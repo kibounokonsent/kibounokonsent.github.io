@@ -2,7 +2,7 @@
    タップ音 / 消音ボタン
    ----------------------------------------------------------
    ・音ファイルは使わず、ブラウザ内で合成しています（Web Audio API）
-   ・右下の「SOUND」ボタンでON/OFF。設定は次回以降も保存されます
+   ・☰メニューの「SOUND」でON/OFF。設定は次回以降も保存されます
    ・リンク・ボタン・画像などをタップすると音が鳴ります
 ========================================================== */
 
@@ -97,7 +97,6 @@
         try { (SOUNDS[name] || SOUNDS.tap)(); } catch (e) { /* 音が出せなくても動作は止めない */ }
     }
 
-    window.portfolioSound = { play };
 
 
     /* ---------- タップの検出 ---------- */
@@ -107,7 +106,7 @@
         const target = event.target.closest(
             "a, button, .zoom-image, .art-card img, [role='button']"
         );
-        if (!target || target.id === "sound-toggle") return;
+        if (!target || target.closest("[data-silent]")) return;
 
         if (target.closest("nav")) {
             play("nav");
@@ -158,33 +157,21 @@
     });
 
 
-    /* ---------- 消音ボタン ---------- */
+    /* ---------- 消音の切り替え ----------
+       ボタン本体は partials.js の設定パネル（☰メニュー）にある。
+       ここでは状態の保存と、ONにしたときの起動音だけを担当する。
+    ------------------------------------------------------------ */
 
-    function renderToggle() {
-
-        const btn = document.createElement("button");
-        btn.id = "sound-toggle";
-        btn.type = "button";
-        btn.className = "sound-toggle";
-
-        function refresh() {
-            btn.classList.toggle("muted", muted);
-            btn.setAttribute("aria-pressed", String(muted));
-            btn.setAttribute("aria-label", muted ? "タップ音をオンにする" : "タップ音を消す");
-            btn.textContent = muted ? "🔇 SOUND OFF" : "🔊 SOUND ON";
-        }
-
-        btn.addEventListener("click", () => {
-            muted = !muted;
-            try { localStorage.setItem(STORAGE_KEY, muted ? "1" : "0"); } catch (e) {}
-            refresh();
-            if (!muted) play("on");
-        });
-
-        refresh();
-        document.body.appendChild(btn);
+    function setMuted(value) {
+        muted = !!value;
+        try { localStorage.setItem(STORAGE_KEY, muted ? "1" : "0"); } catch (e) {}
+        if (!muted) play("on");
     }
 
-    document.addEventListener("DOMContentLoaded", renderToggle);
+    function isMuted() {
+        return muted;
+    }
+
+    window.portfolioSound = { play, setMuted, isMuted };
 
 })();
