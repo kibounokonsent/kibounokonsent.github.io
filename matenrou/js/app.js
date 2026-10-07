@@ -771,6 +771,7 @@
     $('#foot-mark').innerHTML = logoSvg();
     $('#search-ico').innerHTML = icon('search');
     $('#toc-btn').innerHTML = icon('list') + '<span>目次</span>';
+    if (window.MatenrouSound) window.MatenrouSound.bindButton($('#sound'));
     $('#nav').innerHTML = REALMS.map(function (r) {
       return '<a class="rn rt-' + r.id + '" href="#/r/' + r.id + '" data-nav="' + r.id + '"><i>' + r.mark + '</i>' + esc(r.name) + '</a>';
     }).join('') + '<span class="nav-sep" aria-hidden="true"></span><a href="#/c/character" data-nav="character">人物</a><a href="#/c/glossary" data-nav="glossary">用語</a><a href="#/articles" data-nav="articles">索引</a>';
@@ -803,6 +804,7 @@
     document.body.classList.toggle('in-tower', !!tower);
     if (window.__atmos) window.__atmos();
     writeIn();
+    if (tower) snd('tower', parts[0] === 'ascend' ? 'heaven' : 'abyss');
   }
 
   /* =========================================================
@@ -810,6 +812,8 @@
      文章は js/data/world.js
      ========================================================= */
   var WD = window.WORLD;
+  // 音（教会の鐘とパイプオルガン）。中身は js/sound.js
+  function snd(name, a, b) { var S = window.MatenrouSound; if (S) try { S.play(name, a, b); } catch (e) {} }
   var KINDS = [['lust', '色欲'], ['gluttony', '暴食'], ['greed', '強欲'], ['wrath', '憤怒'], ['pride', '傲慢'], ['envy', '嫉妬'], ['sloth', '怠惰']];
   var W = (function () {
     var d = { form: 'human', reborn: false, fallen: false, pact: null, who: null, time: WD.clock.start, event: null, deep: false, spoil: null };
@@ -834,12 +838,14 @@
       '<div class="entry-choices">' +
         '<button type="button" data-spoil="1"><span class="latin">Omnia</span><b>すべてを知る</b><small>ネタバレあり ── 核心も含めて読む</small></button>' +
         '<button type="button" data-spoil="0"><span class="latin">Velatum</span><b>核心を伏せる</b><small>ネタバレなし ── 核心に触れる記述は伏せる</small></button>' +
-      '</div><p class="entry-note">あとから、右上の「いまの身」からいつでも変えられる。</p></div>';
+      '</div><button type="button" class="entry-sound" id="entry-sound"></button><p class="entry-note">あとから、右上の「いまの身」からいつでも変えられる。音は右上の鐘のボタンで止められる。</p></div>';
     document.body.appendChild(ov);
     document.documentElement.classList.add('gate-open');
+    if (window.MatenrouSound) window.MatenrouSound.bindButton(ov.querySelector('#entry-sound'), 'wide');
     ov.querySelector('.entry-choices').addEventListener('click', function (e) {
       var b = e.target.closest('button'); if (!b) return;
       W.spoil = b.dataset.spoil === '1'; saveW();
+      snd('gate');
       ov.classList.add('pass');
       setTimeout(function () { ov.classList.add('out'); document.documentElement.classList.remove('gate-open'); route(); }, reduced ? 0 : 1200);
       setTimeout(function () { ov.remove(); }, reduced ? 50 : 2200);
@@ -881,6 +887,7 @@
     var ash = $('#ash');
     if (W.event === 'apocalypse' && !ash) { var d = document.createElement('div'); d.id = 'ash'; d.setAttribute('aria-hidden', 'true'); d.innerHTML = particles('ash', 24); document.body.appendChild(d); }
     if (W.event !== 'apocalypse' && ash) ash.remove();
+    snd('world', W.form, W.event);
   }
   function journeyPanel() {
     var steps = [
@@ -970,6 +977,7 @@
       location.hash = r.to;
     }
     var skip = '<button type="button" class="rite-skip">飛ばす</button>';
+    snd(name);
     if (name === 'rebirth') {
       ov.innerHTML = '<div class="rite-sky"></div><span class="orb"></span><div class="rite-gate">' + gateShape('heaven') + '</div><div class="rite-lines"></div>' + skip;
       var apply = function () { W.form = 'angel'; W.reborn = true; };
@@ -995,13 +1003,14 @@
         var kind = b.dataset.kind; ch.remove();
         ov.querySelector('.rite-lines').innerHTML = '';
         ov.querySelector('.rite-seal').innerHTML = sealSvg(kindName(kind));
-        ov.classList.add('s2');
+        ov.classList.add('s2'); snd('seal');
         line(demonSelf ? 'お前は' + kindName(kind) + 'の悪魔。人と契りを結ぶ。' : '代償 ── ' + priceOf(kind));
         at(2600, function () { line(r.sealed, 'big'); ov.classList.add('s3'); });
         at(5200, function () { finish(function () { W.pact = kind; }); });
       });
     }
     ov.querySelector('.rite-skip').onclick = function () {
+      snd('cut');
       if (name === 'pact' && !W.pact) { timers.forEach(clearTimeout); if (prevPact) { W.pact = prevPact; saveW(); } ov.remove(); riteBusy = false; return; }
       if (name === 'fall') { timers.forEach(clearTimeout); W.form = 'demon'; W.fallen = true; saveW(); whoStage(ov, r.to); return; }
       finish(name === 'rebirth' ? function () { W.form = 'angel'; W.reborn = true; } : function () {});
@@ -1165,7 +1174,7 @@
         particles('feathers', 28) + clash(44) + particles('embers', 30) + '<span class="front"></span>';
     ov.innerHTML = '<div class="rite-sky"></div>' + scene +
       '<div class="rite-lines"><p class="rite-latin latin">' + esc(ev.latin) + '</p><h2 class="rite-title">' + esc(ev.title) + '</h2><p class="rite-line">' + esc(ev.text) + '</p>' + (ev.sub ? '<p class="rite-line sub">' + esc(ev.sub) + '</p>' : '') + '</div>';
-    document.body.appendChild(ov);
+    document.body.appendChild(ov); snd(ev.id);
     inkify(ov.querySelector('.rite-title'), 220, 900); inkify(ov.querySelector('.rite-line'), 80, 2400);
     var sub = ov.querySelector('.sub'); if (sub) inkify(sub, 70, 3600);
     setTimeout(function () { ov.classList.add('out'); paintWorld(); route(); setTimeout(function () { ov.remove(); }, 1200); }, 7600);
