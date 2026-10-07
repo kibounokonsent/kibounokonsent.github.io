@@ -1132,7 +1132,7 @@
     svg.addEventListener('pointermove', function (e) {
       if (!dragging) return;
       var a = ang(e), d = a - last; if (d > 180) d -= 360; if (d < -180) d += 360; last = a;
-      var t0 = W.time, t1 = t0 + d / 6; W.time = t1; paint();
+      var t0 = W.time, t1 = t0 + d / 6; W.time = t1; paint(); snd('clock', t0, t1);
       WD.clock.events.forEach(function (ev) {
         if (W.event) return;
         var lo = Math.min(t0, t1), hi = Math.max(t0, t1), k = Math.ceil((lo - ev.at) / 720), x = ev.at + k * 720;

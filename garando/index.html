@@ -246,6 +246,16 @@ body.fuseru div[data-netabare],body.fuseru ol[data-netabare],body.fuseru ul[data
 .himawari-zu{max-width:460px;margin:6px auto 4px}
 .himawari-zu svg{width:100%;height:auto;display:block}
 
+/* 音の札 */
+.oto{all:unset;position:fixed;left:16px;bottom:16px;z-index:9;width:42px;height:42px;display:grid;place-items:center;cursor:pointer;
+  background:#dccaa3;border:2px solid var(--shu);border-radius:3px;color:var(--shu);font:20px var(--f-brush);
+  transform:rotate(-5deg);box-shadow:0 4px 14px rgba(0,0,0,.55);opacity:.9;transition:opacity .2s,transform .2s}
+.oto:hover,.oto:focus-visible{opacity:1;transform:rotate(1deg) scale(1.06)}
+.oto:focus-visible{outline:2px solid var(--sun);outline-offset:3px}
+.oto::after{content:"";position:absolute;left:4px;right:4px;top:50%;height:2.5px;background:var(--ink);transform:rotate(-38deg) scaleX(0);transition:transform .25s}
+.oto[aria-pressed="false"]{opacity:.62;color:var(--ink-soft);border-color:var(--ink-soft)}
+.oto[aria-pressed="false"]::after{transform:rotate(-38deg) scaleX(1)}
+
 @media (max-width:560px){
   .midashi{gap:16px}
   .midashi h2{font-size:42px}
@@ -266,6 +276,7 @@ body.fuseru div[data-netabare],body.fuseru ol[data-netabare],body.fuseru ul[data
 <canvas class="kiri" id="kiri" aria-hidden="true"></canvas>
 <div class="hikari" id="hikari" aria-hidden="true"></div>
 <p class="hint">紙の角をめくる　／　← → キー　／　左右にスワイプ</p>
+<button class="oto" id="oto" aria-pressed="true" aria-label="音を消す" title="音を消す">音</button>
 
 
 <!-- ════════════════════════════════════════════════════════════
@@ -317,7 +328,7 @@ body.fuseru div[data-netabare],body.fuseru ol[data-netabare],body.fuseru ul[data
       <button data-ensyutsu-sentaku="on" aria-pressed="false"><b>光を遮る</b><small>演出あり</small></button>
       <button data-ensyutsu-sentaku="off" aria-pressed="false"><b>光を当てる</b><small>演出オフ</small></button>
     </div>
-    <p class="erabu-chu">読み方を選ぶと資料が開く。どちらも、あとから変えられる。</p>
+    <p class="erabu-chu">読み方を選ぶと資料が開く。どちらも、あとから変えられる。<br>音が鳴る。左下の「音」で消せる。</p>
   </div>
 </template>
 
@@ -787,6 +798,132 @@ function kamiwoKaku(sh,k){
     const u=uc.getContext("2d"); u.filter="blur(3px)"; u.drawImage(t,0,0); }
 }
 
+/* ════ 音：すべてその場で合成する（音源ファイルなし） ════ */
+const Oto=(()=>{
+  let on=store.get("garando.oto",true), ac=null, out=null, NZ=null, BR=null, amb=null, airT=0, creakAt=0;
+  const R=Math.random;
+  function init(){
+    if(ac){ if(on && ac.state==="suspended") ac.resume(); return; }
+    const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
+    ac=new AC(); out=ac.createGain(); out.gain.value=on?.9:0;
+    const comp=ac.createDynamicsCompressor(); comp.threshold.value=-18; comp.ratio.value=3; out.connect(comp); comp.connect(ac.destination);
+    // 白い雑音と、くぐもった雑音
+    const L=ac.sampleRate*2; NZ=ac.createBuffer(1,L,ac.sampleRate); BR=ac.createBuffer(1,L*2,ac.sampleRate);
+    const a=NZ.getChannelData(0); for(let i=0;i<L;i++) a[i]=R()*2-1;
+    const b=BR.getChannelData(0); let l=0; for(let i=0;i<L*2;i++){ l=(l+.02*(R()*2-1))/1.02; b[i]=l*3.5; }
+    ambient();
+    if(!on) ac.suspend();
+  }
+  const ok=()=>ac && on && ac.state==="running";
+  const g0=v=>{ const g=ac.createGain(); g.gain.value=v; return g; };
+  const flt=(type,f,q)=>{ const b=ac.createBiquadFilter(); b.type=type; b.frequency.value=f; if(q!=null) b.Q.value=q; return b; };
+  const src=(buf,t,dur,loop=true)=>{ const s=ac.createBufferSource(); s.buffer=buf; s.loop=loop; s.start(t,R()*(buf.duration-.5)); if(dur) s.stop(t+dur+.05); return s; };
+  const pan=v=>{ const p=ac.createStereoPanner?ac.createStereoPanner():ac.createGain(); if(p.pan) p.pan.value=v; return p; };
+  const chain=(...n)=>{ for(let i=0;i<n.length-1;i++) n[i].connect(n[i+1]); return n[n.length-1]; };
+  const hit=(g,t,peak,a,d)=>{ g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(peak,t+a); g.gain.exponentialRampToValueAtTime(.0001,t+a+d); };
+
+  // 紙の細かい「ぱり」
+  function paki(t,v,dest){ const g=g0(0); chain(src(NZ,t,.03),flt("highpass",2400+R()*3000),g,dest||out); hit(g,t,v,.002,.008+R()*.02); }
+
+  const S={
+    // 指先で木を叩く
+    tap(v=1){ if(!ok()) return; const t=ac.currentTime+.005, f=200*(.92+R()*.16);
+      const o=ac.createOscillator(); o.frequency.setValueAtTime(f,t); o.frequency.exponentialRampToValueAtTime(f*.55,t+.09);
+      const g=g0(0); chain(o,g,out); hit(g,t,.22*v,.003,.09); o.start(t); o.stop(t+.15);
+      const n=g0(0); chain(src(NZ,t,.05),flt("bandpass",2300+R()*600,2.2),n,out); hit(n,t,.16*v,.001,.03);
+    },
+    // 判を押す
+    han(){ if(!ok()) return; const t=ac.currentTime+.005;
+      const o=ac.createOscillator(); o.frequency.setValueAtTime(130,t); o.frequency.exponentialRampToValueAtTime(55,t+.16);
+      const g=g0(0); chain(o,g,out); hit(g,t,.32,.004,.16); o.start(t); o.stop(t+.25);
+      const n=g0(0); chain(src(NZ,t,.15),flt("lowpass",700),n,out); hit(n,t,.5,.003,.1);
+      paki(t+.012,.08); paki(t+.05,.05);
+    },
+    // 頁をめくる。fwd=進む、boro=紙の傷み
+    mekuru(fwd=true,boro=.4){ if(!ok()) return; const t=ac.currentTime+.01, D=fwd?.66:.58;
+      const p=pan(fwd?.35:-.35); p.connect(out); if(p.pan) p.pan.linearRampToValueAtTime(fwd?-.4:.4,t+D);
+      // 擦れ
+      const bp=flt("bandpass",fwd?900:1500,.8), g=g0(0); chain(src(NZ,t,D),bp,g,p);
+      bp.frequency.setValueAtTime(fwd?850:1500,t); bp.frequency.exponentialRampToValueAtTime(fwd?3400:2800,t+D*.42); bp.frequency.exponentialRampToValueAtTime(fwd?1300:850,t+D);
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.2,t+D*.32); g.gain.linearRampToValueAtTime(.1,t+D*.62); g.gain.exponentialRampToValueAtTime(.0001,t+D);
+      // 動いた空気
+      const lg=g0(0); chain(src(BR,t,D),flt("lowpass",420),lg,p);
+      lg.gain.setValueAtTime(.0001,t); lg.gain.exponentialRampToValueAtTime(.35,t+D*.45); lg.gain.exponentialRampToValueAtTime(.0001,t+D);
+      // 古い紙ほど、ぱりぱり鳴る
+      const n=Math.round(5+boro*16); for(let i=0;i<n;i++) paki(t+R()*D*.78,.03+R()*.1*(.5+boro),p);
+      // 落ちる
+      const ft=t+D*.8, fg=g0(0); chain(src(NZ,ft,.12),flt("bandpass",1700,1.2),fg,p); hit(fg,ft,.18,.006,.07);
+    },
+    // 紙を新しくする：くしゃりと丸めて、置き直す
+    arata(){ if(!ok()) return; const t=ac.currentTime+.01;
+      for(let i=0;i<34;i++) paki(t+Math.pow(R(),1.4)*.9,.04+R()*.14);
+      const g=g0(0); chain(src(NZ,t,1),flt("bandpass",2600,.7),g,out); g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.09,t+.2); g.gain.exponentialRampToValueAtTime(.0001,t+1);
+      setTimeout(()=>S.mekuru(true,0),850);
+    },
+    // りん：陽の光が差す
+    rin(f=880){ if(!ok()) return; const t=ac.currentTime+.01;
+      [[1,.1,3.6],[1.004,.06,3.2],[2.76,.035,2],[5.4,.016,1.1],[8.9,.007,.6]].forEach(([m,v,d])=>{
+        const o=ac.createOscillator(); o.frequency.value=f*m; const g=g0(0); chain(o,g,out); hit(g,t,v,.004,d); o.start(t); o.stop(t+d+.1); });
+      const n=g0(0); chain(src(NZ,t,.04),flt("highpass",5000),n,out); hit(n,t,.05,.001,.02);
+    },
+    // 光が引き、闇が戻る
+    kage(v=1){ if(!ok()) return; const t=ac.currentTime+.01;
+      const o=ac.createOscillator(); o.type="triangle"; o.frequency.setValueAtTime(92,t); o.frequency.exponentialRampToValueAtTime(48,t+1.4);
+      const g=g0(0); chain(o,flt("lowpass",260),g,out); g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.22*v,t+.35); g.gain.exponentialRampToValueAtTime(.0001,t+1.8); o.start(t); o.stop(t+1.9);
+      const n=g0(0); chain(src(BR,t,1.8),flt("lowpass",500),n,out); n.gain.setValueAtTime(.0001,t); n.gain.exponentialRampToValueAtTime(.4*v,t+.5); n.gain.exponentialRampToValueAtTime(.0001,t+1.8);
+    },
+    // ざわめき：瘴気が濃くなる
+    zawa(v=1){ if(!ok()) return; const t=ac.currentTime+.01, D=2.8;
+      const lp=flt("lowpass",300), g=g0(0); lp.connect(g); g.connect(out);
+      [52,53.1,78.4,104.9].forEach(f=>{ const o=ac.createOscillator(); o.type="sawtooth"; o.frequency.value=f; o.frequency.linearRampToValueAtTime(f*.96,t+D); o.connect(lp); o.start(t); o.stop(t+D+.1); });
+      g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.07*v,t+.8); g.gain.exponentialRampToValueAtTime(.0001,t+D);
+      // ささやき
+      for(let i=0;i<3;i++){ const st=t+.3+i*.55+R()*.3, d=.6+R()*.5, bp=flt("bandpass",900+R()*1600,4), w=g0(0), p=pan((R()-.5)*1.4); chain(src(NZ,st,d),bp,w,p,out);
+        bp.frequency.linearRampToValueAtTime(bp.frequency.value*(.7+R()*.6),st+d); w.gain.setValueAtTime(.0001,st); w.gain.exponentialRampToValueAtTime(.1*v,st+d*.4); w.gain.exponentialRampToValueAtTime(.0001,st+d); }
+    },
+    // 堂が軋む（家鳴り）
+    kishimi(){ if(!ok()) return; const t=ac.currentTime+.01, D=.5+R()*.5, sr=ac.sampleRate, buf=ac.createBuffer(1,Math.ceil(sr*D),sr), d=buf.getChannelData(0);
+      let p=0, per=sr/(35+R()*30); while(p<d.length){ for(let k=0;k<70&&p+k<d.length;k++) d[p+k]+=(R()*2-1)*Math.exp(-k/12); per*=1+(R()-.45)*.08; p+=Math.max(30,per|0); }
+      const s=ac.createBufferSource(); s.buffer=buf; const g=g0(0), pp=pan((R()-.5)*1.6);
+      chain(s,flt("bandpass",500+R()*500,3),g,pp,out); g.gain.setValueAtTime(.0001,t); g.gain.exponentialRampToValueAtTime(.12,t+D*.3); g.gain.exponentialRampToValueAtTime(.0001,t+D); s.start(t);
+    }
+  };
+
+  // 堂の空気：部屋の鳴り・低い唸り・息
+  function ambient(){
+    const room=g0(0), drone=g0(0), breath=g0(0), sasa=g0(0);
+    chain(src(BR,ac.currentTime,0),flt("lowpass",320),room,out);
+    const dl=flt("lowpass",220); dl.connect(drone); drone.connect(out);
+    const os=[49,49.55,98.3].map((f,i)=>{ const o=ac.createOscillator(); o.type=i===2?"triangle":"sine"; o.frequency.value=f; o.connect(dl); o.start(); return o; });
+    const bp=flt("bandpass",480,.7), bg=g0(1); chain(src(NZ,ac.currentTime,0),bp,bg,breath,out);
+    const lfo=ac.createOscillator(), la=g0(.9); lfo.frequency.value=.11; chain(lfo,la,bg.gain); lfo.start();
+    chain(src(NZ,ac.currentTime,0),flt("bandpass",2600,3),sasa,out);
+    amb={room,drone,breath,sasa,os}; creakAt=ac.currentTime+12;
+  }
+  function air(m,light,mode){
+    if(!ac||!amb||ac.state!=="running") return; const t=ac.currentTime; if(t-airT<.25) return; airT=t;
+    amb.room.gain.setTargetAtTime(.05*(1-light*.5),t,.6);
+    amb.drone.gain.setTargetAtTime(.13*m,t,.8);
+    amb.breath.gain.setTargetAtTime(.05*m*m,t,.8);
+    amb.sasa.gain.setTargetAtTime(mode==="onnen"?.012*m:0,t,1);
+    amb.os[1].frequency.setTargetAtTime(mode==="rinne"?49.55+(R()-.5)*4:49.55,t,.4);
+    if(m>.42 && t>creakAt){ creakAt=t+14+R()*30/(m+.2); S.kishimi(); }
+  }
+
+  const btn=$("oto");
+  const show=()=>{ btn.setAttribute("aria-pressed",on); const l=on?"音を消す":"音を鳴らす"; btn.setAttribute("aria-label",l); btn.title=l; };
+  function setOn(v){ on=v; store.set("garando.oto",v); show(); init(); if(!ac) return;
+    out.gain.setTargetAtTime(v?.9:0,ac.currentTime,.05);
+    if(v) ac.resume().then(()=>S.tap()); else setTimeout(()=>{ if(!on) ac.suspend(); },200); }
+  show();
+  btn.addEventListener("click",e=>{ e.stopPropagation(); setOn(!on); });
+  // 最初に触れたときに音を起こす（ブラウザの決まり）
+  const wake=()=>{ if(on) init(); };
+  addEventListener("pointerdown",wake,true); addEventListener("keydown",wake,true); addEventListener("touchstart",wake,{capture:true,passive:true});
+  document.addEventListener("visibilitychange",()=>{ if(!ac) return; if(document.hidden) ac.suspend(); else if(on) ac.resume(); });
+  return Object.assign(S,{air});
+})();
+
 /* ════ 堂の空気：灯りと瘴気を、粗いキャンバス1枚に少ない回数で描く ════ */
 const Kuuki=(()=>{
   const c=$("kiri"), x=c.getContext("2d"), D=6; let W=0,H=0;
@@ -802,7 +939,7 @@ const Kuuki=(()=>{
   function frame(now){
     requestAnimationFrame(frame);
     const every=reduce?500:55; if(now-last<every) return;
-    if(!ensyutsu){ last=now; return; }
+    if(!ensyutsu){ last=now; Oto.air(0,1,""); return; }
     const dt=Math.min(.2,(now-last)/1000); last=now; T+=dt*(st.mode==="rinne"?2.6:1);
     st.lv+=(st.lvT-st.lv)*Math.min(1,dt*.9); st.light+=(st.lightT-st.light)*Math.min(1,dt*1.3); st.pulse*=Math.pow(.5,dt/.5);
     px+=(tx-px)*.15; py+=(ty-py)*.15;
@@ -816,6 +953,7 @@ const Kuuki=(()=>{
     // 瘴気
     let m=clamp(st.lv+st.pulse)*(1-st.light*.8);
     if(st.mode==="rinne"){ m*=.75+.3*Math.sin(T*1.7); if(r()<.06) m*=.4; }
+    Oto.air(m,st.light,st.mode);
     if(m>.01){
       const big=Math.max(W,H), flee=st.light*.25;
       for(const p of puffs){
@@ -884,7 +1022,7 @@ function makeSheet(i){
   leaf.querySelectorAll("[data-netabare]").forEach(e=>e.setAttribute("aria-hidden",netabare!=="ari"));
   leaf.querySelectorAll("[data-netabare-sentaku]").forEach(b=>b.setAttribute("aria-pressed",b.dataset.netabareSentaku===netabare));
   leaf.querySelectorAll("[data-hikari]").forEach(b=>b.addEventListener("click",()=>{
-    const on=b.getAttribute("aria-pressed")!=="true"; b.setAttribute("aria-pressed",on); b.textContent=on?"光を遮る":"光を当てる"; Kuuki.set(null,on?+b.dataset.hikari:k.hikari);
+    const on=b.getAttribute("aria-pressed")!=="true"; b.setAttribute("aria-pressed",on); b.textContent=on?"光を遮る":"光を当てる"; Kuuki.set(null,on?+b.dataset.hikari:k.hikari); on?Oto.rin(988):Oto.kage(.8);
   }));
   leaf.querySelectorAll(".sentaku").forEach(b=>sentaku(b,sh));
   const pv=sh.querySelector(".prev"), nx=sh.querySelector(".next");
@@ -910,7 +1048,7 @@ function mokuji(){
   const label=()=>kr.textContent=netabare==="ari"?"いま：すべて読む（ネタバレあり）":"いま：伏せて読む（ネタバレなし）";
   label(); kr.addEventListener("click",()=>{ setNetabare(netabare==="ari"?"nashi":"ari"); label(); });
   const re=document.createElement("button"); re.className="arata"; re.textContent="紙を新しくする（読んだ記録を消す）";
-  re.addEventListener("click",()=>{ yonda=new Set(["hyoushi","mokuji"]); store.set("garando.yonda",[...yonda]); ul.querySelectorAll(".yonda").forEach(b=>b.classList.remove("yonda")); Kuuki.set(levelFor(kiji[cur])); akari(); });
+  re.addEventListener("click",()=>{ Oto.arata(); yonda=new Set(["hyoushi","mokuji"]); store.set("garando.yonda",[...yonda]); ul.querySelectorAll(".yonda").forEach(b=>b.classList.remove("yonda")); Kuuki.set(levelFor(kiji[cur])); akari(); });
   const ke=document.createElement("button"); ke.className="kirikae kirikae-ens"; ke.style.borderColor="var(--sun)"; ke.style.color="#7a5408";
   ke.textContent="いま："+(ensyutsu?"光を遮っている（演出あり）":"光を当てている（演出オフ）"); ke.addEventListener("click",()=>setEnsyutsu(!ensyutsu));
   sita.append(kr,ke,re); wrap.appendChild(sita); return wrap;
@@ -935,8 +1073,8 @@ function sentaku(box,sh){
     erabi.innerHTML=iku?"ひまわり畑に行く<small>陽の光のもとへ。</small>":"ひまわり畑に行かない<small>陽の光から遠ざかる。</small>";
     out.hidden=false; out.classList.remove("mieru"); void out.offsetWidth; out.classList.add("mieru");
     sh.classList.remove("zawameku");
-    if(iku){ Kuuki.set(null,1); setTimeout(()=>{ Kuuki.set(Math.min(1,Kuuki.lv+.35),0); Kuuki.uzuku(); sh.classList.add("zawameku"); },2400); }
-    else { Kuuki.set(Math.min(1,Kuuki.lv+.3),0); Kuuki.uzuku(); setTimeout(()=>sh.classList.add("zawameku"),700); }
+    if(iku){ Oto.han(); Oto.rin(784); Kuuki.set(null,1); setTimeout(()=>{ Kuuki.set(Math.min(1,Kuuki.lv+.35),0); Kuuki.uzuku(); sh.classList.add("zawameku"); Oto.kage(1); Oto.zawa(1.1); },2400); }
+    else { Oto.han(); Kuuki.set(Math.min(1,Kuuki.lv+.3),0); Kuuki.uzuku(); Oto.zawa(.9); setTimeout(()=>sh.classList.add("zawameku"),700); }
   }));
 }
 
@@ -967,6 +1105,8 @@ function go(i,opt={}){
 function mekuru(i,{push=true}={}){
   if(i<0||i>=N||i===cur) return;
   const fwd=i>cur, old=stage.querySelector(".sheet:not(.yuku)");
+  if(old) Oto.mekuru(fwd,kiji[fwd?i:cur].boro);
+  if(old && kiji[i].shouki>=4 && !kiji[i].style.includes("hyoushi") && ensyutsu) setTimeout(()=>Oto.zawa(.45+(kiji[i].shouki-4)*.3),520);
   stage.querySelectorAll(".sheet.yuku").forEach(e=>e.remove());
   if(old){
     old.classList.remove("kaeru","kuru","matsu");
@@ -1022,6 +1162,15 @@ let rsT=0; new ResizeObserver(()=>{ clearTimeout(rsT); rsT=setTimeout(()=>{ cons
 document.fonts && document.fonts.ready.then(()=>{ const sh=stage.querySelector(".sheet:not(.yuku)"); if(sh && sh.dataset.size!==sh.offsetWidth+"x"+sh.offsetHeight) kamiwoKaku(sh,kiji[cur]); });
 
 /* 操作 */
+document.addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b || b.id==="oto") return;
+  if(b.closest("[data-go]") || /^(prev|next|mokuji)$/.test(b.dataset.nav||"")) return Oto.tap(.6); // めくりの音が続く
+  if(b.matches("[data-netabare-sentaku],.kirikae:not(.kirikae-ens)")) return Oto.han();
+  if(b.matches("[data-ensyutsu-sentaku]")) return b.dataset.ensyutsuSentaku==="on"?Oto.kage():Oto.rin();
+  if(b.matches("[data-nav='ensyutsu'],.kirikae-ens")) return ensyutsu?Oto.rin():Oto.kage(); // 切り替わる前の状態
+  if(b.matches("[data-hikari],[data-sentaku],.arata")) return; // それぞれの場所で鳴らす
+  Oto.tap();
+},true);
 document.addEventListener("click",e=>{
   const g=e.target.closest("[data-go]"); if(g && byId[g.dataset.go]!=null) return go(byId[g.dataset.go]);
   const n=e.target.closest("[data-nav]"); if(n){ const v=n.dataset.nav; if(v==="ensyutsu") return setEnsyutsu(!ensyutsu); return go(v==="prev"?cur-1:v==="next"?cur+1:byId.mokuji); }

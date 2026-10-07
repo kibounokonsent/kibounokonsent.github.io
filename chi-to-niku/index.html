@@ -534,9 +534,12 @@ a.db-row:hover .t{color:var(--db-navy2);text-decoration:underline}
 .lg-b{padding:18px 20px 20px}
 .lg-row{display:grid;grid-template-columns:6.5em minmax(0,1fr);align-items:center;gap:10px;margin-bottom:8px}
 .lg-row label{font-size:12.5px;color:var(--db-sub);text-align:right}
-.lg-in{border:1px solid #9aa5b3;background:#fff;padding:3px 9px;font-family:var(--f-mono);font-size:13px;letter-spacing:.12em}
+.lg-in{border:1px solid #9aa5b3;background:#fff;padding:3px 9px;font-family:var(--f-mono);font-size:13px;letter-spacing:.12em;min-height:1.7em;line-height:1.7em;box-sizing:content-box}
+.lg-in.cur::after{content:'';display:inline-block;width:1px;height:1.05em;background:#0e2039;vertical-align:-.15em;margin-left:1px;animation:lgc .9s steps(1) infinite}
+@keyframes lgc{50%{opacity:0}}
 .lg-prog{height:10px;border:1px solid #9aa5b3;background:#fff;margin:16px 0 6px;overflow:hidden}
-.lg-prog i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--db-navy2) 0 10px,#3d6499 10px 12px);animation:lgp .9s steps(14) forwards}
+.lg-prog i{display:block;height:100%;width:0;background:repeating-linear-gradient(90deg,var(--db-navy2) 0 10px,#3d6499 10px 12px)}
+.lg-prog.go i{animation:lgp .9s steps(14) forwards}
 @keyframes lgp{to{width:100%}}
 .lg-msg{margin:0;font-size:12.5px;color:var(--db-sub);min-height:1.7em}
 .db-login{margin-top:14px;border-top:1px solid var(--db-line);padding-top:14px}
@@ -1289,6 +1292,8 @@ function palAt(step){
   const u=Math.max(0,step)/Math.max(1,END_I)*(KEYPAL.length-1)*(on()?1:.5), i=Math.min(KEYPAL.length-2,Math.floor(u));
   return lerpPal(KEYPAL[i],KEYPAL[i+1],u-i);
 }
+/* 村への近さ：0＝署を出た直後 → 1＝村の入口（ネタバレなしで村に入らないルートは最後の地点を1とする） → 1を超えると村の奥 */
+function approachOf(step){ const v=isFinite(VILLAGE_I)?VILLAGE_I:END_I; return Math.max(0,step)/Math.max(1,v); }
 function phaseOf(step){ if(STEPS.slice(0,step+1).some(s=>s.infect)) return 'infected'; if(step>=VILLAGE_I) return 'village'; return 'mountain'; }
 
 /* 血と肉の人影 */
@@ -1509,7 +1514,7 @@ function arrive(fresh){
   if(F&&F.lap2) return arrive2();
   const st=STEPS[S.step];
   document.body.dataset.phase=phaseOf(S.step);
-  Sound.setScene(phaseOf(S.step), {progress: noiseBase()});
+  Sound.setScene(phaseOf(S.step), {progress: noiseBase(), approach: approachOf(S.step)});
   $('place').innerHTML=g(st.place||'—');
   $('trail').innerHTML=trailHTML(S.step);
   hud(); updateTop();
@@ -1544,7 +1549,7 @@ function walk(){
   if(F.lap2 && S.step+1>=STEPS2.length){ // さまよい続ける：村の入口へ戻る
     flash(); glitch(.9,500); S.step=0; F.cam=0; save(); draw(); arrive(true); return; }
   const from=S.step*STEP_LEN; S.step++; if(!F.lap2) S.max=Math.max(S.max??-1,S.step); save();
-  Sound.footstep();
+  Sound.footstep(); Sound.exert();
   const tt=S.step/END_I; if(S.cleared||S.step>=2) glitch(S.cleared?.6:.12+.5*tt, S.cleared?260:50+260*tt);
   const to=S.step*STEP_LEN, dur=matchMedia('(prefers-reduced-motion: reduce)').matches?10:2200, t0=performance.now();
   F.anim=true; $('spots').innerHTML=''; $('cap').innerHTML=''; $('walk').disabled=true;
@@ -1748,13 +1753,17 @@ $('dbq').addEventListener('input',()=>{ DBQ=$('dbq').value; if(location.hash==='
 let DB_BOOTED=false;
 function bootDB(then){
   const b=$('dbBoot'), scr=$('dbBootScr');
-  b.hidden=false; let done=false;
+  b.hidden=false; let done=false; const timers=[];
   scr.innerHTML=`<div class="lg-win" role="dialog" aria-label="ログオン"><div class="lg-h"><span class="emb" aria-hidden="true">捜</span>捜査資料照会システム　ログオン</div><div class="lg-b">
-    <div class="lg-row"><label>利用者ID</label><span class="lg-in">●●●●●●</span></div>
-    <div class="lg-row"><label>パスワード</label><span class="lg-in">●●●●●●●●</span></div>
-    <div class="lg-prog" aria-hidden="true"><i></i></div><p class="lg-msg" id="lgMsg">認証しています……</p><div id="lgAfter"></div></div></div>`;
-  const finish=()=>{ if(done) return; done=true; clearTimeout(t);
-    const bar=scr.querySelector('.lg-prog i'); if(bar){ bar.style.animation='none'; bar.style.width='100%'; }
+    <div class="lg-row"><label>利用者ID</label><span class="lg-in" id="lgId"></span></div>
+    <div class="lg-row"><label>パスワード</label><span class="lg-in" id="lgPw"></span></div>
+    <div class="lg-prog" aria-hidden="true"><i></i></div><p class="lg-msg" id="lgMsg">利用者IDとパスワードを入力してください。</p><div id="lgAfter"></div></div></div>`;
+  const ID='K0417', PW=8, idEl=$('lgId'), pwEl=$('lgPw');
+  const later=(fn,ms)=>timers.push(setTimeout(fn,ms));
+  const finish=()=>{ if(done) return; done=true; timers.forEach(clearTimeout);
+    idEl.textContent=ID; pwEl.textContent='●'.repeat(PW); idEl.classList.remove('cur'); pwEl.classList.remove('cur');
+    const pr=scr.querySelector('.lg-prog'); pr.classList.remove('go'); const bar=pr.querySelector('i'); bar.style.animation='none'; bar.style.width='100%';
+    Sound.beep();
     $('lgMsg').textContent='事件記録に接続しました。　御身神山関連事件';
     if(DBS.spoil===null||DBS.spoil===undefined){
       $('lgAfter').innerHTML=`<div class="db-login"><p>閲覧区分を選んでください。あとから画面上部で切り替えられます。</p><div class="two">
@@ -1764,7 +1773,13 @@ function bootDB(then){
       scr.querySelector('[data-c]').focus();
     } else { setTimeout(()=>{ b.hidden=true; DB_BOOTED=true; then(); },420); }
   };
-  const t=setTimeout(finish,950);
+  /* 利用者IDとパスワードを一文字ずつ打ち込む → Enter → 認証 */
+  let t=260; idEl.classList.add('cur');
+  [...ID].forEach((ch,i)=>{ t+=70+Math.random()*90; later(()=>{ idEl.textContent+=ch; Sound.key(); },t); });
+  t+=240; later(()=>{ Sound.key('tab'); idEl.classList.remove('cur'); pwEl.classList.add('cur'); },t);
+  for(let i=0;i<PW;i++){ t+=60+Math.random()*80; later(()=>{ pwEl.textContent+='●'; Sound.key(); },t); }
+  t+=260; later(()=>{ Sound.key('enter'); pwEl.classList.remove('cur'); $('lgMsg').textContent='認証しています……'; scr.querySelector('.lg-prog').classList.add('go'); Sound.disk(.9); },t);
+  later(finish,t+950);
   b.onclick=e=>{ if(!e.target.closest('.db-login')) finish(); };
   if(matchMedia('(prefers-reduced-motion: reduce)').matches) finish();
 }
@@ -1776,7 +1791,7 @@ function showOnly(which){
   document.querySelector('.top').hidden=which!=='game'; $('app').hidden=which!=='game';
 }
 function enterGate(){
-  if(APP==='game') leaveGame(); APP='gate'; showOnly('gate'); document.title='血と肉 事件資料';
+  if(APP==='game') leaveGame(); APP='gate'; Sound.setScene('silence'); showOnly('gate'); document.title='血と肉 事件資料';
   $('gateWood').style.backgroundImage=`url(${WOOD})`;
   $('gatePlayState').textContent=S.cleared?'記録終了後 ／ 続きから':S.step>=0?'山道の途中 ／ 続きから':(S.read.length?'署の資料を閲覧中 ／ 続きから':'はじめから');
   window.scrollTo(0,0);
@@ -1792,7 +1807,8 @@ function enterGame(){
   window.scrollTo(0,0);
 }
 function enterDB(route){
-  const was=APP; if(was==='game') leaveGame(); APP='db'; showOnly('db');
+  const was=APP; if(was==='game') leaveGame(); APP='db'; showOnly('db'); Sound.setScene('db');
+  if(was==='db' && DB_BOOTED) Sound.disk(.35);
   const go=()=>{ renderDB(route); if(was!=='db') window.scrollTo(0,0); else window.scrollTo({top:0}); };
   if(!DB_BOOTED) bootDB(go); else go();
 }
@@ -1806,9 +1822,10 @@ $('startBack').onclick=()=>{ location.hash='#top'; };
 window.addEventListener('hashchange',route);
 
 /* ===================== 音声演出（合成音のみ・外部ファイル不使用） =====================
-   山道・御身神村・感染時の環境音と、ノイズ／フラッシュ演出に連動する効果音、
-   足音・紙をめくる音を鳴らす。署内の「事件資料を閲覧する」（資料照会システム）と
-   入口画面では鳴らさない（README 9〜10節の「読みやすさ優先」方針に合わせた）。
+   体験側：山道・御身神村・感染時の環境音、村へ近づくほど大きく速くなる心臓音、
+   ノイズ／フラッシュ演出に連動する効果音、足音・紙をめくる音。
+   資料照会システム側：キーボード・マウスのクリック・ホイール・ディスクアクセス・ログオンのビープと、
+   端末のファンのかすかな音。入口画面では鳴らさない。
    音量とミュートは右下の音声ボタンから。設定は localStorage に保存される。
    ===================================================================== */
 const SND_KEY='chitoniku-snd-v1';
@@ -1818,7 +1835,7 @@ let SND_SET=(()=>{ try{ const v=JSON.parse(localStorage.getItem(SND_KEY));
 const sndSave=()=>{ try{ localStorage.setItem(SND_KEY, JSON.stringify(SND_SET)); }catch(e){} };
 
 const Sound=(()=>{
-  let ctx=null, master=null, noiseBuf=null, nodes={}, pending=null, heartTimer=null, windT=null;
+  let ctx=null, master=null, amb=null, noiseBuf=null, nodes={}, pending=null, windT=null;
   const targetVol=()=>SND_SET.muted?0:SND_SET.vol;
 
   function makeNoiseBuffer(c){
@@ -1832,7 +1849,12 @@ const Sound=(()=>{
     if(ctx) return;
     const AC=window.AudioContext||window.webkitAudioContext; if(!AC) return;
     ctx=new AC();
-    master=ctx.createGain(); master.gain.value=targetVol(); master.connect(ctx.destination);
+    /* 大きい心臓音でも割れないよう、最後にコンプレッサーを通す */
+    const comp=ctx.createDynamicsCompressor(); comp.threshold.value=-14; comp.knee.value=10; comp.ratio.value=4; comp.attack.value=.004; comp.release.value=.2;
+    comp.connect(ctx.destination);
+    master=ctx.createGain(); master.gain.value=targetVol(); master.connect(comp);
+    /* 環境音（風・ノイズ・ドローン）はこのバスにまとめ、鼓動のたびに少し沈めて心臓音を前に出す */
+    amb=ctx.createGain(); amb.gain.value=1; amb.connect(master);
     noiseBuf=makeNoiseBuffer(ctx);
   }
   function unlock(){
@@ -1841,17 +1863,18 @@ const Sound=(()=>{
     if(pending){ const p=pending; pending=null; setScene(p.name,p.opts); }
   }
 
-  /* 常設の音の「ベッド」：風／静電ノイズ／ドローン。シーンに応じて音量だけを揺らす */
+  /* 常設の音の「ベッド」：風／静電ノイズ／ドローン／端末のファン。シーンに応じて音量だけを揺らす */
   function bed(kind){
-    const g=ctx.createGain(); g.gain.value=0; g.connect(master);
+    const g=ctx.createGain(); g.gain.value=0; g.connect(amb);
     const src=noiseSource(), filt=ctx.createBiquadFilter();
     if(kind==='hiss'){ filt.type='highpass'; filt.frequency.value=1800; }
+    else if(kind==='fan'){ filt.type='bandpass'; filt.frequency.value=380; filt.Q.value=.6; }
     else { filt.type='lowpass'; filt.frequency.value=500; }
     src.connect(filt); filt.connect(g); src.start();
     return {g,filt};
   }
   function drone(freq,det){
-    const g=ctx.createGain(); g.gain.value=0; g.connect(master);
+    const g=ctx.createGain(); g.gain.value=0; g.connect(amb);
     const o1=ctx.createOscillator(); o1.type='sine'; o1.frequency.value=freq;
     const o2=ctx.createOscillator(); o2.type='sine'; o2.frequency.value=freq*(det||1.0105);
     o1.connect(g); o2.connect(g); o1.start(); o2.start();
@@ -1861,8 +1884,10 @@ const Sound=(()=>{
     if(nodes.built) return;
     nodes.wind=bed('lp');            // 風・部屋の低い空気音
     nodes.hiss=bed('hiss');          // 感染時の静電ノイズ
+    nodes.fan=bed('fan');            // 資料照会端末の冷却ファン
     nodes.droneLow=drone(52,1.003);  // 山の低いドローン
     nodes.droneInf=drone(61,1.0618); // 感染時の不協和なドローン
+    nodes.hum=drone(100,1.002);      // 端末の電源の低いうなり
     nodes.built=true;
     (function windLFO(){
       if(!ctx) return;
@@ -1870,48 +1895,82 @@ const Sound=(()=>{
       windT=setTimeout(windLFO, 1800+Math.random()*1800);
     })();
   }
-  function rampTo(g,v,t){ if(!ctx||!g) return; g.gain.linearRampToValueAtTime(Math.max(0,v), ctx.currentTime+(t??1.1)); }
+  function rampTo(g,v,t){ if(!ctx||!g) return; g.gain.cancelScheduledValues(ctx.currentTime); g.gain.setValueAtTime(g.gain.value,ctx.currentTime); g.gain.linearRampToValueAtTime(Math.max(0,v), ctx.currentTime+(t??1.1)); }
 
-  /* 心臓音：感染シーンでのみ鳴る拍動（lub-dub を低いサイン波2発で作る） */
-  function stopHeart(){ if(heartTimer){ clearTimeout(heartTimer); heartTimer=null; } }
-  function startHeart(bpm,strong){
-    stopHeart();
-    const interval=60000/bpm;
-    const tick=()=>{
-      if(!ctx) return;
-      const t0=ctx.currentTime;
-      const lub=(t,f,g)=>{ const o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(f,t);
-        o.frequency.exponentialRampToValueAtTime(Math.max(26,f*.5),t+.18);
-        const gg=ctx.createGain(); gg.gain.setValueAtTime(.0001,t); gg.gain.linearRampToValueAtTime(g,t+.018); gg.gain.exponentialRampToValueAtTime(.0005,t+.3);
-        o.connect(gg); gg.connect(master); o.start(t); o.stop(t+.34); };
-      lub(t0, 58, strong?.5:.34);
-      lub(t0+.16, 50, strong?.3:.2);
-      heartTimer=setTimeout(tick, interval);
-    };
-    tick();
+  /* ---------- 心臓音 ----------
+     一度動き出したら止めずに鳴らし続け、速さ（bpm）と強さ（gain）だけを目標値へ少しずつ寄せる。
+     山道 → 村へ近づくほど大きく速くなり、村・感染後は環境音を押しのけるほど目立つ。 */
+  const H={cur:{bpm:50,gain:0}, tgt:{bpm:50,gain:0}, timer:null, rushUntil:0, duck:0};
+  function thump(t,f,g){
+    /* 低い胴鳴り（サイン波）＋ 1オクターブ上の倍音（小さいスピーカーでも聞こえる）＋ こもったノイズの「ドッ」 */
+    const out=ctx.createGain(); out.gain.setValueAtTime(.0001,t); out.gain.linearRampToValueAtTime(g,t+.014); out.gain.exponentialRampToValueAtTime(.0004,t+.34); out.connect(master);
+    const o=ctx.createOscillator(); o.type='sine'; o.frequency.setValueAtTime(f,t); o.frequency.exponentialRampToValueAtTime(Math.max(28,f*.55),t+.2);
+    const o2=ctx.createOscillator(); o2.type='triangle'; o2.frequency.setValueAtTime(f*2,t); o2.frequency.exponentialRampToValueAtTime(f*1.1,t+.15);
+    const g2=ctx.createGain(); g2.gain.value=.32;
+    o.connect(out); o2.connect(g2); g2.connect(out);
+    o.start(t); o2.start(t); o.stop(t+.38); o2.stop(t+.38);
+    const n=noiseSource(), lp=ctx.createBiquadFilter(); lp.type='lowpass'; lp.frequency.value=170; lp.Q.value=1.4;
+    const ng=ctx.createGain(); ng.gain.setValueAtTime(.0001,t); ng.gain.linearRampToValueAtTime(g*1.5,t+.01); ng.gain.exponentialRampToValueAtTime(.0004,t+.11);
+    n.connect(lp); lp.connect(ng); ng.connect(master); n.start(t); n.stop(t+.14);
   }
+  function heartTick(){
+    H.timer=null; if(!ctx) return;
+    const c=H.cur, tg=H.tgt;
+    c.bpm+=(tg.bpm-c.bpm)*.22; c.gain+=(tg.gain-c.gain)*(tg.gain<=0?.45:.25);   // 一拍ごとに目標へ寄せる（急に変わらない）
+    if(c.gain<.006 && tg.gain<=0){ c.gain=0; return; }
+    const rush=performance.now()<H.rushUntil ? 1.18 : 1;          // 歩いている間は少し速まる
+    const bpm=c.bpm*rush, gain=c.gain*(rush>1?1.12:1);
+    const t0=ctx.currentTime+.02, gap=Math.max(.13,.26-bpm/900);
+    thump(t0, 56, gain);
+    thump(t0+gap, 48, gain*.62);
+    if(H.duck>0){  // 鼓動に合わせて環境音を一瞬沈める
+      amb.gain.cancelScheduledValues(t0); amb.gain.setValueAtTime(1,t0);
+      amb.gain.linearRampToValueAtTime(1-H.duck,t0+.03); amb.gain.linearRampToValueAtTime(1,t0+gap+.32);
+    }
+    const jitter=1+(Math.random()-.5)*.05*(bpm>90?2:1);           // 速いほど少し乱れる
+    H.timer=setTimeout(heartTick, 60000/bpm*jitter);
+  }
+  function setHeart(bpm,gain,duck){
+    H.tgt.bpm=bpm; H.tgt.gain=gain; H.duck=duck||0;
+    if(gain>0 && !H.timer){ if(H.cur.gain<=0){ H.cur.bpm=bpm; H.cur.gain=gain*.35; } heartTick(); }
+  }
+  function stopHeart(){ H.tgt.gain=0; H.duck=0; }
+  function exert(){ H.rushUntil=performance.now()+3400; }
 
-  /* シーン切り替え：desk／mountain／village／infected／silence をクロスフェードで渡す */
+  /* シーン切り替え：desk／mountain／village／infected／db／silence をクロスフェードで渡す */
   function setScene(name, opts={}){
     if(!ctx){ pending={name,opts}; return; }
     ensureNodes();
     const p=Math.min(1,Math.max(0,(opts.progress||0)*7));
+    const a=Math.max(0,opts.approach||0), a1=Math.min(1,a);
+    const offDB=()=>{ rampTo(nodes.fan.g,0,.8); rampTo(nodes.hum.g,0,.8); };
     if(name==='desk'){
+      offDB();
       rampTo(nodes.wind.g, opts.ruin?.035:.02, 1.4); rampTo(nodes.hiss.g, opts.ruin?.05:0, 1.4);
       rampTo(nodes.droneLow.g, opts.ruin?.02:.012, 1.4); rampTo(nodes.droneInf.g, opts.ruin?.035:0, 1.4);
-      stopHeart();
+      opts.ruin ? setHeart(44,.12,.1) : stopHeart();
     } else if(name==='mountain'){
+      offDB();
       rampTo(nodes.wind.g, .05+.05*p, 1.4); rampTo(nodes.hiss.g, .01+.03*p, 1.4);
-      rampTo(nodes.droneLow.g, .02+.02*p, 1.4); rampTo(nodes.droneInf.g, 0, 1.4);
-      stopHeart();
+      rampTo(nodes.droneLow.g, .02+.02*p, 1.4); rampTo(nodes.droneInf.g, .02*a1*a1, 1.4);
+      /* 署を出た直後はかすかに、村が近づくほど大きく速く（a=村への近さ 0〜1） */
+      if(a<=0) stopHeart(); else setHeart(54+30*a1, .07+.55*Math.pow(a1,1.4), .15+.4*a1);
     } else if(name==='village'){
-      rampTo(nodes.wind.g, .04, 1.4); rampTo(nodes.hiss.g, .06+.04*p, 1.4);
-      rampTo(nodes.droneLow.g, .03, 1.4); rampTo(nodes.droneInf.g, .02+.03*p, 1.4);
-      stopHeart();
+      offDB();
+      const k=Math.min(1,(a-1)*1.5);   // 村の奥へ進むほど
+      rampTo(nodes.wind.g, .03, 1.4); rampTo(nodes.hiss.g, .05+.04*p, 1.4);
+      rampTo(nodes.droneLow.g, .025, 1.4); rampTo(nodes.droneInf.g, .02+.03*p, 1.4);
+      setHeart(88+14*k, .66+.14*k, .6);
     } else if(name==='infected'){
+      offDB();
       rampTo(nodes.wind.g, .02, 1.2); rampTo(nodes.hiss.g, .1+.07*p, 1.2);
       rampTo(nodes.droneLow.g, .01, 1.2); rampTo(nodes.droneInf.g, .05+.05*p, 1.2);
-      startHeart(opts.lap2?58:46, !!opts.lap2||p>.6);
+      /* 感染後は鼓動が重く遅く落ちる。二周目は少し速く */
+      opts.lap2 ? setHeart(66,.85,.65) : setHeart(58,.85,.65);
+    } else if(name==='db'){
+      ['wind','hiss','droneLow','droneInf'].forEach(k=>rampTo(nodes[k].g,0,.8));
+      rampTo(nodes.fan.g,.014,1.2); rampTo(nodes.hum.g,.004,1.2);
+      stopHeart();
     } else {
       Object.keys(nodes).forEach(k=>{ if(nodes[k]&&nodes[k].g) rampTo(nodes[k].g,0,1.0); });
       stopHeart();
@@ -1919,10 +1978,10 @@ const Sound=(()=>{
   }
 
   /* 単発の効果音：ノイズ乱れ／ジャンプスケア／足音／紙の音 */
-  function burstNoise(t0,dur,gain,hp){
+  function burstNoise(t0,dur,gain,hp,dest){
     const src=noiseSource(), filt=ctx.createBiquadFilter(); filt.type='highpass'; filt.frequency.value=hp||800;
     const g=ctx.createGain(); g.gain.setValueAtTime(.0001,t0); g.gain.linearRampToValueAtTime(gain,t0+Math.min(.03,dur*.2)); g.gain.exponentialRampToValueAtTime(.0005,t0+dur);
-    src.connect(filt); filt.connect(g); g.connect(master); src.start(t0); src.stop(t0+dur+.05);
+    src.connect(filt); filt.connect(g); g.connect(dest||master); src.start(t0); src.stop(t0+dur+.05);
   }
   function noiseBurst(intensity,ms){ if(!ctx) return; burstNoise(ctx.currentTime, Math.max(.08,(ms||150)/1000), Math.min(.5,.08+.35*(intensity||.3)), 1200); }
   function sting(){
@@ -1941,12 +2000,53 @@ const Sound=(()=>{
     const g=ctx.createGain(); g.gain.setValueAtTime(.0001,t0); g.gain.linearRampToValueAtTime(.06,t0+.02); g.gain.exponentialRampToValueAtTime(.0005,t0+.24);
     src.connect(filt); filt.connect(g); g.connect(master); src.start(t0); src.stop(t0+.3);
   }
+
+  /* ---------- 資料照会端末の音：キーボード／マウス／ディスクアクセス／ビープ ---------- */
+  function tick(t,freq,q,dur,gain){   // 帯域を絞ったノイズの短い粒
+    const src=noiseSource(), bp=ctx.createBiquadFilter(); bp.type='bandpass'; bp.frequency.value=freq; bp.Q.value=q;
+    const g=ctx.createGain(); g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(gain,t+.002); g.gain.exponentialRampToValueAtTime(.0004,t+dur);
+    src.connect(bp); bp.connect(g); g.connect(master); src.start(t,Math.random()*1.5); src.stop(t+dur+.02);
+  }
+  /* キーを打つ音：カチッ（キートップが底を打つ）＋コトッ（筐体の低い響き）。Space・Enter は少し重い */
+  function key(kind){
+    if(!ctx) return;
+    const t=ctx.currentTime, big=kind==='enter'||kind==='space', r=Math.random();
+    tick(t, 2600+r*1400, 2.2, .028, big?.17:.12+r*.04);
+    tick(t+.004, big?260:420+r*120, 1.6, big?.07:.045, big?.24:.15);
+    if(big) tick(t+.06, 1800, 3, .02, .04);         // 戻りのカチャ
+  }
+  /* マウスのクリック：押したとき（カチ）と離したとき（小さくカチ） */
+  function mouseDown(){ if(!ctx) return; const t=ctx.currentTime; tick(t,4200,4,.012,.22); tick(t+.001,1500,3,.02,.09); }
+  function mouseUp(){ if(!ctx) return; const t=ctx.currentTime; tick(t,3600,4,.01,.11); }
+  function wheel(){ if(!ctx) return; tick(ctx.currentTime,3000,6,.008,.025); }
+  /* ハードディスクのアクセス音：短いジジッ、という粒を不規則に */
+  function disk(len){
+    if(!ctx) return;
+    const t0=ctx.currentTime, n=Math.round(4+10*(len||.4));
+    let t=t0+.03; for(let i=0;i<n;i++){ t+=.018+Math.random()*.06; tick(t,700+Math.random()*900,5,.012,.02+Math.random()*.02); }
+  }
+  function beep(){
+    if(!ctx) return;
+    const t=ctx.currentTime, o=ctx.createOscillator(), g=ctx.createGain(); o.type='square'; o.frequency.value=1320;
+    g.gain.setValueAtTime(.0001,t); g.gain.linearRampToValueAtTime(.025,t+.005); g.gain.setValueAtTime(.025,t+.09); g.gain.exponentialRampToValueAtTime(.0004,t+.12);
+    o.connect(g); g.connect(master); o.start(t); o.stop(t+.14);
+  }
+
   function applyVolume(){ if(master&&ctx) master.gain.linearRampToValueAtTime(targetVol(), ctx.currentTime+.15); }
 
-  return { unlock, setScene, noiseBurst, sting, footstep, paperOpen, applyVolume };
+  return { unlock, setScene, noiseBurst, sting, footstep, paperOpen, exert, key, mouseDown, mouseUp, wheel, disk, beep, applyVolume };
 })();
 document.addEventListener('pointerdown', Sound.unlock, {once:true});
 document.addEventListener('keydown', Sound.unlock, {once:true});
+/* 資料照会端末にいる間：クリック・キー入力・ホイールに音を付ける（音声パネル内の操作は除く） */
+(function(){
+  const inDB=e=>APP==='db' && !(e.target.closest&&e.target.closest('#snd'));
+  document.addEventListener('pointerdown',e=>{ if(inDB(e) && e.button===0) Sound.mouseDown(); });
+  document.addEventListener('pointerup',e=>{ if(inDB(e) && e.button===0) Sound.mouseUp(); });
+  document.addEventListener('keydown',e=>{ if(!inDB(e) || e.repeat || ['Shift','Control','Alt','Meta','CapsLock'].includes(e.key)) return;
+    Sound.key(e.key==='Enter'?'enter':e.key===' '?'space':''); });
+  let wt=0; document.addEventListener('wheel',e=>{ if(!inDB(e)) return; const n=performance.now(); if(n-wt>55){ wt=n; Sound.wheel(); } },{passive:true});
+})();
 
 /* 音声設定パネル（右下）の配線 */
 (function(){
