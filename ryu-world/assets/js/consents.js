@@ -143,4 +143,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
     requestAnimationFrame(() => body.classList.add("is-ready"));
 
+
+    /* ---------- 音楽（Experimental Model / D'elf） ---------- */
+
+    const audio = document.getElementById("music");
+
+    if (audio && window.RyuMusic) {
+        RyuMusic.init({
+            audio,
+            button: document.getElementById("music-toggle"),
+            key: "ryu-consents-music",
+            volume: 0.55,
+            fadeIn: 2500
+        }).start();
+    }
+
 });

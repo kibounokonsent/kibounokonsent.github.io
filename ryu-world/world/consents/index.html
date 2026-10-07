@@ -14,7 +14,7 @@
 
     <link rel="stylesheet" href="../../assets/css/consents.css">
     <!-- 調律（音・揺らぎ）：全ページ共通 -->
-    <script src="../../assets/js/ryu-tuning.js" data-ambient="realm"></script>
+    <script src="../../assets/js/ryu-tuning.js" data-ambient="none" data-pos="below-music"></script>
 
 </head>
 
@@ -26,6 +26,14 @@
 <body data-consent="kibou">
 
     <a id="back-to-map" href="../other/index.html">その他の世界へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">Experimental Model</span>
+    </button>
+
+    <!-- Experimental Model（D'elf のフリー音源） -->
+    <audio id="music" src="../../assets/consents/experimental-model.mp3" loop preload="none"></audio>
 
     <main id="consents-page">
 
@@ -52,8 +60,15 @@
             <div class="info-text"></div>
         </section>
 
+        <!-- 音楽のクレジット（D'elf の表記ルール：制作者・楽曲名・サイト） -->
+        <footer id="consents-credit">
+            <p>音楽：「Experimental Model」（Short Free ver.）</p>
+            <p>制作：D'elf ／ <a href="https://d-elf.com/" target="_blank" rel="noopener">d-elf.com</a></p>
+        </footer>
+
     </main>
 
+    <script src="../../assets/js/page-music.js"></script>
     <script src="../../assets/js/consents.js"></script>
 
 </body>

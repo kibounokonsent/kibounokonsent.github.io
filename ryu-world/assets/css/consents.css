@@ -464,3 +464,136 @@ body[data-consent="zetubou"] {
     }
 
 }
+
+
+/* =========================================================
+   音楽のボタン（悠久の楽園・破壊之王の間と同じ作り）
+   ========================================================= */
+
+#music-toggle {
+    position: fixed;
+    top: clamp(1rem, 3vh, 1.8rem);
+    right: clamp(1rem, 3vw, 2rem);
+
+    z-index: 5;
+
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+
+    padding: 0.45rem 0.9rem;
+
+    border: 1px solid rgba(var(--accent), 0.35);
+    background: rgba(0, 0, 0, 0.4);
+    color: inherit;
+
+    font: inherit;
+    font-size: 0.74rem;
+    letter-spacing: 0.12em;
+
+    cursor: pointer;
+
+    transition: background 0.4s ease, border-color 0.4s ease;
+}
+
+#music-toggle:hover,
+#music-toggle:focus-visible {
+    background: rgba(0, 0, 0, 0.6);
+    border-color: rgba(var(--accent), 0.75);
+}
+
+#music-toggle:focus-visible {
+    outline: 1px solid rgba(var(--accent), 0.8);
+    outline-offset: 3px;
+}
+
+.music-icon {
+    display: inline-flex;
+    align-items: flex-end;
+    gap: 2px;
+
+    width: 14px;
+    height: 12px;
+}
+
+.music-icon::before,
+.music-icon::after {
+    content: "";
+
+    width: 3px;
+    height: 4px;
+
+    background: rgb(var(--accent));
+}
+
+#music-toggle[aria-pressed="true"] .music-icon::before {
+    animation: music-bar 0.9s ease-in-out infinite;
+}
+
+#music-toggle[aria-pressed="true"] .music-icon::after {
+    animation: music-bar 0.9s ease-in-out infinite 0.3s;
+}
+
+#music-toggle[aria-pressed="false"] .music-label::after {
+    content: "（消音）";
+    opacity: 0.6;
+}
+
+/* 自動再生が止められたときだけ、そっと誘う */
+#music-toggle.is-inviting {
+    animation: music-invite 2.4s ease-in-out infinite;
+}
+
+@keyframes music-bar {
+    0%, 100% { height: 4px; }
+    50% { height: 12px; }
+}
+
+@keyframes music-invite {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(var(--accent), 0); }
+    50% { box-shadow: 0 0 0 6px rgba(var(--accent), 0.16); }
+}
+
+@media (max-width: 600px) {
+    #music-toggle {
+        font-size: 0.68rem;
+        padding: 0.4rem 0.7rem;
+    }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    #music-toggle.is-inviting {
+        animation: none;
+    }
+}
+
+
+/* ---------- 音楽のクレジット ---------- */
+
+#consents-credit {
+    margin-top: 5rem;
+
+    text-align: center;
+
+    font-size: 0.7rem;
+    line-height: 1.9;
+    letter-spacing: 0.12em;
+
+    opacity: 0.6;
+}
+
+#consents-credit p {
+    margin: 0;
+}
+
+#consents-credit a {
+    color: rgb(var(--accent));
+    text-decoration: underline;
+    text-underline-offset: 3px;
+    text-decoration-thickness: 1px;
+}
+
+#consents-credit a:focus-visible {
+    outline: 1px solid rgba(var(--accent), 0.8);
+    outline-offset: 3px;
+}

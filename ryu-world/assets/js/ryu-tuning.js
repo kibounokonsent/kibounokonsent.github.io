@@ -623,8 +623,13 @@ html[data-motion="off"] *::after {
 
     }
 
+    // 最後に音を鳴らした時刻（触れた音が、ページ側の音と重ならないように）
+    let lastCue = 0;
+
     function canPlay() {
-        return ac && ac.state === "running" && settings.sound === "on";
+        const ok = ac && ac.state === "running" && settings.sound === "on";
+        if (ok) lastCue = performance.now();
+        return ok;
     }
 
     // 世界ごとの響き（楽園が最も高く、奈落が最も低い）
@@ -700,8 +705,21 @@ html[data-motion="off"] *::after {
             bell(440, { level: 0.06, decay: 4, delay: 0.1 });
         },
         // 共通
-        leave: () => breath(300, 1900, 0.55, 0.07),
-        tick: () => bell(2093, { level: 0.012, decay: 0.35, partials: [[1, 1]], wet: 0.3 }),
+        leave: () => {
+            breath(300, 1900, 0.55, 0.12);
+            bell(880, { level: 0.07, decay: 1.4, partials: [[1, 1], [2.76, 0.25]], wet: 0.7 });
+        },
+        // かすかに触れる音（なぞっただけの音なので、「鳴らした時刻」には数えない）
+        tick: () => {
+            const keep = lastCue;
+            bell(2093, { level: 0.022, decay: 0.35, partials: [[1, 1]], wet: 0.3 });
+            lastCue = keep;
+        },
+        // ボタンなどに触れたときの音（世界地図で世界を選んだ音と同じくらい聞こえるように）
+        tap: () => {
+            bell(1318.5, { level: 0.1, decay: 0.9, partials: [[1, 1], [2.76, 0.22]], wet: 0.45 });
+            bell(659.25, { level: 0.045, decay: 1.1, partials: [[1, 1]], wet: 0.6, delay: 0.015 });
+        },
         close: () => bell(392, { level: 0.05, decay: 1.6, partials: [[1, 1], [2.76, 0.2]] }),
         open: () => bell(1174.66, { level: 0.04, decay: 1.4 })
     };
@@ -858,7 +876,7 @@ html[data-motion="off"] *::after {
             b.addEventListener("click", (e) => {
                 e.stopPropagation();
                 set(b.dataset.key, b.dataset.val);
-                if (b.dataset.key !== "sound") CUES.tick();
+                if (b.dataset.key !== "sound") CUES.tap();
             });
         });
 
@@ -917,11 +935,38 @@ html[data-motion="off"] *::after {
 
             if (!canPlay()) return;
 
+            tapHandled = true;
+
             // 旅立ちの音を、少しだけ聞かせてから移る
             e.preventDefault();
             const special = a.dataset.tuningCue;
             (CUES[special] || CUES.leave)();
             setTimeout(() => { location.href = url.href; }, special ? 650 : 260);
+
+        });
+
+        /*
+         * ボタン・開閉・ページ内リンクなどに触れたときの音。
+         * ページ側がすでに自分の音を鳴らしていれば（世界地図の選択など）重ねない。
+         */
+        let tapHandled = false;
+
+        window.addEventListener("click", (e) => {
+
+            if (tapHandled) { tapHandled = false; return; }
+
+            const el = e.target.closest?.('button, summary, [role="button"], a[href], label, input[type="checkbox"], input[type="radio"], select');
+            if (!el || el.closest(".ryu-tuning") || el.disabled) return;
+            if (el.dataset.tuningSilent !== undefined) return;
+            if (settings.sound !== "on" || !ac) return;
+
+            if (performance.now() - lastCue < 120) return;
+
+            if (ac.state === "running") {
+                CUES.tap();
+            } else {
+                ac.resume().then(() => CUES.tap()).catch(() => {});
+            }
 
         });
 

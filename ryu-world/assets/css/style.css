@@ -1728,3 +1728,17 @@ body {
     }
 
 }
+
+
+/* ---------- 世界への入口：音楽のクレジット ---------- */
+
+#genesis-credit {
+    margin: 4.5rem 0 0;
+
+    font-size: 0.66rem;
+    line-height: 1.9;
+    letter-spacing: 0.12em;
+
+    color: #17171a;
+    opacity: 0.5;
+}
