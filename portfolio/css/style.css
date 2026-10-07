@@ -2321,3 +2321,155 @@ nav a.active {
         color: #d6d0c4 !important;
     }
 }
+
+/* ==========================================================
+   SOUND BUTTON（タップ音のON/OFF）
+========================================================== */
+
+.sound-toggle {
+    position: fixed;
+    right: 16px;
+    bottom: 16px;
+    z-index: 10000;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+
+    padding: 10px 16px;
+
+    border-radius: 999px;
+    border: 1px solid rgba(255, 213, 74, 0.45);
+
+    background: rgba(17, 17, 17, 0.92);
+    color: var(--accent-color);
+
+    font-family: 'Rajdhani', 'Segoe UI', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+
+    cursor: pointer;
+
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.4);
+
+    transition: transform .2s ease, border-color .2s ease, color .2s ease;
+}
+
+.sound-toggle:hover {
+    transform: translateY(-2px);
+    border-color: rgba(255, 213, 74, 0.8);
+}
+
+.sound-toggle:focus-visible {
+    outline: 2px solid var(--accent-color);
+    outline-offset: 3px;
+}
+
+.sound-toggle.muted {
+    color: #9a9a9a;
+    border-color: rgba(255, 255, 255, 0.2);
+}
+
+
+/* ==========================================================
+   SECTION LABEL / MISC（追加ページ用）
+========================================================== */
+
+.ai-note {
+    margin: 18px auto 0;
+    max-width: 760px;
+    padding: 14px 18px;
+
+    border-left: 4px solid var(--accent-color);
+    border-radius: 8px;
+
+    background: var(--accent-soft);
+    color: var(--text-muted);
+
+    font-size: 0.95rem;
+    line-height: 1.7;
+}
+
+.site-footer {
+    position: relative;
+    z-index: 1;
+
+    text-align: center;
+    padding: 28px 16px 90px;
+
+    color: #8a8a80;
+    font-size: 0.85rem;
+}
+
+.card-grid.one-col {
+    grid-template-columns: 1fr;
+}
+
+@media (max-width: 760px) {
+    .card-grid,
+    .card-grid.two-col {
+        grid-template-columns: 1fr;
+    }
+
+    .art-card,
+    .contact-card {
+        padding: 26px 22px 36px;
+    }
+
+    .art-card img {
+        height: auto;
+        max-height: 300px;
+    }
+}
+
+
+/* ==========================================================
+   追加テーマ：赤 / 茶（Web作品カード用）
+========================================================== */
+
+.art-card.theme-red {
+    --theme-color: #ff4a4a;
+    --theme-rgb: 255, 74, 74;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(160, 10, 10, 0.34),
+            rgba(26, 5, 5, 0.96)
+        );
+}
+
+.art-card.theme-brown {
+    --theme-color: #d9a066;
+    --theme-rgb: 217, 160, 102;
+
+    background:
+        linear-gradient(
+            135deg,
+            rgba(120, 72, 32, 0.34),
+            rgba(30, 20, 12, 0.96)
+        );
+}
+
+.horror-warning {
+    margin: 18px 0;
+    padding: 12px 14px;
+
+    border-left: 4px solid #ff4a4a;
+    border-radius: 6px;
+
+    background: rgba(255, 74, 74, 0.1);
+    color: #ffd0d0;
+
+    font-size: 0.92rem;
+    line-height: 1.6;
+}
+
+
+/* 黒いシルエット画像を暗いカードの上でも見えるようにする */
+.image-grid.light-bg img,
+#modal-image[src*="dragon-types"],
+#modal-image[src*="maten-emblems"] {
+    background: #f2f0e8;
+}
