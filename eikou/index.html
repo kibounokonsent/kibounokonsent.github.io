@@ -8,8 +8,12 @@
 @property --acc{syntax:'<color>';inherits:true;initial-value:#8a8984}
 :root{
   --acc:#8a8984;
-  --paper0:#f3f2ee; --panel0:#fbfbf8; --line0:#dbdad3; --ink:#1c1c1e; --mute:#686761; --soft0:#e9e8e2; --text2:#36352f;
-  --c-far:#dcdbd5; --c-near:#c6c5be; --c-win:#ecebe5; --drg:#2a2a2c;
+  /* 光の世界：癒しをもたらす、あたたかな昼。蜂蜜色の陽だまりと人通り */
+  --paper0:#f7f2e8; --panel0:#fffcf5; --line0:#e5dbc9; --ink:#1e1b16; --mute:#6e665a; --soft0:#f0e8d9; --text2:#3a342a;
+  --c-far:#ebe5d9; --c-near:#ddd3c1; --c-win:#fdf8ec; --c-win2:#efe5d1; --drg:#ab9f8b;
+  --c-street:#ebe2d0; --c-curb:#d8ccb4; --c-ppl:#574d40; --c-tree:#d0cdb1; --c-pole:#a69c8a;
+  --day:inline; --umb:none; --glow:0; --sun-o:1; --moon-o:0;
+  --shadow:0 1px 0 rgba(255,255,255,.7) inset,0 8px 24px -14px rgba(60,48,20,.28);
   --logo-filter:invert(1); --logo-filter-rev:none;
   --G:#e2a90b; --Gt:#8a5e00; --R:#cc1a31; --Rt:#b3112b;
   --accmix:#000; --accamt:24%; --mixw:0%;
@@ -20,14 +24,22 @@
   transition:--acc 1.4s ease;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper0:#18181b; --panel0:#1f1f23; --line0:#323238; --ink:#e7e6e1; --mute:#9c9b95; --soft0:#26262b; --text2:#cfcec8;
-  --c-far:#222227; --c-near:#2b2b31; --c-win:#36363d; --drg:#d6d5cf;
+  /* 闇の世界：休みをもたらす、あたたかな夜。藍の空、灯りのともる窓、人はまばら */
+  --paper0:#15141d; --panel0:#1c1b26; --line0:#302e3d; --ink:#ece6da; --mute:#a09a8f; --soft0:#22202e; --text2:#d4cec2;
+  --c-far:#242339; --c-near:#18172a; --c-win:#f2c374; --c-win2:#2a2839; --drg:#0b0a16;
+  --c-street:#1d1c2b; --c-curb:#2e2c41; --c-ppl:#06050c; --c-tree:#100f1c; --c-pole:#33314a;
+  --day:none; --umb:none; --glow:1; --sun-o:0; --moon-o:1;
+  --shadow:0 0 0 1px rgba(255,255,255,.015) inset,0 10px 30px -16px rgba(0,0,0,.8);
   --logo-filter:none; --logo-filter-rev:invert(1);
   --Gt:#f0c24a; --Rt:#ff6a78; --accmix:#fff; --accamt:32%; --mixw:38%;
   color-scheme:dark}}
 :root[data-theme="dark"]{
-  --paper0:#18181b; --panel0:#1f1f23; --line0:#323238; --ink:#e7e6e1; --mute:#9c9b95; --soft0:#26262b; --text2:#cfcec8;
-  --c-far:#222227; --c-near:#2b2b31; --c-win:#36363d; --drg:#d6d5cf;
+  /* 闇の世界：休みをもたらす、あたたかな夜。藍の空、灯りのともる窓、人はまばら */
+  --paper0:#15141d; --panel0:#1c1b26; --line0:#302e3d; --ink:#ece6da; --mute:#a09a8f; --soft0:#22202e; --text2:#d4cec2;
+  --c-far:#242339; --c-near:#18172a; --c-win:#f2c374; --c-win2:#2a2839; --drg:#0b0a16;
+  --c-street:#1d1c2b; --c-curb:#2e2c41; --c-ppl:#06050c; --c-tree:#100f1c; --c-pole:#33314a;
+  --day:none; --umb:none; --glow:1; --sun-o:0; --moon-o:1;
+  --shadow:0 0 0 1px rgba(255,255,255,.015) inset,0 10px 30px -16px rgba(0,0,0,.8);
   --logo-filter:none; --logo-filter-rev:invert(1);
   --Gt:#f0c24a; --Rt:#ff6a78; --accmix:#fff; --accamt:32%; --mixw:38%;
   color-scheme:dark}
@@ -43,6 +55,8 @@
 [hidden]{display:none!important}
 body{margin:0;background:var(--paper);color:var(--ink);font-family:var(--f-body);line-height:1.9;font-size:15px}
 ::selection{background:var(--acc-soft)}
+.catcard,.fac,.teaser,.mode,.attr,.dept,.pyr,.elc,.spc,.stg,figure{box-shadow:var(--shadow)}
+body{transition:background-color 1.2s ease,color 1.2s ease}
 a{color:inherit}
 a:focus-visible,button:focus-visible,input:focus-visible{outline:2px solid var(--acc-t);outline-offset:2px}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
@@ -83,9 +97,18 @@ mark{background:var(--acc-soft);color:var(--ink);font-weight:700}
 .spoilbar b{color:var(--Rt)}
 .spoilbar button{background:none;border:0;color:var(--mute);font:inherit;text-decoration:underline;text-underline-offset:3px;cursor:pointer;margin-left:10px;padding:0}
 @media (max-width:640px){
-  .hbar{flex-wrap:wrap;gap:8px}
-  .search{order:3;flex-basis:100%;max-width:none}
-  .who-pill{margin-left:auto}
+  /* スマホ：検索は虫めがねだけにして、ヘッダーを一段に */
+  .hbar{gap:6px;padding:8px 12px;position:relative}
+  .brand-logo svg{width:72px;height:30px}
+  .search{flex:0 0 34px;max-width:34px;margin-left:auto}
+  .search input{height:34px;padding:0 0 0 30px;color:transparent;cursor:pointer}
+  .search input::placeholder{color:transparent}
+  .search:focus-within{position:absolute;left:12px;right:12px;top:8px;max-width:none;z-index:5}
+  .search:focus-within input{color:var(--ink);cursor:text;padding-right:10px}
+  .search:focus-within input::placeholder{color:var(--mute)}
+  .hbtn{height:34px;padding:0 8px}
+  .spoil-pill{font-size:11px}
+  .catnav{padding:0 12px;gap:18px}
   .brand-sub{display:none}
   .hbtn .lbl-long{display:none}
   .bar-long{display:none}
@@ -93,7 +116,42 @@ mark{background:var(--acc-soft);color:var(--ink);font-weight:700}
 
 /* ---------- 街（人の世界／竜の世界で同じ景色） ---------- */
 .city{display:block;width:100%;height:100%}
-.city .far{fill:var(--c-far)} .city .near{fill:var(--c-near)} .city .win{fill:var(--c-win)}
+.city .far{fill:var(--c-far)} .city .near{fill:var(--c-near)} .city .win{fill:var(--c-win)} .city .win.dim{fill:var(--c-win2)}
+.city .street{fill:var(--c-street)} .city .curb{fill:var(--c-curb)}
+.city .tree{fill:var(--c-tree)}
+.city .pole{stroke:var(--c-pole);fill:none;stroke-width:1.3;stroke-linecap:round}
+.city .lamp-h{fill:var(--c-pole)}
+.city .lamp-g{opacity:var(--glow);transition:opacity 1.4s ease}
+.city .lamp-g .bulb{fill:#ffe6b0}
+/* 街の人々（昼だけ出歩く人は class="day"） */
+.city .ppl{color:var(--c-ppl)}
+.city .ppl.day{display:var(--day)}
+.city .ppl .st{fill:none;stroke:currentColor;stroke-width:1.25;stroke-linecap:round;stroke-linejoin:round}
+.city .ppl .fl{fill:currentColor}
+.city .ppl .umb{display:var(--umb)}
+/* 竜の世界に目覚めると、人ごみの中の半竜が見えるようになる */
+.city .hd{opacity:0;transition:opacity 1.8s ease var(--d,1s);color:color-mix(in oklab,var(--acc-t) 65%,var(--c-ppl))}
+:root[data-awake] .city .hd{opacity:1}
+.paused,.paused *{animation-play-state:paused!important}
+
+/* 空：光の世界は左上から陽が射し、闇の世界は右上に月が出る */
+.sky{position:absolute;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.sky::before{content:"";position:absolute;inset:0;transition:opacity 1.2s ease;opacity:var(--sun-o);
+  background:radial-gradient(ellipse 60% 75% at 10% -8%,rgba(255,214,130,.45),transparent 68%),radial-gradient(ellipse 80% 40% at 50% 100%,rgba(255,222,160,.25),transparent 70%),linear-gradient(to bottom,rgba(244,226,192,.7),rgba(244,226,192,0) 80%)}
+.sky::after{content:"";position:absolute;inset:0;transition:opacity 1.2s ease;opacity:var(--moon-o);
+  background:radial-gradient(ellipse 70% 40% at 50% 100%,rgba(242,180,96,.13),transparent 70%),radial-gradient(circle at 84% 20%,rgba(255,232,190,.12),transparent 26%),linear-gradient(to bottom,#0c0b19,rgba(12,11,25,0) 82%)}
+.sky .sun{position:absolute;left:-60px;top:-60px;width:260px;height:260px;border-radius:50%;opacity:calc(var(--sun-o) * .9);transition:opacity 1.2s ease;
+  background:radial-gradient(circle,rgba(255,250,232,1) 0 18%,rgba(255,232,170,.55) 30%,transparent 64%)}
+.sky .sun::after{content:"";position:absolute;inset:-160px;border-radius:50%;
+  background:repeating-conic-gradient(from 100deg,rgba(255,220,150,.14) 0 4deg,transparent 4deg 16deg);
+  -webkit-mask:radial-gradient(circle,#000 10%,transparent 60%);mask:radial-gradient(circle,#000 10%,transparent 60%)}
+.sky .moon{position:absolute;right:11%;top:46px;width:44px;height:44px;border-radius:50%;opacity:var(--moon-o);transition:opacity 1.2s ease;
+  background:radial-gradient(circle at 38% 36%,#fbf1dc,#e6d3ae 72%);box-shadow:0 0 30px 6px rgba(255,226,170,.18),0 0 100px 26px rgba(255,226,170,.07)}
+.sky .moon::after{content:"";position:absolute;inset:0;border-radius:50%;background:radial-gradient(circle at 74% 30%,rgba(12,11,25,.9) 0 44%,transparent 46%)}
+@media (max-width:640px){.sky .moon{width:30px;height:30px;top:18px;right:6%}.sky .sun{left:-90px;top:-90px}}
+.sky .stars{position:absolute;inset:0 0 40%;opacity:calc(var(--moon-o) * .8);transition:opacity 1.2s ease;
+  background-image:radial-gradient(1px 1px at 12% 22%,#fff,transparent),radial-gradient(1px 1px at 27% 48%,#fff8,transparent),radial-gradient(1.4px 1.4px at 41% 14%,#fff,transparent),radial-gradient(1px 1px at 58% 36%,#fffa,transparent),radial-gradient(1px 1px at 69% 9%,#fff,transparent),radial-gradient(1.2px 1.2px at 77% 52%,#fff9,transparent),radial-gradient(1px 1px at 92% 30%,#fff,transparent),radial-gradient(1px 1px at 6% 60%,#fff7,transparent),radial-gradient(1px 1px at 35% 70%,#fff6,transparent),radial-gradient(1.2px 1.2px at 88% 66%,#fff8,transparent);
+  -webkit-mask-image:linear-gradient(#000 40%,transparent);mask-image:linear-gradient(#000 40%,transparent)}
 .city .drg{color:var(--drg);opacity:0;transition:opacity 1.8s ease var(--d,0s)}
 :root[data-awake] .city .drg{opacity:var(--o,.5)}
 .city .fly{animation:fly var(--t,9s) ease-in-out infinite alternate}
@@ -101,18 +159,19 @@ mark{background:var(--acc-soft);color:var(--ink);font-weight:700}
 
 /* ---------- hero ---------- */
 .hero{position:relative;text-align:center;padding:52px 20px 0;border-bottom:1px solid var(--line);overflow:hidden}
+.hero > .sky{-webkit-mask-image:linear-gradient(#000 70%,transparent);mask-image:linear-gradient(#000 70%,transparent)}
 .hero-logo svg{width:min(100%,440px);height:auto;aspect-ratio:54.98/22.83;display:block;margin:0 auto;filter:var(--logo-filter);position:relative;z-index:1}
 .epic{margin:22px 0 0;font-family:var(--f-display);font-weight:800;font-size:clamp(21px,4.6vw,32px);letter-spacing:.42em;padding-left:.42em;position:relative;z-index:1}
 .hero .kicker{margin:8px 0 0;font-size:12px;letter-spacing:.5em;padding-left:.5em;color:var(--mute);position:relative;z-index:1}
-.hero .scene{height:clamp(150px,24vw,230px);margin:14px -20px 0;position:relative;z-index:1}
-.hero .note{position:absolute;left:0;right:0;bottom:12px;font-size:11px;color:var(--mute);letter-spacing:.1em}
+.hero .scene{height:clamp(176px,25vw,250px);margin:14px -20px 0;position:relative;z-index:1}
+.hero .note{position:relative;z-index:2;margin:14px 0 0;font-size:11px;color:var(--mute);letter-spacing:.1em}
 .hero .note button{all:unset;cursor:pointer;text-decoration:underline;text-underline-offset:3px}
 
 /* ---------- 光と闇の陣営 ---------- */
 .factions{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:880px;margin:28px auto 0;padding-inline:20px}
 .fac{display:flex;flex-direction:column;gap:8px;padding:26px 24px 22px;text-decoration:none;min-width:0;position:relative;background:var(--panel);border:1px solid var(--line)}
 .fac.light{border-top:3px solid var(--G);background:radial-gradient(ellipse 70% 80% at 0% 0%,color-mix(in oklab,var(--G) 12%,transparent),transparent 70%),var(--panel)}
-.fac.dark{border-top:3px solid var(--R);text-align:right;align-items:flex-end;background:radial-gradient(ellipse 70% 80% at 100% 0%,color-mix(in oklab,var(--R) 10%,transparent),transparent 70%),var(--panel)}
+.fac.dark{border-top:3px solid var(--R);text-align:right;align-items:flex-end;background:radial-gradient(ellipse 70% 80% at 100% 0%,color-mix(in oklab,var(--R) 9%,transparent),transparent 70%),radial-gradient(ellipse 60% 60% at 100% 100%,rgba(242,180,96,.07),transparent 70%),var(--panel)}
 .fac .el{font-size:11px}
 .fac.light .el,.fac.light .lead b{color:var(--Gt)}
 .fac.dark .el,.fac.dark .lead b{color:var(--Rt)}
@@ -125,6 +184,20 @@ mark{background:var(--acc-soft);color:var(--ink);font-weight:700}
 .fac .lead b{font-weight:700}
 .fac:hover .nm{text-decoration:underline;text-underline-offset:6px;text-decoration-thickness:1px}
 @media (max-width:600px){.factions{grid-template-columns:1fr}.fac.dark{text-align:left;align-items:flex-start}}
+/* 光は癒し、闇は休み。どちらもあたたかい。白と黒（龍）がその間に立つ */
+.factions{position:relative}
+.fac-seal{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:46px;height:46px;border-radius:50%;display:grid;place-items:center;background:var(--paper);box-shadow:0 0 0 1px var(--line),0 0 0 6px var(--paper);z-index:2;pointer-events:none}
+.fac-seal .yy{width:28px;height:28px}
+.fac .meta{display:flex;gap:18px;font-size:11px;color:var(--mute);letter-spacing:.06em;margin-top:2px}
+.fac.dark .meta{justify-content:flex-end}
+.fac .meta b{font-family:var(--f-display);font-weight:800;font-size:15px;margin-left:8px;letter-spacing:.1em;color:var(--ink)}
+.fac .meta b{font-weight:500;opacity:.8}
+.tenet{max-width:880px;margin:22px auto 0;padding:0 20px;text-align:center;font-family:var(--f-display);color:var(--text2);display:flex;flex-direction:column;gap:2px}
+.tenet span:first-child{font-size:15px;letter-spacing:.14em;color:var(--ink)}
+.tenet span{font-size:13px;letter-spacing:.12em}
+.tenet .tenet-sp{color:var(--Rt);font-size:12px;margin-top:4px}
+@media (max-width:600px){.fac-seal{display:none}.fac.dark .meta{justify-content:flex-start}.tenet span:first-child{font-size:14px;letter-spacing:.08em}}
+
 
 /* ---------- section headings ---------- */
 .sec-h{display:flex;align-items:center;gap:14px;margin:46px 0 18px}
@@ -139,16 +212,16 @@ mark{background:var(--acc-soft);color:var(--ink);font-weight:700}
 .cg-h .jp{font-family:var(--f-display);font-weight:800;font-size:15px}
 .cg-h .en{font-size:10px;color:var(--mute)}
 .catgrid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
-.catcard{display:flex;flex-direction:column;gap:4px;padding:18px 16px;text-decoration:none;min-width:0;background:var(--panel);border:1px solid var(--line);position:relative;transition:border-color .2s,transform .2s,box-shadow .2s}
-.catcard .ic{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;margin-bottom:8px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line);transition:transform .5s}
+.catcard{display:flex;flex-direction:column;gap:4px;padding:18px 16px;text-decoration:none;min-width:0;background:var(--panel);border:1px solid var(--line);position:relative;transition:border-color .2s,box-shadow .2s}
+.catcard .ic{width:54px;height:54px;border-radius:50%;display:grid;place-items:center;margin-bottom:8px;position:relative;overflow:hidden;box-shadow:inset 0 0 0 1px var(--line)}
 .catcard .ic::before{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent 50%,var(--soft) 50%)}
-.catcard .ic svg{width:30px;height:30px;position:relative;color:color-mix(in srgb,var(--cc,var(--ink)),#fff var(--mixw));transition:transform .5s}
+.catcard .ic svg{width:30px;height:30px;position:relative;color:color-mix(in srgb,var(--cc,var(--ink)),#fff var(--mixw))}
 .catcard[data-k="org"] .ic svg{color:var(--ink)}
 .catcard .name{font-family:var(--f-display);font-weight:800;font-size:17px;line-height:1.45;display:block}
 .catcard .desc{font-size:13px;color:var(--mute);line-height:1.65;display:block}
-.catcard:hover,.catcard:focus-visible{border-color:var(--acc-t);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.08)}
-.catcard:hover .ic{transform:rotate(180deg)}
-.catcard:hover .ic svg{transform:rotate(-180deg)}
+.catcard:hover,.catcard:focus-visible{border-color:var(--acc-t);box-shadow:0 0 0 1px var(--acc-t) inset,var(--shadow)}
+.catcard .ic::before{transition:transform .6s cubic-bezier(.3,.7,.2,1)}
+.catcard:hover .ic::before,.catcard:focus-visible .ic::before{transform:rotate(180deg)}
 @media (max-width:760px){.catgrid{grid-template-columns:repeat(2,1fr)}}
 @media (max-width:420px){
   .catgrid{grid-template-columns:1fr;gap:8px}
@@ -177,7 +250,9 @@ h3::before{content:"";width:10px;height:10px;border-radius:50%;flex:none;backgro
 .ahead .lede{margin-bottom:0}
 .page > .ahead.plain{border-bottom:0;padding:6px 0 6px;margin-bottom:18px}
 .ahead.light{border-top:2px solid var(--G);background:linear-gradient(180deg,color-mix(in oklab,var(--G) 7%,transparent),transparent 80%)}
-.ahead.dark{border-top:2px solid var(--R);background:linear-gradient(180deg,color-mix(in oklab,var(--R) 7%,transparent),transparent 80%)}
+.ahead.dark{border-top:2px solid var(--R);background:linear-gradient(180deg,color-mix(in oklab,var(--R) 6%,transparent),transparent 80%)}
+.pstrip + .ahead{border-top-width:0;padding-top:20px}
+.pstrip.light{border-bottom:2px solid var(--G)} .pstrip.dark{border-bottom:2px solid var(--R)}
 .ahead.chap{border-top:2px solid var(--chc)}
 .ahead .cat-ic{width:30px;height:30px;display:block;margin:14px 0 -4px;color:color-mix(in srgb,var(--cc,var(--ink)),#fff var(--mixw))}
 .ahead .cat-ic[data-k="org"]{color:var(--ink)}
@@ -261,6 +336,40 @@ footer a,footer button{color:var(--mute);text-decoration:none;background:none;bo
 footer a:hover,footer button:hover{color:var(--ink)}
 footer .links{display:flex;gap:16px}
 
+
+/* ---------- 各ページ上部：その世界の空と街並み ---------- */
+.pstrip{position:relative;height:120px;overflow:hidden;border-bottom:1px solid var(--line)}
+.pstrip .pcity{position:absolute;left:0;right:0;bottom:0;height:86px;-webkit-mask-image:linear-gradient(transparent,#000 45%);mask-image:linear-gradient(transparent,#000 45%)}
+.pstrip .city{height:100%}
+.pstrip .sky .moon{top:18px;width:34px;height:34px}
+.pstrip .sky .sun{width:200px;height:200px;left:-70px;top:-80px}
+.pstrip::after{content:"";position:absolute;inset:0;pointer-events:none}
+.pstrip.light::after{background:linear-gradient(100deg,color-mix(in oklab,var(--G) 16%,transparent),transparent 55%)}
+.pstrip.dark::after{background:linear-gradient(260deg,color-mix(in oklab,var(--R) 12%,transparent),transparent 55%)}
+.pstrip + .wrap.page{padding-top:18px}
+
+/* ---------- キャラクター：人物カード ---------- */
+.chgroup{margin-top:28px}
+.chgroup:first-of-type{margin-top:6px}
+.chgroup .cg-h{display:flex;align-items:baseline;gap:12px;margin:0 0 12px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+.chgroup .cg-h .jp{font-family:var(--f-display);font-weight:800;font-size:15px}
+.chgroup.light .cg-h .jp{color:var(--Gt)} .chgroup.dark .cg-h .jp{color:var(--Rt)}
+.chgroup .cg-h .en{font-size:10px;color:var(--mute)}
+.chgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.chcard{display:flex;gap:14px;align-items:flex-start;padding:14px 16px;text-decoration:none;background:var(--panel);border:1px solid var(--line);box-shadow:var(--shadow);transition:border-color .2s,box-shadow .2s;min-width:0}
+.chcard:hover,.chcard:focus-visible{border-color:var(--sc,var(--acc-t));box-shadow:0 0 0 1px var(--sc,var(--acc-t)) inset,var(--shadow)}
+.chcard.light{--sc:var(--G)} .chcard.dark{--sc:var(--R)} .chcard.none{--sc:var(--mute)}
+.chcard .mono{flex:none;width:46px;height:46px;border-radius:50%;display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:20px;line-height:1;position:relative;
+  background:var(--soft);box-shadow:inset 0 0 0 1px var(--line);color:var(--ink)}
+.chcard .mono::before{content:"";position:absolute;inset:-4px;border-radius:50%;border:1.5px solid var(--sc);opacity:.75}
+.chcard.light .mono{background:radial-gradient(circle at 30% 25%,color-mix(in oklab,var(--G) 22%,var(--panel)),var(--soft) 70%)}
+.chcard.dark .mono{background:radial-gradient(circle at 70% 25%,color-mix(in oklab,var(--R) 18%,var(--panel)),var(--soft) 70%)}
+.chcard.none .mono::before{border-style:dotted}
+.chcard .txt{min-width:0;display:flex;flex-direction:column;gap:2px}
+.chcard .t{font-family:var(--f-display);font-weight:800;font-size:17px;line-height:1.4}
+.chcard .l{font-size:12.5px;color:var(--mute);line-height:1.65}
+@media (prefers-reduced-motion:no-preference){.chcard{animation:rise .5s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i,0) * 40ms)}}
+
 /* ---------- 所属図 ---------- */
 .orgchart{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:24px 0}
 .dept{border:1px solid var(--line);background:var(--panel);border-top:2px solid var(--fc);min-width:0}
@@ -338,7 +447,7 @@ footer .links{display:flex;gap:16px}
 .rline{font-family:var(--f-display);font-weight:800;font-size:clamp(22px,5.4vw,34px);letter-spacing:.2em;margin:10px 0;min-height:1.4em}
 .rline.sm{font-size:13px;font-weight:400;letter-spacing:.1em;color:var(--mute)}
 .mode{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;gap:6px;padding:22px 20px;background:var(--panel);border:1px solid var(--line);transition:border-color .2s,transform .2s}
-.mode:hover,.mode:focus-visible{border-color:var(--ink);transform:translateY(-2px)}
+.mode:hover,.mode:focus-visible{border-color:var(--ink);box-shadow:0 0 0 1px var(--ink) inset}
 .mode .big{font-family:var(--f-display);font-weight:800;font-size:24px}
 .mode .who{font-size:13px;font-weight:700}
 .mode .txt{font-size:13px;color:var(--mute);line-height:1.7}
@@ -352,7 +461,7 @@ footer .links{display:flex;gap:16px}
 .attr svg{width:28px;height:28px;color:var(--ink);transition:color .25s}
 .attr b{font-family:var(--f-display);font-size:20px;line-height:1.2}
 .attr span{font-size:12px;color:var(--mute);line-height:1.6}
-.attr:hover,.attr:focus-visible{border-color:var(--ac);transform:translateY(-2px)}
+.attr:hover,.attr:focus-visible{border-color:var(--ac);box-shadow:0 0 0 1px var(--ac) inset}
 .attr:hover svg,.attr:focus-visible svg{color:var(--ac)}
 .attr.chosen{border-color:var(--ac);background:color-mix(in oklab,var(--panel),var(--ac) 10%)}
 .attr.chosen svg{color:var(--ac)}
@@ -603,7 +712,8 @@ body.quake{animation:quake .5s linear infinite}
 
 /* ---------- 夜の街：ページの終わりの先 ---------- */
 .night{position:relative;height:100vh;min-height:540px;overflow:hidden;user-select:none;
-  --c-far:#1d2030;--c-near:#10121b;--c-win:#e8b94a;--drg:#262a3a;
+  --c-far:#1d2030;--c-near:#10121b;--c-win:#e8b94a;--c-win2:#1b1e2b;--drg:#262a3a;
+  --c-street:#0b0d14;--c-curb:#232738;--c-ppl:#05060a;--c-tree:#0b0c13;--c-pole:#2c3042;--day:none;--umb:inline;--glow:1;
   background:linear-gradient(to bottom,var(--paper) 0,var(--night) 26%,var(--night2) 62%,var(--night) 80%,var(--paper) 100%)}
 .night .nt-sky{position:absolute;inset:0;background:radial-gradient(ellipse 60% 22% at 50% 58%,rgba(232,185,74,.10),transparent 70%)}
 .night .nt-city{position:absolute;left:0;right:0;top:24%;height:34%}
@@ -611,6 +721,7 @@ body.quake{animation:quake .5s linear infinite}
 .night .nt-city .city{height:100%}
 .night .nt-wet{position:absolute;left:0;right:0;top:58%;height:22%;transform:scaleY(-1);opacity:.22;filter:blur(2.5px);-webkit-mask-image:linear-gradient(to top,#000,transparent 90%);mask-image:linear-gradient(to top,#000,transparent 90%)}
 .night .nt-wet .city{height:155%}
+.night .nt-wet .city *{animation:none!important}
 .night .nt-rain{position:absolute;inset:18% 0 12%;opacity:calc(.5 + var(--dk) * .1);
   background-image:repeating-linear-gradient(103deg,transparent 0 22px,rgba(200,212,235,.16) 22px 23px,transparent 23px 61px),repeating-linear-gradient(98deg,transparent 0 37px,rgba(200,212,235,.09) 37px 38px,transparent 38px 90px);
   background-size:400px 400px,520px 520px;animation:rain .7s linear infinite}
@@ -683,7 +794,7 @@ body.quake{animation:quake .5s linear infinite}
 .al-frags{list-style:none;margin:44px 0 60px;padding:0;border-top:1px solid var(--al-line)}
 .al-frags li{border-bottom:1px solid var(--al-line);padding-left:var(--x)}
 .frag{display:flex;align-items:baseline;gap:16px;padding:16px 4px;text-decoration:none;color:var(--al-ink);opacity:.62;transition:opacity .3s,transform .3s}
-.frag:hover,.frag:focus-visible{opacity:1;transform:translateY(-2px)}
+.frag:hover,.frag:focus-visible{opacity:1}
 .frag .tt{font-size:19px;font-weight:700;letter-spacing:.06em}
 .frag .k,.al-kind{font-size:11px;letter-spacing:.2em;font-family:var(--f-body)}
 .k.restored,.al-kind.restored{color:#bdb7a9}
@@ -774,6 +885,7 @@ figure.record.al figcaption{color:var(--al-mute)}
 <footer><span>エイコウ 設定資料集 ／ 龍の世界・フロンズワールド　第三の時代<a class="al-crack" id="alCrack" href="#alias" hidden>エイリアス</a></span><span class="links"><button type="button" data-open-who>属性を選び直す</button><button type="button" data-open-spoiler>ネタバレ表示を切り替える</button></span></footer>
 
 <div class="intro" id="intro" role="dialog" aria-modal="true" aria-label="資料集の入口" hidden>
+  <div class="sky" aria-hidden="true"><i class="stars"></i><i class="sun"></i><i class="moon"></i></div>
   <div class="scene" id="introScene" aria-hidden="true"></div>
   <button class="skip" id="introSkip" type="button" hidden></button>
   <div class="stage" id="stage"></div>
@@ -1747,11 +1859,87 @@ function dragonUse(k, x, y, h, cls, style){
   const d = DRAGONS.find(v=>v.k===k); const w = h * d.w / d.h;
   return `<g class="drg ${cls||''}" style="${style||''}"><svg x="${(x - w/2).toFixed(1)}" y="${(y - h).toFixed(1)}" width="${w.toFixed(1)}" height="${h}" viewBox="0 0 ${d.w} ${d.h}" overflow="visible"><use href="#dg-${k}" x="0" y="0" width="${d.w}" height="${d.h}"/></svg></g>`;
 }
-function city(seed, w, scar){
+/* ---------- 通り：街路樹、街灯、行き交う人々 ----------
+   人の目には人しか見えない。目覚めたあとは、人ごみの中に角やしっぽのある者が混ざって見える */
+const PPL = {
+  head:'<circle class="fl" cx=".5" cy="-13.1" r="1.75"/>',
+  hair:'<path class="fl" d="M-1.3-13.4q.2-2.1 1.9-2.1t1.9 1.6q-1.5-.6-3.8.5z"/>',
+  torso:'<path class="fl" d="M-1.7-11.1Q.1-11.9 1.8-11.1L2.1-5.6H-2z"/>',
+  coat:'<path class="fl" d="M-1.7-11.1Q.1-11.9 1.8-11.1L2.8-3.2H-2.7z"/>',
+  skirt:'<path class="fl" d="M-1.5-11.1Q.1-11.8 1.6-11.1L1.8-7.4L3-3.6H-2.8L-1.8-7.4z"/>',
+  la:'<path class="st la" d="M-.8-6.1L-2.3 0M1-6.1L2.5 0"/>',
+  lb:'<path class="st lb" d="M-.4-6.1L-.9 0M.6-6.1L.9 0"/>',
+  stand:'<path class="st" d="M-.6-6.1V0M.8-6.1V0"/>',
+  arms:'<path class="st" d="M-1.2-10.5L-2.4-6.6M1.5-10.5L2.7-6.8"/>',
+  armsUp:'<path class="st" d="M-1.2-10.5L-2.4-6.6M1.5-10.5L1.4-8.2L.7-11"/>',
+  bag:'<rect class="fl" x="2.1" y="-7.2" width="2.6" height="3.2" rx=".5"/>',
+  pack:'<rect class="fl" x="-3.4" y="-10.8" width="2" height="4.2" rx=".7"/>',
+  umb:'<g class="umb"><path class="fl" d="M-5.4-15.6Q.5-21.4 6.4-15.6Q5-16.4 3.5-15.6Q2-16.4 .5-15.6Q-1-16.4-2.5-15.6Q-4-16.4-5.4-15.6z"/><path class="st" style="stroke-width:.6" d="M.5-15.6V-9.4"/></g>',
+  // 半竜のしるし（目覚めると見える）
+  horns:'<path class="st" style="stroke-width:.9" d="M-.4-14.5L-1.6-17M1.3-14.6L2.3-16.9"/>',
+  tail:'<path class="st" style="stroke-width:1.1" d="M-1.7-6.2Q-6-5.8-6.6-1.6L-7.8-2.4"/>',
+  wing:'<path class="fl" d="M-1.4-10.6L-6.4-14.6L-5.2-11.6L-7-11.2L-5-9.4L-6-8.4L-1.6-8.4z"/>',
+};
+function figure(kind, opt){
+  const P = PPL; let b = P.head;
+  if(opt.hair) b += P.hair;
+  b += kind==='coat' ? P.coat : kind==='skirt' ? P.skirt : P.torso;
+  b += opt.walk ? P.la : P.stand;
+  b += opt.umb ? P.armsUp : P.arms;
+  if(opt.bag) b += P.bag;
+  if(opt.pack) b += P.pack;
+  if(opt.umb) b += P.umb;
+  let hd = '';
+  if(opt.hd) hd = `<g class="hd" style="--d:${opt.hdd}s">${opt.hd.map(k=>P[k]).join('')}</g>`;
+  return b + hd;
+}
+function street(p, W, H, w){
+  const Y = H + 12;   // 歩道の足もと（奥の列）
+  let out = `<rect class="street" x="-20" y="${H}" width="${W + 40}" height="40"/><rect class="curb" x="-20" y="${H}" width="${W + 40}" height="1.6"/>`;
+  // 街路樹（奥の列）
+  let trees = '';
+  for(let x = 40 + p()*60; x < W; x += 150 + p()*140){
+    const h = 26 + p()*12, r1 = 9 + p()*4;
+    trees += `<g class="tree"><rect x="${(x-.8).toFixed(1)}" y="${(H+8-h*.45).toFixed(1)}" width="1.6" height="${(h*.45).toFixed(1)}"/><circle cx="${x.toFixed(1)}" cy="${(H+8-h*.55).toFixed(1)}" r="${r1.toFixed(1)}"/><circle cx="${(x-r1*.6).toFixed(1)}" cy="${(H+8-h*.42).toFixed(1)}" r="${(r1*.7).toFixed(1)}"/><circle cx="${(x+r1*.65).toFixed(1)}" cy="${(H+8-h*.45).toFixed(1)}" r="${(r1*.75).toFixed(1)}"/></g>`;
+  }
+  // 街灯：昼は消え、夜は灯る。周回を重ねると、灯りの数が減る
+  let lamps = '', glows = '';
+  const nLamp = [1,1,.8,.55,.3][w];
+  for(let x = 110 + p()*40, i = 0; x < W; x += 210 + p()*40, i++){
+    const on = p() < nLamp;
+    lamps += `<path class="pole" d="M${x.toFixed(1)} ${Y} V${H-26} q0-5 6-5"/><rect class="lamp-h" x="${(x+4).toFixed(1)}" y="${H-32.4}" width="6" height="2.4" rx="1"/>`;
+    if(on) glows += `<circle cx="${(x+7).toFixed(1)}" cy="${H-29}" r="26" fill="url(#lampGlow)"/><ellipse cx="${(x+7).toFixed(1)}" cy="${Y-1}" rx="22" ry="3.2" fill="url(#lampPool)"/><rect class="bulb" x="${(x+4.6).toFixed(1)}" y="${H-30.4}" width="4.8" height="1.4" rx=".7"/>`;
+  }
+  // 人々：奥と手前の二列。昼だけ出歩く人（day）は夜にはいない。雨の夜には傘をさす
+  const keep = [1,.72,.48,.28,.12][w];
+  const KINDS = ['torso','torso','coat','skirt','coat','torso'];
+  const HDS = [['horns'],['tail'],['horns','tail'],['wing'],['horns','wing']];
+  let rows = '';
+  for(const row of [{y:Y-2, s:1.1, gap:[30,80]},{y:Y+14, s:1.6, gap:[60,140]}]){
+    for(let x = 10 + p()*30; x < W - 6; x += row.gap[0] + p()*(row.gap[1]-row.gap[0])){
+      const pair = p() < .22;                     // 連れ立って歩く二人
+      for(let k = 0; k < (pair ? 2 : 1); k++){
+        const px = x + k*7.5, child = k===1 && p() < .45;
+        const kind = KINDS[Math.floor(p()*KINDS.length)];
+        const dir = p() < .5 ? 1 : -1;
+        const walk = p() < .62, day = p() < .55, hd = p() < .2, umb = p() < .8;
+        const opt = {walk, hair:p()<.4, bag:p()<.28, pack:p()<.12, umb, hd: hd ? HDS[Math.floor(p()*HDS.length)] : null, hdd:(1 + p()*2.5).toFixed(2)};
+        const sc = row.s * (child ? .68 : (.94 + p()*.12));
+        const alive = p() < keep;
+        if(!alive) continue;
+        rows += `<g class="ppl${day ? ' day' : ''}" transform="translate(${px.toFixed(1)} ${row.y.toFixed(1)}) scale(${(sc*dir).toFixed(3)} ${sc.toFixed(3)})">${figure(kind, opt)}</g>`;
+      }
+    }
+  }
+  const defs = `<defs><radialGradient id="lampGlow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset=".35" stop-color="#ffcf70" stop-opacity=".16"/><stop offset="1" stop-color="#ffcf70" stop-opacity="0"/></radialGradient><radialGradient id="lampPool"><stop offset="0" stop-color="#ffd98a" stop-opacity=".35"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient></defs>`;
+  return `${defs}<g>${trees}</g>${out}<g>${lamps}</g><g class="lamp-g">${glows}</g><g>${rows}</g>`;
+}
+function city(seed, w, scar, still, wide){
   // w：摩耗の段階（0〜4）。街の形（seed）は同じまま、灯りが減り、建物が欠け、竜がいなくなり、ノイズと亀裂が混ざる
   w = w || 0;
-  const r = rng(seed), q = rng(seed*31 + w*7 + 3), W = 1200, H = 300;
+  const r = rng(seed), q = rng(seed*31 + w*7 + 3), W = wide || 1200, H = 300;
   const LIT = [.42,.34,.24,.13,.05][w], DROP = [0,.05,.12,.2,.32][w], CHOP = [0,.08,.16,.26,.36][w];
+  const pr = rng(seed*7 + 11), pp = rng(seed*13 + 5);   // 窓の灯り／通りの人々（街の形とは別の乱数）
   let far = '', near = '', win = '';
   for(let x = -20; x < W; ){ const bw = 34 + r()*60, h = 70 + r()*140, ant = r()<.25; if(!(q() < DROP*.6)){ far += `<rect class="far" x="${x.toFixed(1)}" y="${(H-h).toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}"/>`; if(ant) far += `<rect class="far" x="${(x+bw/2-2).toFixed(1)}" y="${(H-h-18).toFixed(1)}" width="3" height="18"/>`; } x += bw + r()*6; }
   for(let x = -10; x < W; ){
@@ -1765,7 +1953,7 @@ function city(seed, w, scar){
         near += `<polygon class="near" points="${pts} ${(x+bw).toFixed(1)},${(y+8).toFixed(1)} ${(x+bw).toFixed(1)},${H}"/>`;
       } else near += `<rect class="near" x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${bw.toFixed(1)}" height="${h.toFixed(1)}"/>`;
     }
-    for(let wy = H - h0 + 10; wy < H - 12; wy += 14) for(let wx = x + 7; wx < x + bw - 10; wx += 12){ const lit = r() < .42; if(!gone && wy > y + 6 && lit && q() < LIT/.42) win += `<rect class="win" x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="5" height="7"/>`; }
+    for(let wy = H - h0 + 10; wy < H - 12; wy += 14) for(let wx = x + 7; wx < x + bw - 10; wx += 12){ const lit = r() < .42; if(!gone && wy > y + 6 && lit && q() < LIT/.42) win += `<rect class="win${pr() < .5 ? ' dim' : ''}" x="${wx.toFixed(1)}" y="${wy.toFixed(1)}" width="5" height="7"/>`; }
     x += bw + 2 + r()*10;
   }
   // 竜：空を飛ぶもの、遠くのビルの向こうにいるもの。周回を重ねると、ひとつずつ見えなくなる
@@ -1776,20 +1964,21 @@ function city(seed, w, scar){
   ].slice(0, 3 - Math.min(w,3)).join('');
   const part = (k, p, x, y, h, rot, style) => { const d = DRAGONS.find(v=>v.k===k); const dw = h*d.w/d.h;
     return `<g class="drg" style="${style}"><g transform="translate(${x} ${y}) rotate(${rot})"><svg x="${(-dw/2).toFixed(1)}" y="${-h}" width="${dw.toFixed(1)}" height="${h}" viewBox="${d.x} ${d.y} ${d.w} ${d.h}" overflow="visible"><g fill="currentColor"><use href="#dgp-${k}-${p}"/></g></svg></g></g>`; };
+  // ロゴの真後ろは空けておく（そこには「あなたの竜」の翼が開く）。竜は左右に分けて置く
   const peek = w >= 2 ? '' : [
-    part('02','wr', 930, 360, 230, -14, '--o:.4;--d:1.6s'),   // ビルの向こうから突き出す翼の先
-    part('04','body', 700, 236, 120, 96, '--o:.4;--d:2s'),    // 屋根の間を這うしっぽ
+    part('04','body', 700, 236, 110, 96, '--o:.4;--d:2s'),    // 屋根の間を這うしっぽ
   ].join('');
   const behind = w >= 4 ? '' : [
-    dragonUse('00', 560, 236, 170, '', '--o:.5;--d:.6s'),
+    dragonUse('00', 935, 240, 150, '', '--o:.5;--d:.6s'),
     w >= 3 ? '' : dragonUse('04', 330, 200, 90, '', '--o:.42;--d:1.1s'),
   ].join('');
   // 亀裂とノイズ
   let cr = '';
   const nCr = scar ? 1 : [0,0,1,3,6][w];
   for(let i=0;i<nCr;i++){ let cx = 100 + q()*1000, cy = 0, d = `M${cx.toFixed(0)} 0`; while(cy < H){ cy += 18 + q()*30; cx += (q()-.5)*46; d += ` L${cx.toFixed(0)} ${cy.toFixed(0)}`; } cr += `<path d="${d}"/>`; }
-  const noise = w >= 2 ? `<rect class="cnoise" width="${W}" height="${H}" style="opacity:${[0,0,.1,.18,.3][w]}"/>` : '';
-  return `<svg class="city w${w}" viewBox="0 0 ${W} ${H}" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${sky}<g>${far}</g>${peek}${behind}<g>${near}${win}</g>${noise}${cr?`<g class="ccrack">${cr}</g>`:''}</svg>`;
+  const noise = w >= 2 ? `<rect class="cnoise" width="${W}" height="${H + 34}" style="opacity:${[0,0,.1,.18,.3][w]}"/>` : '';
+  const st = still ? '' : street(pp, W, H, w);
+  return `<svg class="city w${w}" viewBox="0 0 ${W} ${H + (still ? 0 : 34)}" preserveAspectRatio="xMidYMax slice" aria-hidden="true">${sky}<g>${far}</g>${peek}${behind}<g>${near}${win}</g>${st}${noise}${cr?`<g class="ccrack">${cr}</g>`:''}</svg>`;
 }
 
 /* =========================================================
@@ -2111,12 +2300,13 @@ function renderHome(){
   return `
   <section class="hero">
     <h1 class="sr">エイコウ 設定資料集</h1>
+    <div class="sky" aria-hidden="true"><i class="stars"></i><i class="sun"></i><i class="moon"></i></div>
     ${myWings()}
     <div class="hero-logo" aria-hidden="true">${LOGO}</div>
     <p class="epic">光と闇の英雄譚</p>
     <p class="kicker">設定資料集</p>
-    <div class="scene">${city(7, ew(), fell)}</div>
     ${me ? '' : '<p class="note">まだ、人の目で見ている。<button type="button" data-open-who>あなたは何者？</button></p>'}
+    <div class="scene">${city(7, ew(), fell)}</div>
   </section>
   <section class="factions" aria-label="二つの陣営">
     <a class="fac light" href="#a-org-phs">
@@ -2124,6 +2314,7 @@ function renderHome(){
       <span class="logo">${PHS_LOGO}</span>
       <span class="nm">PHS</span>
       <span class="ds">人間と半竜の共生を目指し、人々を竜の脅威から守る組織。</span>
+      <span class="meta"><span>表向きの立場<b>正義</b></span></span>
       <span class="lead">率いるのは <b>光の龍 エゼル</b></span>
     </a>
     <a class="fac dark" href="#a-org-deitetto">
@@ -2131,8 +2322,10 @@ function renderHome(){
       <span class="logo">${DT_LOGO}</span>
       <span class="nm">デイテッド</span>
       <span class="ds">人間に受け入れられなかった半竜たちが集う、人類滅亡を掲げる組織。</span>
+      <span class="meta"><span>表向きの立場<b>悪</b></span></span>
       <span class="lead">率いるのは <b>闇の龍 シアロタス</b></span>
     </a>
+    <span class="fac-seal" aria-hidden="true">${YY}</span>
   </section>
   <div class="wrap">
     ${secHead('資料目録')}
@@ -2145,6 +2338,7 @@ function renderHome(){
   </div>`;
 }
 
+const pstrip = side => `<div class="pstrip${side ? ' ' + side : ''}" aria-hidden="true"><div class="sky"><i class="stars"></i><i class="sun"></i><i class="moon"></i></div><div class="pcity">${city(7, ew(), false, true, 3600)}</div></div>`;
 function catHead(cat){return `<div class="ahead plain"><a class="back" href="#top">← 目次へ</a><span class="cat-ic" data-k="${cat.key}" style="--cc:${cat.c}">${ICON[cat.key]}</span><h2>${cat.name}</h2><p class="lede">${cat.desc}</p></div>`;}
 const dot = a => a.ch ? `<span class="dot ch" style="--chc:${a.ch}" aria-hidden="true"></span>` : `<span class="dot ${a.side||'none'}" aria-hidden="true"></span>`;
 
@@ -2154,12 +2348,18 @@ function renderCategory(key){
   let inner;
   if(key==='calendar') inner = `<div class="rowlist">${CALENDAR.map(c=>`<div class="row"><span>${c.n}</span><span class="k">${c.d}</span></div>`).join('')}</div><p class="lede" style="margin-top:14px">判明している分から順次追加します。</p>`;
   else if(key==='glossary') inner = `<dl class="gloss">${GLOSSARY.filter(g=>!g.spoiler||full()).map(g=>`<div><dt>${g.t}${g.spoiler?'<span class="badge sp">ネタバレ</span>':''}</dt><dd>${g.d}${full()&&g.sp?` <strong>${g.sp}</strong>`:''}</dd></div>`).join('')}</dl>`;
+  else if(key==='character'){
+    const arts = ARTICLES.filter(a=>a.cat===key && visible(a));
+    const GR = [['light','光の側','LIGHT'],['dark','闇の側','DARK'],['none','どちらにも属さない','NEITHER']];
+    inner = GR.map(([k,jp,en])=>{ const list = arts.filter(a=>(a.side||'none')===k); if(!list.length) return '';
+      return `<section class="chgroup ${k}"><div class="cg-h"><span class="jp">${jp}</span><span class="en latin">${en}</span></div><div class="chgrid">${list.map((a,i)=>`<a class="chcard ${k}" style="--i:${i}" href="#a-${a.id}"><span class="mono" aria-hidden="true">${[...a.title][0]}</span><span class="txt"><span class="t">${a.title}${a.spoiler?'<span class="badge sp">ネタバレ</span>':''}</span><span class="l">${a.lede}</span></span></a>`).join('')}</div></section>`; }).join('');
+  }
   else if(key==='novel') inner = `<ul class="alist">${NOVEL.map(n=>`<li><a href="#novel-${n.id}"><span class="dot ch" style="--chc:${n.ch}" aria-hidden="true"></span><span><span class="t">第${n.id}話　${n.title}</span><div class="l">${n.date}</div></span></a></li>`).join('')}</ul>`;
   else {
     const arts = ARTICLES.filter(a=>a.cat===key && visible(a));
     inner = `<ul class="alist">${arts.map(a=>`<li><a href="#a-${a.id}">${dot(a)}<span><span class="t">${a.title}</span>${a.spoiler?'<span class="badge sp">ネタバレ</span>':''}<div class="l">${a.lede}</div></span></a></li>`).join('')}</ul>`;
   }
-  return `<div class="wrap page">${catHead(cat)}${inner}</div>`;
+  return `${pstrip()}<div class="wrap page">${catHead(cat)}${inner}</div>`;
 }
 
 function renderSections(secs){
@@ -2210,7 +2410,7 @@ function renderArticle(id){
      <p class="lede">${a.lede}</p>
      ${s?`<span class="sidechip ${s.c}"><i></i>${s.t}</span>`:''}${a.ch?`<span class="chtag"><i></i>物語の展開</span>`:''}
    </div></div>`;
-  return `${head}<div class="wrap article">
+  return `${pstrip(s ? s.c : '')}${head}<div class="wrap article">
   ${a.media ? a.media() : ''}
   ${a.doc && a.docFirst ? recordDoc(a.doc) : ''}
   ${pWrap(paras(a.body))}
@@ -2457,7 +2657,7 @@ function whiteLight(mid, after){
 const NOVEL_LINES = NOVEL[0].text.split('\n').map(l=>l.trim()).filter(Boolean);
 const yearMark = () => { const w = ew(); return w===0 ? (fell ? '<span class="fell">……</span>' : '') : ['','……2','……3','四度目','五度目'][w]; };
 function nightHTML(cls, inner){
-  return `<div class="${cls} night" style="--dk:${ew()}"><div class="nt-sky"></div><div class="nt-city">${city(7, ew(), fell && ew()===0)}</div><div class="nt-rain" aria-hidden="true"></div><div class="nt-wet" aria-hidden="true">${city(7, ew())}</div><div class="nt-text">${inner}</div></div>`;
+  return `<div class="${cls} night" style="--dk:${ew()}"><div class="nt-sky"></div><div class="nt-city">${city(7, ew(), fell && ew()===0)}</div><div class="nt-rain" aria-hidden="true"></div><div class="nt-wet" aria-hidden="true">${city(7, ew(), false, true)}</div><div class="nt-text">${inner}</div></div>`;
 }
 function gapHTML(){
   const w = ew();
@@ -2714,4 +2914,14 @@ applyMe();
 router();
 if(!spoilMode){ afterSpoiler = (!me && store.get('eikou-skip')!=='1') ? 'who' : null; openIntro('spoiler'); }
 else if(!me && store.get('eikou-skip')!=='1') openIntro('who');
+
+/* 画面外の街・雨は止めておく（重さ対策） */
+(()=>{
+  if(!('IntersectionObserver' in window)) return;
+  const io = new IntersectionObserver(es=>es.forEach(e=>e.target.classList.toggle('paused', !e.isIntersecting)), {rootMargin:'100px'});
+  const seen = new WeakSet();
+  const scan = () => document.querySelectorAll('svg.city, .nt-rain, .sky').forEach(el=>{ if(!seen.has(el)){ seen.add(el); el.classList.add('paused'); io.observe(el); } });
+  let pend = 0; new MutationObserver(()=>{ if(!pend) pend = requestAnimationFrame(()=>{ pend = 0; scan(); }); }).observe(document.getElementById('app'), {childList:true});
+  scan();
+})();
 </script>

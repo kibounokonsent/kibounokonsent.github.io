@@ -148,30 +148,42 @@
       '<section class="wrap section"><div class="sec-head"><span class="kicker"><b>肆</b><i>Nuper Scripta</i></span><h2>新たに記された節</h2><a class="more" href="#/articles">すべての節 →</a></div><div class="list">' +
         recent.map(function (a) { return listRow(a, { realm: true, cat: true }); }).join('') + '</div></section>';
   }
-  /* 塔の断面：三つの領域を上から順に。この書の目次でもある */
+  /* 塔の断面：一本の塔を縦に切った図。上へ細る尖塔（天界）／地表（人の世）／下へ細る地下（魔界）。この書の目次でもある */
   function crossSection() {
     var H = TOWER.heaven, A = TOWER.abyss;
-    function band(r) {
-      var cats = realmCats(r.id), fl = floorsOf(r.id), n = realmArticles(r.id).length;
-      var floors = fl.length ? '<ol class="xs-floors" aria-label="' + esc(r.name) + 'の階">' + fl.map(function (f) {
-        var ref = resolve(rankRef(r.id, f));
-        return '<li' + (f.unknown ? ' class="unknown"' : '') + '><a href="' + (ref.href || '#/' + (r.id === 'heaven' ? 'ascend' : 'descend') + '/' + f.floor) + '"><span class="no">' + esc(f.floor) + '</span>' + esc(f.name) + '</a></li>';
-      }).join('') + '</ol>' : '';
-      return '<section class="xs-band realm-' + r.id + '">' +
-        '<header class="xs-head"><a href="#/r/' + r.id + '" class="xs-title"><span class="mk" aria-hidden="true">' + r.mark + '</span><b>' + esc(r.name) + '</b><span class="latin">' + esc(r.la) + '</span></a>' +
-          '<p class="xs-sub">' + esc(r.sub) + '<span class="n">' + n + ' 節</span></p><p class="xs-desc">' + esc(r.desc) + '</p>' + floors +
-          '<a class="xs-open" href="#/r/' + r.id + '">' + esc(r.name) + 'の章をひらく →</a></header>' +
-        '<div class="xs-cats">' + cats.map(function (c) {
-          var items = c.id === 'character' ? CHARACTERS.filter(function (x) { return !x.spoiler || spoilOK(); }).map(function (ch) { return { href: '#/ch/' + ch.id, t: ch.name }; })
-            : articlesIn(c.id).map(function (a) { return { href: '#/a/' + a.id, t: a.title }; });
-          return '<div class="xs-cat"><a class="xs-cat-h" href="#/c/' + c.id + '"><span class="code">' + chapter(c.id) + '</span><b>' + esc(c.name) + '</b><small>' + countOf(c) + unitOf(c) + '</small></a>' +
-            '<ul>' + items.map(function (x) { return '<li><a href="' + x.href + '">' + esc(x.t) + '</a></li>'; }).join('') + '</ul></div>';
-        }).join('') + '</div></section>';
+    function storeys(rid) {
+      var fl = floorsOf(rid), n = fl.length;
+      return fl.map(function (f, i) {
+        var ref = resolve(rankRef(rid, f)), t = n > 1 ? i / (n - 1) : 1;   // 0＝上端 1＝下端
+        var far = rid === 'heaven' ? 1 - t : t, w = rid === 'heaven' ? 44 + t * 48 : 92 - t * 48;
+        return '<a class="st' + (f.unknown ? ' unknown' : '') + '" style="--w:' + w.toFixed(1) + '%;--far:' + far.toFixed(2) + '" href="' + (ref.href || '#/' + (rid === 'heaven' ? 'ascend' : 'descend') + '/' + f.floor) + '">' +
+          '<span class="no">' + esc(f.floor) + '</span><b>' + esc(f.name) + '</b></a>';
+      }).join('');
     }
-    return '<div class="xsec">' +
-      '<a class="xs-gate up" href="#/ascend/gate">' + miniDoor('heaven') + '<b>' + esc(H.gate.name) + '</b><span class="latin">' + esc(H.gate.latin) + '</span></a>' +
-      REALMS.map(band).join('') +
-      '<a class="xs-gate down" href="#/descend/gate">' + miniDoor('abyss') + '<b>' + esc(A.gate.name) + '</b><span class="latin">' + esc(A.gate.latin) + '</span></a>' +
+    function cats(r) {
+      return '<div class="xs-cats">' + realmCats(r.id).map(function (c) {
+        var items = c.id === 'character' ? CHARACTERS.filter(function (x) { return !x.spoiler || spoilOK(); }).map(function (ch) { return { href: '#/ch/' + ch.id, t: ch.name }; })
+          : articlesIn(c.id).map(function (a) { return { href: '#/a/' + a.id, t: a.title }; });
+        return '<div class="xs-cat"><a class="xs-cat-h" href="#/c/' + c.id + '"><span class="code">' + chapter(c.id) + '</span><b>' + esc(c.name) + '</b><small>' + countOf(c) + unitOf(c) + '</small></a>' +
+          '<ul>' + items.map(function (x) { return '<li><a href="' + x.href + '">' + esc(x.t) + '</a></li>'; }).join('') + '</ul></div>';
+      }).join('') + '</div>';
+    }
+    function info(r) {
+      return '<header class="xs-info"><a href="#/r/' + r.id + '" class="xs-title"><span class="mk" aria-hidden="true">' + r.mark + '</span><b>' + esc(r.name) + '</b><span class="latin">' + esc(r.la) + '</span></a>' +
+        '<p class="xs-sub">' + esc(r.sub) + '<span class="n">' + realmArticles(r.id).length + ' 節</span></p><p class="xs-desc">' + esc(r.desc) + '</p>' +
+        '<a class="xs-open" href="#/r/' + r.id + '">' + esc(r.name) + 'の章をひらく →</a></header>';
+    }
+    function gate(kind, g) {
+      return '<a class="xs-gate ' + kind + '" href="#/' + (kind === 'heaven' ? 'ascend' : 'descend') + '/gate">' + miniDoor(kind) +
+        '<span><b>' + esc(g.name) + '</b><i class="latin">' + esc(g.latin) + '</i></span></a>';
+    }
+    var body = REALMS.map(function (r) {
+      var tower = r.id === 'heaven' ? '<div class="xs-tower">' + gate('heaven', H.gate) + '<div class="spire">' + storeys('heaven') + '</div>' + skyline(900, 90, 3, 'city') + '</div>'
+        : r.id === 'abyss' ? '<div class="xs-tower"><div class="spire">' + storeys('abyss') + '</div>' + gate('abyss', A.gate) + '</div>'
+        : '<div class="xs-tower"><a class="xs-ground" href="#/r/ground"><span class="no">G</span><b>地上</b><i class="latin">Terra</i></a></div>';
+      return '<section class="xs-row realm-' + r.id + '">' + (r.id === 'ground' ? '<span class="horizon" aria-hidden="true"><i>地表 ── 人の世</i></span>' : '') + info(r) + tower + cats(r) + '</section>';
+    }).join('');
+    return '<div class="xsec">' + body +
       '<p class="xs-ref"><span>資料</span><a href="#/c/glossary">用語集</a><a href="#/articles">すべての節</a><a href="#/horologium">世界の時計</a>' + (deepOpen() ? '<a href="#/deep">深層</a>' : '') + '</p>' +
     '</div>';
   }
@@ -268,15 +280,52 @@
     var id = RANK_ID[f.name], k = id ? (kind === 'heaven' ? 'a-' : 'd-') + id : '';
     return k && EMBLEMS[k] ? '<span class="fl-emb ' + (kind === 'heaven' ? 'ang' : 'dem') + '" aria-hidden="true">' + emblem(k, reduced ? '' : 'drawn') + '</span>' : '';
   }
-  function floorBlock(f, kind) {
+  /* 人の世の街並み（地上）。窓の灯は人の気配 */
+  function skyline(w, h, seed, cls) {
+    var s = '<svg class="' + cls + '" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="xMidYMax slice" aria-hidden="true"><path d="', win = '', x = -10, i = 0;
+    while (x < w) {
+      var bw = 22 + rnd(seed + i) * 54, bh = h * (.22 + rnd(seed + i + 50) * .5), top = h - bh, r = rnd(seed + i + 90);
+      if (r > .9) {  // 教会：尖塔と十字
+        var cx = x + bw / 2, sp = top - h * .3;
+        s += 'M' + x.toFixed(1) + ' ' + h + 'V' + top.toFixed(1) + 'L' + cx.toFixed(1) + ' ' + sp.toFixed(1) + 'L' + (x + bw).toFixed(1) + ' ' + top.toFixed(1) + 'V' + h + 'Z' +
+          'M' + (cx - .8).toFixed(1) + ' ' + (sp - 14).toFixed(1) + 'h1.6v14h-1.6Z' + 'M' + (cx - 5).toFixed(1) + ' ' + (sp - 10).toFixed(1) + 'h10v1.6h-10Z';
+      } else if (r > .8) {  // 鐘楼・給水塔
+        s += 'M' + x.toFixed(1) + ' ' + h + 'V' + top.toFixed(1) + 'h' + (bw * .3).toFixed(1) + 'v-' + (h * .12).toFixed(1) + 'h' + (bw * .4).toFixed(1) + 'v' + (h * .12).toFixed(1) + 'h' + (bw * .3).toFixed(1) + 'V' + h + 'Z';
+      } else s += 'M' + x.toFixed(1) + ' ' + h + 'V' + top.toFixed(1) + 'h' + bw.toFixed(1) + 'V' + h + 'Z';
+      for (var wy = top + 8; wy < h - 6; wy += 9) for (var wx = x + 5; wx < x + bw - 6; wx += 8)
+        if (rnd(seed + wx * 3.1 + wy * 7.7) > .86) win += '<rect x="' + wx.toFixed(1) + '" y="' + wy.toFixed(1) + '" width="2.6" height="3.4"/>';
+      x += bw + (rnd(seed + i + 30) > .75 ? 6 : 0); i++;
+    }
+    return s + '"/><g class="win">' + win + '</g></svg>';
+  }
+  /* 地の下：地層・石・根。人の世の底から魔界へ */
+  function strata(w, h, seed) {
+    var cols = ['#1e1c22', '#2a1f1b', '#22150f', '#1a0d0a', '#140808'], s = '<svg class="strata" viewBox="0 0 ' + w + ' ' + h + '" preserveAspectRatio="none" aria-hidden="true"><rect width="' + w + '" height="' + h + '" fill="' + cols[0] + '"/>';
+    for (var L = 1; L < cols.length; L++) {
+      var y0 = h * (L / cols.length) - 10, d = 'M0 ' + h + 'V' + y0.toFixed(1);
+      for (var x = 0; x <= w; x += w / 14) d += 'L' + x.toFixed(1) + ' ' + (y0 + (rnd(seed + L * 31 + x) - .5) * 22).toFixed(1);
+      s += '<path d="' + d + 'V' + h + 'Z" fill="' + cols[L] + '"/>';
+    }
+    for (var k = 0; k < 26; k++) s += '<ellipse cx="' + (rnd(seed + k) * w).toFixed(1) + '" cy="' + (h * .15 + rnd(seed + k + 9) * h * .75).toFixed(1) + '" rx="' + (3 + rnd(seed + k + 3) * 9).toFixed(1) + '" ry="' + (2 + rnd(seed + k + 5) * 4).toFixed(1) + '" fill="#000" opacity=".35"/>';
+    for (k = 0; k < 7; k++) { var rx = rnd(seed + k * 13) * w, rd = 'M' + rx.toFixed(1) + ' 0'; for (var yy = 12; yy < h * (.3 + rnd(seed + k) * .45); yy += 12) rd += 'L' + (rx + (rnd(seed + yy + k) - .5) * 26).toFixed(1) + ' ' + yy; s += '<path d="' + rd + '" fill="none" stroke="#0e0b0c" stroke-width="1.2" opacity=".7"/>'; }
+    return s + '</svg>';
+  }
+  function jitter(t, seed) {
+    return Array.prototype.map.call(String(t), function (c, i) { return '<span style="--j:' + (rnd(seed + i) - .5).toFixed(2) + ';--q:' + (rnd(seed + i + 40) - .5).toFixed(2) + '">' + esc(c) + '</span>'; }).join('');
+  }
+  function floorBlock(f, kind, far) {
+    far = far || 0;
     var choirs = '';
     if (f.choirs) {
       choirs = '<ol class="choirs" aria-label="司級天使の九つの階位（上ほど高位）">' + f.choirs.slice().reverse().map(function (c, i, arr) {
         return '<li style="--k:' + ((arr.length - i) / arr.length).toFixed(2) + '"><i>' + ROMAN[arr.length - i] + '</i><span><b>' + esc(c.name) + '</b>' + (c.note ? '<small>' + esc(c.note) + '</small>' : '') + '</span></li>';
       }).join('') + '</ol>';
     }
-    return '<section class="floor' + (f.unknown ? ' unknown' : '') + '" id="fl-' + f.floor + '" data-floor="' + f.floor + '">' +
-      '<span class="no">' + esc(f.floor) + '</span>' + floorEmb(f, kind) + '<h2>' + esc(f.name) + '</h2><p>' + esc(f.text) + '</p>' + choirs + floorLinks(f.links) + '</section>';
+    var heaven = kind === 'heaven', seed = f.floor.charCodeAt(0) * 7 + f.floor.charCodeAt(1);
+    var air = reduced ? '' : far >= .5 ? particles(heaven ? 'motes' : 'embers', Math.round(far * 9)) : '';
+    return '<section class="floor' + (f.unknown ? ' unknown' : '') + (far >= .6 ? ' far' : '') + '" id="fl-' + f.floor + '" data-floor="' + f.floor + '" style="--far:' + far.toFixed(2) + '">' + air +
+      (f.echo ? '<p class="echo">' + esc(f.echo) + '</p>' : '') +
+      '<span class="no">' + esc(f.floor) + '</span>' + floorEmb(f, kind) + '<h2>' + (heaven ? esc(f.name) : jitter(f.name, seed)) + '</h2><p>' + esc(f.text) + '</p>' + choirs + floorLinks(f.links) + '</section>';
   }
   function gateBlock(kind, g) {
     var stage = kind === 'heaven'
@@ -291,54 +340,48 @@
   var towerIO = [];
   function renderTower(kind, target) {
     var heaven = kind === 'heaven', T = heaven ? TOWER.heaven : TOWER.abyss;
-    var ground = '<section class="ground-floor" id="fl-G" data-floor="G"><span class="kicker"><i>Terra</i></span><h2>地上</h2><p>' + esc(TOWER.ground.text) + '</p>' +
+    var ground = '<section class="ground-floor" id="fl-G" data-floor="G"><div class="sky-edge">' + skyline(1600, 150, heaven ? 11 : 23, 'city') + '</div><div class="gf-body">' +
+      (TOWER.ground.echo ? '<p class="echo">' + esc(TOWER.ground.echo) + '</p>' : '') + '<span class="kicker"><i>Terra</i></span><h2>地上</h2><p>' + esc(TOWER.ground.text) + '</p>' +
       '<div class="row">' + (heaven ? '<a class="link-arrow down" href="#/descend"><span class="dir">↓</span>魔界へ潜る</a>' : '<a class="link-arrow up" href="#/ascend"><span class="dir">↑</span>天界へ昇る</a>') +
-      '<a class="link-arrow" href="#/r/' + (heaven ? 'heaven' : 'abyss') + '">' + (heaven ? '昇塔' : '降塔') + 'の章を読む</a><a class="link-arrow" href="#/r/ground">地上の章へ</a></div></section>';
+      '<a class="link-arrow" href="#/r/' + (heaven ? 'heaven' : 'abyss') + '">' + (heaven ? '昇塔' : '降塔') + 'の章を読む</a><a class="link-arrow" href="#/r/ground">地上の章へ</a></div></div></section>';
     var head = '<header class="tower-head"><div class="latin">' + esc(T.latin) + '</div><h1>' + esc(T.title) + '</h1><p>' + (heaven ? '下から上へ。光が強くなるほど、天使は強くなる。' : '上から下へ。闇が深くなるほど、悪魔は強くなる。') + '</p></header>';
     var alt;
     if (heaven) {
       app.innerHTML = '<div class="tower heaven"><div class="shaft">' + head + gateBlock('heaven', T.gate) +
-        T.floors.slice().reverse().map(function (f) { return floorBlock(f, 'heaven'); }).join('') + '</div>' + ground + '</div>';
+        T.floors.slice().reverse().map(function (f, i, arr) { return floorBlock(f, 'heaven', (arr.length - i) / arr.length); }).join('') + '</div>' + ground + '</div>';
       alt = ['gate'].concat(T.floors.slice().reverse().map(function (f) { return f.floor; })).concat(['G']);
-      tintFloors();
     } else {
-      app.innerHTML = '<div class="tower abyss">' + ground + '<div class="shaft">' + head + T.floors.map(function (f) { return floorBlock(f, 'abyss'); }).join('') + gateBlock('abyss', T.gate) + '</div></div>';
+      app.innerHTML = '<div class="tower abyss">' + ground + strata(1600, 200, 5) + '<div class="shaft">' + head + T.floors.map(function (f, i, arr) { return floorBlock(f, 'abyss', (i + 1) / arr.length); }).join('') + gateBlock('abyss', T.gate) + '</div></div>';
       alt = ['G'].concat(T.floors.map(function (f) { return f.floor; })).concat(['gate']);
     }
     var meter = document.createElement('nav');
     meter.className = 'altimeter'; meter.setAttribute('aria-label', '階');
-    meter.innerHTML = alt.map(function (id) { return '<a href="#/' + (heaven ? 'ascend' : 'descend') + '/' + id + '" data-to="' + id + '">' + (id === 'gate' ? '門' : id) + '</a>'; }).join('');
+    meter.innerHTML = '<span class="alt-cap">人の世</span>' + alt.map(function (id) { return '<a href="#/' + (heaven ? 'ascend' : 'descend') + '/' + id + '" data-to="' + id + '">' + (id === 'gate' ? '門' : id) + '</a>'; }).join('');
     app.appendChild(meter);
-    var floors = $$('.floor', app), links = $$('a', meter);
+    var floors = $$('.floor', app), links = $$('a', meter), cap = $('.alt-cap', meter);
+    function caption(id) {
+      var n = alt.indexOf(id) - alt.indexOf('G'); n = Math.abs(n);
+      cap.innerHTML = id === 'G' ? '人の世<br><small>Terra</small>' : id === 'gate' ? esc(T.gate.name) + '<br><small>' + esc(T.gate.latin) + '</small>' : '人の世から<br>' + kan(n) + '階' + (heaven ? '上' : '下');
+      meter.style.setProperty('--far', (n / (alt.length - 1)).toFixed(2));
+    }
     // 見えている階だけ動かす（画面外の門の演出は止めておく）
     var seen = new IntersectionObserver(function (es) { es.forEach(function (e) { if (e.isIntersecting) { e.target.classList.add('seen'); seen.unobserve(e.target); } }); }, { threshold: .35 });
     floors.forEach(function (el) { seen.observe(el); });
     var live = new IntersectionObserver(function (es) { es.forEach(function (e) { e.target.classList.toggle('live', e.isIntersecting); }); }, { rootMargin: '100px 0px' });
     $$('.gate-stage', app).forEach(function (el) { live.observe(el); });
     var io = new IntersectionObserver(function (es) {
-      es.forEach(function (e) { if (e.isIntersecting) links.forEach(function (a) { a.classList.toggle('on', a.dataset.to === e.target.dataset.floor); }); });
+      es.forEach(function (e) { if (e.isIntersecting) { links.forEach(function (a) { a.classList.toggle('on', a.dataset.to === e.target.dataset.floor); }); caption(e.target.dataset.floor); } });
     }, { rootMargin: '-45% 0px -45% 0px' });
     $$('[data-floor]', app).forEach(function (el) { io.observe(el); });
     towerIO = [seen, live, io];
     var to = target ? document.getElementById('fl-' + target) : null;
     requestAnimationFrame(function () {
       if (to) to.scrollIntoView({ block: 'center' });
-      else if (heaven) window.scrollTo(0, document.documentElement.scrollHeight);
+      else if (heaven) { var g = document.getElementById('fl-G').getBoundingClientRect(); window.scrollTo(0, scrollY + g.bottom - innerHeight); }   // 地上（街）から昇りはじめる
       else window.scrollTo(0, 0);
     });
     return true;
   }
-  // 天界は背景が下から上へ明るくなるので、階ごとに文字色を切り替える
-  function tintFloors() {
-    var tower = $('.tower.heaven'); if (!tower) return;
-    var H = tower.offsetHeight;
-    $$('.floor', tower).forEach(function (el) {
-      var t = 1 - (el.offsetTop + el.offsetHeight / 2) / H, light = t > 0.5;
-      el.style.setProperty('--f-ink', light ? '#1b1a20' : '#ece8e2');
-      el.style.setProperty('--f-muted', light ? '#4a4a58' : '#a9a4ad');
-    });
-  }
-  var rzT; window.addEventListener('resize', function () { clearTimeout(rzT); rzT = setTimeout(tintFloors, 150); });
 
   /* ---------- 領域（昇塔／地上／降塔） ---------- */
   function renderRealm(rid, focusCat) {
@@ -741,8 +784,12 @@
   var atmos = $('.atmos'), rail = $('.depth-rail');
   function setupAtmosphere() {
     var root = document.documentElement, ticking = false, lastP = -1;
+    var head = $('.site-header');
     function update() {
       ticking = false;
+      // 塔の中では、ヘッダーの下が暗い地上・地の底ならヘッダーも暗くする
+      var gb = document.body.classList.contains('in-tower') && $('.gf-body');
+      head.classList.toggle('hdr-dark', !!gb && (document.body.classList.contains('tower-abyss') ? gb.getBoundingClientRect().top < head.offsetHeight : gb.getBoundingClientRect().top < head.offsetHeight && gb.getBoundingClientRect().bottom > 0));
       var max = Math.max(1, root.scrollHeight - innerHeight), p = Math.min(1, Math.max(0, scrollY / max));
       if (Math.abs(p - lastP) < 0.004) return; lastP = p;
       atmos.style.setProperty('--up', (1 - p * 0.8).toFixed(3));
@@ -802,6 +849,8 @@
     var t = $('#app h1'); document.title = (h && t ? t.textContent + '｜' : '') + '魔天楼 ARCHIVE';
     if (!tower && !(parts[0] === 'a' && parts[2]) && !(parts[0] === 'c' && catById[parts[1]] && !catById[parts[1]].renderMode)) window.scrollTo(0, 0);
     document.body.classList.toggle('in-tower', !!tower);
+    document.body.classList.toggle('tower-heaven', tower && parts[0] === 'ascend');
+    document.body.classList.toggle('tower-abyss', tower && parts[0] === 'descend');
     if (window.__atmos) window.__atmos();
     writeIn();
     if (tower) snd('tower', parts[0] === 'ascend' ? 'heaven' : 'abyss');

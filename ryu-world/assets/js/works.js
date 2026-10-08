@@ -4,7 +4,7 @@
 
    作品を追加・変更するときは、このファイルだけを書き換える。
 
-   world   : どの世界の作品か（"fronz" / "other" / "soul"）
+   world   : どの世界の作品か（"fronz" / "other" / "soul" / "abyss"）
    era     : フロンズの時系列（同じ数字＝同じ時代）。フロンズ以外は null
    title   : 作品名
    tentative : 名前が仮のときは true（「仮」と表示される）
@@ -106,6 +106,13 @@ url: "https://kibounokonsent.github.io/garando/index.html" },
         summary: "希望のコンセント。\n空虚のコンセント。\n絶望のコンセント。",
         url: "../consents/index.html",
         linkLabel: "会いに行く"
+    },
+
+    // ---------- 刹那の奈落 ----------
+    {
+        world: "abyss", era: null, title: "人外レストラン", tentative: true,
+        summary: "",
+        url: ""
     },
 
     // ---------- 魂界 ----------
@@ -231,7 +238,7 @@ const REALMS = {
         title: "ABYSS OF THE MOMENT",
         name: "刹那の奈落",
         lead: "エイリアスのさらに底。すべての下に口を開ける、深い奈落。",
-        layout: "none",
+        layout: "scatter",
         lore: []
     }
 

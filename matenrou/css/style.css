@@ -12,12 +12,12 @@
    ========================================================= */
 :root {
   /* 色（ライト＝灰の昼） */
-  --bg: #e6e3de;
-  --surface: #eeebe7;
-  --raise: #f5f3f0;
+  --bg: #ece9e3;
+  --surface: #f3f0eb;
+  --raise: #f8f6f2;
   --text: #17151a;
   --muted: #55505a;
-  --faint: #7d7880;
+  --faint: #6c6670;
   --line: rgba(23, 21, 26, .12);
   --line-2: rgba(23, 21, 26, .22);
   --heaven: #3e5f86;      /* 文字で使える「冷たい光」 */
@@ -26,9 +26,10 @@
   --relic: #7a6230;
   --brand: #8e1622;
   --halo-glow: rgba(255, 255, 255, .95);
-  --ember-glow: rgba(190, 70, 40, .22);
+  --ember-glow: rgba(140, 34, 22, .13);
   --side: var(--muted);
   --head-h: 60px;
+  --st-h-hi: #ffffff; --st-h-lo: #dfe3e8; --st-h-ink: #2c4566; --st-h-glow: rgba(255, 255, 255, .95);
 
   /* 書体（本文は端末の書体。見出しだけ明朝を読み込む） */
   --f-display: 'Shippori Mincho B1', 'Hiragino Mincho ProN', 'Yu Mincho', 'YuMincho', 'Noto Serif JP', 'Noto Serif CJK JP', serif;
@@ -41,18 +42,20 @@
 }
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --bg: #0d0c0f; --surface: #141317; --raise: #1a191e; --text: #e7e2da; --muted: #a8a2a9; --faint: #858089;
+    --bg: #0d0c0f; --surface: #141317; --raise: #1a191e; --text: #e7e2da; --muted: #aea8ae; --faint: #8d8890;
     --line: rgba(231, 226, 218, .09); --line-2: rgba(231, 226, 218, .18);
     --heaven: #cdd9e8; --abyss: #dd5a3e; --ground: #bfae8e; --relic: #bba26b; --brand: #c22a36;
     --halo-glow: rgba(205, 220, 240, .16); --ember-glow: rgba(200, 70, 40, .20);
+    --st-h-hi: #5a6a80; --st-h-lo: #22262d; --st-h-ink: #eef2f7; --st-h-glow: rgba(205, 220, 240, .32); --city: #2e2b33;
     color-scheme: dark;
   }
 }
 :root[data-theme="dark"] {
-  --bg: #0d0c0f; --surface: #141317; --raise: #1a191e; --text: #e7e2da; --muted: #a8a2a9; --faint: #858089;
+  --bg: #0d0c0f; --surface: #141317; --raise: #1a191e; --text: #e7e2da; --muted: #aea8ae; --faint: #8d8890;
   --line: rgba(231, 226, 218, .09); --line-2: rgba(231, 226, 218, .18);
   --heaven: #cdd9e8; --abyss: #dd5a3e; --ground: #bfae8e; --relic: #bba26b; --brand: #c22a36;
   --halo-glow: rgba(205, 220, 240, .16); --ember-glow: rgba(200, 70, 40, .20);
+  --st-h-hi: #5a6a80; --st-h-lo: #22262d; --st-h-ink: #eef2f7; --st-h-glow: rgba(205, 220, 240, .32); --city: #2e2b33;
   color-scheme: dark;
 }
 
@@ -61,6 +64,7 @@
 html { scroll-padding-top: calc(var(--head-h) + 20px); }
 body {
   margin: 0; background: var(--bg); color: var(--text);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 .1 0 0 0 0 .08 0 0 0 0 .08 0 0 0 .05 0'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
   font-family: var(--f-body); font-size: 16px; line-height: 1.9; letter-spacing: .02em;
   -webkit-font-smoothing: antialiased; overflow-x: hidden; text-rendering: optimizeLegibility;
 }
@@ -83,7 +87,7 @@ p { text-wrap: pretty; }
 .atmos { position: fixed; inset: 0; pointer-events: none; z-index: 0; --up: 1; --down: .35; }
 .atmos::before, .atmos::after { content: ""; position: absolute; left: -10%; right: -10%; will-change: opacity; }
 .atmos::before { top: -30vh; height: 85vh; background: radial-gradient(ellipse 55% 60% at 50% 30%, var(--halo-glow), transparent 72%); opacity: calc(var(--up) + var(--cu, 0)); }
-.atmos::after { bottom: -30vh; height: 80vh; background: radial-gradient(ellipse 60% 60% at 50% 70%, var(--ember-glow), transparent 72%); opacity: calc(var(--down) + var(--cd, 0)); }
+.atmos::after { bottom: -34vh; height: 70vh; background: radial-gradient(ellipse 75% 50% at 50% 78%, var(--ember-glow), transparent 75%); opacity: calc(var(--down) + var(--cd, 0)); }
 main { position: relative; z-index: 1; overflow-x: clip; min-height: 70vh; outline: none; }
 
 /* 画面の左端：いまどの深さを読んでいるか。上は天、下は魔 */
@@ -129,6 +133,12 @@ main { position: relative; z-index: 1; overflow-x: clip; min-height: 70vh; outli
 .btn-toc { height: 34px; display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; border: 1px solid var(--text); background: var(--text); color: var(--bg); font: inherit; font-family: var(--f-display); font-size: 13px; letter-spacing: .2em; cursor: pointer; }
 .btn-toc .ico { width: 16px; height: 16px; }
 .btn-toc:hover { background: transparent; color: var(--text); }
+
+/* 塔の中：ヘッダーの下が暗いとき、ヘッダーも夜に沈む */
+.site-header { transition: background-color .5s, border-color .5s, color .5s; }
+.site-header.hdr-dark { --bg: #0e0b0c; --text: #e7ddd6; --muted: #a39894; --line: rgba(231, 221, 214, .1); --line-2: rgba(231, 221, 214, .2); --heaven: #cdd9e8; --abyss: #e0603f; color: var(--text); background: rgba(14, 11, 12, .92); }
+.site-header.hdr-dark .logo { color: var(--text); }
+body.in-tower .site-footer { --bg: #0e0b0c; --text: #e7ddd6; --muted: #a39894; --faint: #8a807c; --line: rgba(231, 221, 214, .1); --line-2: rgba(231, 221, 214, .2); --heaven: #cdd9e8; --abyss: #e0603f; background: #0e0b0c; color: var(--text); }
 
 /* ---------- 目次（引き出し） ---------- */
 .drawer { position: fixed; inset: 0; z-index: 150; }
@@ -263,25 +273,67 @@ mark { background: color-mix(in srgb, var(--relic) 30%, transparent); color: inh
 .hero .mark::before { content: ""; position: absolute; inset: -30% -70%; background: radial-gradient(closest-side at 50% 32%, color-mix(in srgb, var(--heaven) 12%, transparent), transparent), radial-gradient(closest-side at 50% 80%, color-mix(in srgb, var(--abyss) 13%, transparent), transparent); z-index: -1; pointer-events: none; }
 .hero .side-v { writing-mode: vertical-rl; font-family: var(--f-display); letter-spacing: .5em; color: var(--muted); font-size: 13px; justify-self: center; max-height: 70vh; overflow: hidden; }
 .hero .side-v.l { grid-column: 1; grid-row: 1; } .hero .side-v.r { grid-column: 3; grid-row: 1; font-family: var(--f-latin); font-size: 14px; letter-spacing: .18em; }
-.halo-rose { position: absolute; left: 50%; top: 50%; width: 170%; height: auto; transform: translate(-50%, -50%); z-index: 0; color: var(--muted); opacity: .2; animation: roseTurn 260s linear infinite; pointer-events: none; will-change: transform; }
+.halo-rose { position: absolute; left: 50%; top: 50%; width: min(170%, calc(100vw - 20px)); height: auto; transform: translate(-50%, -50%); z-index: 0; color: var(--muted); opacity: .2; animation: roseTurn 260s linear infinite; pointer-events: none; will-change: transform; }
 @keyframes roseTurn { to { transform: translate(-50%, -50%) rotate(360deg); } }
 .hero-foot { display: grid; grid-template-columns: 1fr auto; gap: 24px; align-items: center; padding-bottom: 10px; }
 .hero-foot p { margin: 0; color: var(--muted); font-size: 14.5px; font-family: var(--f-display); letter-spacing: .08em; line-height: 2; }
 .hero-foot .go { display: flex; gap: 28px; }
 
-/* ---------- トップ：塔の断面（三つの領域） ---------- */
-.xsec { position: relative; display: grid; }
-.xsec::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 40px; width: 1px; background: linear-gradient(180deg, var(--heaven), var(--line-2) 30%, var(--line-2) 70%, var(--abyss)); opacity: .5; z-index: -1; }
-.xs-gate { justify-self: center; display: inline-flex; align-items: center; gap: 10px; text-decoration: none; padding: 10px 18px; background: var(--bg); font-family: var(--f-display); letter-spacing: .3em; font-size: 14px; }
-.xs-gate .latin { font-size: 14px; letter-spacing: .04em; color: var(--muted); }
-.xs-gate.up { color: var(--heaven); } .xs-gate.down { color: var(--abyss); }
+/* ---------- トップ：塔の断面（一本の塔を縦に切った図） ----------
+   左：領域の名／中：塔そのもの（上へ細る尖塔・地表・下へ細る地下）／右：章と節
+   塔の階は --far（人の世からの遠さ 0〜1）で、色と光が変わる */
+.xsec { position: relative; display: grid; margin-top: 8px; }
+.xs-row { position: relative; display: grid; grid-template-columns: 250px 300px minmax(0, 1fr); column-gap: 48px; isolation: isolate; }
+.xs-info, .xs-cats { padding-block: 34px; }
+.xs-tower { grid-column: 2; grid-row: 1; position: relative; display: flex; flex-direction: column; align-items: center; }
+.xs-tower::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; z-index: -1; }
+.realm-heaven .xs-tower { justify-content: flex-end; }
+.realm-heaven .xs-tower::before { background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--heaven) 50%, transparent)); }
+.realm-abyss .xs-tower { justify-content: flex-start; }
+.realm-abyss .xs-tower::before { background: linear-gradient(180deg, color-mix(in srgb, var(--abyss) 55%, transparent), transparent); }
+/* 光と熾火は帯ではなく、塔のまわりにだけ灯す */
+.xs-tower::after { content: ""; position: absolute; left: 50%; width: 760px; height: 520px; transform: translateX(-50%); z-index: -2; pointer-events: none; }
+.realm-heaven .xs-tower::after { top: -60px; background: radial-gradient(closest-side, color-mix(in srgb, var(--st-h-glow) 60%, transparent), transparent); }
+.realm-abyss .xs-tower::after { bottom: -80px; background: radial-gradient(closest-side, rgba(120, 22, 12, .16), transparent); }
+.realm-ground .xs-tower::before { background: linear-gradient(180deg, var(--line-2), transparent); }
+/* 塔の足もとの街：塔は人の世から生えている */
+.realm-heaven .xs-tower .city { position: relative; z-index: -1; width: 170%; height: 90px; margin-top: -58px; display: block; fill: var(--city, var(--text)); opacity: .9; flex: none; }
+.xs-tower .city .win { fill: #e2b955; }
+.spire { width: 100%; display: flex; flex-direction: column; align-items: center; gap: 3px; }
+.st { width: var(--w); display: flex; align-items: baseline; justify-content: center; gap: 12px; padding: 9px 10px; text-decoration: none; position: relative; transition: transform .3s, box-shadow .3s; }
+.st .no { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em; opacity: .7; }
+.st b { font-family: var(--f-display); font-size: 15px; letter-spacing: .32em; }
+.realm-heaven .st { color: var(--st-h-ink); border: 1px solid color-mix(in srgb, var(--heaven) calc(18% + var(--far) * 20%), transparent);
+  background: color-mix(in srgb, var(--st-h-hi) calc(var(--far) * 100%), var(--st-h-lo));
+  box-shadow: 0 0 calc(var(--far) * 34px) color-mix(in srgb, var(--st-h-glow) calc(var(--far) * 100%), transparent); }
+.realm-heaven .st b { letter-spacing: calc(.3em + var(--far) * .25em); }
+.realm-abyss .st { color: #eadfd8; border: 1px solid color-mix(in srgb, var(--abyss) calc(25% + var(--far) * 35%), transparent);
+  background: color-mix(in srgb, #050102 calc(var(--far) * 100%), #4a3631);
+  box-shadow: 0 calc(var(--far) * 10px) calc(var(--far) * 30px) color-mix(in srgb, #8a1a10 calc(var(--far) * 55%), transparent); }
+.realm-abyss .st .no { color: #e8775a; }
+.realm-abyss .st b { text-shadow: 0 0 calc(var(--far) * 10px) rgba(220, 70, 40, .55); }
+.st:hover { transform: scale(1.03); z-index: 1; }
+.st.unknown { border-style: dashed; }
+.st.unknown b, .st.unknown .no { opacity: .45; }
+.xs-gate { display: grid; justify-items: center; gap: 6px; text-decoration: none; padding: 18px 0 14px; position: relative; text-align: center; }
+.xs-gate .mini-door { margin: 0; }
+.xs-gate .mini-door svg { width: 30px; height: 82px; }
+.xs-gate span { display: grid; gap: 0; }
+.xs-gate b { font-family: var(--f-display); letter-spacing: .4em; font-size: 14px; padding-left: .4em; }
+.xs-gate i { font-size: 13px; color: var(--muted); }
+.xs-gate.heaven { order: -1; color: var(--heaven); }
+.xs-gate.heaven .mini-door svg { fill: var(--st-h-hi); stroke: color-mix(in srgb, var(--heaven) 40%, transparent); stroke-width: 6; filter: drop-shadow(0 0 14px var(--st-h-glow)) drop-shadow(0 0 30px var(--st-h-glow)); }
+.xs-gate.abyss { color: var(--abyss); padding: 14px 0 22px; }
+.xs-gate.abyss .mini-door svg { fill: #000; stroke: #6a1410; stroke-width: 8; filter: drop-shadow(0 6px 14px rgba(120, 10, 10, .55)); }
 .xs-gate:hover b { text-decoration: underline; text-underline-offset: 5px; }
-.xs-band { display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 40px; padding: 30px 30px 32px; border: 1px solid var(--line-2); background: var(--bg); position: relative; isolation: isolate; }
-.xs-band + .xs-band { border-top: 0; }
-.xs-band::before { content: ""; position: absolute; inset: 0; z-index: -1; pointer-events: none; }
-.realm-heaven.xs-band::before { background: linear-gradient(180deg, color-mix(in srgb, var(--heaven) 14%, transparent), transparent 70%); }
-.realm-ground.xs-band::before { background: color-mix(in srgb, var(--ground) 5%, transparent); }
-.realm-abyss.xs-band::before { background: linear-gradient(0deg, color-mix(in srgb, var(--abyss) 16%, transparent), transparent 70%); }
+.xs-ground { width: 100%; display: grid; justify-items: center; text-decoration: none; padding-bottom: 14px; margin-block: 3px; color: var(--text); }
+.xs-ground .no { font-family: var(--f-mono); font-size: 10.5px; color: var(--ground); margin-top: 22px; letter-spacing: .1em; }
+.xs-ground b { font-family: var(--f-display); font-size: 20px; letter-spacing: .5em; padding-left: .5em; }
+.xs-ground i { font-size: 13px; color: var(--muted); }
+.realm-ground { border-top: 2px solid var(--text); }
+.horizon { position: absolute; left: 0; top: -1px; transform: translateY(-100%); font-family: var(--f-display); font-size: 11.5px; letter-spacing: .3em; color: var(--muted); padding-bottom: 6px; }
+.horizon i { font-style: normal; }
+
 .xs-title { display: flex; align-items: baseline; gap: 12px; text-decoration: none; }
 .xs-title .mk { font-family: var(--f-mono); font-size: 18px; }
 .xs-title b { font-family: var(--f-display); font-size: 34px; letter-spacing: .3em; line-height: 1.2; }
@@ -289,27 +341,25 @@ mark { background: color-mix(in srgb, var(--relic) 30%, transparent); color: inh
 .realm-heaven .xs-title { color: var(--heaven); } .realm-abyss .xs-title { color: var(--abyss); } .realm-ground .xs-title .mk { color: var(--ground); font-size: 12px; }
 .xs-sub { margin: 4px 0 0; font-family: var(--f-display); font-weight: 700; letter-spacing: .2em; display: flex; gap: 12px; align-items: baseline; }
 .xs-sub .n { font-family: var(--f-mono); font-weight: 400; font-size: 11.5px; color: var(--faint); letter-spacing: .08em; }
-.xs-desc { margin: 8px 0 12px; color: var(--muted); font-size: 14px; line-height: 1.85; }
+.xs-desc { margin: 8px 0 14px; color: var(--muted); font-size: 14px; line-height: 1.85; }
 .xs-open { font-family: var(--f-display); font-size: 14px; letter-spacing: .14em; text-decoration: none; border-bottom: 1px solid var(--line-2); padding-bottom: 3px; }
 .xs-open:hover { border-color: currentColor; }
 .realm-heaven .xs-open { color: var(--heaven); } .realm-abyss .xs-open { color: var(--abyss); }
-.xs-floors { list-style: none; margin: 0 0 14px; padding: 0; display: flex; flex-wrap: wrap; gap: 4px; }
-.xs-floors a { display: inline-flex; gap: 6px; align-items: baseline; text-decoration: none; font-family: var(--f-display); font-size: 13px; letter-spacing: .1em; padding: 2px 9px; border: 1px solid var(--line-2); }
-.xs-floors a:hover { border-color: var(--side, currentColor); }
-.xs-floors .no { font-family: var(--f-mono); font-size: 10.5px; color: var(--faint); }
-.xs-floors .unknown a { opacity: .5; border-style: dashed; }
-.realm-heaven .xs-floors a:hover { color: var(--heaven); border-color: var(--heaven); } .realm-abyss .xs-floors a:hover { color: var(--abyss); border-color: var(--abyss); }
-.xs-cats { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 22px 28px; align-content: start; }
+/* 章は段組みにして、節の数がばらばらでも隙間を作らない */
+.xs-cats { grid-column: 3; columns: 2 200px; column-gap: 32px; align-self: start; }
+.xs-cat { break-inside: avoid; padding-bottom: 20px; }
 .xs-cat-h { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: baseline; text-decoration: none; border-bottom: 1px solid var(--line-2); padding-bottom: 6px; margin-bottom: 6px; }
 .xs-cat-h .code { font-family: var(--f-display); font-size: 11px; color: var(--faint); letter-spacing: .12em; }
 .xs-cat-h b { font-family: var(--f-display); font-size: 17px; letter-spacing: .12em; }
 .xs-cat-h small { font-family: var(--f-mono); font-size: 11px; color: var(--faint); }
 .xs-cat-h:hover b { text-decoration: underline; text-underline-offset: 4px; }
+.realm-heaven .xs-cat-h { border-color: color-mix(in srgb, var(--heaven) 35%, transparent); }
+.realm-abyss .xs-cat-h { border-color: color-mix(in srgb, var(--abyss) 35%, transparent); }
 .xs-cat ul { list-style: none; margin: 0; padding: 0; }
 .xs-cat li a { display: block; text-decoration: none; font-size: 14px; color: var(--muted); padding: 3px 0; }
 .xs-cat li a::before { content: "─ "; color: var(--faint); }
 .xs-cat li a:hover { color: var(--text); }
-.xs-ref { margin: 18px 0 0; display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; justify-content: center; font-size: 14px; }
+.xs-ref { margin: 26px 0 0; display: flex; flex-wrap: wrap; gap: 6px 22px; align-items: baseline; justify-content: center; font-size: 14px; }
 .xs-ref span { font-family: var(--f-display); letter-spacing: .3em; color: var(--faint); font-size: 12.5px; }
 .xs-ref a { text-decoration: none; border-bottom: 1px solid var(--line-2); }
 .xs-ref a:hover { border-color: currentColor; }
@@ -406,10 +456,12 @@ mark { background: color-mix(in srgb, var(--relic) 30%, transparent); color: inh
 .article-head .reading { font-family: var(--f-latin); font-style: italic; font-size: 19px; color: var(--muted); margin-top: 2px; }
 .article-head .summary { font-family: var(--f-display); font-weight: 500; font-size: clamp(17px, 1.6vw, 19px); line-height: 2; margin: 18px 0 0; max-width: 38em; letter-spacing: .04em; }
 .article-head .sigil { right: 0; }
-.article-body { max-width: 42em; padding-top: 6px; }
+.article-body { max-width: 42em; padding-top: 6px; counter-reset: sec; }
 .article-body .sec { scroll-margin-top: calc(var(--head-h) + 20px); }
-.article-body h2 { font-size: 23px; letter-spacing: .14em; margin: 44px 0 14px; padding-bottom: 8px; border-bottom: 1px solid var(--line); display: flex; align-items: center; gap: 12px; scroll-margin-top: calc(var(--head-h) + 20px); }
-.article-body h2::before { content: ""; flex: none; width: 3px; height: .9em; background: var(--side); }
+/* 見出し：ローマ数字の節番号と、領域の色から消えていく罫線 */
+.article-body h2 { counter-increment: sec; position: relative; font-size: 23px; letter-spacing: .14em; margin: 52px 0 16px; padding-bottom: 10px; display: flex; align-items: center; gap: 14px; scroll-margin-top: calc(var(--head-h) + 20px); }
+.article-body h2::before { content: counter(sec, upper-roman); flex: none; min-width: 1.6em; font-family: var(--f-latin); font-style: italic; font-weight: 400; font-size: .82em; letter-spacing: .04em; color: var(--side); }
+.article-body h2::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1px; background: linear-gradient(90deg, var(--side), color-mix(in srgb, var(--side) 25%, transparent) 40%, transparent); }
 .article-body h2.has-emb::before { display: none; }
 .article-body h2 .h-emb { display: grid; place-items: center; width: 44px; height: 44px; color: var(--side); flex: none; }
 .article-body h2 .h-emb .emb { width: 100%; height: 100%; }
@@ -559,9 +611,10 @@ main:has(.tower) + .site-footer { margin-top: 0; }
    ========================================================= */
 .tower { position: relative; isolation: isolate; color: var(--t-ink); }
 .tower.heaven { --t-ink: #1b1a20; --t-muted: #5a5866; --t-line: rgba(30, 30, 50, .16); --t-acc: #3e5f86;
-  background: linear-gradient(0deg, #0d0c0f 0%, #16171d 14%, #2c3240 30%, #6a7486 46%, #b8c2cf 62%, #e6ebf1 78%, #fbfcfd 92%, #ffffff 100%); }
+  /* 下（地上の夕暮れ）から上へ：雲を抜け、白く飛ぶほどの光へ */
+  background: linear-gradient(0deg, #b9b5b1 0%, #c3c5c9 10%, #ccd3dc 24%, #dbe2ea 40%, #ebeff4 58%, #f7f9fb 76%, #ffffff 90%); }
 .tower.abyss { --t-ink: #e7ddd6; --t-muted: #a08c86; --t-line: rgba(220, 90, 62, .18); --t-acc: #dd5a3e;
-  background: linear-gradient(180deg, #0d0c0f 0%, #120c0d 20%, #140707 45%, #0c0303 70%, #050101 88%, #000 100%); }
+  background: linear-gradient(180deg, #140808 0%, #170908 20%, #160606 45%, #0c0303 70%, #050101 88%, #000 100%); }
 .tower .shaft { position: relative; max-width: 760px; margin: 0 auto; padding-inline: 24px; }
 .tower .shaft::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 1px; background: var(--t-line); z-index: -1; }
 .tower.abyss .shaft { z-index: 1; }
@@ -569,8 +622,26 @@ main:has(.tower) + .site-footer { margin-top: 0; }
 .tower-head .latin { font-size: clamp(26px, 3.4vw, 38px); color: var(--t-acc); }
 .tower-head h1 { font-size: 18px; letter-spacing: .6em; margin-top: 8px; }
 .tower-head p { color: var(--t-muted); margin: 8px 0 0; font-size: 13px; }
-.floor { position: relative; display: grid; justify-items: center; text-align: center; gap: 6px; padding-block: 64px; scroll-margin-top: 100px; }
-.floor .no { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .3em; color: var(--f-muted, var(--t-muted)); padding: 2px 10px; }
+.floor { --far: 0; position: relative; display: grid; justify-items: center; text-align: center; gap: 6px; padding-block: 64px; scroll-margin-top: 100px; isolation: isolate; }
+/* 人の世の遠さ（--far）：昇るほど文字が光に溶け、間が空き、言葉が薄くなる／潜るほど文字が赤く灼け、歪む */
+.floor .echo { order: -1; margin: 0 0 18px; font-family: var(--f-display); font-size: 13px; letter-spacing: .34em; padding-left: .34em; max-width: none; }
+.tower.heaven .floor { --f-ink: color-mix(in srgb, #1b1a20 calc(100% - var(--far) * 52%), #6c88ad); --f-muted: #4f5464; }
+.tower.heaven .floor h2 { letter-spacing: calc(.4em + var(--far) * .4em); padding-left: calc(.4em + var(--far) * .4em); text-shadow: 0 0 calc(var(--far) * 22px) #fff, 0 0 calc(var(--far) * 8px) #fff; }
+.tower.heaven .floor > p:not(.echo) { opacity: calc(.92 - var(--far) * .18); }
+.tower.heaven .floor .echo { color: #4d5566; opacity: calc(.85 - var(--far) * .4); }
+.tower.heaven .floor::before { content: ""; position: absolute; inset: 10% -30vw; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 45% 50% at 50% 50%, rgba(255, 255, 255, calc(var(--far) * .85)), transparent 72%); }
+.tower.abyss .floor { --f-ink: color-mix(in srgb, #e7ddd6 calc(100% - var(--far) * 55%), #e2593a); --f-muted: #a08c86; }
+.tower.abyss .floor h2 { text-shadow: 0 0 calc(var(--far) * 18px) rgba(210, 50, 25, calc(var(--far) * .7)); }
+.tower.abyss .floor h2 span { display: inline-block; transform: translateY(calc(var(--j) * var(--far) * 16px)) rotate(calc(var(--q) * var(--far) * 14deg)); }
+.tower.abyss .floor.far h2 { animation: smolder 5s ease-in-out infinite; }
+.tower.abyss .floor .echo { color: #b08a80; opacity: calc(.85 - var(--far) * .25); }
+.tower.abyss .floor::before { content: ""; position: absolute; inset: 0 -30vw; z-index: -1; pointer-events: none;
+  background: radial-gradient(ellipse 40% 55% at 50% 60%, rgba(120, 18, 10, calc(var(--far) * .32)), transparent 75%); }
+.floor .particles { z-index: -1; }
+.particles.motes i { left: var(--x); bottom: -10px; width: calc(var(--s) * 1.4); height: calc(var(--s) * 1.4); border-radius: 50%; background: #fff; box-shadow: 0 0 8px 3px rgba(255, 255, 255, .9);
+  animation: rise calc(var(--u) * 1.6) linear var(--d) infinite; opacity: 0; }
+.floor .no { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .3em; color: var(--f-muted, var(--t-muted)); padding: 2px 10px; border: 1px solid currentColor; }
 .floor h2 { font-size: clamp(30px, 4vw, 44px); letter-spacing: .4em; padding-left: .4em; color: var(--f-ink, var(--t-ink)); }
 .floor p { margin: 6px 0 12px; max-width: 30em; color: var(--f-ink, var(--t-ink)); opacity: .86; }
 .floor .links, .gate .links { display: flex; gap: 18px; flex-wrap: wrap; justify-content: center; }
@@ -598,17 +669,32 @@ main:has(.tower) + .site-footer { margin-top: 0; }
 .gate-state.open { opacity: 1; }
 .heaven-gate { padding-top: 10px; }
 .abyss-gate { padding-bottom: 0; }
-.ground-floor { display: grid; justify-items: center; text-align: center; gap: 10px; padding: 60px 24px 70px; color: var(--text); background: var(--bg); }
-.ground-floor h2 { font-size: 22px; letter-spacing: .5em; padding-left: .5em; }
-.ground-floor p { margin: 0; max-width: 30em; color: var(--muted); }
-.ground-floor .row { display: flex; gap: 12px 30px; flex-wrap: wrap; justify-content: center; margin-top: 10px; }
-.tower.heaven .ground-floor { background: transparent; color: #e7e2da; }
-.tower.heaven .ground-floor p { color: #9a949b; }
+.ground-floor { position: relative; color: #e7e2da; }
+.sky-edge { position: relative; height: 150px; }
+.tower.abyss .sky-edge { background: linear-gradient(180deg, var(--bg), #c9c5c0 45%, #b9b5b1); }
+.sky-edge .city { position: absolute; left: 0; bottom: -1px; width: 100%; height: 150px; display: block; fill: #1e1c22; }
+.sky-edge .city .win { fill: #f0c76a; opacity: .85; }
+.gf-body { background: #1e1c22; display: grid; justify-items: center; text-align: center; gap: 10px; padding: 30px 24px 80px; }
+.gf-body .echo { margin: 0 0 10px; font-family: var(--f-display); font-size: 13px; letter-spacing: .34em; color: #c9b98f; }
+.gf-body .kicker i { color: #a9a4ad; }
+.gf-body h2 { font-size: 26px; letter-spacing: .5em; padding-left: .5em; }
+.gf-body p { margin: 0; max-width: 30em; color: #b3adb3; }
+.gf-body .row { display: flex; gap: 12px 30px; flex-wrap: wrap; justify-content: center; margin-top: 14px; }
+.gf-body .link-arrow { --line-2: rgba(231, 226, 218, .25); color: #e7e2da; }
+.gf-body .link-arrow.up { color: #cdd9e8; } .gf-body .link-arrow.down { color: #ef7a5c; }
+.tower.abyss .gf-body { padding-bottom: 50px; }
+.strata { display: block; width: 100%; height: 200px; margin-top: -1px; }
+.tower.abyss .tower-head { padding-top: 40px; }
 .altimeter { position: fixed; right: max(18px, calc((100vw - var(--wrap)) / 2)); top: 50%; transform: translateY(-50%); z-index: 20; display: grid; gap: 2px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .1em;
-  background: rgba(10, 10, 12, .55); padding: 8px 6px; border: 1px solid rgba(255, 255, 255, .12); }
-.altimeter a { text-decoration: none; display: flex; align-items: center; gap: 8px; justify-content: flex-end; padding: 2px 4px; color: #9a979c; }
+  padding: 10px 8px 8px; width: 104px; --far: 0; }
+body.tower-heaven .altimeter { background: rgba(250, 251, 253, .94); border: 1px solid rgba(40, 60, 90, .18); --a-ink: #26344a; --a-dim: #7d8696; }
+body.tower-abyss .altimeter { background: rgba(12, 6, 6, .88); border: 1px solid rgba(220, 90, 62, .22); --a-ink: #f1e4dc; --a-dim: #8e7a74; }
+.alt-cap { display: block; font-family: var(--f-display); font-size: 11px; letter-spacing: .12em; color: var(--a-ink); text-align: right; padding: 0 4px 8px; margin-bottom: 4px; border-bottom: 1px solid currentColor; line-height: 1.55; min-height: 3.2em; }
+.alt-cap small { font-family: var(--f-latin); font-style: italic; font-size: 11.5px; letter-spacing: .02em; opacity: .75; }
+body.tower-abyss .alt-cap { color: color-mix(in srgb, #f1e4dc calc(100% - var(--far) * 60%), #e2593a); }
+.altimeter a { text-decoration: none; display: flex; align-items: center; gap: 8px; justify-content: flex-end; padding: 2px 4px; color: var(--a-dim); }
 .altimeter a::after { content: ""; width: 10px; height: 1px; background: currentColor; transition: width .3s; }
-.altimeter a.on { color: #fff; }
+.altimeter a.on { color: var(--a-ink); }
 .altimeter a.on::after { width: 22px; }
 
 /* =========================================================
@@ -1008,7 +1094,10 @@ body.form-demon { --ember-glow: rgba(210, 70, 40, .3); }
   .doc-aside-m { display: block; margin-top: 18px; }
   .realm-body { grid-template-columns: 1fr; gap: 0; }
   .realm-side { position: static; max-height: none; padding-top: 50px; order: 2; }
-  .xs-band { grid-template-columns: 1fr; gap: 22px; }
+  .xs-row { grid-template-columns: 230px minmax(0, 1fr); column-gap: 36px; }
+  .xs-cats { grid-column: 1 / -1; padding-top: 0; }
+  .xs-tower { grid-column: 2; grid-row: 1; }
+  .realm-heaven .xs-tower { grid-row: 1 / span 2; }
   .search input { width: 150px; }
 }
 @media (max-width: 900px) {
@@ -1033,9 +1122,15 @@ body.form-demon { --ember-glow: rgba(210, 70, 40, .3); }
   .wrap { padding-inline: 16px; }
   .section { padding-block: 72px 0; }
   .divider { padding-top: 72px; }
-  .xs-band { padding: 22px 18px; }
+  .xs-row { grid-template-columns: 1fr; }
+  .xs-info, .xs-cats, .xs-tower { grid-column: 1; grid-row: auto !important; }
+  .xs-info { padding-bottom: 18px; }
+  .xs-cats { padding-block: 10px 30px; columns: 2 150px; column-gap: 20px; }
+  .realm-heaven .xs-tower { order: 3; } .realm-heaven .xs-cats { order: 2; }
+  .realm-ground .xs-tower, .realm-abyss .xs-tower { order: -1; }
+  .xs-tower { max-width: 320px; width: 100%; justify-self: center; }
+  .realm-abyss .xs-info { padding-top: 22px; }
   .xs-title b { font-size: 28px; }
-  .xs-cats { grid-template-columns: 1fr 1fr; gap: 18px; }
   .realm-head { grid-template-columns: 1fr; padding-top: 26px; }
   .realm-head .count, .page-head .count { display: none; }
   .realm-head .sigil { right: 0; width: 100px; height: 100px; opacity: .2; }
@@ -1067,7 +1162,11 @@ body.form-demon { --ember-glow: rgba(210, 70, 40, .3); }
 }
 @media (max-width: 560px) {
   .entry-choices { grid-template-columns: 1fr; }
-  .xs-cats { grid-template-columns: 1fr; }
+  .xs-cat-h { grid-template-columns: 1fr auto; }
+  .xs-cat-h .code { display: none; }
+  .xs-cat-h b { font-size: 15.5px; letter-spacing: .06em; }
+  .horizon { display: none; }
+  .realm-heaven .xs-tower .city { width: 130%; }
   .brand b { display: none; }
 }
 @media (max-width: 380px) { .btn-toc span { display: none; } }
