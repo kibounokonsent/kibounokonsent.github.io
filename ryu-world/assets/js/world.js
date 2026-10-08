@@ -66,7 +66,7 @@ const WORLD_DATA = {
         title: "ABYSS OF THE MOMENT",
         name: "刹那の奈落",
         lead: "エイリアスのさらに底。すべての下に口を開ける、深い奈落。",
-        layout: "none",
+        layout: "abyss/",
         lore: [
             {
                 heading: "刹那の奈落",
