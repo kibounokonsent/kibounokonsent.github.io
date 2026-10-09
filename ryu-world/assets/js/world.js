@@ -65,8 +65,9 @@ const WORLD_DATA = {
     abyss: {
         title: "ABYSS OF THE MOMENT",
         name: "刹那の奈落",
+        description: "エイリアスのさらに底。すべての下に口を開ける、深い奈落。堕ちた者、背いた者、欲した者が行き着く場所。",
+        url: "abyss/",
         lead: "エイリアスのさらに底。すべての下に口を開ける、深い奈落。",
-        layout: "abyss/",
         lore: [
             {
                 heading: "刹那の奈落",
