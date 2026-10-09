@@ -1,0 +1,249 @@
+{
+  "_note": "本のキャラクター設定（すべて仮案）。収録作品の本文は works.json 側にあり、workId で結びつけています。",
+  "_emoteNote": "emote（感情）に使える名前: normal / happy / heart / smug / shy / sweat / surprise / excited / angry / sad / sleepy / silent / question。吹き出しの形やまわりの記号（汗・照れ線・怒りマーク・音符・Zzzなど）が自動で変わります。",
+  "_coverNote": "表紙の設定。cover.template（形）: classic（額縁と紋章と題名プレート）/ grimoire（金具と留め具のある魔導書）/ starchart（星図）/ botanical（ツタと葉の縁取り）/ moon（月の満ち欠け）/ simple（帯だけのシンプル）。emblem（紋章）: star / moon / leaf / key / eye / heart / feather / flame / none。color＝地の色、accent＝飾りの色、textColor＝題名の色（省略するとaccent）、title＝表紙に書く題名（省略すると本の名前）、subtitle＝小さな副題、titleDirection＝horizontal（横書き）/ vertical（縦書き）。cover.image に画像のパスを入れると、テンプレートの代わりにその画像を使う。",
+  "_placeNote": "place は置き場所。bay は library.json の本棚ID、row は段（0が一番上〜4）、slot は左から何冊目あたりに置くか。",
+  "books": [
+    {
+      "id": "tsun",
+      "title": "仮題・紅の本",
+      "workId": "work-01",
+      "type": "revisit",
+      "_typeNote": "① 何度も訪れると反応が変わる本",
+      "place": {
+        "bay": "w3",
+        "row": 2,
+        "slot": 6
+      },
+      "shelfEmote": "!?",
+      "cover": {
+        "template": "classic",
+        "color": "#8e3b46",
+        "accent": "#e8c26a",
+        "emblem": "heart",
+        "title": "紅の本",
+        "subtitle": "仮の副題",
+        "titleDirection": "horizontal",
+        "image": ""
+      },
+      "lines": {
+        "first": [
+          {
+            "emote": "surprise",
+            "text": "な、何よ。いきなり手に取らないでくれる？"
+          },
+          {
+            "emote": "shy",
+            "text": "……まあいいわ。読みたいなら、読ませてあげなくもないけど。"
+          }
+        ],
+        "revisit": [
+          {
+            "emote": "surprise",
+            "text": "何？！ってまたアンタ？"
+          },
+          {
+            "emote": "smug",
+            "text": "ふーん、私が気になるのね！"
+          }
+        ],
+        "frequent": [
+          {
+            "emote": "shy",
+            "text": "……今日も来たのね。べつに、待ってたわけじゃないから。"
+          }
+        ],
+        "frequentFrom": 4,
+        "afterRead": {
+          "emote": "shy",
+          "text": "最後まで読んだの？……ふん、なかなか見る目あるじゃない。"
+        },
+        "catalog": {
+          "emote": "angry",
+          "text": "ちょっと！目録から直接来るなんてずるいわよ！"
+        }
+      }
+    },
+    {
+      "id": "friendly",
+      "title": "仮題・若草の本",
+      "workId": "work-02",
+      "type": "friendly",
+      "_typeNote": "② 親しげに迎えてくれる本",
+      "place": {
+        "bay": "e1",
+        "row": 3,
+        "slot": 4
+      },
+      "shelfEmote": "♪",
+      "cover": {
+        "template": "botanical",
+        "color": "#4f7a4a",
+        "accent": "#f2e6b8",
+        "emblem": "leaf",
+        "title": "若草の本",
+        "subtitle": "",
+        "titleDirection": "vertical",
+        "image": ""
+      },
+      "lines": {
+        "first": [
+          {
+            "emote": "happy",
+            "text": "わぁ、はじめましてだね～。"
+          },
+          {
+            "emote": "heart",
+            "text": "僕を選んでくれてありがとう。ゆっくりしていってね～。"
+          }
+        ],
+        "revisit": [
+          {
+            "emote": "heart",
+            "text": "久しぶり～、僕を手に取ってくれてうれしいよ～"
+          }
+        ],
+        "afterRead": {
+          "emote": "happy",
+          "text": "読んでくれてありがとう～。また会いに来てね～。"
+        },
+        "catalog": {
+          "emote": "happy",
+          "text": "目録から探してくれたの？うれしいな～。"
+        }
+      }
+    },
+    {
+      "id": "jumper",
+      "title": "仮題・空色の本",
+      "workId": "work-03",
+      "type": "jumper",
+      "_typeNote": "③ 自分から本棚を飛び出す本。近くまで歩いて少し待つと飛び出してくる。",
+      "place": {
+        "bay": "e2",
+        "row": 1,
+        "slot": 7
+      },
+      "jumpDelayMs": 1500,
+      "shelfEmote": "!!",
+      "cover": {
+        "template": "starchart",
+        "color": "#2f4f86",
+        "accent": "#d9e4f2",
+        "emblem": "star",
+        "title": "空色の本",
+        "subtitle": "仮の副題",
+        "titleDirection": "horizontal",
+        "image": ""
+      },
+      "lines": {
+        "jump": [
+          {
+            "emote": "excited",
+            "text": "とうっ！"
+          },
+          {
+            "emote": "question",
+            "text": "ねえねえ、今こっち見てたよね？見てたよね？"
+          }
+        ],
+        "first": [
+          {
+            "emote": "sweat",
+            "text": "わっ、つかまっちゃった。"
+          },
+          {
+            "emote": "excited",
+            "text": "じっとしてるの、苦手なんだよね。さあ読んで読んで！"
+          }
+        ],
+        "revisit": [
+          {
+            "emote": "excited",
+            "text": "また来た！待ちきれなくて飛び出すところだったよ！"
+          }
+        ],
+        "afterRead": {
+          "emote": "excited",
+          "text": "おしまい！次はもっと高く跳ぶから見ててね！"
+        },
+        "catalog": {
+          "emote": "excited",
+          "text": "目録からでも、ちゃんと飛んでいくよ！"
+        }
+      }
+    },
+    {
+      "id": "refuser",
+      "title": "仮題・墨色の本",
+      "workId": "work-04",
+      "type": "refuser",
+      "_typeNote": "④ 読ませてくれない本。refuseCount 回断られたあと、次に手に取ると読ませてくれる。目録からは常に読める。",
+      "place": {
+        "bay": "w1",
+        "row": 3,
+        "slot": 3
+      },
+      "refuseCount": 2,
+      "shelfEmote": "zzz",
+      "cover": {
+        "template": "grimoire",
+        "color": "#33334a",
+        "accent": "#b9b4d6",
+        "emblem": "eye",
+        "title": "墨色の本",
+        "subtitle": "",
+        "titleDirection": "horizontal",
+        "image": ""
+      },
+      "lines": {
+        "refuse": [
+          [
+            {
+              "emote": "silent",
+              "text": "……。"
+            },
+            {
+              "emote": "angry",
+              "text": "触らないで。今日は開く気分じゃない。"
+            }
+          ],
+          [
+            {
+              "emote": "angry",
+              "text": "また？……しつこいな。"
+            },
+            {
+              "emote": "sleepy",
+              "text": "（本はぱたんと閉じて、寝たふりをはじめた）"
+            }
+          ]
+        ],
+        "accept": [
+          {
+            "emote": "sweat",
+            "text": "……わかった。そこまで言うなら、少しだけ。"
+          },
+          {
+            "emote": "normal",
+            "text": "ページは、静かにめくって。"
+          }
+        ],
+        "revisit": [
+          {
+            "emote": "normal",
+            "text": "……あなたか。いいよ、開いてあげる。"
+          }
+        ],
+        "afterRead": {
+          "emote": "shy",
+          "text": "……どうだった。べつに、感想は言わなくていい。"
+        },
+        "catalog": {
+          "emote": "sweat",
+          "text": "……目録から来たのか。まあ、いい。"
+        }
+      }
+    }
+  ]
+}

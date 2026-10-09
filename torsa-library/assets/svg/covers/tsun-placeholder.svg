@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 400" width="300" height="400"><style>
+ .tw{animation:twinkle 3s ease-in-out infinite}@keyframes twinkle{50%{opacity:.25}}
+ .drift{animation:dy 9s ease-in-out infinite}.drift.slow{animation-duration:14s}.float{animation:dy 5s ease-in-out infinite}@keyframes dy{50%{transform:translateY(-14px)}}
+ .flick{animation:flick 2.6s ease-in-out infinite}@keyframes flick{30%{opacity:.78}60%{opacity:1}80%{opacity:.85}}
+ .fx-rise>*{animation:rise 2.4s ease-out infinite}.fx-rise>*:nth-child(2){animation-delay:.8s}.fx-rise>*:nth-child(3){animation-delay:1.6s}@keyframes rise{0%{transform:translateY(14px);opacity:0}25%{opacity:1}100%{transform:translateY(-34px);opacity:0}}
+ .fx-drip{animation:drip 1.8s ease-in infinite}@keyframes drip{0%{transform:translateY(-6px);opacity:0}20%{opacity:1}100%{transform:translateY(18px);opacity:0}}
+ .fx-pulse{animation:pulse .9s ease-in-out infinite;transform-box:fill-box;transform-origin:center}@keyframes pulse{50%{transform:scale(1.18)}}
+ .fx-twinkle>*{animation:twinkle 1.6s ease-in-out infinite}.fx-twinkle>*:nth-child(2){animation-delay:.5s}.fx-twinkle>*:nth-child(3){animation-delay:1s}
+ </style>
+      <rect width="300" height="400" fill="#8e3b46"/><rect width="26" height="400" fill="#000" opacity=".2"/>
+      <rect x="44" y="20" width="236" height="360" rx="6" fill="none" stroke="#e8c26a" stroke-width="2" opacity=".75"/>
+      <rect x="54" y="30" width="216" height="340" rx="4" fill="none" stroke="#e8c26a" stroke-width="1" opacity=".45"/>
+      <circle cx="162" cy="160" r="54" fill="none" stroke="#e8c26a" stroke-width="2" opacity=".7"/>
+      <path d="M162 130Q162 160 192 160Q162 160 162 190Q162 160 132 160Q162 160 162 130Z" fill="#e8c26a" opacity=".85"/>
+      <path d="M98 62Q98 70 106 70Q98 70 98 78Q98 70 90 70Q98 70 98 62ZM226 62Q226 70 234 70Q226 70 226 78Q226 70 218 70Q226 70 226 62ZM98 322Q98 330 106 330Q98 330 98 338Q98 330 90 330Q98 330 98 322ZM226 322Q226 330 234 330Q226 330 226 338Q226 330 218 330Q226 330 226 322Z" fill="#e8c26a" opacity=".6"/>
+      <text x="162" y="270" text-anchor="middle" font-size="22" font-family="Kaisei Decol, serif" fill="#e8c26a">紅の本</text>
+      <text x="162" y="298" text-anchor="middle" font-size="11" letter-spacing="4" font-family="Zen Maru Gothic, sans-serif" fill="#e8c26a" opacity=".7">仮の表紙</text></svg>

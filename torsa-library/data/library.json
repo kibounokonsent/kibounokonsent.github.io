@@ -1,0 +1,20 @@
+{
+  "_note": "館内の広さと配置（仮案）。world.width は館内の横幅（単位は館内の高さを1000としたときの長さ）。bays は本棚の位置。zones は画面上部に出る場所の名前。",
+  "world": { "width": 3600, "startX": 1800 },
+  "_artNote": "背景の絵を差し替えるときは、assets/svg/ の SVG を加工して、ここにパスを書く（例: \"assets/svg/back.svg\"）。空なら自動で描いた絵を使う。mid は本棚の位置と手に取れる本の位置が対応しているので、viewBox（0 0 3600 1000）と本棚の配置は変えないこと。",
+  "art": { "sky": "assets/svg/custom/sky.svg", "back": "", "mid": "", "front": "" },
+  "walkSpeed": 9,
+  "zones": [
+    { "name": "西の書架", "from": 0, "to": 1460 },
+    { "name": "月の窓", "from": 1460, "to": 2140 },
+    { "name": "東の書架", "from": 2140, "to": 3600 }
+  ],
+  "bays": [
+    { "id": "w1", "x": 110, "seed": 11 },
+    { "id": "w2", "x": 570, "seed": 23 },
+    { "id": "w3", "x": 1030, "seed": 37 },
+    { "id": "e1", "x": 2170, "seed": 41 },
+    { "id": "e2", "x": 2630, "seed": 53 },
+    { "id": "e3", "x": 3090, "seed": 67 }
+  ]
+}

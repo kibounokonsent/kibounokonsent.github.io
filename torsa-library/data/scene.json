@@ -1,0 +1,201 @@
+{
+  "_note": "館内を部品（assets/parts/ の SVG）から組み立てる設定。useParts を false にすると、部品を使わず自動で描いた絵に戻る。",
+  "_partsNote": "vb はファイルの viewBox。fit は [左端x, 右端x, 下端y]（ファイル内の座標）で、この3つが館内の決まった位置にぴったり合うように拡大縮小して置く。fit が無い部品はファイル全体を枠に合わせる。部品を描き直して大きさが変わったら vb（と fit）を直すこと。assets/parts-src/ は受け取ったままの元ファイル。",
+  "useParts": true,
+  "parts": {
+    "bookcase_b2": {
+      "file": "assets/parts/bookcase_b2.svg",
+      "vb": [
+        0.0,
+        0.0,
+        343.58,
+        522.81
+      ]
+    },
+    "pillar": {
+      "file": "assets/parts/pillar.svg",
+      "vb": [
+        0.0,
+        0.0,
+        52.48,
+        546.98
+      ]
+    },
+    "arch": {
+      "file": "assets/parts/arch.svg",
+      "vb": [
+        0.0,
+        -8.0,
+        715.95,
+        182.0
+      ],
+      "fit": [
+        28,
+        681,
+        138
+      ]
+    },
+    "grand_arch": {
+      "file": "assets/parts/grand_arch.svg",
+      "vb": [
+        0.0,
+        0.0,
+        722.44,
+        213.36
+      ],
+      "fit": [
+        6,
+        700,
+        191
+      ]
+    },
+    "lantern": {
+      "file": "assets/parts/lantern.svg",
+      "vb": [
+        0,
+        200,
+        217.6,
+        322.24
+      ]
+    },
+    "candle": {
+      "file": "assets/parts/candle.svg",
+      "vb": [
+        0.0,
+        0.0,
+        100.09,
+        350.32
+      ]
+    },
+    "plant": {
+      "file": "assets/parts/plant.svg",
+      "vb": [
+        0.0,
+        0.0,
+        423.17,
+        416.42
+      ]
+    },
+    "front_plant": {
+      "file": "assets/parts/front_plant.svg",
+      "vb": [
+        0.0,
+        0.0,
+        423.17,
+        416.92
+      ]
+    },
+    "carpet": {
+      "file": "assets/parts/carpet.svg",
+      "vb": [
+        0.0,
+        0.0,
+        722.0,
+        164.46
+      ]
+    },
+    "desk": {
+      "file": "assets/parts/desk.svg",
+      "vb": [
+        -8.0,
+        -8.0,
+        716.5,
+        505.0
+      ],
+      "fit": [
+        -5,
+        696,
+        489
+      ]
+    },
+    "orrery": {
+      "file": "assets/parts/orrery.svg",
+      "vb": [
+        0.0,
+        0.0,
+        371.17,
+        537.25
+      ]
+    },
+    "ladder": {
+      "file": "assets/parts/ladder.svg",
+      "vb": [
+        0.0,
+        0.0,
+        159.54,
+        513.25
+      ]
+    },
+    "far_shelf": {
+      "file": "assets/parts/far_shelf.svg",
+      "vb": [
+        0.0,
+        0.0,
+        320.0,
+        544.0
+      ]
+    },
+    "tower": {
+      "file": "assets/parts/tower.svg",
+      "vb": [
+        0.0,
+        0.0,
+        652.8,
+        544.0
+      ]
+    },
+    "wall_panel": {
+      "file": "assets/parts/wall_panel.svg",
+      "vb": [
+        0.0,
+        0.0,
+        229.26,
+        544.0
+      ]
+    },
+    "window": {
+      "file": "assets/parts/window.svg",
+      "vb": [
+        300.0,
+        290.0,
+        475.0,
+        560.0
+      ],
+      "fit": [
+        339,
+        733,
+        815
+      ]
+    },
+    "tama": {
+      "file": "assets/parts/tama.svg",
+      "vb": [
+        0.0,
+        0.0,
+        22.91,
+        24.34
+      ]
+    },
+    "turu": {
+      "file": "assets/parts/turu.svg",
+      "vb": [
+        0.0,
+        0.0,
+        128.92,
+        103.95
+      ]
+    }
+  },
+  "_decorNote": "飾りの設定。bookcaseFlip: 本棚を1つおきに左右反転する。ivyPerArch: 1なら柱1本おき、2以上なら全部の柱の頭からツタを垂らす。crystals: 柱の上と窓台に水晶玉を置く。floatingBooks: 月の窓のまわりを漂う本の数（0〜6）。 shade: 明暗。base＝館内全体の暗さ（0〜1、明かりのまわりは明るいまま）、ends＝左右の端の暗さ（0〜1）、lanternRadius＝自分の手もとのランタンが照らす広さ（画面のまん中が、歩くのについてほのかに明るくなる）。",
+  "decor": {
+    "bookcaseFlip": true,
+    "ivyPerArch": 1,
+    "crystals": true,
+    "floatingBooks": 4,
+    "shade": {
+      "base": 0.34,
+      "ends": 0.45,
+      "lanternRadius": 520
+    }
+  }
+}

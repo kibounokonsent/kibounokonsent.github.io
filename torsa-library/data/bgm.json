@@ -1,0 +1,21 @@
+{
+  "_note": "BGM設定。音声ファイルは使わず、ブラウザ内で静かな曲を自動演奏します。audioFile に音声ファイルのパス（例: assets/bgm.mp3）を入れると、そちらをループ再生します。",
+  "audioFile": "",
+  "volume": 0.32,
+  "secondsPerChord": 7,
+  "chords": [
+    ["F3", "A3", "C4", "E4"],
+    ["E3", "G3", "B3", "D4"],
+    ["D3", "F3", "A3", "C4"],
+    ["C3", "E3", "G3", "B3"],
+    ["Bb2", "D3", "F3", "A3"],
+    ["A2", "C3", "E3", "G3"],
+    ["D3", "F3", "A3", "C4"],
+    ["G2", "C3", "D3", "G3"]
+  ],
+  "melodyNotes": ["C5", "D5", "E5", "G5", "A5", "C6"],
+  "melodyChance": 0.45,
+  "melodyStepSeconds": 1.75,
+  "padBrightness": 900,
+  "reverbSeconds": 4.5
+}
