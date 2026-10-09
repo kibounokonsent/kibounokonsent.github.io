@@ -36,7 +36,7 @@ const WORLD_DATA = {
     misseo: {
         title: "MISSEO WORLD",
         name: "ミスセオワールド",
-        description: "フロンズと並び、大いなる世界として語られるもう一つの世界。IFやクロスオーバーなど、別の物語が存在する。",
+        description: "フロンズとは異なる、同じ構造を持つもう一つの世界。多くの他の世界と交わりながら、フロンズとは異なる物語が存在する。",
         url: "misseo/"
     },
 
