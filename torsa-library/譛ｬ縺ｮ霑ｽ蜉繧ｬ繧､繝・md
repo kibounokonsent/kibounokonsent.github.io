@@ -1,0 +1,127 @@
+# 本の追加ガイド
+
+本を1冊増やすには、2つのファイルに1つずつ書き足します。
+
+1. `data/works.json` … 作品の本文
+2. `data/books.json` … 本のキャラクター（表紙・置き場所・セリフ）
+
+2つは `workId`（作品の名前札）でつながっています。
+
+---
+
+## 手順1：作品の本文を書く（works.json）
+
+`"works": [ … ]` の中の最後の作品のうしろに `,`（カンマ）を付けて、次のかたまりを足します。
+
+```json
+{
+  "id": "work-05",
+  "title": "作品のタイトル",
+  "author": "コンセント",
+  "genre": "短編",
+  "paragraphs": [
+    "一段落目の文章。",
+    "二段落目の文章。",
+    "",
+    "空行を入れたいところは、このように空の \"\" を1つ入れます。"
+  ]
+}
+```
+
+- `id` はほかの作品と重ならない名前にします（work-05, work-06 … と番号を増やすのがおすすめ）。
+- 本文の中で `"`（ダブルクォート）を使いたいときは `\"` と書きます。「」なら気にしなくて大丈夫です。
+
+## 手順2：本を書く（books.json）
+
+`"books": [ … ]` の中の最後の本のうしろに `,` を付けて、次のかたまりを足します。
+
+```json
+{
+  "id": "hoshizora",
+  "title": "星空の本",
+  "workId": "work-05",
+  "type": "friendly",
+  "place": { "bay": "w2", "row": 1, "slot": 5 },
+  "shelfEmote": "✦",
+  "cover": {
+    "template": "moon",
+    "color": "#3a2f6a",
+    "accent": "#f0d78c",
+    "emblem": "moon",
+    "title": "星空の本",
+    "subtitle": "",
+    "titleDirection": "horizontal",
+    "image": ""
+  },
+  "lines": {
+    "first":    [ { "emote": "happy", "text": "はじめまして。" } ],
+    "revisit":  [ { "emote": "heart", "text": "また来てくれたんだね。" } ],
+    "afterRead": { "emote": "happy",  "text": "読んでくれてありがとう。" },
+    "catalog":   { "emote": "normal", "text": "目録から来てくれたんだね。" }
+  }
+}
+```
+
+### 各項目の意味
+
+| 項目 | 意味 |
+|---|---|
+| `id` | 本の名前札。ほかの本と重ならない英数字 |
+| `title` | 蔵書目録や会話で表示される本の名前 |
+| `workId` | 手順1で付けた作品の `id` と同じにする |
+| `type` | 本の性格（下の表） |
+| `place` | 置き場所（下の表） |
+| `shelfEmote` | 棚に並んでいるとき、本の上に出る小さな吹き出し（`!?` `♪` `zzz` など。いらなければ `""`） |
+| `cover` | 表紙（下の表） |
+| `lines` | セリフ（下の表） |
+
+### 本の性格 `type`
+
+| 値 | 動き | 必要なセリフ |
+|---|---|---|
+| `friendly` | 親しげに迎えてくれる | `first`, `revisit` |
+| `revisit` | 何度も来ると反応が変わる | `first`, `revisit`, `frequent`（＋ `frequentFrom`：何回目から） |
+| `jumper` | 近くで立ち止まると本棚から飛び出す | `jump`, `first`, `revisit`（＋ `jumpDelayMs`：待つ時間） |
+| `refuser` | 何回か断ってから読ませてくれる | `refuse`（断るセリフの組をいくつか）, `accept`, `revisit`（＋ `refuseCount`：断る回数） |
+
+どの性格でも `afterRead`（読み終えて戻ったとき）と `catalog`（目録から開いたとき）を書いておくと、そのときにも話します。
+書き方は、今ある4冊（tsun / friendly / jumper / refuser）をまねるのがいちばん早いです。
+
+### 置き場所 `place`
+
+| 値 | 意味 |
+|---|---|
+| `bay` | 本棚。`w1` `w2` `w3`（西の書架、左から）、`e1` `e2` `e3`（東の書架、左から） |
+| `row` | 段。`0` がいちばん上、`4` がいちばん下 |
+| `slot` | 左から何冊目あたりか。`0`〜`14` くらい |
+
+ほかの本と同じ場所にすると重なるので、`bay`・`row`・`slot` のどれかをずらしてください。
+
+### 表紙 `cover`
+
+| 値 | 選べるもの |
+|---|---|
+| `template`（形） | `classic`（額縁）, `grimoire`（魔導書）, `starchart`（星図）, `botanical`（ツタ）, `moon`（月の満ち欠け）, `simple`（帯） |
+| `emblem`（紋章） | `star`, `moon`, `leaf`, `key`, `eye`, `heart`, `feather`, `flame`, `none` |
+| `color` / `accent` | 地の色 / 飾りの色（`#3a2f6a` のような色コード） |
+| `textColor` | 題名の色（省略すると `accent` と同じ） |
+| `title` / `subtitle` | 表紙に書く題名 / 小さな副題 |
+| `titleDirection` | `horizontal`（横書き）/ `vertical`（縦書き） |
+| `image` | 描いた表紙画像を使うときのパス（例: `assets/covers/hoshizora.png`）。空ならテンプレートで作る |
+
+### セリフの感情 `emote`
+
+`normal` / `happy` / `heart` / `smug` / `shy` / `sweat` / `surprise` / `excited` / `angry` / `sad` / `sleepy` / `silent` / `question`
+
+感情に合わせて、吹き出しの形・本のまわりの記号・本の動き・効果音が変わります。
+
+---
+
+## うまく出ないとき
+
+- **何も表示されなくなった** … カンマの付け忘れか、付けすぎがほとんどです。かたまり同士の間には `,` が1つ、最後のかたまりのうしろには付けません。
+- **本棚に本が出ない** … `place` の `bay` の名前が合っているか確認してください。
+- **「作品が見つかりません」と出る** … `workId` と、works.json の `id` が同じになっているか確認してください。
+
+JSON の書き間違いは、「JSON チェック」などで検索して出てくる確認サイトに貼ると、どこが違うか教えてくれます。
+わからなくなったら、ファイルごと渡してくれればこちらで直します。
