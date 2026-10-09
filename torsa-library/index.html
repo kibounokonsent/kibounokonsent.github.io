@@ -574,6 +574,11 @@ body.at-door .topbar, body.at-door .walkbar, body.at-door .zone { opacity: 0; po
 @media (max-width: 720px) {
   .torsa .bubble { right: auto; top: auto; }
 }
+
+/* 入口ではトルサはいない。入館すると、きらめきと一緒にふわっと現れる */
+.torsa { transition: opacity 1s ease, transform 1.1s cubic-bezier(.2, .8, .2, 1), filter 1.2s ease; }
+body.torsa-away .torsa { opacity: 0; transform: translateY(28px) scale(.97); filter: brightness(2.2) blur(4px); pointer-events: none; }
+body.torsa-away .torsa * { pointer-events: none !important; }
 </style>
 
 <div id="hall" aria-label="館内">
@@ -1814,7 +1819,7 @@ body.at-door .topbar, body.at-door .walkbar, body.at-door .zone { opacity: 0; po
   }
 
   /* ---------- 入館 ---------- */
-  document.body.classList.add("at-door");
+  document.body.classList.add("at-door", "torsa-away");
   $("enterBtn").addEventListener("click", () => {
     if ($("bgmOnEnter").checked) BGM.start(); setBgmButton();
     document.body.classList.remove("at-door");
@@ -1822,8 +1827,18 @@ body.at-door .topbar, body.at-door .walkbar, body.at-door .zone { opacity: 0; po
     $("entrance").classList.add("leaving");
     setTimeout(() => { $("entrance").hidden = true; }, 1200);
     seqTimers.forEach(clearTimeout);
-    setTimeout(() => torsa("enterLibrary"), 1300);
-    MOON.allowAt = performance.now() + 9000;
+    // 入館して少ししてから、トルサがきらめきと一緒に現れて、あいさつする
+    const greet = DATA.torsa.lines[mem.visits === 1 ? "entranceFirst" : "entranceReturn"] || [];
+    setTimeout(() => {
+      document.body.classList.remove("torsa-away");
+      const r = $("torsaImg").getBoundingClientRect();
+      for (let i = 0; i < 3; i++) setTimeout(() => burst(r.left + r.width * (.3 + Math.random() * .4), r.top + r.height * (.15 + Math.random() * .5), 18, 1.6, 70), i * 180);
+      setTimeout(() => {
+        torsaSeq(mem.visits === 1 ? "entranceFirst" : "entranceReturn");
+        setTimeout(() => torsa("enterLibrary"), greet.length * 3400 + 600);
+      }, 700);
+    }, 1300);
+    MOON.allowAt = performance.now() + 1300 + 700 + greet.length * 3400 + 7000;
     resetIdle();
   });
 
@@ -1855,7 +1870,7 @@ body.at-door .topbar, body.at-door .walkbar, body.at-door .zone { opacity: 0; po
       $("visitNo").textContent = mem.visits === 1 ? "はじめて" : `${mem.visits} 回目`;
       $("bookCount").textContent = `${books.books.length} 冊（ほか眠っている本）`;
       $("enterBtn").disabled = false; $("status").textContent = "";
-      setTimeout(() => torsaSeq(mem.visits === 1 ? "entranceFirst" : "entranceReturn"), 800);
+
       requestAnimationFrame(loop);
     })
     .catch((err) => {
