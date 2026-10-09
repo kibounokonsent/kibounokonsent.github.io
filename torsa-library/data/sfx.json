@@ -1,0 +1,29 @@
+{
+  "_note": "効果音の設定。音はブラウザの中で合成している。volume は全体の大きさ（0〜1）。typing は本が話すときの「ぽぽぽ」という声音。sounds の各音を false にするとその音だけ鳴らなくなり、音声ファイルのパス（例: \"assets/sfx/heart.mp3\"）を書くとそのファイルを鳴らす。",
+  "enabled": true,
+  "volume": 0.6,
+  "typing": true,
+  "sounds": {
+    "tap": true,
+    "hover": true,
+    "pickup": true,
+    "bookOpen": true,
+    "page": true,
+    "sparkle": true,
+    "happy": true,
+    "heart": true,
+    "shy": true,
+    "pat": true,
+    "surprise": true,
+    "excited": true,
+    "angry": true,
+    "sweat": true,
+    "sad": true,
+    "sleepy": true,
+    "question": true,
+    "silent": true,
+    "jump": true,
+    "appear": true,
+    "moon": true
+  }
+}

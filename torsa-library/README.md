@@ -17,7 +17,8 @@ torsa-library/
    ├─ books.json     … 本のキャラクター（性格・セリフ・感情・表紙・置き場所）
    ├─ works.json     … 収録作品の本文
    ├─ torsa.json     … トルサのセリフ
-   └─ bgm.json       … BGMの設定
+   ├─ bgm.json       … BGMの設定
+   └─ sfx.json       … 効果音の設定（音量・個別のオンオフ・音声ファイルへの差し替え）
 ```
 
 本のセリフ（books.json）と作品本文（works.json）は別ファイルなので、片方を直してももう片方は壊れません。
@@ -40,6 +41,8 @@ torsa-library/
 - **表情を増やす** … 画像を assets/torsa/ に置き、torsa.json の `faces` に名前とパスを足します。
 - **BGM** … bgm.json の `chords`（和音）や `volume`（音量）で雰囲気を変えられます。
   音声ファイルを使いたいときは assets に置いて `audioFile` にパスを書く（例: `"assets/bgm.mp3"`）。
+
+- **効果音** … sfx.json の `volume` で全体の音量、`sounds` の各音を `false` にするとその音だけ止まる。音声ファイルのパスを書くとそのファイルを鳴らす。`typing` は本が話すときの「ぽぽぽ」声。
 
 ## パソコンで開くとき
 
