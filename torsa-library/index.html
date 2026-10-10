@@ -110,6 +110,8 @@ body.at-door #sceneWrap::after { opacity: 1; }
 .live.gone { visibility: hidden; }
 @keyframes glow { 50% { box-shadow: inset -3px 0 0 rgba(0,0,0,.25), 0 0 16px 4px rgba(243, 208, 138, .6); } }
 @keyframes restless { 0%, 68%, 100% { transform: none; } 74% { transform: translateY(-8%) rotate(-3deg); } 80% { transform: rotate(2deg); } 86% { transform: translateY(-4%); } }
+.door-hit { position: absolute; border: 0; padding: 0; background: transparent; border-radius: 50% 50% 0 0 / 22% 22% 0 0; cursor: pointer; }
+.door-hit:focus-visible { outline: 2px dashed var(--lamp); outline-offset: 2px; }
 .slot-back { position: absolute; background: linear-gradient(180deg, #1c130d, #33241b); pointer-events: none; }
 .shelf-emote {
   position: absolute;
@@ -835,7 +837,67 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     return `<svg viewBox="0 0 2400 1000" preserveAspectRatio="xMidYMax slice">${s}</svg>`;
   }
 
+  /* ====================================================
+     館内の配置：library.json の本棚（bays）から、柱・アーチ・ランタン・鉢植え・両端の扉と、
+     歩ける範囲を自動で決める。本棚を足せば、まわりの飾りと歩ける範囲もいっしょに広がる
+     ==================================================== */
+  const WIN = { a: 1460, b: 2140, cx: 1800 }; // 月の窓（中央の大アーチ）の位置
+  const WORLD = { L: 0, R: 3600, W: 3600, plan: null };
+  function makePlan(lib) {
+    const w = lib.world || {}, doorW = w.doorBay ?? 500, room = Math.max(doorW + 120, w.endRoom ?? 820), eastExtra = w.eastExtra ?? 320;
+    const bays = lib.bays.slice().sort((p, q) => p.x - q.x), ps = [];
+    const addP = (x) => { if (!ps.some((p) => Math.abs(p - x) < 8)) ps.push(x); };
+    bays.forEach((b) => { addP(b.x - 30); addP(b.x + 430); });
+    ps.sort((p, q) => p - q);
+    const first = ps[0], last = ps[ps.length - 1];
+    const pillars = [first - doorW, ...ps, last + doorW], gaps = [];
+    for (let i = 0; i < pillars.length - 1; i++) {
+      const a = pillars[i], b = pillars[i + 1];
+      const kind = i === 0 || i === pillars.length - 2 ? "door" : a <= WIN.cx && b >= WIN.cx && b - a > 600 ? "window" : bays.some((y) => Math.abs(y.x - 30 - a) < 8) ? "bay" : "open";
+      gaps.push({ a, b, kind });
+    }
+    const plants = [];
+    for (let i = 1; i < gaps.length; i++) if (gaps[i - 1].kind === "bay" && gaps[i].kind === "bay") plants.push([pillars[i], plants.length % 2 ? 1.25 : 1.05]);
+    // トルサが画面の右に立っているので、東の端は少し多めに歩けるようにする（扉がトルサに隠れないように）
+    const L = first - room, R = last + room + eastExtra;
+    return {
+      pillars, plants,
+      arches: gaps.filter((g) => g.kind !== "open"),
+      lanterns: gaps.filter((g) => g.kind === "bay" || g.kind === "door").map((g) => (g.a + g.b) / 2),
+      doors: [{ x: first - doorW / 2, side: "west", flip: false }, { x: last + doorW / 2, side: "east", flip: true }],
+      endPlants: [[pillars[0] - 150, 1.3], [pillars[pillars.length - 1] + 150, 1.3]],
+      L, R, W: R - L,
+      // 奥の壁を左右にどこまでのばして描くか（横長の画面でも端が切れないように）
+      backExt: Math.ceil(Math.max(0, -(630 - .45 * (WIN.cx - L)), (630 - .45 * (WIN.cx - L)) + 1540 + .45 * (R - L) - 2800)) + 300
+    };
+  }
+  // 本棚の両端の先にある「まだ開かない扉」（いつか増設するときの入口）
+  function doorBody(cx) {
+    const x0 = cx - 150, x1 = cx + 150, top = 470, ap = 330, id = "dc" + Math.round(cx + 10000);
+    const outer = `M${x0} 838 V${top} Q${x0} ${ap} ${cx} ${ap - 10} Q${x1} ${ap} ${x1} ${top} V838 Z`;
+    const inner = `M${cx - 128} 836 V${top + 8} Q${cx - 128} ${ap + 22} ${cx} ${ap + 14} Q${cx + 128} ${ap + 22} ${cx + 128} ${top + 8} V836 Z`;
+    let s = `<clipPath id="${id}"><path d="${inner}"/></clipPath>`;
+    s += `<ellipse cx="${cx}" cy="846" rx="190" ry="16" fill="#000" opacity=".35"/><path d="${outer}" fill="#262b5e" stroke="${C.woodD}" stroke-width="6"/>`;
+    s += `<path d="${inner}" fill="url(#doorG)"/><g clip-path="url(#${id})">`;
+    for (let i = -3; i <= 3; i++) if (i) s += `<path d="M${cx + i * 32} 300 V836" stroke="#3a2619" stroke-width="2" opacity=".55"/>`;
+    [-1, 1].forEach((k) => { const px = k < 0 ? cx - 112 : cx + 22; s += `<rect x="${px}" y="520" width="90" height="120" rx="6" fill="none" stroke="#8a6444" stroke-width="3"/><rect x="${px}" y="670" width="90" height="140" rx="6" fill="none" stroke="#8a6444" stroke-width="3"/>`; });
+    [560, 770].forEach((y) => { s += `<rect x="${cx - 130}" y="${y}" width="260" height="9" fill="${C.gold}" opacity=".6"/>`; for (let x = cx - 116; x < cx + 120; x += 29) s += `<circle cx="${x}" cy="${y + 4.5}" r="2.4" fill="#fff1c4" opacity=".7"/>`; });
+    s += `</g><path d="M${cx} ${ap + 14} V836" stroke="#24160d" stroke-width="5"/>`;
+    s += `<path d="M${x0 + 10} 838 V${top} Q${x0 + 10} ${ap + 12} ${cx} ${ap + 2} Q${x1 - 10} ${ap + 12} ${x1 - 10} ${top} V838" fill="none" stroke="${C.wood}" stroke-width="16"/>`;
+    s += `<path d="M${x0 + 20} 838 V${top} Q${x0 + 20} ${ap + 24} ${cx} ${ap + 13} Q${x1 - 20} ${ap + 24} ${x1 - 20} ${top} V838" fill="none" stroke="${C.gold}" stroke-width="2.5" opacity=".75"/>`;
+    // 扉の上の月の紋章・取っ手・鍵穴
+    s += `<path d="M${cx + 4} ${ap + 40} A26 26 0 1 0 ${cx + 24} ${ap + 84} A20 20 0 1 1 ${cx + 4} ${ap + 40} Z" fill="${C.gold}"/><path d="${star4(cx + 22, ap + 50, 8)}" fill="#fff1c4"/>`;
+    [-1, 1].forEach((k) => { s += `<circle cx="${cx + k * 20}" cy="680" r="13" fill="none" stroke="${C.gold}" stroke-width="4"/><circle cx="${cx + k * 20}" cy="666" r="5" fill="${C.gold}"/>`; });
+    s += `<rect x="${cx + 38}" y="694" width="16" height="28" rx="4" fill="${C.gold}"/><circle cx="${cx + 46}" cy="704" r="3.5" fill="#24160d"/><path d="M${cx + 46} 706 V715" stroke="#24160d" stroke-width="3"/>`;
+    // 扉の下のすきまから、向こう側の明かりが少しもれている
+    s += `<rect x="${cx - 150}" y="830" width="300" height="12" rx="2" fill="${C.woodL}"/><rect x="${cx - 124}" y="826" width="248" height="5" fill="#ffe2a0" opacity=".6"/>`;
+    return s;
+  }
+  // 手前の層（ぼかした植物）の置き場所：画面の幅に合わせて層の横幅が変わるので、広さのぶん並べる
+  const frontSpots = (W, step, x0) => { const a = []; for (let x = x0; x < 1.25 * W + 400; x += step) a.push(x); return a; };
   const FAR_SHELVES = [[90, 520], [320, 540], [2030, 540], [2260, 520], [2490, 540]];
+  // 奥の壁をのばした部分にも、遠くの本棚を並べる
+  const farShelvesAll = (E) => { const a = FAR_SHELVES.slice(); for (let x = -260; x > -E; x -= 300) a.push([x, x % 600 ? 540 : 520]); for (let x = 2860; x < 2800 + E - 200; x += 300) a.push([x, x % 600 ? 520 : 540]); return a; };
   function wallPanel(x) { return `<path d="M${x} 330 V880 M${x + 220} 330" stroke="#283065" stroke-width="14"/><path d="M${x + 20} 470 Q${x + 110} 380 ${x + 200} 470" fill="none" stroke="#283065" stroke-width="8"/>`; }
   function farShelf(x, y, r) {
     let s = `<rect x="${x}" y="${y}" width="200" height="${860 - y}" fill="#2a2349"/>`;
@@ -843,7 +905,7 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     return s;
   }
   function backSVG() {
-    const cx = 1400, cy = 390, r = rng(19); let s = "";
+    const cx = 1400, cy = 390, r = rng(19), E = WORLD.plan ? WORLD.plan.backExt : 0; let s = "";
     const arch = "M1110 800 V400 Q1110 160 1400 112 Q1690 160 1690 400 V800 Z";
     s += `<defs><clipPath id="win"><path d="${arch}"/></clipPath>
       <radialGradient id="winGlow"><stop offset="0" stop-color="#bcd2ff" stop-opacity=".45"/><stop offset="1" stop-color="#bcd2ff" stop-opacity="0"/></radialGradient>
@@ -856,11 +918,11 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
       <linearGradient id="frameG" x1="0" x2="1"><stop offset="0" stop-color="#5e4a3a"/><stop offset=".5" stop-color="#9a7e62"/><stop offset="1" stop-color="#5e4a3a"/></linearGradient>
       <radialGradient id="spill"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient></defs>`;
     // 奥の壁と中央の塔
-    s += `<!--wall--><rect x="0" y="330" width="2800" height="670" fill="url(#wallG)"/>
-      <path d="M0 330 H2800" stroke="#2c3370" stroke-width="10"/><!--/wall-->`;
-    for (let x = 60; x < 2800; x += 220) { if (x > 700 && x < 2050) continue; s += wallPanel(x); }
+    s += `<!--wall--><rect x="${-E}" y="330" width="${2800 + 2 * E}" height="670" fill="url(#wallG)"/>
+      <path d="M${-E} 330 H${2800 + E}" stroke="#2c3370" stroke-width="10"/><!--/wall-->`;
+    for (let x = 60 - Math.ceil(E / 220) * 220; x < 2800 + E; x += 220) { if (x > 700 && x < 2050) continue; s += wallPanel(x); }
     // 遠くの本棚のシルエット
-    FAR_SHELVES.forEach(([x, y]) => { s += farShelf(x, y, r); });
+    farShelvesAll(E).forEach(([x, y]) => { s += farShelf(x, y, r); });
     s += `<!--tower--><path d="M820 1000 V210 Q1400 30 1980 210 V1000 Z" fill="url(#towerG)"/>
       <path d="M820 210 Q1400 30 1980 210" fill="none" stroke="#3a4384" stroke-width="10"/><!--/tower-->
       <!--winglow--><ellipse cx="${cx}" cy="420" rx="560" ry="460" fill="url(#winGlow)"/><!--/winglow-->`;
@@ -888,10 +950,10 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     s += `</g><path d="${arch}" fill="none" stroke="#fff3c4" stroke-opacity=".18" stroke-width="60"/><path d="${arch}" fill="none" stroke="url(#frameG)" stroke-width="26"/><path d="${arch}" fill="none" stroke="${C.gold}" stroke-width="4" opacity=".8"/>
       <path d="M1080 800 H1720 V830 H1080 Z" fill="#7b6450"/>
       <path d="${star4(cx, 70, 24)}" fill="${C.gold}"/><!--/win-->
-      <!--floor--><rect x="0" y="860" width="2800" height="140" fill="#141a40"/>
+      <!--floor--><rect x="${-E}" y="860" width="${2800 + 2 * E}" height="140" fill="#141a40"/>
       <ellipse cx="1300" cy="905" rx="190" ry="32" fill="#7d96ff" opacity=".1"/><ellipse cx="1500" cy="930" rx="170" ry="30" fill="#b48aff" opacity=".1"/><ellipse cx="1400" cy="965" rx="230" ry="26" fill="#ffe7a0" opacity=".08"/>
       <polygon points="1130,820 1670,820 1980,1000 820,1000" fill="url(#beam)"/><!--/floor-->`;
-    return `<svg viewBox="0 0 2800 1000" preserveAspectRatio="xMidYMax slice">${s}</svg>`;
+    return `<svg viewBox="0 0 2800 1000" preserveAspectRatio="none">${s}</svg>`;
   }
 
   // 先のとがった葉。rib=true で葉脈（中央の筋）を描く
@@ -974,7 +1036,7 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
 
   // 本棚の絵と、手に取れる本の位置を作る
   function midSVG(lib, books) {
-    const W = lib.world.width, spots = {}, r0 = rng(3);
+    const P = WORLD.plan, L = P.L, W = P.W, spots = {}, r0 = rng(3);
     let s = `<defs><radialGradient id="lampGlow"><stop offset="0" stop-color="#ffd98a" stop-opacity=".55"/><stop offset="1" stop-color="#ffd98a" stop-opacity="0"/></radialGradient>
       <linearGradient id="moonBeam" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#d4e2ff" stop-opacity=".18"/><stop offset="1" stop-color="#d4e2ff" stop-opacity=".02"/></linearGradient>
       <linearGradient id="woodV" x1="0" x2="1"><stop offset="0" stop-color="${C.woodD}"/><stop offset=".25" stop-color="${C.wood}"/><stop offset=".75" stop-color="${C.wood}"/><stop offset="1" stop-color="${C.woodD}"/></linearGradient>
@@ -987,6 +1049,7 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
       <linearGradient id="crownG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#e2b88a"/><stop offset="1" stop-color="${C.woodD}"/></linearGradient>
       <linearGradient id="carpetG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#14204c"/><stop offset=".3" stop-color="#22336f"/><stop offset="1" stop-color="#16224e"/></linearGradient>
       <radialGradient id="moonPool"><stop offset="0" stop-color="#d8e4ff" stop-opacity=".32"/><stop offset="1" stop-color="#d8e4ff" stop-opacity="0"/></radialGradient>
+      <linearGradient id="doorG" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6c4a33"/><stop offset="1" stop-color="#432b1e"/></linearGradient>
       <radialGradient id="tint"><stop offset="0" stop-color="#fff" stop-opacity="1"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
       <linearGradient id="leafA" x1="0" x2="1"><stop offset="0" stop-color="#2f5a37"/><stop offset=".5" stop-color="#7cb46a"/><stop offset="1" stop-color="#2f5a37"/></linearGradient>
       <linearGradient id="leafB" x1="0" x2="1"><stop offset="0" stop-color="#284d31"/><stop offset=".5" stop-color="#5f9a58"/><stop offset="1" stop-color="#284d31"/></linearGradient>
@@ -995,29 +1058,27 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
       <linearGradient id="potRim" x1="0" x2="1"><stop offset="0" stop-color="#7a5136"/><stop offset=".35" stop-color="#d09a6c"/><stop offset="1" stop-color="#6a4530"/></linearGradient>
       <pattern id="carpetP" width="120" height="150" patternUnits="userSpaceOnUse"><path d="${star4(60, 74, 7)}" fill="${C.gold}" opacity=".45"/><path d="M0 74 L10 68 L20 74 L10 80 Z M100 74 L110 68 L120 74 L110 80 Z" fill="#2f3f80"/></pattern></defs>`;
     // 床とカーペット
-    s += `<rect x="0" y="836" width="${W}" height="20" fill="${C.woodD}"/><rect x="0" y="852" width="${W}" height="148" fill="url(#carpetG)"/>
-      <rect x="0" y="852" width="${W}" height="148" fill="url(#carpetP)"/>
-      <path d="M0 866 H${W} M0 986 H${W}" stroke="${C.gold}" stroke-width="3" opacity=".75"/><path d="M0 874 H${W} M0 978 H${W}" stroke="${C.gold}" stroke-width="1" opacity=".45"/>
+    const R0 = L + W;
+    s += `<rect x="${L}" y="836" width="${W}" height="20" fill="${C.woodD}"/><rect x="${L}" y="852" width="${W}" height="148" fill="url(#carpetG)"/>
+      <rect x="${L}" y="852" width="${W}" height="148" fill="url(#carpetP)"/>
+      <path d="M${L} 866 H${R0} M${L} 986 H${R0}" stroke="${C.gold}" stroke-width="3" opacity=".75"/><path d="M${L} 874 H${R0} M${L} 978 H${R0}" stroke="${C.gold}" stroke-width="1" opacity=".45"/>
       <!--floorlight--><ellipse cx="1800" cy="935" rx="430" ry="70" fill="url(#moonPool)"/>
       <ellipse cx="1700" cy="915" rx="140" ry="22" fill="#7d96ff" opacity=".08"/><ellipse cx="1890" cy="945" rx="130" ry="22" fill="#b48aff" opacity=".08"/><ellipse cx="1800" cy="975" rx="170" ry="18" fill="#ffe7a0" opacity=".07"/>
       <polygon points="1700,0 1900,0 2080,1000 1520,1000" fill="url(#moonBeam)"/><!--/floorlight-->`;
     // 柱とアーチ
-    const pillars = [80, 540, 1000, 1460, 2140, 2600, 3060, 3520];
-    for (let i = 0; i < pillars.length - 1; i++) {
-      const a = pillars[i], b = pillars[i + 1];
-      s += a === 1460 ? grandArchBody(a) : archBody(a, b - a);
-    }
+    P.arches.forEach((g) => { s += g.kind === "window" ? grandArchBody(g.a) : archBody(g.a, g.b - g.a); });
+    P.doors.forEach((d) => { s += doorBody(d.x); });
     // 本棚
     const rows = 5, rowH = 116, top0 = 250;
     const spines = ["#7c3b3f", "#3f5a7c", "#5a4a7a", "#8a6a3a", "#44694c", "#6a3f5c", "#2f4a68", "#9a7a4e", "#5c3a2c", "#3e3e62", "#7a5a8a", "#476a7a"];
     const liveByBay = {};
     books.forEach((b) => { (liveByBay[b.place.bay] ||= []).push(b); });
     lib.bays.forEach((bay) => { s += bayBody(bay.x, bay.seed || 1, liveByBay[bay.id] || [], spots); });
-    pillars.forEach((p) => { s += pillarBody(p); });
+    P.pillars.forEach((p) => { s += pillarBody(p); });
     // 柱のそばの鉢植え
-    [540, 1000, 2600, 3060].forEach((px, i) => { s += pottedPlant(px, 800, 1.05 + (i % 2) * .2, r0); });
+    P.plants.concat(P.endPlants).forEach(([px, k]) => { s += pottedPlant(px, 800, k, r0); });
     // 吊りランタンと浮かぶろうそく
-    [310, 770, 1230, 2370, 2830, 3290].forEach((lx) => s += lantern(lx, 110, lx));
+    P.lanterns.forEach((lx) => s += lantern(lx, 110, lx));
     [[1560, 420, 0], [1640, 330, -1.2], [1960, 360, -2.1], [2040, 450, -.7], [1800, 270, -1.6]].forEach(([x, y, d]) => s += candle(x, y, d));
     // 中央：天球儀と読書机
     s += `<!--orrery--><g><rect x="1600" y="790" width="80" height="48" fill="${C.woodD}"/><rect x="1588" y="780" width="104" height="14" rx="3" fill="${C.woodL}"/>
@@ -1035,13 +1096,13 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     s += pottedPlant(1520, 800, 1.35, r0) + pottedPlant(2090, 800, 1.2, r0);
     // はしご
     s += `<!--ladder--><g transform="rotate(9 2660 840)"><path d="M2650 250 V840 M2700 250 V840" stroke="${C.woodL}" stroke-width="8"/>${Array.from({ length: 12 }, (_, i) => `<path d="M2650 ${290 + i * 48} H2700" stroke="${C.woodL}" stroke-width="6"/>`).join("")}</g><!--/ladder-->`;
-    return { svg: `<svg viewBox="0 0 ${W} 1000" preserveAspectRatio="none">${s}</svg>`, spots };
+    return { svg: `<svg viewBox="${L} 0 ${W} 1000" preserveAspectRatio="none">${s}</svg>`, spots };
   }
 
   function frontSVG() {
     const r = rng(91); let s = "";
-    [60, 1150, 2250, 3350, 4500].forEach((x) => { s += frontCluster(x, r); });
-    return `<svg viewBox="0 0 4600 1000" preserveAspectRatio="xMidYMax slice">${s}</svg>`;
+    frontSpots(WORLD.plan.W, 1100, 60).forEach((x) => { s += frontCluster(x, r); });
+    return `<svg viewBox="0 0 4600 1000" preserveAspectRatio="none">${s}</svg>`;
   }
 
   /* ====================================================
@@ -1070,28 +1131,26 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     add("wall_panel", bd, wallPanel(0), [-8, 325, 236, 560]);
     add("far_shelf", bd, farShelf(0, 520, rng(19)), [0, 520, 200, 340]);
     add("front_plant", "", frontCluster(0, rng(91)), [-260, 790, 520, 210]);
+    add("end_door", md, doorBody(0), [-172, 300, 344, 550]);
     return P;
   }
   // どの部品をどこに置くか（館内の座標。高さ1000）。slot = [左端, 右端, 下端]
-  const PILLARS = [80, 540, 1000, 1460, 2140, 2600, 3060, 3520];
   function sceneLayout(lib, decor = {}) {
-    const W = lib.world.width, mid = [], back = [], front = [], r = rng(77);
-    for (let x = 0; x < W; x += 720) mid.push({ part: "carpet", slot: [x, x + 721, 1000] });
+    const P = WORLD.plan, PILLARS = P.pillars, mid = [], back = [], front = [], r = rng(77);
+    for (let x = P.L; x < P.R; x += 720) mid.push({ part: "carpet", slot: [x, x + 721, 1000] });
     mid.push({ fx: "floorlight" });
-    for (let i = 0; i < PILLARS.length - 1; i++) {
-      const a = PILLARS[i], b = PILLARS[i + 1];
-      if (a === 1460) { mid.push({ part: "grand_arch", slot: [1460, 2140, 180] }); continue; }
-      mid.push({ part: "arch", slot: [a, b, 198] });
-    }
+    P.arches.forEach((g) => mid.push(g.kind === "window" ? { part: "grand_arch", slot: [g.a, g.b, 180] } : { part: "arch", slot: [g.a, g.b, 198] }));
+    P.doors.forEach((d) => mid.push({ part: "end_door", slot: [d.x - 172, d.x + 172, 850], flip: d.flip }));
     lib.bays.forEach((bay, i) => mid.push({ part: "bookcase_b2", slot: [bay.x - 40, bay.x + 440, 868], flip: decor.bookcaseFlip !== false && i % 2 === 1 }));
     PILLARS.forEach((p) => mid.push({ part: "pillar", slot: [p - 33, p + 33, 838] }));
     // ツタ：柱の頭から垂らす（どこにも付いていない「浮いた草」にならないように）
-    PILLARS.forEach((p, i) => { if (i % 2 === 0 || (decor.ivyPerArch ?? 1) > 1) { const h = 92 + (i % 3) * 14, w = h * 128.92 / 103.95; mid.push({ part: "turu", slot: [p - w / 2, p + w / 2, 160 + h], flip: i % 4 === 0 }); } });
+    // 両端の扉の柱をのぞいた柱に、1本おきに（ivyPerArch が2以上なら全部に）
+    PILLARS.forEach((p, k) => { const i = k - 1; if (k === 0 || k === PILLARS.length - 1) return; if (i % 2 === 0 || (decor.ivyPerArch ?? 1) > 1) { const h = 92 + (i % 3) * 14, w = h * 128.92 / 103.95; mid.push({ part: "turu", slot: [p - w / 2, p + w / 2, 160 + h], flip: i % 4 === 0 }); } });
     if (decor.crystals !== false) PILLARS.forEach((p) => mid.push({ part: "tama", slot: [p - 14, p + 14, 151], glow: [p, 136, 46, "crystalGlow"] }));
     const plant = (px, k) => { const f = k / 1.2, w = 175.6 * f; return { part: "plant", slot: [px - w / 2, px + w / 2, 800 + 61.2 * f] }; };
-    [[540, 1.05], [1000, 1.25], [2600, 1.05], [3060, 1.25]].forEach(([p, k]) => mid.push(plant(p, k)));
+    P.plants.concat(P.endPlants).forEach(([p, k]) => mid.push(plant(p, k)));
     // 鎖を外して、宙に浮かぶ魔法のランタンにする（どこにも吊られていない鎖が「浮いて」見えないように）
-    [310, 770, 1230, 2370, 2830, 3290].forEach((lx, i) => mid.push({ part: "lantern", slot: [lx - 26, lx + 26, 128], float: true, delay: i * .9, glow: [lx, 100, 90] }));
+    P.lanterns.forEach((lx, i) => mid.push({ part: "lantern", slot: [lx - 26, lx + 26, 128], float: true, delay: i * .9, glow: [lx, 100, 90] }));
     [[1560, 420], [1640, 330], [1960, 360], [2040, 450], [1800, 270]].forEach(([x, y], i) => mid.push({ part: "candle", slot: [x - 8, x + 8, y + 34], float: true, delay: i * 1.1, glow: [x, y - 14, 30] }));
     mid.push({ fx: "books" });
     mid.push({ part: "orrery", slot: [1548, 1732, 838] }, { fx: "orrery" });
@@ -1099,12 +1158,12 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     mid.push(plant(1520, 1.35), plant(2090, 1.2));
     mid.push({ part: "ladder", slot: [2640, 2822, 845] });
     back.push({ fx: "wall" });
-    for (let x = 60; x < 2800; x += 220) { if (x > 700 && x < 2050) continue; back.push({ part: "wall_panel", slot: [x - 8, x + 228, 885] }); }
-    FAR_SHELVES.forEach(([x]) => back.push({ part: "far_shelf", slot: [x, x + 200, 860] }));
+    for (let x = 60 - Math.ceil(P.backExt / 220) * 220; x < 2800 + P.backExt; x += 220) { if (x > 700 && x < 2050) continue; back.push({ part: "wall_panel", slot: [x - 8, x + 228, 885] }); }
+    farShelvesAll(P.backExt).forEach(([x]) => back.push({ part: "far_shelf", slot: [x, x + 200, 860] }));
     back.push({ part: "tower", slot: [815, 1985, 1000] }, { fx: "winglow" }, { part: "window", slot: [1110, 1690, 800] }, { fx: "winboost" });
     if (decor.crystals !== false) [1112, 1688].forEach((x) => back.push({ part: "tama", slot: [x - 17, x + 17, 802], glow: [x, 780, 60, "crystalGlow"] }));
     back.push({ fx: "floor" });
-    [80, 3380, 4520].forEach((x, i) => front.push({ part: "front_plant", slot: [x - 150, x + 150, 1120], flip: i % 2 === 1 }));
+    frontSpots(P.W, 1450, 80).forEach((x, i) => front.push({ part: "front_plant", slot: [x - 150, x + 150, 1120], flip: i % 2 === 1 }));
     return { mid, back, front };
   }
   // 部品の基準線（fit）を館内の slot に合わせたときの、画像の位置と大きさ
@@ -1132,10 +1191,10 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
   const FB_DEFS = `<linearGradient id="fbShade" x1="0" x2="1"><stop offset="0" stop-color="#000" stop-opacity=".35"/><stop offset=".3" stop-color="#fff" stop-opacity=".15"/><stop offset="1" stop-color="#000" stop-opacity=".3"/></linearGradient>
     <linearGradient id="fbPage" x1="0" x2="1"><stop offset="0" stop-color="#e9dfc6"/><stop offset=".5" stop-color="#fbf6ea"/><stop offset="1" stop-color="#e9dfc6"/></linearGradient>`;
   function buildFromParts(parts, lib, decor = {}) {
-    const L = sceneLayout(lib, decor), mid = midSVG(lib, []).svg, back = backSVG(), W = lib.world.width;
+    const L = sceneLayout(lib, decor), mid = midSVG(lib, []).svg, back = backSVG(), W = WORLD.plan.W, X0 = WORLD.plan.L;
     const midDefs = defsOf(mid).replace("</defs>", EXTRA_DEFS + FB_DEFS + "</defs>"), backDefs = defsOf(back).replace("</defs>", EXTRA_DEFS + "</defs>");
     // 館内（mid）の座標 → 層の中の％（層は 横 W・縦 1000 の比率なので、そのまま割合にできる）
-    const pc = (x, y, w, h) => `left:${f1(x / W * 100 * 1000) / 1000}%;top:${f1(y / 10 * 1000) / 1000}%;width:${f1(w / W * 100 * 1000) / 1000}%;height:${f1(h / 10 * 1000) / 1000}%`;
+    const pc = (x, y, w, h) => `left:${f1((x - X0) / W * 100 * 1000) / 1000}%;top:${f1(y / 10 * 1000) / 1000}%;width:${f1(w / W * 100 * 1000) / 1000}%;height:${f1(h / 10 * 1000) / 1000}%`;
     const glowDiv = (x, y, r, kind = "lamp", cls = "flick", delay = 0) => `<div class="dglow ${kind} ${cls}" style="${pc(x - r, y - r, r * 2, r * 2)};animation-delay:${f1(delay)}s"></div>`;
     const midStatic = [], backStatic = [], frontStatic = [];
     let midDyn = "";
@@ -1174,19 +1233,19 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     let frontSvg = "";
     L.front.forEach((e) => { const p = parts[e.part]; if (!p || !p.file) return; frontSvg += imgTag({ q: placePart(p, e.slot), e, p }); });
     return {
-      mid: `<svg viewBox="0 0 ${W} 1000" preserveAspectRatio="none">${midDefs}${midStatic.map(imgTag).join("")}</svg>`,
+      mid: `<svg viewBox="${X0} 0 ${W} 1000" preserveAspectRatio="none">${midDefs}${midStatic.map(imgTag).join("")}</svg>`,
       midTop: midDyn,
-      back: `<svg viewBox="0 0 2800 1000" preserveAspectRatio="xMidYMax slice">${backDefs}${backSvg}</svg>`,
+      back: `<svg viewBox="0 0 2800 1000" preserveAspectRatio="none">${backDefs}${backSvg}</svg>`,
       backDyn,
-      front: `<svg viewBox="0 0 4600 1000" preserveAspectRatio="xMidYMax slice"><defs><filter id="frontBlur" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3"/><feComponentTransfer><feFuncR type="linear" slope=".38"/><feFuncG type="linear" slope=".38"/><feFuncB type="linear" slope=".42"/></feComponentTransfer></filter></defs><g filter="url(#frontBlur)">${frontSvg}</g></svg>`
+      front: `<svg viewBox="0 0 4600 1000" preserveAspectRatio="none"><defs><filter id="frontBlur" x="-10%" y="-10%" width="120%" height="120%"><feGaussianBlur stdDeviation="3"/><feComponentTransfer><feFuncR type="linear" slope=".38"/><feFuncG type="linear" slope=".38"/><feFuncB type="linear" slope=".42"/></feComponentTransfer></filter></defs><g filter="url(#frontBlur)">${frontSvg}</g></svg>`
     };
   }
   // 窓まわりの光（奥の層）：奥の層の座標から画面の位置を計算して置く
   const BACKDYN = [];
   function placeBackDyn() {
     if (!BACKDYN.length) return;
-    const H = cam.H, maxPx = Math.max(0, cam.W * cam.s - cam.vw), bw = cam.vw + maxPx * PAR.back, sc = Math.max(bw / 2800, H / 1000), ox = (bw - 2800 * sc) / 2, oy = H - 1000 * sc;
-    BACKDYN.forEach(({ el, x, y, w, h }) => { el.style.cssText += `;left:${(ox + x * sc).toFixed(1)}px;top:${(oy + y * sc).toFixed(1)}px;width:${(w * sc).toFixed(1)}px;height:${(h * sc).toFixed(1)}px`; });
+    const sc = cam.s, ox = -VIEW.backX * sc;
+    BACKDYN.forEach(({ el, x, y, w, h }) => { el.style.cssText += `;left:${(ox + x * sc).toFixed(1)}px;top:${(y * sc).toFixed(1)}px;width:${(w * sc).toFixed(1)}px;height:${(h * sc).toFixed(1)}px`; });
   }
   // 窓のまわりを漂う本（HTMLの部品。ふわふわの動きは画面の合成だけで済むので軽い）
   function floatingBooksHTML(n, pc) {
@@ -1202,8 +1261,10 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
   // 左右の端ほど暗くして、まん中の月の窓ときらめきが引き立つようにする
   function shadeHoles() {
     const holes = [];
-    [310, 770, 1230, 2370, 2830, 3290].forEach((x) => holes.push([x, 100, 300, 210]));
-    PILLARS.forEach((x) => holes.push([x, 140, 150, 130]));
+    const P = WORLD.plan;
+    P.lanterns.forEach((x) => holes.push([x, 100, 300, 210]));
+    P.pillars.forEach((x) => holes.push([x, 140, 150, 130]));
+    P.doors.forEach((d) => holes.push([d.x, 832, 220, 70]));
     holes.push([1800, 430, 470, 560], [1800, 930, 520, 120], [1640, 640, 170, 170], [2037, 700, 210, 190]);
     [[1560, 420], [1640, 330], [1960, 360], [2040, 450], [1800, 270]].forEach(([x, y]) => holes.push([x, y, 90, 90]));
     return holes;
@@ -1227,10 +1288,8 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     for (let i = 0; i < (IS_MOBILE ? 18 : 34); i++) MOON.dust.push({ ray: i % RAYS.length, t: Math.random(), k: Math.random() - .5, sp: .00004 + Math.random() * .00007, ph: Math.random() * 6 });
   }
   function layerMap() {
-    const H = cam.H, px = cam.px || 0, maxPx = Math.max(0, cam.W * cam.s - cam.vw);
-    const bw = cam.vw + maxPx * PAR.back, sc = Math.max(bw / 2800, H / 1000);
-    const bOff = -px * PAR.back + (bw - 2800 * sc) / 2;
-    return { back: (u, v) => [bOff + u * sc, H - (1000 - v) * sc], mid: (u, v) => [-px + u * cam.s, v * cam.s] };
+    const px = cam.px || 0, sc = cam.s, bOff = -px * PAR.back - VIEW.backX * sc;
+    return { back: (u, v) => [bOff + u * sc, v * sc], mid: (u, v) => [-px + (u - cam.L) * sc, v * sc] };
   }
   function updateMoon(dt) {
     const d = Math.abs(cam.x - MOON.cx), raw = Math.max(0, 1 - d / MOON.reach), lv = reduced ? raw : raw * raw * (3 - 2 * raw);
@@ -1251,8 +1310,18 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
   /* ====================================================
      カメラ（歩く）
      ==================================================== */
-  const cam = { x: 1800, target: 1800, vel: 0, phase: 0, H: 0, s: 1, vw: 0, viewU: 0, W: 3600, dir: 0 };
+  const cam = { x: 1800, target: 1800, vel: 0, phase: 0, H: 0, s: 1, vw: 0, viewU: 0, L: 0, W: 3600, dir: 0 };
   const PAR = { sky: .15, back: .45, front: 1.25 };
+  // 奥の層・手前の層の絵の、どこからどこまでを画面に出すか（画面の大きさが変わるたびに計算し直す）
+  const VIEW = { backX: 0 };
+  function fitLayerArt() {
+    const s = cam.s, maxPx = Math.max(0, cam.W * s - cam.vw);
+    // 奥の層：月の窓の真ん前に立ったとき、奥のステンドグラス（x=1400）が画面のまん中に来るように合わせる
+    const bw = cam.vw + maxPx * PAR.back, pxWin = (WIN.cx - cam.L) * s - cam.vw / 2;
+    VIEW.backX = 1400 - (cam.vw / 2 + PAR.back * pxWin) / s;
+    const bs = $("back").querySelector("svg"); if (bs) bs.setAttribute("viewBox", `${f1(VIEW.backX)} 0 ${f1(bw / s)} 1000`);
+    const fw = cam.vw + maxPx * PAR.front, fs = $("front").querySelector("svg"); if (fs) fs.setAttribute("viewBox", `0 0 ${f1(fw / s)} 1000`);
+  }
   function resize() {
     const hall = $("hall");
     cam.H = hall.clientHeight; cam.vw = hall.clientWidth; cam.s = cam.H / 1000; cam.viewU = cam.vw / cam.s;
@@ -1261,23 +1330,26 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     $("sky").style.width = cam.vw + maxPx * PAR.sky + "px";
     ["back", "backTop"].forEach((id) => { $(id).style.width = cam.vw + maxPx * PAR.back + "px"; });
     $("front").style.width = cam.vw + maxPx * PAR.front + "px";
+    fitLayerArt();
     placeBackDyn();
     clampCam();
   }
   function clampCam() {
-    const lo = cam.viewU / 2, hi = cam.W - cam.viewU / 2;
-    const c = (v) => (lo > hi ? cam.W / 2 : Math.min(hi, Math.max(lo, v)));
+    // 画面の端が館内の端を越えないように。せまい画面では、両端の扉の前より先へは行かない
+    const D = WORLD.plan ? WORLD.plan.doors : null;
+    const lo = Math.max(cam.L + cam.viewU / 2, D ? D[0].x : -Infinity), hi = Math.min(cam.L + cam.W - cam.viewU / 2, D ? D[1].x : Infinity);
+    const c = (v) => (lo > hi ? cam.L + cam.W / 2 : Math.min(hi, Math.max(lo, v)));
     cam.target = c(cam.target); cam.x = c(cam.x);
   }
   function render() {
     const leftU = cam.x - cam.viewU / 2;
-    const px = cam.W * cam.s < cam.vw ? -(cam.vw - cam.W * cam.s) / 2 : leftU * cam.s; cam.px = px;
+    const px = cam.W * cam.s < cam.vw ? -(cam.vw - cam.W * cam.s) / 2 : (leftU - cam.L) * cam.s; cam.px = px;
     const bob = Math.sin(cam.phase) * Math.min(1, Math.abs(cam.vel) / 4) * 2.2;
     const mt = `translate3d(${-px}px, ${bob}px, 0)`; $("mid").style.transform = mt; $("midTop").style.transform = mt;
     $("sky").style.transform = `translate3d(${-px * PAR.sky}px, 0, 0)`;
     const bt = `translate3d(${-px * PAR.back}px, ${bob * .4}px, 0)`; $("back").style.transform = bt; $("backTop").style.transform = bt;
     $("front").style.transform = `translate3d(${-px * PAR.front}px, ${bob * 1.4}px, 0)`;
-    $("me").style.left = (cam.x / cam.W) * 100 + "%";
+    $("me").style.left = ((cam.x - cam.L) / cam.W) * 100 + "%";
   }
   let lastZone = null, zoneTimer = null, jumpWait = 0, lastT = performance.now();
   const PAUSE = { on: false };
@@ -1303,7 +1375,7 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     requestAnimationFrame(loop);
   }
   function updateZone() {
-    const z = DATA.library.zones.find((z) => cam.x >= z.from && cam.x < z.to);
+    const z = DATA.library.zones.find((z) => cam.x >= (z.from ?? -Infinity) && cam.x < (z.to ?? Infinity));
     if (!z || z.name === lastZone) return;
     const first = lastZone === null; lastZone = z.name;
     const el = $("zone"); el.style.opacity = 0;
@@ -1370,9 +1442,9 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
   }
   const FXCOL = ["#fff2c6", "#ffe08a", "#cfe7ff", "#d9c8ff", "#c8f0d8"];
   function initFX(lib) {
-    const r = rng(2024), W = lib.world.width;
-    for (let i = 0; i < 150; i++) FX.stars.push({ u: r() * W, v: 40 + r() * 780, ph: r() * Math.PI * 2, sp: .5 + r() * 1.4, size: 12 + r() * 22, col: FXCOL[Math.floor(r() * FXCOL.length)] });
-    for (let i = 0; i < 36; i++) FX.orbs.push({ u: r() * W, v: 240 + r() * 560, ax: 30 + r() * 60, ay: 20 + r() * 40, sp: .1 + r() * .18, ph: r() * 9, size: 14 + r() * 18, col: ["#ffd98a", "#9fd0ff", "#c8f0d8", "#d9c8ff"][i % 4] });
+    const r = rng(2024), W = WORLD.plan.W, X0 = WORLD.plan.L;
+    for (let i = 0; i < 150; i++) FX.stars.push({ u: X0 + r() * W, v: 40 + r() * 780, ph: r() * Math.PI * 2, sp: .5 + r() * 1.4, size: 12 + r() * 22, col: FXCOL[Math.floor(r() * FXCOL.length)] });
+    for (let i = 0; i < Math.round(36 * W / 3600); i++) FX.orbs.push({ u: X0 + r() * W, v: 240 + r() * 560, ax: 30 + r() * 60, ay: 20 + r() * 40, sp: .1 + r() * .18, ph: r() * 9, size: 14 + r() * 18, col: ["#ffd98a", "#9fd0ff", "#c8f0d8", "#d9c8ff"][i % 4] });
     FX.allStars = FX.stars.slice(); FX.allOrbs = FX.orbs.slice();
     applyFxLevel(SET.fx || (IS_MOBILE ? "lite" : "full"), !!SET.fx);
     ["fx", "skyfx", "trail"].forEach((id) => sizeCanvas($(id)));
@@ -1401,11 +1473,14 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
   // 夜の暗さ：画面に合わせて毎フレーム描く。明かりのまわりと、手もとのランタン（画面のまん中）は丸く明るく抜く
   function drawShade(g) {
     const o = SHADE.opt; if (!o) return;
-    const W = cam.W, s = cam.s, px = cam.px || 0, vw = cam.vw, H = cam.H, X = (u) => -px + u * s;
+    // 前のフレームの星の透明度が残っていると、暗さが毎フレームちらつくので必ず戻す
+    g.globalAlpha = 1;
+    const P = WORLD.plan, s = cam.s, px = cam.px || 0, vw = cam.vw, H = cam.H, X = (u) => -px + (u - cam.L) * s;
     g.globalCompositeOperation = "source-over";
     g.fillStyle = `rgba(6,7,24,${o.base ?? .34})`; g.fillRect(0, 0, vw, H);
-    const ends = o.ends ?? .45, lg = g.createLinearGradient(X(0), 0, X(W), 0);
-    lg.addColorStop(0, `rgba(3,4,15,${ends})`); lg.addColorStop(.3, "rgba(3,4,15,0)"); lg.addColorStop(.7, "rgba(3,4,15,0)"); lg.addColorStop(1, `rgba(3,4,15,${ends})`);
+    // 左右の端（扉のあたり）ほど暗く、本棚に近づくにつれて明るくする
+    const ends = o.ends ?? .45, lg = g.createLinearGradient(X(P.L), 0, X(P.R), 0), fa = Math.min(.45, (P.pillars[1] + 1000 - P.L) / P.W), fb = Math.max(.55, 1 - (P.R - P.pillars[P.pillars.length - 2] + 1000) / P.W);
+    lg.addColorStop(0, `rgba(3,4,15,${ends})`); lg.addColorStop(fa, "rgba(3,4,15,0)"); lg.addColorStop(fb, "rgba(3,4,15,0)"); lg.addColorStop(1, `rgba(3,4,15,${ends})`);
     g.fillStyle = lg; g.fillRect(0, 0, vw, H);
     g.globalCompositeOperation = "destination-out";
     const hole = (cx, cy, rx, ry) => { if (cx + rx < 0 || cx - rx > vw) return; g.save(); g.translate(cx, cy); g.scale(rx, ry); g.fillStyle = SHADE.grad || (SHADE.grad = (() => { const r = g.createRadialGradient(0, 0, 0, 0, 0, 1); r.addColorStop(0, "rgba(0,0,0,1)"); r.addColorStop(.55, "rgba(0,0,0,.55)"); r.addColorStop(1, "rgba(0,0,0,0)"); return r; })()); g.beginPath(); g.arc(0, 0, 1, 0, Math.PI * 2); g.fill(); g.restore(); };
@@ -1437,25 +1512,26 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     if (!busy) watchPerf(dt);
     const t = performance.now() / 1000, d = FX.dpr;
     if (!busy) {
-    const c = $("fx"), g = c.getContext("2d"); g.setTransform(d, 0, 0, d, 0, 0); g.clearRect(0, 0, c.width, c.height);
+    const c = $("fx"), g = c.getContext("2d"); g.setTransform(d, 0, 0, d, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.clearRect(0, 0, c.width, c.height);
     drawShade(g); drawRays(g, t);
     if (!FX.on) return;
     // 館内（本棚の前の空気）：またたく星と、ゆっくり漂う光
     g.globalCompositeOperation = "lighter";
     const px = cam.px || 0, s = cam.s, vw = cam.vw;
     FX.orbs.forEach((o) => {
-      const x = -px + (o.u + Math.sin(t * o.sp + o.ph) * o.ax) * s, y = (o.v + Math.cos(t * o.sp * 1.3 + o.ph) * o.ay) * s;
+      const x = -px + (o.u - cam.L + Math.sin(t * o.sp + o.ph) * o.ax) * s, y = (o.v + Math.cos(t * o.sp * 1.3 + o.ph) * o.ay) * s;
       if (x < -40 || x > vw + 40) return; const z = o.size * s * 2.2;
       g.globalAlpha = .6 + .35 * Math.sin(t * 1.7 + o.ph); g.drawImage(sprite(o.col, "orb"), x - z / 2, y - z / 2, z, z);
     });
     FX.stars.forEach((st) => {
-      const x = -px + st.u * s; if (x < -30 || x > vw + 30) return;
+      const x = -px + (st.u - cam.L) * s; if (x < -30 || x > vw + 30) return;
       const a = Math.pow(Math.max(0, Math.sin(t * st.sp + st.ph)), 4); if (a < .02) return;
       const z = st.size * s * (0.6 + a * .7); g.globalAlpha = a; g.save(); g.translate(x, st.v * s); g.rotate(t * .4 + st.ph); g.drawImage(sprite(st.col, "star"), -z / 2, -z / 2, z, z); g.restore();
     });
+    g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
     // 空：流れ星
     const k = $("skyfx"), h = k.getContext("2d");
-    if (FX.shoot.length || FX.skyDirty) { h.setTransform(d, 0, 0, d, 0, 0); h.clearRect(0, 0, k.width, k.height); FX.skyDirty = FX.shoot.length > 0; }
+    if (FX.shoot.length || FX.skyDirty) { h.setTransform(d, 0, 0, d, 0, 0); h.globalAlpha = 1; h.clearRect(0, 0, k.width, k.height); FX.skyDirty = FX.shoot.length > 0; }
     FX.nextShoot -= dt;
     if (FX.nextShoot < 0) { FX.nextShoot = 5000 + Math.random() * 9000; FX.shoot.push({ x: vw * (.3 + Math.random() * .8), y: cam.H * (.02 + Math.random() * .15), vx: -(7 + Math.random() * 4), vy: 2.4 + Math.random() * 1.5, life: 70 }); }
     FX.shoot = FX.shoot.filter((q) => q.life > 0);
@@ -1471,7 +1547,7 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     if (!FX.parts.length && !FX.trailDirty) { if (!FX.trailHidden) { tr.style.display = "none"; FX.trailHidden = true; } return; }
     if (FX.trailHidden) { tr.style.display = ""; FX.trailHidden = false; }
     FX.trailDirty = FX.parts.length > 0;
-    q.setTransform(d, 0, 0, d, 0, 0); q.clearRect(0, 0, tr.width, tr.height); q.globalCompositeOperation = "lighter";
+    q.setTransform(d, 0, 0, d, 0, 0); q.globalAlpha = 1; q.clearRect(0, 0, tr.width, tr.height); q.globalCompositeOperation = "lighter";
     FX.parts = FX.parts.filter((p) => p.life > 0);
     FX.parts.forEach((p) => {
       p.x += p.vx * dt / 16; p.y += p.vy * dt / 16; p.vy += .012 * dt / 16; p.vx *= .985; p.life -= dt / 16;
@@ -1979,26 +2055,40 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
     talk(book, lines, actions);
   }
 
+  /* ---------- 両端の扉：さわるとトルサが話す（いつか増設するときは、ここが新しい棟への入口になる） ---------- */
+  function placeDoors() {
+    const mid = $("midTop");
+    // ボタンにフォーカスが移ったとき、ブラウザが館内を勝手にスクロールして絵がずれないようにする
+    $("hall").addEventListener("scroll", (e) => { e.currentTarget.scrollTop = 0; e.currentTarget.scrollLeft = 0; });
+    WORLD.plan.doors.forEach((d) => {
+      const el = document.createElement("button");
+      el.className = "door-hit"; el.setAttribute("aria-label", "閉じた扉");
+      el.style.cssText = `left:${((d.x - 128 - cam.L) / cam.W) * 100}%;top:34.4%;width:${(256 / cam.W) * 100}%;height:49.2%`;
+      el.addEventListener("click", () => { burstAt(el, 14, .9); SFX.play("hover"); const arr = DATA.torsa.lines.door; if (arr && arr.length) say(pick(arr)); });
+      mid.appendChild(el);
+    });
+  }
+
   /* ---------- 本棚の本を置く ---------- */
   function placeBooks(spots) {
-    const mid = $("midTop"), W = DATA.library.world.width;
+    const mid = $("midTop"), W = cam.W, X0 = cam.L;
     DATA.books.books.forEach((b) => {
       const sp = spots[b.id]; if (!sp) return;
       const el = document.createElement("button");
       el.className = "live" + (b.type === "jumper" ? " restless" : "");
       el.dataset.id = b.id;
       el.dataset.tpl = b.cover.template || "classic";
-      el.style.cssText = `--c:${b.cover.color};--a:${b.cover.accent};left:${(sp.x / W) * 100}%;top:${sp.y / 10}%;width:${(sp.w / W) * 100}%;height:${sp.h / 10}%`;
+      el.style.cssText = `--c:${b.cover.color};--a:${b.cover.accent};left:${((sp.x - X0) / W) * 100}%;top:${sp.y / 10}%;width:${(sp.w / W) * 100}%;height:${sp.h / 10}%`;
       el.setAttribute("aria-label", `${b.title}を手に取る`);
       el.addEventListener("click", () => { burstAt(el, 26, 1.6); SFX.play("pickup"); openBook(b, "shelf"); });
       el.addEventListener("pointerenter", () => { burstAt(el, 8, .6); SFX.play("hover"); });
       el.innerHTML = '<span class="shine"></span>';
-      if (sp.slot) { const bk = document.createElement("span"); bk.className = "slot-back"; bk.style.cssText = `left:${((sp.x - 5) / W) * 100}%;top:${(sp.y - 4) / 10}%;width:${((sp.w + 10) / W) * 100}%;height:${(sp.h + 4) / 10}%`; mid.appendChild(bk); }
+      if (sp.slot) { const bk = document.createElement("span"); bk.className = "slot-back"; bk.style.cssText = `left:${((sp.x - 5 - X0) / W) * 100}%;top:${(sp.y - 4) / 10}%;width:${((sp.w + 10) / W) * 100}%;height:${(sp.h + 4) / 10}%`; mid.appendChild(bk); }
       mid.appendChild(el);
       b._x = sp.x + sp.w / 2;
       if (b.shelfEmote) {
         const em = document.createElement("span"); em.className = "shelf-emote"; em.textContent = b.shelfEmote; em.dataset.for = b.id;
-        em.style.cssText = `left:${((sp.x + sp.w / 2) / W) * 100}%;top:${(sp.y - 8) / 10}%`;
+        em.style.cssText = `left:${((sp.x + sp.w / 2 - X0) / W) * 100}%;top:${(sp.y - 8) / 10}%`;
         mid.appendChild(em);
       }
     });
@@ -2125,7 +2215,8 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
       BGM.setConfig(bgm);
       if (torsaD.faces) { Object.values(torsaD.faces).forEach((src) => { const im = new Image(); im.src = src; }); $("torsaImg").src = torsaD.faces.normal || torsaD.image; }
       else if (torsaD.image) $("torsaImg").src = torsaD.image;
-      cam.W = library.world.width; cam.x = cam.target = library.world.startX || cam.W / 2;
+      WORLD.plan = makePlan(library); cam.L = WORLD.plan.L; cam.W = WORLD.plan.W;
+      cam.x = cam.target = (library.world && library.world.startX) ?? WIN.cx;
       // 背景の絵：library.json の art にファイルが指定されていればそれを使い、空なら自動で描く
       const art = library.art || {};
       const useArt = (id, path, fit, gen) => { $(id).innerHTML = path ? `<img src="${esc(path)}" alt="" style="width:100%;height:100%;display:block;object-fit:${fit};object-position:50% 100%">` : gen; };
@@ -2138,9 +2229,11 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
       (built.backDyn || []).forEach((d) => { const el = document.createElement("div"); el.className = "dyn " + d.cls; if (d.id) el.id = d.id; $("backTop").appendChild(el); BACKDYN.push({ el, ...d }); });
       if (useParts) { SHADE.opt = (scene.decor && scene.decor.shade) || {}; SHADE.holes = shadeHoles(); }
       placeBooks(useParts ? partSpots(library, books.books) : m.spots);
+      placeDoors();
       setupRays(); MOON.ready = true; initFX(library);
       window.__torsaArt = { skySVG, backSVG, frontSVG, mid: () => m.svg, fxSVG, bubbleShape, coverHTML, EMOTE, books: books.books, partsSrc: () => partsSrc(library) };
-      library.zones.forEach((z) => { if (z.from > 0) { const t = document.createElement("div"); t.className = "tick"; t.style.left = (z.from / cam.W) * 100 + "%"; $("ticks").appendChild(t); } });
+      library.zones.forEach((z) => { if (z.from != null && z.from > cam.L) { const t = document.createElement("div"); t.className = "tick"; t.style.left = ((z.from - cam.L) / cam.W) * 100 + "%"; $("ticks").appendChild(t); } });
+      document.querySelector(".map .moon").style.left = ((WIN.cx - cam.L) / cam.W) * 100 + "%";
       resize(); addEventListener("resize", resize);
       mem.visits++; save();
       $("visitNo").textContent = mem.visits === 1 ? "はじめて" : `${mem.visits} 回目`;
