@@ -244,6 +244,68 @@
           "text": "……目録から来たのか。まあ、いい。"
         }
       }
+    },
+
+    {
+      "id": "revenge",
+      "title": "エイコウ-01 / REVENGE",
+      "workId": "eikou-01",
+      "type": "friendly",
+      "place": {
+        "bay": "e1",
+        "row": 0,
+        "slot": 3
+      },
+      "shelfEmote": "✨",
+      "cover": {
+        "template": "starchart",
+    "color": "#ffffff",
+    "accent": "#000000",
+        "emblem": "star",
+        "title": "REVENGE",
+        "subtitle": "EIKOU-01",
+        "titleDirection": "horizontal",
+        "image": ""
+      },
+      "lines": {
+        "first": [
+          {
+            "emote": "normal",
+            "text": "よく来たね！"
+          },
+                    {
+            "emote": "normal",
+            "text": "僕の名前はエイコウ！第一話なんだよ！読んでてってよ！"
+          },
+                              {
+            "emote": "shy",
+            "text": "それでもし...気にいってくれたなら...これからも僕の兄弟の話とかも読んでほしいな。"
+          }
+        ],
+        "revisit": [
+          {
+            "emote": "happy",
+            "text": "また来たの？うれしいな！"
+          },
+                    {
+            "emote": "heart",
+            "text": "もしかして、僕のこと好きになってくれた？"
+          },
+                  
+                    {
+            "emote": "shy",
+            "text": "照れちゃうよ～！"
+          }
+        ],
+        "afterRead": {
+          "emote": "happy",
+          "text": "読んでくれてうれしいよ～！！またきてね！"
+        },
+        "catalog": {
+          "emote": "happy",
+          "text": "目録から来てくれたんだ！ありがとう！"
+        }
+      }
     }
   ]
 }
