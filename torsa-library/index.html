@@ -584,12 +584,21 @@ body.at-door .topbar, body.at-door .walkbar, body.at-door .zone { opacity: 0; po
 .torsa-fig.patted img { animation: pat .45s ease; }
 @keyframes pat { 30% { transform: scaleY(.975) scaleX(1.012); } 60% { transform: scaleY(1.008); } }
 .torsa .pat-zone {
-  position: absolute; left: 22%; top: 2%; width: 40%; height: 22%;
+  position: absolute; left: 19%; top: 2%; width: 40%; height: 22%;
   border: 0; padding: 0; background: transparent; pointer-events: auto; border-radius: 50%;
   cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='36' height='36' viewBox='0 0 36 36'%3E%3Cpath d='M9 20c-2-3-1-6 2-5l3 3V6a2 2 0 0 1 4 0v8V4a2 2 0 0 1 4 0v10V6a2 2 0 0 1 4 0v9-6a2 2 0 0 1 4 0v12c0 6-4 10-10 10h-2c-4 0-6-2-8-5z' fill='%23fff6e0' stroke='%235a4630' stroke-width='1.6' stroke-linejoin='round'/%3E%3C/svg%3E") 16 4, pointer;
   touch-action: none;
 }
 .pat-zone:focus-visible { outline: 2px dashed var(--lamp); outline-offset: 2px; }
+/* トルサの部位別タッチ判定。位置は torsa-fig 内の割合 */
+.torsa .pat-zone[data-part="horn"].l { left: 20%; top: 10%; width: 7%; height: 10%; }
+.torsa .pat-zone[data-part="horn"].r { left: 47%; top: 10%; width: 12%; height: 10%; }
+.torsa .pat-zone[data-part="ear"].l { left: 16%; top: 17%; width: 8%; height: 6%; }
+.torsa .pat-zone[data-part="ear"].r { left: 53%; top: 17%; width: 13%; height: 6%; }
+.torsa .pat-zone[data-part="nose"] { left: 34%; top: 21%; width: 5%; height: 5%; }
+.torsa .pat-zone[data-part="chest"] { left: 27%; top: 34%; width: 25%; height: 13%; border-radius: 40%; }
+.torsa .pat-zone[data-part="waist"] { left: 33%; top: 72%; width: 10%; height: 10%; border-radius: 35%; }
+.pat-zone.debug { background: rgba(255, 80, 120, .32); outline: 1px solid #ff5078; }
 .torsa .bubble { right: 92%; top: 9%; }
 .torsa .bubble.show { animation: bubbleIn .35s ease; }
 @keyframes bubbleIn { from { transform: translateY(6px) scale(.96); } }
@@ -721,6 +730,13 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
   <div class="torsa-fig" id="torsaFig">
     <button id="torsaBtn" aria-label="トルサに話しかける"><img id="torsaImg" alt="トルサ。淡い緑の髪と金色の巻き角を持つ、羊のような少年" src="assets/torsa/normal.png"></button>
     <button class="pat-zone" id="patZone" aria-label="トルサの頭をなでる"></button>
+    <button class="pat-zone l" data-part="horn" aria-label="トルサの角にさわる"></button>
+    <button class="pat-zone r" data-part="horn" tabindex="-1" aria-hidden="true"></button>
+    <button class="pat-zone l" data-part="ear" aria-label="トルサの耳にさわる"></button>
+    <button class="pat-zone r" data-part="ear" tabindex="-1" aria-hidden="true"></button>
+    <button class="pat-zone" data-part="nose" aria-label="トルサの鼻をつつく"></button>
+    <button class="pat-zone" data-part="chest" aria-label="トルサの胸にさわる"></button>
+    <button class="pat-zone" data-part="waist" aria-label="トルサの腰や下腹部にさわる"></button>
   </div>
 </div>
 
@@ -1757,40 +1773,193 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
   ["pointerdown", "keydown"].forEach((ev) => addEventListener(ev, resetIdle));
   $("torsaBtn").addEventListener("click", () => { if (DATA) torsa("talk"); });
 
-  /* ---------- トルサの頭をなでる ----------
-     頭の上でクリック（タップ）するか、押したまま左右にこする。こすった回数に合わせて、照れ顔・きらめき・セリフが出る */
-  (() => {
-    const zone = $("patZone"), fig = $("torsaFig");
-    let down = null, strokes = 0, lastDir = 0, cool = 0;
-    const heart = (x, y) => { FX.parts.push({ x, y, vx: (Math.random() - .5) * 1.2, vy: -1.4 - Math.random(), life: 70, max: 70, size: 16 + Math.random() * 8, col: "#ffb8cc", star: false, heart: true }); };
+
+
+/* ---------- トルサにさわる（頭・角・耳・鼻・胸・腰） ---------- */
+(() => {
+  const fig = $("torsaFig");
+
+  // ページを読み込むたびに部位ごとのタッチ回数をリセット
+  mem.touch = {};
+  save();
+
+  const PARTS = {
+    head:  { lines: "pat", face: "blush" },
+    horn:  { lines: "patHorn", face: "surprise" },
+    ear:   { lines: "patEar", face: "blush" },
+    nose:  { lines: "patNose", face: "blush" },
+    chest: { lines: "patChest", face: "blush" },
+    waist: { lines: "patWaist", face: "soblush" }
+  };
+
+  let cool = 0;
+
+  const heart = (x, y) => {
+    FX.parts.push({
+      x,
+      y,
+      vx: (Math.random() - 0.5) * 1.2,
+      vy: -1.4 - Math.random(),
+      life: 70,
+      max: 70,
+      size: 16 + Math.random() * 8,
+      col: "#ffb8cc",
+      star: false,
+      heart: true
+    });
+  };
+
+  function bind(zone) {
+    const part = zone.dataset.part || "head";
+    const cfg = PARTS[part] || PARTS.head;
+
+    let down = null;
+    let strokes = 0;
+    let lastDir = 0;
+
     function stroke(e) {
-      strokes++; SFX.play("pat");
-      fig.classList.remove("patted"); void fig.offsetWidth; fig.classList.add("patted");
-      const r = zone.getBoundingClientRect(); heart(e ? e.clientX : r.left + r.width / 2, (e ? e.clientY : r.top + r.height / 2) - 10);
-      burst(e ? e.clientX : r.left + r.width / 2, e ? e.clientY : r.top + r.height / 2, 5, .8, 40);
-      setFace("blush", 3200);
+      strokes++;
+      SFX.play("pat");
+
+      fig.classList.remove("patted");
+      void fig.offsetWidth;
+      fig.classList.add("patted");
+
+      const r = zone.getBoundingClientRect();
+      const x = e ? e.clientX : r.left + r.width / 2;
+      const y = e ? e.clientY : r.top + r.height / 2;
+
+      heart(x, y - 10);
+      burst(x, y, 5, 0.8, 40);
+      setFace(cfg.face, 2600);
     }
+
     function finish() {
       if (!strokes || !DATA) return;
-      mem.pats = (mem.pats || 0) + strokes; save();
-      const L = DATA.torsa.lines;
-      const key = mem.pats >= (DATA.torsa.patManyFrom || 12) && L.patMany && Math.random() < .5 ? "patMany" : "pat";
-      if (performance.now() > cool) { cool = performance.now() + 1500; SFX.play("heart"); const arr = L[key] || L.pat; if (arr) { const l = pick(arr); say(typeof l === "string" ? { text: l, face: "blush" } : { face: "blush", ...l }, 5200); } }
+
+      const L = DATA.torsa.lines || {};
+      let arr;
+      let reactionFace = cfg.face;
+
+      if (part === "head") {
+        // 頭：既存のセリフと、たくさん撫でたときのセリフ
+        mem.pats = (mem.pats || 0) + strokes;
+
+        const key =
+          mem.pats >= (DATA.torsa.patManyFrom || 12) &&
+          L.patMany &&
+          Math.random() < 0.5
+            ? "patMany"
+            : "pat";
+
+        arr = L[key] || L.pat;
+
+        if (key === "patMany") {
+          reactionFace = "soblush";
+        }
+      } else {
+        // 頭以外：初回だけ専用セリフを使う
+        mem.touch = mem.touch || {};
+
+        const previous = mem.touch[part] || 0;
+        mem.touch[part] = previous + 1;
+
+        const first = L[cfg.lines + "First"] || [];
+        const base = L[cfg.lines] || [];
+
+        // 初回用があれば初回用、2回目以降は既存のセリフ
+        arr = previous === 0 && first.length ? first : base;
+
+        // 該当するセリフがなければ予備のセリフを使う
+        if (!arr.length) {
+          arr = fallbackLines[cfg.lines] || [];
+        }
+      }
+
+      save();
+
+      // セリフの連続表示を防ぐ
+      if (performance.now() > cool) {
+        cool = performance.now() + 1200;
+        SFX.play("heart");
+
+        if (arr && arr.length) {
+          const line = pick(arr);
+
+          say(
+            typeof line === "string"
+              ? { text: line, face: reactionFace }
+              : { face: reactionFace, ...line },
+            5200
+          );
+        }
+      }
+
       strokes = 0;
     }
-    zone.addEventListener("pointerdown", (e) => { e.preventDefault(); e.stopPropagation(); zone.setPointerCapture(e.pointerId); down = { x: e.clientX, d: 0 }; lastDir = 0; stroke(e); });
+
+    zone.addEventListener("pointerdown", (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      zone.setPointerCapture(e.pointerId);
+
+      down = { x: e.clientX, d: 0 };
+      lastDir = 0;
+
+      stroke(e);
+    });
+
     zone.addEventListener("pointermove", (e) => {
       if (!down) return;
-      const dx = e.clientX - down.x, dir = Math.sign(dx);
-      down.d += Math.abs(dx); down.x = e.clientX;
-      if (down.d > 46 || (dir && lastDir && dir !== lastDir && down.d > 18)) { stroke(e); down.d = 0; }
+
+      const dx = e.clientX - down.x;
+      const dir = Math.sign(dx);
+
+      down.d += Math.abs(dx);
+      down.x = e.clientX;
+
+      if (
+        down.d > 46 ||
+        (dir && lastDir && dir !== lastDir && down.d > 18)
+      ) {
+        stroke(e);
+        down.d = 0;
+      }
+
       if (dir) lastDir = dir;
     });
-    const up = () => { if (!down) return; down = null; finish(); };
-    zone.addEventListener("pointerup", up); zone.addEventListener("pointercancel", up);
-    zone.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); stroke(); finish(); } });
+
+    const up = () => {
+      if (!down) return;
+
+      down = null;
+      finish();
+    };
+
+    zone.addEventListener("pointerup", up);
+    zone.addEventListener("pointercancel", up);
+
+    zone.addEventListener("keydown", (e) => {
+      if (e.key === "Enter" || e.key === " ") {
+        e.preventDefault();
+        stroke();
+        finish();
+      }
+    });
+
     zone.addEventListener("click", (e) => e.stopPropagation());
-  })();
+  }
+
+  fig.querySelectorAll(".pat-zone").forEach(bind);
+
+  // URLに ?zones を付けると当たり判定を表示
+  if (/[?&]zones\b/.test(location.search)) {
+    fig.querySelectorAll(".pat-zone").forEach((z) => {
+      z.classList.add("debug");
+    });
+  }
+})();
+
 
   /* ---------- 表紙 ---------- */
   /* ---------- 表紙（data/books.json の cover から作る） ---------- */
