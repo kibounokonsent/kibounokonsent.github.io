@@ -1,0 +1,388 @@
+<title>死を生きる 資料集</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Shippori+Mincho:wght@400;600&family=Zen+Kaku+Gothic+New:wght@400;500&family=IBM+Plex+Mono:wght@400&display=swap">
+<style>
+/* Layout: 余白そのものが「都市の外の白い世界」。左に細い索引、右に一段組の本文。下へ行くほど白く消えていく。 */
+:root {
+  --paper: #fbfbfa;
+  --ink: #1b1b1c;
+  --ash: #6f6f72;
+  --mist: #b9b9bc;
+  --hair: #e4e4e3;
+  --void: #ffffff;
+  --display: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --body: "Zen Kaku Gothic New", "Hiragino Sans", "Yu Gothic", sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, monospace;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } *, *::before, *::after { animation: none !important; transition: none !important; } }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--body);
+  font-size: 15px;
+  line-height: 1.95;
+  letter-spacing: .02em;
+}
+.wrap { max-width: 1040px; margin: 0 auto; padding-inline: clamp(16px, 5vw, 48px); }
+
+/* ---------- 表紙 ---------- */
+.cover { padding-block: clamp(64px, 14vh, 140px) 56px; display: grid; justify-items: center; gap: 36px; text-align: center; }
+.cover svg { width: min(420px, 100%); height: auto; }
+.cover .kind { font-family: var(--mono); font-size: 11px; letter-spacing: .32em; text-transform: uppercase; color: var(--mist); }
+
+/* ---------- 根幹の文章 ---------- */
+.verse {
+  font-family: var(--display);
+  font-size: clamp(17px, 2.4vw, 21px);
+  line-height: 2.5;
+  letter-spacing: .14em;
+  padding-block: 40px 96px;
+  display: grid; justify-items: center; text-align: center;
+}
+.verse p { margin: 0; animation: surface 1.6s ease both; }
+.verse p:nth-child(2){animation-delay:.25s}.verse p:nth-child(3){animation-delay:.5s}.verse p:nth-child(4){animation-delay:.75s}
+.verse p:nth-child(5){animation-delay:1s}.verse p:nth-child(6){animation-delay:1.25s}.verse p:nth-child(7){animation-delay:1.5s}
+.verse p:nth-child(8){animation-delay:1.75s}.verse p:nth-child(9){animation-delay:2s}
+.verse .gap { height: 1.4em; }
+.verse .last { margin-top: 1.2em; font-size: 1.35em; font-weight: 600; letter-spacing: .3em; }
+@keyframes surface { from { opacity: .12; filter: blur(2px); } to { opacity: 1; filter: none; } }
+
+/* ---------- 本文 ---------- */
+.book { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: 56px; padding-block: 24px 0; border-top: 1px solid var(--hair); }
+.index { position: sticky; top: calc(env(safe-area-inset-top, 0px) + 28px); align-self: start; padding-top: 40px; }
+.index ol { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.index a { color: var(--ash); text-decoration: none; display: flex; gap: 10px; padding: 2px 0; }
+.index a span { font-family: var(--mono); font-size: 11px; color: var(--mist); padding-top: 2px; }
+.index a:hover, .index a:focus-visible { color: var(--ink); }
+a:focus-visible, button:focus-visible { outline: 1px solid var(--ink); outline-offset: 4px; }
+
+main { min-width: 0; }
+section { padding-block: 40px 56px; border-bottom: 1px solid var(--hair); }
+section:last-of-type { border-bottom: 0; }
+.no { font-family: var(--mono); font-size: 11px; letter-spacing: .24em; color: var(--mist); }
+h2 { font-family: var(--display); font-weight: 600; font-size: clamp(24px, 3.4vw, 30px); letter-spacing: .12em; margin: 6px 0 24px; text-wrap: balance; }
+h3 { font-family: var(--display); font-weight: 600; font-size: 18px; letter-spacing: .1em; margin: 0 0 8px; }
+p { max-width: 36em; margin: 0 0 1em; }
+em.key { font-style: normal; font-family: var(--display); font-weight: 600; border-bottom: 1px solid var(--ink); }
+
+/* 未確定の印 */
+.unset { margin-top: 28px; display: grid; gap: 8px; max-width: 36em; }
+.unset-label { font-family: var(--mono); font-size: 11px; letter-spacing: .24em; color: var(--mist); }
+.unset ul { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; }
+.unset li { color: var(--ash); display: flex; gap: 12px; }
+.unset li::before { content: ""; flex: 0 0 22px; height: 1px; background: var(--mist); margin-top: 1em; }
+
+/* 都市／外側 */
+.places { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-top: 8px; border: 1px solid var(--hair); }
+.place { padding: 28px 26px 30px; min-width: 0; }
+.place.city { border-right: 1px solid var(--hair); }
+.place.city .sky { height: 64px; margin-bottom: 18px; display: flex; align-items: flex-end; gap: 4px; }
+.place.city .sky i { display: block; width: 10px; background: var(--ink); opacity: .85; }
+.place.outside { background: var(--void); }
+.place.outside .sky { height: 64px; margin-bottom: 18px; border-bottom: 1px solid var(--hair); }
+.place p { font-size: 14px; margin: 0; }
+
+/* 住人 */
+.forms { display: flex; flex-wrap: wrap; gap: 10px; margin: 8px 0 20px; padding: 0; list-style: none; }
+.forms li { font-family: var(--display); font-size: 17px; padding: 6px 18px; border: 1px solid var(--hair); background: var(--void); }
+.forms li.etc { color: var(--ash); border-style: dashed; }
+
+/* タブー */
+.taboo { margin: 8px 0 20px; padding: 26px 28px; background: var(--ink); color: var(--paper); max-width: 36em; }
+.taboo .no { color: var(--mist); }
+.taboo p { margin: 6px 0 0; font-family: var(--display); font-size: 18px; letter-spacing: .1em; }
+
+/* 夢 */
+.dream { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 0; margin: 8px 0 24px; border-top: 1px solid var(--hair); border-bottom: 1px solid var(--hair); }
+.dream div { padding: 18px 16px 18px 0; min-width: 0; }
+.dream div + div { padding-left: 16px; border-left: 1px solid var(--hair); }
+.dream b { display: block; font-family: var(--mono); font-weight: 400; font-size: 11px; letter-spacing: .2em; color: var(--mist); margin-bottom: 4px; }
+.dream span { font-family: var(--display); font-size: 16px; }
+.dream div:last-child span { color: var(--ash); }
+
+/* 一覧表 */
+.tbl { overflow-x: auto; }
+table { border-collapse: collapse; width: 100%; min-width: 440px; font-size: 14px; }
+th, td { text-align: left; padding: 12px 12px 12px 0; border-bottom: 1px solid var(--hair); vertical-align: top; }
+th { font-weight: 500; color: var(--ash); width: 8em; white-space: nowrap; }
+td { font-family: var(--display); font-size: 15px; }
+thead th { font-family: var(--mono); font-size: 11px; letter-spacing: .2em; color: var(--mist); font-weight: 400; }
+
+/* 白い外側へ消える末尾 */
+.fade { height: 260px; background: linear-gradient(var(--paper), var(--void)); display: grid; place-items: end center; padding-bottom: 40px; }
+.fade p { font-family: var(--mono); font-size: 10px; letter-spacing: .3em; color: var(--hair); margin: 0; }
+.end { background: var(--void); padding-block: 0 80px; text-align: center; font-size: 12px; color: var(--mist); }
+
+@media (max-width: 760px) {
+  .book { grid-template-columns: 1fr; gap: 0; }
+  .index { position: static; padding-top: 28px; }
+  .index ol { grid-template-columns: 1fr 1fr; }
+  .places { grid-template-columns: 1fr; }
+  .place.city { border-right: 0; border-bottom: 1px solid var(--hair); }
+  .dream { grid-template-columns: 1fr; }
+  .dream div, .dream div + div { padding: 14px 0; border-left: 0; }
+  .dream div + div { border-top: 1px solid var(--hair); }
+}
+
+.place.white { background: var(--void); }
+.place.white .sky { height: 64px; margin-bottom: 18px; border-bottom: 1px solid var(--hair); }
+.forms li { font-family: var(--display); }
+.place.city:last-child, .place.white:last-child { border-right: 0; }
+.verse p.blank { height: 1.4em; }
+.load-error { padding: 40px 0; color: var(--ash); }
+
+/* 音ボタン */
+.sound {
+  position: fixed; right: 16px; bottom: calc(16px + env(safe-area-inset-bottom, 0px)); z-index: 10;
+  display: flex; align-items: center; gap: 10px;
+  font: 400 11px/1 var(--mono); letter-spacing: .22em; color: var(--ash);
+  background: var(--void); border: 1px solid var(--hair); padding: 10px 14px 10px 12px; cursor: pointer;
+  transition: color .3s, border-color .3s;
+}
+.sound:hover { color: var(--ink); border-color: var(--mist); }
+.sound .bars { display: flex; align-items: flex-end; gap: 2px; height: 12px; }
+.sound .bars i { display: block; width: 2px; height: 3px; background: currentColor; }
+.sound[aria-pressed="true"] { color: var(--ink); }
+.sound[aria-pressed="true"].playing .bars i { animation: bar 1.8s ease-in-out infinite; }
+.sound .bars i:nth-child(2) { animation-delay: .3s !important; }
+.sound .bars i:nth-child(3) { animation-delay: .6s !important; }
+.sound .bars i:nth-child(4) { animation-delay: .9s !important; }
+@keyframes bar { 0%,100% { height: 3px; } 50% { height: 12px; } }
+.sound .hint { color: var(--mist); }
+@media (max-width: 760px) { .sound .hint { display: none; } }
+</style>
+
+<header class="wrap cover">
+  <svg viewBox="32.14892 68.99645 417.77034 210.98432" role="img" aria-label="死を生きる">
+    <defs>
+      <linearGradient x1="137.80502" y1="134.99999" x2="233.44499" y2="134.99999" gradientUnits="userSpaceOnUse" id="sl-1"><stop offset="0" stop-color="#959595"/><stop offset="1" stop-color="#000000"/></linearGradient>
+      <linearGradient x1="190.17119" y1="90" x2="289.82881" y2="90" gradientUnits="userSpaceOnUse" id="sl-2"><stop offset="0" stop-color="#959595"/><stop offset="1" stop-color="#000000"/></linearGradient>
+      <linearGradient x1="33.183" y1="230" x2="446.817" y2="230" gradientTransform="translate(-16.04462,-123.20943) scale(0.48352,0.48352)" gradientUnits="userSpaceOnUse" id="sl-3"><stop offset="0" stop-color="#959595"/><stop offset="1" stop-color="#000000"/></linearGradient>
+    </defs>
+    <path d="M299.69499,159.72492c-2.82988,0 -5.52248,-0.58773 -7.9624,-1.64779c-3.66869,4.4019 -9.19266,7.20334 -15.37094,7.20334c-10.03098,0 -24.97784,-11.96956 -29.80663,-22.054c31.70747,-9.41667 49.15324,-37.87656 75.63997,-38.50155c11.04262,-0.26057 20,8.95431 20,20c0,11.04569 -8.9543,20 -20,20c-1.0444,0 -2.07009,-0.08005 -3.07128,-0.23435c-2.13764,8.7448 -10.02532,15.23435 -19.42872,15.23435z" fill="#000000"/>
+    <path d="M160.8763,144.49057c-1.00119,0.1543 -2.02689,0.23435 -3.07128,0.23435c-11.0457,0 -20,-8.95431 -20,-20c0,-11.04569 8.95738,-20.26056 20,-20c26.48672,0.625 43.9325,29.08488 75.63997,38.50155c-4.82879,10.08444 -19.77564,22.054 -29.80663,22.054c-6.17828,0 -11.70225,-2.80143 -15.37094,-7.20334c-2.43992,1.06006 -5.13252,1.64779 -7.9624,1.64779c-9.40339,0 -17.29108,-6.48955 -19.42872,-15.23435z" fill="url(#sl-1)"/>
+    <path d="M289.82881,90c0,10.21922 -22.30913,18.50355 -49.82881,18.50355c-27.5197,0 -49.82881,-8.28432 -49.82881,-18.50355c0,-10.21923 22.30912,-18.50354 49.82881,-18.50354c27.51969,0 49.82881,8.2843 49.82881,18.50353z" fill="none" stroke="url(#sl-2)" stroke-width="5"/>
+    <text transform="translate(33.183,254.81804) scale(2.06817,2.06817)" font-size="40" fill="url(#sl-3)" font-family="Shippori Mincho, Yu Mincho, serif">死を生きる</text>
+  </svg>
+  <div class="kind">Official Archive</div>
+</header>
+
+<div class="wrap verse" id="verse" aria-label="作品の根幹となる文章"></div>
+
+<div class="wrap book">
+  <nav class="index" aria-label="目次"><ol id="toc"></ol></nav>
+  <main id="main"></main>
+</div>
+
+<div class="fade" aria-hidden="true"><p>この先は、まだ白い</p></div>
+<footer class="end">死を生きる　公式資料集 ／ コンセント</footer>
+
+<button class="sound" id="sound" type="button" aria-pressed="true" aria-label="音のオンとオフを切り替える">
+  <span class="bars" aria-hidden="true"><i></i><i></i><i></i><i></i></span>
+  <span id="soundLabel">SOUND ON</span><span class="hint" id="soundHint">・タップで再生</span>
+</button>
+
+<script src="data.js"></script>
+<script>
+(function () {
+  "use strict";
+  var D = window.ARCHIVE;
+  var main = document.getElementById("main");
+  if (!D) { main.innerHTML = '<p class="load-error">data.js を読み込めませんでした。index.html と同じ場所に data.js があるか確認してください。</p>'; return; }
+
+  function esc(s) { return String(s == null ? "" : s).replace(/[&<>"']/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]; }); }
+  function inline(s) { return esc(s).replace(/\*\*(.+?)\*\*/g, '<em class="key">$1</em>'); }
+  function pad(n) { return (n < 10 ? "0" : "") + n; }
+
+  /* 根幹の文章 */
+  var verse = document.getElementById("verse"), vh = "";
+  (D.verse || []).forEach(function (line, i) {
+    vh += line === "" ? '<p class="blank" aria-hidden="true"></p>' : '<p style="animation-delay:' + (i * 0.25) + 's">' + esc(line) + "</p>";
+  });
+  if (D.verseLast) vh += '<p class="last" style="animation-delay:' + ((D.verse || []).length * 0.25) + 's">' + esc(D.verseLast) + "</p>";
+  verse.innerHTML = vh;
+
+  /* ブロック */
+  var R = {
+    p: function (b) { return "<p>" + inline(b.text) + "</p>"; },
+    h: function (b) { return "<h3>" + esc(b.text) + "</h3>"; },
+    rule: function (b) { return '<div class="taboo"><div class="no">' + esc(b.label || "RULE") + "</div><p>" + inline(b.text) + "</p></div>"; },
+    tags: function (b) {
+      return '<ul class="forms">' + (b.items || []).map(function (t) { return "<li>" + esc(t) + "</li>"; }).join("") +
+        (b.etc ? '<li class="etc">' + esc(b.etc) + "</li>" : "") + "</ul>";
+    },
+    steps: function (b) {
+      return '<div class="dream">' + (b.items || []).map(function (s) { return "<div><b>" + esc(s[0]) + "</b><span>" + inline(s[1]) + "</span></div>"; }).join("") + "</div>";
+    },
+    places: function (b) {
+      var bars = [38, 72, 54, 90, 44, 64, 30, 80, 50].map(function (h) { return '<i style="height:' + h + '%"></i>'; }).join("");
+      return '<div class="places">' + (b.items || []).map(function (p) {
+        var city = p.look === "city";
+        return '<div class="place ' + (city ? "city" : "white") + '"><div class="sky" aria-hidden="true">' + (city ? bars : "") + "</div><h3>" + esc(p.name) + "</h3><p>" + inline(p.text) + "</p></div>";
+      }).join("") + "</div>";
+    },
+    unset: function (b) {
+      return '<div class="unset"><div class="unset-label">未記録</div><ul>' + (b.items || []).map(function (t) { return "<li>" + inline(t) + "</li>"; }).join("") + "</ul></div>";
+    }
+  };
+
+  var secs = (D.sections || []).slice();
+  if (D.settings && D.settings.length) secs.push({ id: "list", en: "INDEX", title: "設定一覧", _table: true });
+
+  var toc = "", html = "";
+  secs.forEach(function (s, i) {
+    var n = pad(i + 1), id = esc(s.id || ("s" + n));
+    toc += '<li><a href="#' + id + '"><span>' + n + "</span>" + esc(s.title) + "</a></li>";
+    var inner;
+    if (s._table) {
+      inner = '<div class="tbl"><table><thead><tr><th>項目</th><th>設定</th></tr></thead><tbody>' +
+        D.settings.map(function (r) { return "<tr><th>" + esc(r[0]) + "</th><td>" + inline(r[1]) + "</td></tr>"; }).join("") + "</tbody></table></div>";
+    } else {
+      inner = (s.blocks || []).map(function (b) { var f = R[b.type]; return f ? f(b) : ""; }).join("");
+    }
+    html += '<section id="' + id + '"><div class="no">' + n + " — " + esc(s.en || "") + "</div><h2>" + esc(s.title) + "</h2>" + inner + "</section>";
+  });
+  document.getElementById("toc").innerHTML = toc;
+  main.innerHTML = html;
+})();
+
+/* ---------------- 音 ---------------- */
+(function () {
+  "use strict";
+  var KEY = "shiwoikiru-sound";
+  var on = true;
+  try { if (localStorage.getItem(KEY) === "off") on = false; } catch (e) {}
+
+  var btn = document.getElementById("sound"), label = document.getElementById("soundLabel"), hint = document.getElementById("soundHint");
+  var AC = window.AudioContext || window.webkitAudioContext;
+  var ctx = null, master = null, bgmBus = null, sfxBus = null, wet = null, started = false, timer = null, bellTimer = null;
+
+  function ui() {
+    btn.setAttribute("aria-pressed", on ? "true" : "false");
+    label.textContent = on ? "SOUND ON" : "SOUND OFF";
+    hint.hidden = !on || started;
+    btn.classList.toggle("playing", on && started);
+  }
+  ui();
+
+  function init() {
+    if (ctx || !AC) return;
+    ctx = new AC();
+    master = ctx.createGain(); master.gain.value = 0; master.connect(ctx.destination);
+    // ゆるい残響（ディレイの帰還）
+    var delay = ctx.createDelay(2); delay.delayTime.value = 0.42;
+    var fb = ctx.createGain(); fb.gain.value = 0.45;
+    var lp = ctx.createBiquadFilter(); lp.type = "lowpass"; lp.frequency.value = 1800;
+    wet = ctx.createGain(); wet.gain.value = 0.35;
+    wet.connect(delay); delay.connect(lp); lp.connect(fb); fb.connect(delay); lp.connect(master);
+    bgmBus = ctx.createGain(); bgmBus.gain.value = 0.55; bgmBus.connect(master); bgmBus.connect(wet);
+    sfxBus = ctx.createGain(); sfxBus.gain.value = 0.9; sfxBus.connect(master); sfxBus.connect(wet);
+  }
+
+  function fadeTo(v, t) {
+    if (!ctx) return;
+    var now = ctx.currentTime;
+    master.gain.cancelScheduledValues(now);
+    master.gain.setValueAtTime(master.gain.value, now);
+    master.gain.linearRampToValueAtTime(v, now + t);
+  }
+
+  /* BGM：白い余白のような、ゆっくり移ろう和音 */
+  var hz = function (m) { return 440 * Math.pow(2, (m - 69) / 12); };
+  var chords = [
+    [48, 55, 59, 64],   // Cmaj7
+    [45, 52, 55, 60],   // Am7
+    [41, 48, 52, 57],   // Fmaj7
+    [43, 50, 52, 59]    // G6
+  ];
+  var bells = [72, 74, 76, 79, 81, 84];
+  var ci = 0, LEN = 9;
+
+  function pad(midi, t0, dur, gain) {
+    var o = ctx.createOscillator(), g = ctx.createGain(), f = ctx.createBiquadFilter();
+    o.type = "triangle"; o.frequency.value = hz(midi); o.detune.value = (Math.random() - 0.5) * 8;
+    f.type = "lowpass"; f.frequency.value = 900;
+    g.gain.setValueAtTime(0, t0);
+    g.gain.linearRampToValueAtTime(gain, t0 + dur * 0.4);
+    g.gain.linearRampToValueAtTime(0, t0 + dur);
+    o.connect(f); f.connect(g); g.connect(bgmBus);
+    o.start(t0); o.stop(t0 + dur + 0.1);
+  }
+  function chord() {
+    if (!ctx) return;
+    var t = ctx.currentTime + 0.05, c = chords[ci % chords.length];
+    c.forEach(function (m, i) { pad(m, t + i * 0.12, LEN + 3, i === 0 ? 0.09 : 0.05); });
+    ci++;
+    timer = setTimeout(chord, LEN * 1000);
+  }
+  function bell() {
+    if (!ctx) return;
+    if (Math.random() < 0.7) {
+      var t = ctx.currentTime + 0.02, m = bells[Math.floor(Math.random() * bells.length)];
+      var o = ctx.createOscillator(), g = ctx.createGain();
+      o.type = "sine"; o.frequency.value = hz(m);
+      g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(0.035, t + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t + 4);
+      o.connect(g); g.connect(bgmBus); o.start(t); o.stop(t + 4.1);
+    }
+    bellTimer = setTimeout(bell, 2600 + Math.random() * 3800);
+  }
+
+  /* タップ音：水面に触れたような短い音 */
+  var tapNotes = [76, 79, 81, 84, 88];
+  function tap(strong) {
+    if (!ctx || !on) return;
+    var t = ctx.currentTime, m = tapNotes[Math.floor(Math.random() * tapNotes.length)];
+    var o = ctx.createOscillator(), o2 = ctx.createOscillator(), g = ctx.createGain();
+    o.type = "sine"; o.frequency.setValueAtTime(hz(m) * 1.02, t); o.frequency.exponentialRampToValueAtTime(hz(m), t + 0.08);
+    o2.type = "sine"; o2.frequency.value = hz(m) * 2.01;
+    var g2 = ctx.createGain(); g2.gain.value = 0.25;
+    var peak = strong ? 0.12 : 0.07;
+    g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(peak, t + 0.008); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.9);
+    o.connect(g); o2.connect(g2); g2.connect(g); g.connect(sfxBus);
+    o.start(t); o2.start(t); o.stop(t + 1); o2.stop(t + 1);
+  }
+
+  function start() {
+    init(); if (!ctx) return;
+    if (ctx.state === "suspended") ctx.resume();
+    fadeTo(1, 2.5);
+    if (!started) { started = true; chord(); bellTimer = setTimeout(bell, 3000); }
+    ui();
+  }
+  function stop() {
+    if (!ctx) return;
+    fadeTo(0, 0.6);
+    clearTimeout(timer); clearTimeout(bellTimer);
+    started = false;
+    setTimeout(function () { if (!on && ctx.state === "running") ctx.suspend(); }, 700);
+    ui();
+  }
+
+  btn.addEventListener("click", function (e) {
+    e.stopPropagation();
+    on = !on;
+    try { localStorage.setItem(KEY, on ? "on" : "off"); } catch (err) {}
+    if (on) { start(); tap(true); } else { stop(); }
+    ui();
+  });
+
+  document.addEventListener("pointerdown", function (e) {
+    if (btn.contains(e.target)) return;
+    if (!on) return;
+    if (!started) start();
+    tap(!!e.target.closest("a, button, li"));
+  }, { passive: true });
+  document.addEventListener("keydown", function (e) {
+    if (!on || btn.contains(e.target)) return;
+    if (e.key === "Enter" || e.key === " ") { if (!started) start(); tap(true); }
+  });
+  document.addEventListener("visibilitychange", function () {
+    if (!ctx || !on || !started) return;
+    if (document.hidden) ctx.suspend(); else ctx.resume();
+  });
+})();
+</script>
