@@ -4,7 +4,7 @@
 
    作品を追加・変更するときは、このファイルだけを書き換える。
 
-   world   : どの世界の作品か（"fronz" / "other" / "soul" / "abyss"）
+   world   : どの世界の作品か（"fronz" / "misseo" / "other" / "soul" / "abyss"）
    era     : フロンズの時系列（同じ数字＝同じ時代）。フロンズ以外は null
    title   : 作品名
    tentative : 名前が仮のときは true（「仮」と表示される）
@@ -77,6 +77,13 @@ const WORKS = [
         url: "https://kibounokonsent.github.io/moon_core/#/" },
     { world: "fronz", era: 7, title: "ハーネンス", summary: "", url: "" },
     { world: "fronz", era: 8, title: "終末世界", tentative: true, summary: "", url: "" },
+
+    // ---------- ミスセオワールド ----------
+    {
+        world: "misseo", era: null, title: "vs ペスト医師", genre: "二次創作ゲーム",
+        summary: "アンダーテール風に、ペスト医師との戦いを描いた二次創作ゲーム。",
+        url: "https://kibounokonsent.github.io/plague_doctor/plague_doctor.html"
+    },
 
     // ---------- その他の世界 ----------
     { world: "other", era: null, title: "伽藍堂", summary: "人の世に現れた妖怪は、人々の暮らしに寄生し、静かにその身を蝕んでいた。妖怪の存在が当たり前となった世界で、妖怪を狩る一体の妖怪がいる。\n\n" +
@@ -158,7 +165,7 @@ const REALMS = {
         title: "MISSEO WORLD",
         name: "ミスセオワールド",
         lead: "フロンズと並び、大いなる世界として語られるもう一つの世界。IFやクロスオーバー、二次創作など、別の物語が存在する。",
-        layout: "none",
+        layout: "scatter",
         lore: [
             {
                 heading: "大いなる世界",
