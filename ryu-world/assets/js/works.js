@@ -119,9 +119,9 @@ url: "https://kibounokonsent.github.io/garando/index.html" },
 
     // ---------- 刹那の奈落 ----------
     {
-        world: "abyss", era: null, title: "人外レストラン", tentative: true,
-        summary: "",
-        url: ""
+        world: "abyss", era: null, title: "人外レストラン", 
+        summary: "このレストランは、サタンが作り出したものである。訪れるのは人外、すなわち怪物たち。彼らはここで食事をとる。",
+        url: "https://kibounokonsent.github.io/jingai-restaurant/index.html"
     },
 
     // ---------- 魂界 ----------
