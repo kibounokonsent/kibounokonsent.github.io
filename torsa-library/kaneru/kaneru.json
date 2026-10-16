@@ -1,0 +1,400 @@
+{
+  "_note": "カネルのイベントと、赤い月の間・廊下の設定。プログラムは kaneru/kaneru.js。カネルはテレパシーでしか話さないので、カネルのセリフはぜんぶ《 》で心に響く声として出ます（声の音は鳴りません）。",
+  "name": "カネル",
+  "unknownName": "？？？",
+  "telepathyMark": [
+    "《",
+    "》"
+  ],
+  "_triggerNote": "trigger：いつ起こるか。affinity＝トルサの好感度がいくつ以上か、hall＝どの棟にいるときか、delaySec＝その棟で何秒たってから、本館が赤く染まって月の窓の前にカネルが現れるか。カネルに話しかけるとイベントが始まります。一度見たら、来館記録をリセットするまで起こりません（思い出からは何度でも見られます）。",
+  "trigger": {
+    "affinity": 100,
+    "hall": "main",
+    "delaySec": 6
+  },
+  "_boxNote": "会話の箱：event/events.json のいちばん外の \"box\"（全イベント共通）をそのまま使い、ここの box に書いた項目だけ上書きします（書ける項目は event/events.json と同じ：color・ink・line・ring・ring2・shadow・nameBg・nameInk・next・font・narrFont・fontSize・fontSizePhone・lineHeight・radius・padding・paddingPhone・minHeight・minHeightPhone・maxWidth・lift）。boxKaneru はカネルのセリフ（心に響く声）のときだけ重ねる見た目。glow はカネルの文字のまわりの光の色。",
+  "box": {},
+  "boxKaneru": {
+    "color": "linear-gradient(180deg, #1a0308, #080103)",
+    "ink": "#ffdfe3",
+    "line": "#7a0e1e",
+    "ring": "rgba(14, 2, 5, .95)",
+    "ring2": "rgba(150, 18, 38, .65)",
+    "nameBg": "linear-gradient(90deg, #2a0309, #6a0c1a)",
+    "nameInk": "#ffc9d0",
+    "next": "#d0384e",
+    "font": "\"Kaisei Decol\", \"Shippori Mincho\", serif",
+    "glow": "rgba(230, 30, 60, .7)"
+  },
+  "_eventNote": "event：好感度100のイベント。who は torsa（トルサ）／kaneru（カネル）／narration（地の文）／notice（お知らせ）。face はトルサの表情（normal / blush / soblush / sweat / surprise / sad）。fx は演出：redden＝館が赤く染まる、appear＝カネルが現れる（最初からトルサの反対側＝左に、右を向いて）、project＝本の姿が流れこむ、turn＝背を向ける、unturn＝向き直る、named＝名前がわかる、rumble＝遠くで石が組みかわる音、vanish＝カネルがその場で消える、clear＝赤い光が引く。",
+  "event": {
+    "id": "kaneru-redmoon",
+    "name": "赤い月の来訪者",
+    "hall": "main",
+    "steps": [
+      {
+        "who": "narration",
+        "fx": "redden",
+        "text": "――月の窓の光が、ゆっくりと赤く染まっていく。"
+      },
+      {
+        "who": "torsa",
+        "face": "surprise",
+        "text": "……あれぇ？ 月の窓が……まっかだよぉ……？"
+      },
+      {
+        "who": "narration",
+        "text": "赤い光は床をつたい、本棚を、館じゅうを染めていく。"
+      },
+      {
+        "who": "narration",
+        "fx": "appear",
+        "text": "気がつくと、赤い光の中に、だれかが立っていた。"
+      },
+      {
+        "who": "torsa",
+        "face": "sweat",
+        "text": "わ、わぁ……お客さん、かなぁ……？ と、図書館へようこそぉ……"
+      },
+      {
+        "who": "narration",
+        "text": "その人は、口をひらかない。けれど、頭の中に直接、声が響いた。"
+      },
+      {
+        "who": "kaneru",
+        "text": "本を探している。"
+      },
+      {
+        "who": "torsa",
+        "face": "surprise",
+        "text": "わっ……あたまの中に、声が……！"
+      },
+      {
+        "who": "torsa",
+        "face": "normal",
+        "text": "えっと……どんな本かなぁ？"
+      },
+      {
+        "who": "narration",
+        "fx": "project",
+        "text": "頭の中に、一冊の本の姿が流れこんでくる。"
+      },
+      {
+        "who": "torsa",
+        "face": "sweat",
+        "text": "うーん……ごめんねぇ。その本は、見たことないねぇ……"
+      },
+      {
+        "who": "kaneru",
+        "text": "……そうか。"
+      },
+      {
+        "who": "narration",
+        "fx": "turn",
+        "text": "その人は、それ以上なにも言わずに背を向けた。"
+      },
+      {
+        "who": "torsa",
+        "face": "surprise",
+        "text": "あっ、まってぇ"
+      },
+      {
+        "who": "torsa",
+        "face": "normal",
+        "text": "ここの本はねぇ、ほとんどが眠ってるんだぁ"
+      },
+      {
+        "who": "torsa",
+        "face": "blush",
+        "text": "だから……いつか、その本も目を覚ますかもしれないねぇ"
+      },
+      {
+        "who": "kaneru",
+        "fx": "unturn",
+        "text": "…………。"
+      },
+      {
+        "who": "kaneru",
+        "text": "……仕方ない。"
+      },
+      {
+        "who": "kaneru",
+        "text": "目覚めるまで、ここにいる。"
+      },
+      {
+        "who": "torsa",
+        "face": "blush",
+        "text": "ほんとぉ？ えへへ……僕、トルサっていうんだぁ。君は……？"
+      },
+      {
+        "who": "kaneru",
+        "fx": "named",
+        "text": "……カネル。"
+      },
+      {
+        "who": "narration",
+        "fx": "rumble",
+        "text": "館の西の奥で、石の組みかわるような、低い音がした。"
+      },
+      {
+        "who": "kaneru",
+        "text": "西の奥に、部屋をつくった。……用がないなら、来るな。"
+      },
+      {
+        "who": "narration",
+        "fx": "vanish",
+        "text": "赤い霧がほどけるように、その姿は消えていった。"
+      },
+      {
+        "who": "torsa",
+        "fx": "clear",
+        "face": "normal",
+        "text": "……行っちゃったぁ"
+      },
+      {
+        "who": "torsa",
+        "face": "sad",
+        "text": "カネルさん、かぁ……。おはなし、してくれるかなぁ……"
+      },
+      {
+        "who": "notice",
+        "text": "本館の西のはし、西の書館への扉のさらに左に、「赤い月の間」へつづく廊下ができました。"
+      }
+    ],
+    "stagedStart": 4,
+    "_stagedNote": "好感度100になると、まず本館が赤く染まり、月の窓の前にカネルが立っています（勝手には始まりません）。カネルにさわる（「話しかける」）とイベントが始まり、stagedStart 番目（0から数える）のセリフから進みます。それより前のセリフ（赤く染まる・現れる）は、思い出から見たときだけ流れます。"
+  },
+  "_roomsNote": "rooms：corridor＝西の書館の奥につづく廊下（館内にそのまま置かれ、画面上の場所の名前になる）、redmoon＝赤い月の間。whispers はときどき画面の下に出るひとこと。warpSub は転送の一覧に出る小さな説明。",
+  "rooms": {
+    "corridor": {
+      "name": "赤い月の間への廊下",
+      "_note": "本館の西のはし（西の書館への扉の左）から、少しずつ暗くなってそのままつづく廊下の名前。廊下は館内にあり、いちばん奥に赤い月の間の扉があります。"
+    },
+    "redmoon": {
+      "name": "赤い月の間",
+      "plate": "THE CRIMSON MOON",
+      "warpSub": "本館の西のはし・カネルの部屋",
+      "whispers": [
+        "（赤い満月が、ゆっくりと脈うつように光った）",
+        "（窓の外の城に、灯がひとつ、ともった）",
+        "（遠くで、羽ばたくような音がした）",
+        "（燭台の火が、音もなく赤く揺れた）",
+        "（床に落ちた月の光が、少しだけ濃くなった）"
+      ]
+    }
+  },
+  "_torsaNote": "torsa：廊下と赤い月の間でのトルサのセリフ。{ \"text\", \"face\" } の face は表情。sad＝しょんぼり。カネルと話したいけれど話せない、という気持ちのセリフ。",
+  "torsa": {
+    "enterCorridor": [
+      {
+        "text": "わぁ……赤いろうそくが、奥までずっとつづいてるねぇ",
+        "face": "sweat"
+      },
+      {
+        "text": "この廊下の奥に、カネルさんのお部屋があるんだよぉ",
+        "face": "normal"
+      }
+    ],
+    "enterRedmoon": [
+      {
+        "text": "カネルさん……こんばんはぁ……",
+        "face": "blush"
+      },
+      {
+        "text": "……お、おじゃましますぅ……",
+        "face": "sweat"
+      }
+    ],
+    "afterEnterRedmoon": [
+      {
+        "text": "……今日も、おはなし、してくれないねぇ",
+        "face": "sad"
+      },
+      {
+        "text": "……こっち、見てもくれないやぁ",
+        "face": "sad"
+      }
+    ],
+    "idleRedmoon": [
+      {
+        "text": "カネルさんの探してる本、早く目を覚ますといいねぇ",
+        "face": "normal"
+      },
+      {
+        "text": "……となりに座っても、いいかなぁ……。……やっぱり、やめとこぉ",
+        "face": "sad"
+      },
+      {
+        "text": "本、読んであげたら……よろこぶかなぁ……",
+        "face": "sad"
+      },
+      {
+        "text": "赤い月、きれいだねぇ。……カネルさんも、そう思うぅ……？",
+        "face": "blush"
+      },
+      {
+        "text": "……ねぇ、カネルさん。……ううん、なんでもないやぁ",
+        "face": "sad"
+      },
+      {
+        "text": "（トルサは、カネルのほうを何度もちらちら見ている）",
+        "face": "sad"
+      }
+    ],
+    "afterPressure": [
+      {
+        "text": "ひゃっ……！ こ、こわかったぁ……",
+        "face": "sweat"
+      },
+      {
+        "text": "だ、だめだよぉ……カネルさん、さわられるの、いやみたい……",
+        "face": "sweat"
+      },
+      {
+        "text": "……カネルさん、僕も、さわっちゃだめかなぁ……",
+        "face": "sad"
+      }
+    ],
+    "backFromRedmoon": [
+      {
+        "text": "……またねぇ、カネルさん",
+        "face": "sad"
+      }
+    ],
+    "doorRedmoon": [
+      {
+        "text": "この扉の向こうが、カネルさんのお部屋だよぉ",
+        "face": "normal"
+      },
+      {
+        "text": "……ちょっとだけ、のぞいてみるぅ？",
+        "face": "sweat"
+      }
+    ],
+    "patKaneru": [
+      {
+        "text": "え、えぇっ……！？ カネルさん、なでても怒らないねぇ……！",
+        "face": "surprise"
+      }
+    ],
+    "stagedHint": [
+      {
+        "text": "……あれぇ？ 月の窓が、まっかだよぉ……。窓の前に、だれか、いるねぇ……",
+        "face": "surprise"
+      }
+    ]
+  },
+  "_kaneruNote": "kaneru：赤い月の間のカネル。touch＝さわろうとしたとき（何回目かで変わる。最後のものがくり返し）。murmur＝ときどき心に流れこむひとこと（とてもまれ）。",
+  "kaneru": {
+    "touch": [
+      "触るな。",
+      "……二度言わせるな。",
+      "人間が、私に触れるな。",
+      "触るな。"
+    ],
+    "murmur": [
+      "……まだ、目覚めないか。",
+      "…………。",
+      "……騒がしい。"
+    ],
+    "murmurChance": 0.25,
+    "_talkNote": "talk：カネルのまわり（からだ以外）をさわると話しかけられる。min＝カネルへの好感度がいくつ以上で使うか（いちばん大きい min のものが選ばれる）。lines＝カネルの返事（《 》は自動でつく）、torsa＝そのあとトルサがときどき言うひとこと。",
+    "talk": [
+      {
+        "min": 0,
+        "lines": [
+          "……何だ。",
+          "話しかけるな。",
+          "…………。",
+          "用がないなら、来るなと言ったはずだ。"
+        ],
+        "torsa": [
+          {
+            "text": "……やっぱり、そっけないねぇ",
+            "face": "sad"
+          }
+        ]
+      },
+      {
+        "min": 30,
+        "lines": [
+          "……また来たのか。",
+          "本は、まだ目覚めないか。",
+          "……騒がしい。",
+          "…………何だ。"
+        ],
+        "torsa": [
+          {
+            "text": "カネルさん、お返事してくれたねぇ……！",
+            "face": "blush"
+          }
+        ]
+      },
+      {
+        "min": 70,
+        "lines": [
+          "……好きにしろ。",
+          "……あの本が目覚めたら、知らせろ。",
+          "……いたいなら、いればいい。"
+        ],
+        "torsa": [
+          {
+            "text": "えへへ……カネルさん、ちょっとだけ、やさしくなったかもぉ",
+            "face": "blush"
+          }
+        ]
+      },
+      {
+        "min": 100,
+        "lines": [
+          "……。",
+          "……今日も来たのか。",
+          "……静かにしていろ。"
+        ],
+        "torsa": [
+          {
+            "text": "……カネルさん、ここにいてくれて、よかったぁ",
+            "face": "blush"
+          }
+        ]
+      }
+    ],
+    "_talkFlowNote": "話しかけたときの流れ：カネルが左に出てきてひとこと → talkAsk（ほかに話すことでもあるのか）→ タップすると、同じ段の別の返事 → … 。talkWaitSec 秒なにもしないと talkBye（もうないなら、もどるぞ）で元の場所へ。話すことがなくなると talkEnd。talkLimit：count 回より多く minutes 分のあいだに呼びだすと、しばらく反応しない（そのときトルサがときどき talkIgnoredTorsa を言う）。",
+    "talkAsk": [
+      "ほかに話すことでもあるのか。"
+    ],
+    "talkBye": [
+      "もうないなら、もどるぞ。"
+    ],
+    "talkEnd": [
+      "……もう話すことはない。"
+    ],
+    "talkWaitSec": 7,
+    "talkLimit": {
+      "count": 4,
+      "minutes": 5
+    },
+    "talkIgnoredTorsa": [
+      {
+        "text": "……カネルさん、もうお返事してくれないみたい……",
+        "face": "sad"
+      },
+      {
+        "text": "呼びすぎちゃったかなぁ……",
+        "face": "sweat"
+      }
+    ]
+  },
+  "_kaneruAffinityNote": "kaneruAffinity：カネルへの好感度（0〜100、画面には出ない）。gain＝ふえる量（talk＝まわりをさわって話しかけたとき、visit＝赤い月の間に来たとき（1日1回）、touch＝からだにさわったとき（マイナスにすると減る））。cooldownSec＝続けてふえるまでの秒数。patFrom＝この値以上で頭をなでられる（カネルは何も反応しない。頭以外は、これまでどおり「触るな」）。確認用：コンソールで __kaneruAff() で今の値、__kaneruAff(100) で変更。",
+  "kaneruAffinity": {
+    "gain": {
+      "talk": 0.4,
+      "visit": 1,
+      "touch": 0
+    },
+    "cooldownSec": {
+      "talk": 120
+    },
+    "patFrom": 100
+  }
+}

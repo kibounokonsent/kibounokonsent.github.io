@@ -1,0 +1,73 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>禁書庫イベント確認</title>
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Shippori+Mincho:wght@500;600&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+/* イベントだけを確認するためのページ（サイト本体は index.html。ここではイベントを何度でも見られる） */
+:root {
+  --night: #0d0a17; --gold: #d6b062; --lamp: #f3d08a; --ink: #f2ecdc; --ink-soft: #bdb6cf;
+  --font-display: "Kaisei Decol", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-ui: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
+  --font-read: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  color-scheme: dark;
+}
+html, body { height: 100%; margin: 0; }
+body { background: radial-gradient(ellipse at 50% 30%, #2a1c46, var(--night) 70%); color: var(--ink); font-family: var(--font-ui); display: grid; place-items: center; padding: 16px; box-sizing: border-box; }
+main { max-width: 34em; text-align: center; }
+h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(24px, 6vw, 34px); letter-spacing: .12em; margin: 0 0 .2em; }
+h1 small { display: block; font-size: 13px; letter-spacing: .3em; color: var(--lamp); font-family: var(--font-ui); margin-bottom: .6em; }
+p { color: var(--ink-soft); line-height: 1.9; margin: .6em 0 1.6em; }
+button.start { border: 1px solid rgba(214, 176, 98, .7); background: linear-gradient(#4a2e62, #2c1b3e); color: var(--ink); font: 700 16px var(--font-ui); letter-spacing: .14em; padding: 12px 34px; border-radius: 999px; cursor: pointer; box-shadow: 0 8px 26px rgba(0,0,0,.4); }
+button.start::before { content: "✦"; color: var(--gold); margin-right: .6em; font-size: .8em; }
+button.start:hover { background: linear-gradient(#5a3874, #36214a); }
+button.start:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+.keys { font-size: 12px; color: #8f87a6; margin-top: 1.6em; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #f7f2e5; color: #2b2a3a; padding: 10px 20px; border-radius: 14px; box-shadow: 0 0 0 1.5px #c9a35a; opacity: 0; transition: opacity .4s; pointer-events: none; max-width: calc(100vw - 32px); box-sizing: border-box; }
+.toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<main>
+
+  <button class="start" id="start">イベントを見る</button>
+  <p class="keys">「（吹き出し非表示）」で絵だけを見られます（H キーでも切りかえ）</p>
+</main>
+<div class="toast" id="toast"></div>
+
+<script src="event/events.js"></script>
+<script>
+(() => {
+  // 確認用の小さな効果音（サイト本体では index.html の効果音を使います）
+  let ac = null;
+  const tone = (f, t, d, v = .08, to = f, type = "sine") => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(to, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + .02); };
+  const noise = (t, d, freq, v) => { const n = ac.createBufferSource(), b = ac.createBuffer(1, ac.sampleRate * d, ac.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length) ** 2; n.buffer = b; const f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = freq; const g = ac.createGain(); g.gain.value = v; n.connect(f).connect(g).connect(ac.destination); n.start(t); };
+  const SOUNDS = {
+    thud: (t) => { tone(140, t, .32, .3, 48); noise(t, .28, 700, .5); tone(90, t + .1, .2, .12, 50); },
+    sweat: (t) => { tone(1500, t, .26, .08, 520); tone(1900, t + .22, .06, .05); },
+    surprise: (t) => { tone(330, t, .16, .1, 1350); tone(2637, t + .12, .2, .04); },
+    pat: (t) => { noise(t, .13, 1300, .25); tone(500, t, .12, .03, 560); },
+    shy: (t) => { tone(1120, t, .22, .08, 1318); tone(1500, t + .16, .4, .07, 1760); }
+  };
+  const SFX = {
+    play(name) { if (!ac) return; const f = SOUNDS[name]; if (f) f(ac.currentTime + .01); },
+    blip() { if (!ac) return; tone(560 + Math.random() * 90, ac.currentTime, .05, .035, 620, "triangle"); }
+  };
+  const toast = (text) => { const el = document.getElementById("toast"); el.textContent = "トルサ：" + text; el.classList.add("show"); setTimeout(() => el.classList.remove("show"), 4200); };
+  const EVENTS = window.TorsaEvents({ standalone: true, SFX, say: (l) => toast(typeof l === "string" ? l : l.text), onEnd: () => document.getElementById("start").focus() });
+  EVENTS.ready.then(() => EVENTS.prefetch("vault-fall"));
+  document.getElementById("start").addEventListener("click", () => {
+    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch (e) {}
+    document.getElementById("start").textContent = "もう一度見る";
+    EVENTS.play("vault-fall");
+  });
+  if (new URLSearchParams(location.search).has("auto")) setTimeout(() => EVENTS.play("vault-fall"), 300);
+})();
+</script>
+</body>
+</html>

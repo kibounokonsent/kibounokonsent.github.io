@@ -1,5 +1,5 @@
 {
-  "_note": "効果音の設定。音はブラウザの中で合成している。volume は全体の大きさ（0〜1）。typing は本が話すときの「ぽぽぽ」という声音。sounds の各音を false にするとその音だけ鳴らなくなり、音声ファイルのパス（例: \"assets/sfx/heart.mp3\"）を書くとそのファイルを鳴らす。",
+  "_note": "効果音の設定。音はブラウザの中で合成している。volume は全体の大きさ（0〜1）。typing は本が話すときの「ぽぽぽ」という声音。sounds の各音を false にするとその音だけ鳴らなくなり、音声ファイルのパス（例: \"assets/sfx/heart.mp3\"）を書くとそのファイルを鳴らす。 telepathy・pressure・redmoon・rumble・vanish・wings はカネルの音（心に響く声・さわろうとしたときの圧・館が赤く染まる・石が組みかわる・消える・翼が開く）。",
   "enabled": true,
   "volume": 0.6,
   "typing": true,
@@ -24,6 +24,14 @@
     "silent": true,
     "jump": true,
     "appear": true,
-    "moon": true
+    "moon": true,
+    "thud": true,
+    "poyon": true,
+    "telepathy": true,
+    "pressure": true,
+    "redmoon": true,
+    "rumble": true,
+    "vanish": true,
+    "wings": true
   }
 }

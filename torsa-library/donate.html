@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>寄贈の間 ― トルサ図書館</title>
+<meta name="description" content="トルサ図書館に本を寄贈する部屋。題名・本文・表紙・性格・セリフを決めて、自分だけの本をつくれます。">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Shippori+Mincho:wght@500;600&family=Zen+Maru+Gothic:wght@500;700&display=swap">
+<style>
+/* 寄贈の間：本の寄贈を、ゲームのように一歩ずつ進めるページ。
+   できあがった本はファイルにして、図書館の管理人さんが book_data フォルダに入れるだけで書架に並ぶ。 */
+:root {
+  --night: #0d1230; --night-2: #1a2152; --panel: #18163a; --panel-2: #221e4a;
+  --gold: #d6b062; --gold-2: #e8c26a; --ink: #f2ecdc; --ink-soft: #bdbbdc; --leaf: #8fbf7a;
+  --paper: #f5f0e3; --paper-ink: #2b2a3a; --danger: #e58a8a;
+  --font-display: "Kaisei Decol", "Hiragino Mincho ProN", "Yu Mincho", serif;
+  --font-ui: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+  --font-read: "Shippori Mincho", "Hiragino Mincho ProN", serif;
+}
+* { box-sizing: border-box; }
+html { -webkit-text-size-adjust: 100%; background: var(--night); }
+body:has(.talk:not([hidden])) .nav, body:has(.reader:not([hidden])) .nav { display: none; }
+body { margin: 0; min-height: 100vh; color: var(--ink); font: 15px/1.7 var(--font-ui); background: radial-gradient(120% 80% at 50% -10%, #2d2a6a 0%, var(--night-2) 40%, var(--night) 100%) fixed; }
+body::before { content: ""; position: fixed; inset: 0; pointer-events: none; background-image: radial-gradient(1px 1px at 12% 20%, #fff8 50%, transparent 51%), radial-gradient(1px 1px at 80% 12%, #fff6 50%, transparent 51%), radial-gradient(1.5px 1.5px at 66% 70%, #fff5 50%, transparent 51%), radial-gradient(1px 1px at 30% 80%, #fff6 50%, transparent 51%), radial-gradient(1px 1px at 90% 50%, #fff5 50%, transparent 51%); }
+button, input, textarea, select { font: inherit; color: inherit; }
+.wrap { max-width: 1040px; margin: 0 auto; padding: 18px 16px 120px; position: relative; }
+header.top { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+header.top h1 { margin: 0; font: 700 28px/1.2 var(--font-display); letter-spacing: .12em; color: var(--gold-2); text-shadow: 0 0 18px rgba(232,194,106,.35); }
+header.top h1 small { display: block; font: 500 12px/1.4 var(--font-ui); letter-spacing: .2em; color: var(--ink-soft); }
+.back-link { color: var(--ink-soft); text-decoration: none; font-size: 13px; border: 1px solid rgba(214,176,98,.4); border-radius: 999px; padding: 4px 12px; }
+.back-link:hover { color: var(--gold-2); }
+
+/* しおり（章の目次） */
+.ribbons { display: flex; gap: 6px; margin: 16px 0 14px; overflow-x: auto; padding-bottom: 4px; scrollbar-width: thin; }
+.ribbon { flex: 0 0 auto; border: 0; cursor: pointer; padding: 8px 12px 12px; min-width: 64px; font-size: 12px; line-height: 1.3; color: #2b2118; background: #9a8a6a; clip-path: polygon(0 0, 100% 0, 100% 100%, 50% 82%, 0 100%); opacity: .6; transition: opacity .2s, transform .2s; }
+.ribbon b { display: block; font: 700 13px/1.3 var(--font-display); }
+.ribbon.done { background: #b9c99a; opacity: .85; }
+.ribbon.on { background: var(--gold-2); opacity: 1; transform: translateY(3px); }
+.ribbon:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+
+/* 案内役（若草の本） */
+.guide { display: flex; gap: 14px; align-items: flex-start; margin-bottom: 16px; }
+.guide-book { flex: 0 0 auto; width: 78px; aspect-ratio: 3/4; border-radius: 3px 6px 6px 3px; overflow: hidden; box-shadow: 0 8px 18px rgba(0,0,0,.5); animation: bob 3.2s ease-in-out infinite; cursor: pointer; }
+.guide-book svg { width: 100%; height: 100%; display: block; }
+.guide-book.talking { animation: bob 3.2s ease-in-out infinite, talk .32s ease-in-out infinite alternate; }
+@keyframes bob { 0%, 100% { translate: 0 0; } 50% { translate: 0 -5px; } }
+@keyframes talk { from { rotate: -2deg; } to { rotate: 2deg; } }
+.bubble { position: relative; flex: 1; background: var(--paper); color: var(--paper-ink); border-radius: 14px; padding: 12px 16px; min-height: 64px; font: 600 15px/1.75 var(--font-read); box-shadow: 0 6px 16px rgba(0,0,0,.35); cursor: pointer; }
+.bubble::before { content: ""; position: absolute; left: -9px; top: 22px; border: 9px solid transparent; border-left: 0; border-right-color: var(--paper); }
+.bubble .who { display: block; font: 700 11px/1.4 var(--font-ui); color: #4f7a4a; letter-spacing: .12em; margin-bottom: 2px; }
+.bubble .more { position: absolute; right: 12px; bottom: 6px; font-size: 11px; color: #4f7a4a; animation: blink 1s steps(2) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* 机（各章の中身） */
+.desk { background: linear-gradient(180deg, var(--panel-2), var(--panel)); border: 1px solid rgba(214,176,98,.35); border-radius: 16px; padding: 20px; box-shadow: 0 20px 40px rgba(0,0,0,.35), inset 0 1px 0 rgba(255,255,255,.05); }
+.desk h2 { margin: 0 0 4px; font: 700 22px/1.4 var(--font-display); color: var(--gold-2); letter-spacing: .08em; }
+.desk .lead { margin: 0 0 16px; color: var(--ink-soft); font-size: 13px; }
+.field { display: grid; gap: 6px; margin-bottom: 16px; }
+.field > span { font-weight: 700; font-size: 14px; }
+.field > span em { font-style: normal; font-weight: 500; color: var(--ink-soft); font-size: 12px; margin-left: 6px; }
+.txt { width: 100%; padding: 10px 12px; border-radius: 10px; border: 1px solid rgba(214,176,98,.45); background: #120f28; color: var(--ink); outline: none; }
+.txt:focus { border-color: var(--gold-2); box-shadow: 0 0 0 3px rgba(232,194,106,.2); }
+textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read); }
+.big-text { min-height: 320px; }
+.count { font-size: 12px; color: var(--ink-soft); text-align: right; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { border: 1px solid rgba(214,176,98,.45); background: rgba(255,255,255,.04); border-radius: 999px; padding: 4px 12px; font-size: 13px; cursor: pointer; }
+.chip.on { background: var(--gold-2); color: #2b2118; border-color: var(--gold-2); font-weight: 700; }
+.btn { border: 1px solid rgba(214,176,98,.6); background: rgba(255,255,255,.05); border-radius: 999px; padding: 9px 20px; cursor: pointer; font-weight: 700; letter-spacing: .06em; transition: background .2s, transform .1s; }
+.btn:hover { background: rgba(232,194,106,.15); }
+.btn:active { transform: translateY(1px); }
+.btn.primary { background: linear-gradient(180deg, #f0d48a, #c99a44); color: #2b2118; border-color: #f0d48a; box-shadow: 0 4px 14px rgba(232,194,106,.3); }
+.btn.small { padding: 5px 14px; font-size: 13px; }
+.btn[disabled] { opacity: .45; cursor: not-allowed; }
+.note { font-size: 12px; color: var(--ink-soft); margin: 6px 0 0; }
+.warn { color: var(--danger); font-size: 13px; margin: 4px 0 0; }
+
+/* 下の進むボタン */
+.nav { position: fixed; left: 0; right: 0; bottom: 0; z-index: 20; padding: 12px 16px calc(12px + env(safe-area-inset-bottom)); display: flex; justify-content: center; gap: 12px; background: linear-gradient(180deg, transparent, rgba(8,10,30,.92) 40%); }
+.nav .btn { min-width: 132px; }
+
+/* 性格・くせのカード */
+.cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.card { text-align: left; border: 1px solid rgba(214,176,98,.35); background: rgba(255,255,255,.04); border-radius: 14px; padding: 12px 14px; cursor: pointer; transition: transform .15s, border-color .15s, background .15s; }
+.card:hover { transform: translateY(-2px); border-color: var(--gold-2); }
+.card.on { background: rgba(232,194,106,.16); border-color: var(--gold-2); box-shadow: 0 0 0 2px rgba(232,194,106,.35) inset; }
+.card b { display: block; font: 700 16px/1.4 var(--font-display); color: var(--gold-2); }
+.card small { display: block; color: var(--ink-soft); font-size: 12px; line-height: 1.6; margin-top: 4px; }
+.card .ex { display: inline-block; margin-top: 6px; font-size: 11px; padding: 1px 8px; border-radius: 999px; background: rgba(255,255,255,.08); }
+.card .ico { font-size: 22px; line-height: 1; float: right; opacity: .8; }
+.type-cards { grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); }
+.sub-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 12px; }
+
+/* セリフの編集 */
+.sec { border: 1px solid rgba(214,176,98,.28); border-radius: 14px; padding: 12px 14px; margin-bottom: 12px; background: rgba(0,0,0,.12); }
+.sec h3 { margin: 0; font: 700 16px/1.4 var(--font-display); color: var(--gold-2); }
+.sec .hint { margin: 2px 0 10px; font-size: 12px; color: var(--ink-soft); }
+.ln { display: grid; grid-template-columns: 112px 1fr auto; gap: 8px; align-items: start; margin-bottom: 8px; }
+.ln select { padding: 8px 6px; border-radius: 10px; border: 1px solid rgba(214,176,98,.45); background: #120f28; }
+.ln textarea { min-height: 44px; padding: 8px 10px; }
+.ln .tools { display: flex; flex-direction: column; gap: 4px; }
+.icon-btn { border: 1px solid rgba(214,176,98,.35); background: none; border-radius: 8px; width: 30px; height: 28px; cursor: pointer; font-size: 13px; line-height: 1; }
+.icon-btn:hover { background: rgba(232,194,106,.15); }
+.add-ln { border: 1px dashed rgba(214,176,98,.55); background: none; color: var(--gold-2); border-radius: 10px; padding: 6px 12px; cursor: pointer; font-size: 13px; }
+.refuse-round { border-left: 3px solid rgba(214,176,98,.4); padding-left: 10px; margin: 8px 0 12px; }
+.refuse-round h4 { margin: 0 0 6px; font-size: 13px; color: var(--ink-soft); }
+
+/* 表紙の章 */
+.cover-head { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 14px; }
+.cover-head .field { flex: 1 1 220px; margin: 0; }
+
+/* ためしに会う */
+.shelf-scene { position: relative; height: 230px; border-radius: 14px; overflow: hidden; background: linear-gradient(180deg, #2a1d14, #3b2a1d); border: 1px solid rgba(214,176,98,.3); margin-bottom: 14px; }
+.shelf-scene::before { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 2px, transparent 2px 40px); }
+.board { position: absolute; left: 0; right: 0; height: 14px; background: linear-gradient(180deg, #a27752, #6c4a33); box-shadow: 0 4px 6px rgba(0,0,0,.4); }
+.dummy { position: absolute; bottom: 0; width: 22px; border-radius: 2px 2px 0 0; box-shadow: inset -3px 0 0 rgba(0,0,0,.25); }
+.my-book { position: absolute; bottom: 0; width: 34px; height: 104px; border-radius: 3px 3px 0 0; border: 0; cursor: pointer; box-shadow: 0 0 0 2px rgba(255,240,180,.7), 0 0 22px rgba(255,220,140,.55), inset -4px 0 0 rgba(0,0,0,.25); animation: glow 2.2s ease-in-out infinite; }
+.my-book.restless { animation: glow 2.2s ease-in-out infinite, wiggle .5s ease-in-out infinite; }
+@keyframes glow { 50% { box-shadow: 0 0 0 2px rgba(255,240,180,.9), 0 0 32px rgba(255,220,140,.8), inset -4px 0 0 rgba(0,0,0,.25); } }
+@keyframes wiggle { 0%, 100% { rotate: 0deg; } 25% { rotate: -3deg; } 75% { rotate: 3deg; } }
+.my-book i { position: absolute; left: 4px; right: 4px; height: 3px; background: var(--a, #e8c26a); opacity: .8; }
+.shelf-emote { position: absolute; transform: translateX(-50%); background: var(--paper); color: var(--paper-ink); border-radius: 999px; padding: 0 9px; font: 700 13px/1.7 var(--font-ui); animation: bob 2s ease-in-out infinite; white-space: nowrap; }
+.scenarios { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+
+/* 会話の窓（図書館の本の会話と同じ並び） */
+.talk { position: fixed; inset: 0; z-index: 40; display: grid; place-items: end center; padding: 16px 16px calc(24px + env(safe-area-inset-bottom)); background: rgba(5,6,20,.55); backdrop-filter: blur(2px); }
+.talk[hidden] { display: none; }
+.talk-box { width: min(760px, 100%); display: grid; grid-template-columns: 150px 1fr; gap: 16px; align-items: end; }
+.talk-cover { position: relative; aspect-ratio: 3/4; border-radius: 4px 8px 8px 4px; overflow: hidden; box-shadow: 0 16px 34px rgba(0,0,0,.6); animation: pop .35s ease-out; }
+.talk-cover svg { width: 100%; height: 100%; display: block; }
+.talk-cover.jump { animation: jumpin .6s cubic-bezier(.3,1.6,.5,1); }
+@keyframes pop { from { transform: scale(.85) translateY(10px); opacity: 0; } }
+@keyframes jumpin { from { transform: translateY(-160px) rotate(-20deg); opacity: 0; } }
+.emo { position: absolute; top: 6px; right: 6px; background: var(--paper); color: var(--paper-ink); border-radius: 999px; padding: 0 9px; font: 700 14px/1.7 var(--font-ui); box-shadow: 0 2px 6px rgba(0,0,0,.4); }
+.emo:empty { display: none; }
+.talk-say { background: var(--paper); color: var(--paper-ink); border-radius: 16px; padding: 14px 18px 12px; min-height: 130px; position: relative; box-shadow: 0 12px 30px rgba(0,0,0,.5); cursor: pointer; }
+.talk-say .name { font: 700 13px/1.4 var(--font-display); color: #6a4a1c; margin-bottom: 4px; }
+.talk-say .line { font: 600 17px/1.8 var(--font-read); min-height: 2.6em; white-space: pre-wrap; }
+.talk-say .next { position: absolute; right: 16px; bottom: 8px; color: #6a4a1c; animation: blink 1s steps(2) infinite; }
+.talk-actions { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end; margin-top: 8px; }
+.talk-actions .btn { color: var(--paper-ink); border-color: #c9b07a; background: #fff8e8; }
+.talk-actions .btn.primary { background: linear-gradient(180deg, #f0d48a, #c99a44); }
+
+/* 本文のためし読み */
+.reader { position: fixed; inset: 0; z-index: 45; display: grid; place-items: center; padding: 16px; background: rgba(5,6,20,.7); }
+.reader[hidden] { display: none; }
+.reader-page { width: min(680px, 100%); max-height: 86vh; overflow: auto; background: var(--paper); color: var(--paper-ink); border-radius: 10px; padding: 26px 26px 20px; font: 500 16px/2 var(--font-read); box-shadow: 0 20px 50px rgba(0,0,0,.6); }
+.reader-page h2 { font: 700 22px/1.4 var(--font-display); margin: 0; text-align: center; }
+.reader-page .meta { text-align: center; color: #7a7486; font-size: 13px; margin: 4px 0 18px; }
+.reader-page p { margin: 0; white-space: pre-wrap; }
+.reader-page p.blank { height: 1em; }
+.reader-page .fin { text-align: center; margin: 24px 0 8px; color: #7a7486; }
+.reader-page .close { display: block; margin: 12px auto 0; }
+
+/* 綴じる */
+.check { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 6px; }
+.check li { display: flex; align-items: center; gap: 10px; padding: 8px 12px; border-radius: 10px; background: rgba(255,255,255,.04); }
+.check li .mark { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; flex: 0 0 auto; background: #4f7a4a; color: #fff; }
+.check li.ng .mark { background: #8a3a3a; }
+.check li .go { margin-left: auto; }
+.bind-area { display: grid; grid-template-columns: 180px 1fr; gap: 20px; align-items: center; }
+.bind-book { aspect-ratio: 3/4; border-radius: 4px 8px 8px 4px; overflow: hidden; box-shadow: 0 14px 30px rgba(0,0,0,.55); }
+.bind-book svg { width: 100%; height: 100%; display: block; }
+.bind-book.bound { animation: bound 1.1s ease-out; }
+@keyframes bound { 0% { transform: scale(1); filter: brightness(1); } 30% { transform: scale(.92) rotate(-3deg); filter: brightness(1.6); } 60% { transform: scale(1.05) rotate(2deg); } 100% { transform: scale(1); filter: brightness(1); } }
+.done-box { margin-top: 14px; padding: 14px; border-radius: 12px; border: 1px dashed rgba(143,191,122,.7); background: rgba(143,191,122,.08); }
+.done-box[hidden] { display: none; }
+.done-box ol { margin: 6px 0 0; padding-left: 20px; }
+.sparkle { position: fixed; pointer-events: none; z-index: 60; width: 8px; height: 8px; border-radius: 50%; background: #ffe7a8; box-shadow: 0 0 10px #ffe7a8; animation: spark 1s ease-out forwards; }
+@keyframes spark { to { transform: translate(var(--dx), var(--dy)) scale(.2); opacity: 0; } }
+
+/* はじめに */
+.intro-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; margin: 6px 0 16px; }
+.intro-grid div { padding: 10px 12px; border-radius: 12px; background: rgba(255,255,255,.04); border: 1px solid rgba(214,176,98,.22); font-size: 13px; }
+.intro-grid b { display: block; color: var(--gold-2); font-family: var(--font-display); }
+.row-btns { display: flex; flex-wrap: wrap; gap: 8px; }
+.toast { position: fixed; left: 50%; bottom: 90px; transform: translateX(-50%); z-index: 70; background: var(--paper); color: var(--paper-ink); padding: 8px 16px; border-radius: 999px; font-size: 13px; box-shadow: 0 6px 18px rgba(0,0,0,.4); }
+.toast[hidden] { display: none; }
+
+@media (max-width: 640px) {
+  header.top h1 { font-size: 23px; }
+  .desk { padding: 16px 14px; }
+  .guide-book { width: 58px; }
+  .bubble { font-size: 14px; }
+  .ln { grid-template-columns: 1fr auto; }
+  .ln select { grid-column: 1 / -1; }
+  .talk-box { grid-template-columns: 96px 1fr; gap: 10px; }
+  .talk-say { min-height: 110px; padding: 12px 14px 10px; }
+  .talk-say .line { font-size: 15px; }
+  .bind-area { grid-template-columns: 1fr; }
+  .bind-book { width: 160px; margin: 0 auto; }
+  .nav .btn { min-width: 0; flex: 1; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <h1><small>トルサ図書館</small>寄贈の間</h1>
+    <a class="back-link" href="index.html">図書館にもどる</a>
+  </header>
+  <nav class="ribbons" id="ribbons" aria-label="章"></nav>
+  <div class="guide">
+    <div class="guide-book" id="guideBook" title="若草の本"></div>
+    <div class="bubble" id="bubble" role="status" aria-live="polite"><span class="who">若草の本</span><span id="bubbleText"></span><span class="more" id="bubbleMore" hidden>▼</span></div>
+  </div>
+  <main class="desk" id="desk"></main>
+</div>
+<div class="nav" id="nav"><button type="button" class="btn" id="prevBtn">もどる</button><button type="button" class="btn primary" id="nextBtn">つぎへ</button></div>
+
+<div class="talk" id="talk" hidden>
+  <div class="talk-box">
+    <div class="talk-cover" id="talkCover"><span class="emo" id="talkEmo"></span></div>
+    <div>
+      <div class="talk-say" id="talkSay"><div class="name" id="talkName"></div><div class="line" id="talkLine"></div><span class="next" id="talkNext" hidden>▼</span></div>
+      <div class="talk-actions" id="talkActions"></div>
+    </div>
+  </div>
+</div>
+<div class="reader" id="reader" hidden><div class="reader-page" id="readerPage"></div></div>
+<div class="toast" id="toast" hidden></div>
+<input type="file" id="fileIn" accept=".json,application/json" hidden>
+
+<script src="js/cover-parts.js"></script>
+<script src="js/cover-core.js"></script>
+<script src="js/book-gifts.js"></script>
+<script>
+(() => {
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const C = window.TorsaCoverCore, PARTS = C.PARTS.PARTS, esc = C.esc;
+  const KEY = "torsaDonateDraft";
+
+  /* ---------- 気持ち（顔）の名前 ---------- */
+  const EMOTES = [["normal", "ふつう", ""], ["happy", "にこにこ", "♪"], ["heart", "だいすき", "♡"], ["smug", "ふふん", "✦"], ["shy", "てれてれ", "///"], ["sweat", "あせあせ", "；"], ["surprise", "びっくり", "!?"], ["excited", "わくわく", "!!"], ["angry", "ぷんぷん", "#"], ["sad", "しょんぼり", "…"], ["sleepy", "ねむねむ", "zzz"], ["silent", "だんまり", "……"], ["question", "はてな", "?"]];
+  const EMO_MARK = Object.fromEntries(EMOTES.map(([k, , m]) => [k, m]));
+
+  /* ---------- 性格のお手本（選ぶと、セリフのお手本が入る） ---------- */
+  const T = (e, t) => ({ emote: e, text: t });
+  const PERSONAS = {
+    friendly: { name: "人なつっこい", ico: "♪", desc: "だれにでもにこにこ。会えるとすぐ喜ぶ。", shelf: "♪", lines: {
+      first: [T("happy", "わあ、はじめまして！ 手に取ってくれてありがとう！"), T("heart", "きみとは、なんだか仲良くなれそうな気がするよ。")],
+      revisit: [T("happy", "あっ、また来てくれたんだね！ うれしいなあ。")],
+      frequent: [T("heart", "もうすっかり常連さんだね。きみが来るの、毎日楽しみにしてるんだ。")],
+      afterRead: [T("heart", "最後まで読んでくれてありがとう！ また会いに来てね。")], catalog: [T("happy", "目録から探してくれたの？ うれしい！")],
+      jump: [T("excited", "見つけた！ ねえねえ、ぼくを読んでいかない？")],
+      refuse: [[T("shy", "えへへ……ごめんね、今日はちょっとはずかしいんだ。")], [T("sweat", "も、もう一回だけ待って……心の準備が……！")], [T("shy", "うう……あと一回だけ……！")]],
+      accept: [T("happy", "……よし！ 決めた、読んでもらう！"), T("heart", "大事に読んでね。")] } },
+    tsundere: { name: "ツンデレ", ico: "!?", desc: "つんつんしているけど、本当は来てほしい。", shelf: "!?", lines: {
+      first: [T("surprise", "ちょっと！ 急に持ち上げないでよね！"), T("shy", "……べ、べつに読んでほしいなんて思ってないんだから。")],
+      revisit: [T("smug", "ふーん、また来たの。わたしのこと、気になってるんでしょ？")],
+      frequent: [T("shy", "……遅いじゃない。べつに、ずっと待ってたとかじゃないけど。")],
+      afterRead: [T("shy", "さ、最後まで読んだの？……ふん、見る目あるじゃない。")], catalog: [T("angry", "目録から来るなんて、ずるいわよ！")],
+      jump: [T("angry", "もう！ 見てるだけなんて、じれったいのよ！")],
+      refuse: [[T("angry", "触らないで！ 今日はそういう気分じゃないの。")], [T("smug", "しつこいわね……そんなにわたしが読みたいの？")], [T("shy", "……ほ、本当にしつこいんだから。")]],
+      accept: [T("shy", "……わ、わかったわよ。特別なんだからね。")] } },
+    quiet: { name: "無口", ico: "…", desc: "ほとんどしゃべらない。でも、ちゃんと見ている。", shelf: "…", lines: {
+      first: [T("silent", "……。"), T("question", "……読むのか。")],
+      revisit: [T("silent", "……また来たのか。")],
+      frequent: [T("shy", "……来ると、思っていた。")],
+      afterRead: [T("normal", "……そうか。最後まで、読んだか。")], catalog: [T("silent", "……目録から、か。")],
+      jump: [T("silent", "……。"), T("normal", "……読め。")],
+      refuse: [[T("silent", "……。")], [T("silent", "…………。")], [T("sweat", "……しつこい。")]],
+      accept: [T("normal", "……少しだけだ。")] } },
+    genki: { name: "元気いっぱい", ico: "!!", desc: "じっとしていられない。いつも全力。", shelf: "!!", lines: {
+      first: [T("excited", "やっほー！ はじめまして！"), T("happy", "さあさあ、ページをめくってみて！ きっと楽しいよ！")],
+      revisit: [T("excited", "おかえりー！ 待ってたよ！")],
+      frequent: [T("heart", "毎日来てくれるなんて、最高だね！ 今日もいっしょに冒険しよう！")],
+      afterRead: [T("excited", "読破おめでとう！ 次はもっとワクワクさせるからね！")], catalog: [T("excited", "目録からでも、飛んでいくよー！")],
+      jump: [T("excited", "とうっ！ 呼ばれた気がしたから出てきちゃった！")],
+      refuse: [[T("sweat", "あっ、今ちょっと走りまわってて忙しいんだ！")], [T("excited", "もうちょっとで準備できるから、待ってて！")], [T("sweat", "あとちょっと！ ほんとにあとちょっと！")]],
+      accept: [T("excited", "おまたせー！ さあ、読んで読んで！")] } },
+    ottori: { name: "おっとり", ico: "～", desc: "のんびりやさしい。時間の流れがゆっくり。", shelf: "♪", lines: {
+      first: [T("happy", "あら～、はじめまして～。"), T("normal", "ゆっくりでいいから、のんびり読んでいってね～。")],
+      revisit: [T("happy", "また来てくれたのね～。お茶でもいかが～？")],
+      frequent: [T("heart", "あなたが来ると、なんだかほっとするわ～。")],
+      afterRead: [T("happy", "読んでくれてありがとう～。少し休んでいってね～。")], catalog: [T("normal", "あらあら、目録から来てくれたのね～。")],
+      jump: [T("sweat", "あらら～、ころんと落ちちゃったわ～。")],
+      refuse: [[T("sleepy", "ごめんなさいね～、今お昼寝の時間なの～。")], [T("sleepy", "ふわぁ……もう少しだけ～……。")], [T("sweat", "あらあら～、そんなに読みたいの～？")]],
+      accept: [T("happy", "うふふ、それじゃあ、どうぞ～。")] } },
+    elegant: { name: "上品", ico: "✦", desc: "ていねいな言葉づかいのお嬢さま・紳士。", shelf: "✨", lines: {
+      first: [T("normal", "ごきげんよう。わたくしを選ぶとは、お目が高いこと。"), T("smug", "どうぞ、ゆっくりとお読みになって。")],
+      revisit: [T("happy", "あら、またいらしたのね。歓迎いたしますわ。")],
+      frequent: [T("shy", "あなたがいらっしゃるのを、心待ちにしておりましたの。……内緒ですわよ。")],
+      afterRead: [T("heart", "最後までお付き合いくださって、ありがとう存じます。")], catalog: [T("normal", "目録からのお越しですのね。どうぞこちらへ。")],
+      jump: [T("surprise", "まあ！ わたくしとしたことが、はしたない……。")],
+      refuse: [[T("angry", "淑女の頁を、そう気安くめくるものではありませんわ。")], [T("smug", "もう少し、礼儀というものを学んでいらして？")], [T("sweat", "……まあ、ずいぶんと熱心ですこと。")]],
+      accept: [T("shy", "そこまでおっしゃるなら……特別ですわよ。")] } },
+    whimsy: { name: "気まぐれ", ico: "?", desc: "なぞめいていて、つかみどころがない。", shelf: "?", lines: {
+      first: [T("smug", "ふふ、見つかっちゃった。"), T("question", "わたしが何の本か、当ててみる？")],
+      revisit: [T("question", "あれ、また来たの？ それとも、わたしが呼んだのかな。")],
+      frequent: [T("smug", "きみ、だいぶこっち側に慣れてきたね。")],
+      afterRead: [T("smug", "おしまい。……でも、本当に終わったと思う？")], catalog: [T("question", "目録の中から、わたしを見つけたの？ ふうん。")],
+      jump: [T("smug", "ばあ。おどろいた？")],
+      refuse: [[T("smug", "今日は、だーめ。")], [T("question", "どうしてそんなに読みたいの？ 理由を聞かせて？")], [T("smug", "ふふ、その顔が見たかったんだ。")]],
+      accept: [T("happy", "気が変わった。いいよ、読んで。")] } },
+    sleepy: { name: "眠たがり", ico: "zzz", desc: "いつもうとうと。たまに寝言を言う。", shelf: "zzz", lines: {
+      first: [T("sleepy", "ふわぁ……だれ……？"), T("sleepy", "……読むなら、そーっと……ね……。")],
+      revisit: [T("sleepy", "……また来たの……？ むにゃ……。")],
+      frequent: [T("shy", "……きみが来ると……ちょっとだけ、目がさめる……。")],
+      afterRead: [T("sleepy", "……読み終わったの……？ おやすみ……。")], catalog: [T("sleepy", "……目録……から……？ zzz……。")],
+      jump: [T("surprise", "はっ！ ……寝ぼけて落ちちゃった……。")],
+      refuse: [[T("sleepy", "zzz……。")], [T("sleepy", "……あと五分……。")], [T("sad", "……うう、起こさないで……。")]],
+      accept: [T("sleepy", "……わかった……起きる……。")] } },
+    shy: { name: "内気", ico: "///", desc: "はずかしがり屋。声が小さい。", shelf: "…", lines: {
+      first: [T("shy", "あ、あの……はじめまして……。"), T("sweat", "わ、わたしなんかで、いいんですか……？")],
+      revisit: [T("shy", "ま、また来てくれたんですね……うれしい、です……。")],
+      frequent: [T("heart", "あなたが来てくれるの、いつも、楽しみにしてて……。")],
+      afterRead: [T("shy", "さ、最後まで……ありがとうございます……！")], catalog: [T("sweat", "も、目録から……わざわざ……？")],
+      jump: [T("sweat", "ひゃっ！ お、落ちちゃいました……！")],
+      refuse: [[T("sweat", "ご、ごめんなさい……まだ、恥ずかしくて……。")], [T("shy", "も、もう少しだけ……待ってください……。")], [T("sweat", "う、うう……。")]],
+      accept: [T("shy", "……あなたになら……読んでほしい、です。")] } },
+    proud: { name: "自信家", ico: "★", desc: "自分の物語に絶対の自信がある。", shelf: "☆", lines: {
+      first: [T("smug", "おっと、ついにこの名作を見つけたか！"), T("smug", "読めば分かる。この本は、すごいぞ。")],
+      revisit: [T("smug", "また来たな？ やはり、この本の魅力には逆らえないか。")],
+      frequent: [T("happy", "きみも、すっかりこの本のとりこだな！")],
+      afterRead: [T("smug", "どうだ、すごかっただろう？ 感想はいつでも受け付けているぞ。")], catalog: [T("smug", "目録でも、この題名はひときわ輝いていただろう？")],
+      jump: [T("excited", "待たせたな！ 主役の登場だ！")],
+      refuse: [[T("smug", "この名作を読むには、まだ早いな。")], [T("smug", "ふむ、なかなかの熱意だ。だが、もう一押し。")], [T("happy", "よし、その熱意、気に入った！")]],
+      accept: [T("excited", "いいだろう！ 心して読むがいい！")] } }
+  };
+
+  /* ---------- くせ（本の演出） ---------- */
+  const TYPES = {
+    friendly: { name: "ふつうの本", ico: "📖", desc: "手に取ると、気さくに話しかけてくれる本。はじめて会ったときと、また会ったときでセリフが変わります。", ex: "若草の本" },
+    revisit: { name: "通うほど変わる本", ico: "❤", desc: "何度も会いに来ると、だんだん態度が変わる本。決めた回数から、特別なセリフになります。", ex: "紅の本" },
+    jumper: { name: "飛び出す本", ico: "!!", desc: "近くを歩いて少し待つと、自分から棚を飛び出してくる本。同じ書館に1冊までなので、ほかの飛び出す本がいるときは、べつの書館に置かれます。", ex: "空色の本" },
+    refuser: { name: "読ませてくれない本", ico: "×", desc: "何度かお願いしないと開いてくれない本。断る回数とセリフを決められます。目録からなら、いつでも読めます。", ex: "墨色の本" }
+  };
+  const HALLS = [["", "おまかせ"], ["main", "本館"], ["east", "東の書館"], ["west", "西の書館"]];
+  const SHELF_EMOTES = ["♪", "!?", "!!", "?", "…", "♡", "☆", "✨", "zzz", "～", ""];
+  const GENRES = ["ファンタジー", "恋愛", "冒険", "ミステリー", "ホラー", "日常", "歴史", "SF", "童話", "詩", "短編", "長編"];
+
+  /* ---------- 章 ---------- */
+  const STEPS = [
+    { key: "intro", label: "はじめに", talk: ["ようこそ、寄贈の間へ～。ここでは、新しい本をつくって、図書館に寄贈できるんだよ～。", "ぼくが順番に案内するね～。下の「つぎへ」で進んでね～。"] },
+    { key: "name", label: "本の名前", talk: ["まずは、本の名前を教えてね～。作者の名前と、どんなお話かもね～。"] },
+    { key: "text", label: "本文", talk: ["つぎは本文だよ～。書いたお話を、そのまま貼りつけてね～。空いた行も、そのまま残るよ～。"] },
+    { key: "cover", label: "表紙", talk: ["表紙をつくろう～。上の見出しで部品のなかまを切りかえて、ひとつずつ選んでいってね～。", "迷ったら「おまかせ」もあるよ～。何度でも押してみてね～。"] },
+    { key: "persona", label: "性格", talk: ["この本は、どんな性格かな～？ 近いものを選ぶと、セリフのお手本を入れておくね～。", "あとで、ぜんぶ自分の言葉に書きかえていいからね～。"] },
+    { key: "type", label: "くせ", talk: ["本にはね、それぞれ“くせ”があるんだ～。", "飛び出したり、なかなか読ませてくれなかったり……この本はどうかな～？"] },
+    { key: "lines", label: "セリフ", talk: ["いよいよセリフだよ～。この本が、手に取ってくれた人に話しかける言葉を書いてね～。", "ひとことずつ、そのときの気持ち（顔）も選べるよ～。"] },
+    { key: "try", label: "ためしに会う", talk: ["ためしに会ってみよう～。棚で光っている本をさわってみてね～。", "上のボタンで、いろんな場面をためせるよ～。"] },
+    { key: "bind", label: "綴じる", talk: ["準備ができたら、本を綴じよう～。", "できあがったファイルを、図書館の管理人さんに渡してね～。書架に入れてもらえたら、図書館で会えるよ～。"] }
+  ];
+
+  /* ---------- 書きかけの本 ---------- */
+  const blankLines = () => ({ first: [], revisit: [], frequent: [], afterRead: [], catalog: [], jump: [], refuse: [[], [], []], accept: [] });
+  const newBook = () => ({ v: 1, id: Math.random().toString(36).slice(2, 10) + Date.now().toString(36).slice(-4), title: "", author: "", genre: "", text: "", coverTitle: "", coverSub: "",
+    cover: { color: "#2f4a7a", accent: "#e8c26a", emblem: "star", titleDirection: "horizontal", parts: { ...C.PARTS.DEFAULT } },
+    persona: "", personaNote: "", shelfEmote: "♪", hall: "", type: "friendly", refuseCount: 2, frequentFrom: 4, lines: blankLines(), step: 0, seen: {} });
+  let S;
+  try { S = JSON.parse(localStorage.getItem(KEY) || "null"); } catch (e) { S = null; }
+  if (!S || S.v !== 1) S = newBook();
+  S.lines = { ...blankLines(), ...(S.lines || {}) };
+  let saveTimer = 0;
+  const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* 保存できない環境 */ } }, 250); };
+  const toast = (t) => { const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 2200); };
+
+  // 本文を段落にする（1行が1段落。空いた行も残す）
+  const paragraphs = () => { const a = S.text.replace(/\r\n?/g, "\n").split("\n"); while (a.length && !a[a.length - 1].trim()) a.pop(); while (a.length && !a[0].trim()) a.shift(); return a.map((p) => (p.trim() ? p.replace(/\s+$/, "") : "")); };
+  const coverOf = () => ({ ...S.cover, title: S.coverTitle || S.title || "名もなき本", subtitle: S.coverSub, parts: { ...S.cover.parts } });
+  const bookView = () => ({ id: "gift-" + S.id, title: S.title || "名もなき本", cover: coverOf() });
+
+  /* ---------- 案内役 ---------- */
+  const GUIDE_BOOK = { id: "friendly-guide", title: "若草の本", cover: { title: "若草の本", titleDirection: "vertical", color: "#4f7a4a", accent: "#f2e6b8", emblem: "leaf", parts: { base: "cloth", scene: "none", pattern: "vines", sparkle: "leaves", spine: "plain", frame: "vine", corners: "leaf", band: "none", emblemBase: "wreath", emblemPos: "middle", plate: "label", titleDeco: "none", titlePos: "top", clasp: "none", bookmark: "none", finish: "none" } } };
+  $("guideBook").innerHTML = C.coverHTML(GUIDE_BOOK);
+  let gQueue = [], gTimer = 0, gFull = "";
+  function guideSay(lines) { gQueue = lines.slice(); guideNext(); }
+  function guideNext() {
+    clearInterval(gTimer);
+    if (!gQueue.length) return;
+    gFull = gQueue.shift(); const chars = Array.from(gFull); let i = 0;
+    const el = $("bubbleText"); el.textContent = ""; $("bubbleMore").hidden = true; $("guideBook").classList.add("talking");
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) { el.textContent = gFull; guideDone(); return; }
+    gTimer = setInterval(() => { el.textContent += chars[i++] || ""; if (i >= chars.length) guideDone(); }, 32);
+  }
+  function guideDone() { clearInterval(gTimer); gTimer = 0; $("bubbleText").textContent = gFull; $("guideBook").classList.remove("talking"); $("bubbleMore").hidden = !gQueue.length; }
+  $("bubble").addEventListener("click", () => { if (gTimer) guideDone(); else guideNext(); });
+  $("guideBook").addEventListener("click", () => guideSay(STEPS[S.step].talk));
+
+  /* ---------- しおり ---------- */
+  function drawRibbons() {
+    $("ribbons").innerHTML = STEPS.map((s, i) => `<button type="button" class="ribbon${i === S.step ? " on" : ""}${S.seen[s.key] && i !== S.step ? " done" : ""}" data-i="${i}"><b>${i ? i : "☆"}</b>${esc(s.label)}</button>`).join("");
+    const on = $("ribbons").querySelector(".on"); if (on) on.scrollIntoView({ block: "nearest", inline: "center" });
+  }
+  $("ribbons").addEventListener("click", (e) => { const b = e.target.closest(".ribbon"); if (b) go(+b.dataset.i); });
+  $("prevBtn").addEventListener("click", () => go(S.step - 1));
+  $("nextBtn").addEventListener("click", () => go(S.step + 1));
+  function go(i) {
+    if (i < 0 || i >= STEPS.length) return;
+    S.seen[STEPS[S.step].key] = true; S.step = i; save();
+    draw(); guideSay(STEPS[i].talk); scrollTo({ top: 0, behavior: "smooth" });
+  }
+
+  /* ---------- 各章 ---------- */
+  const desk = $("desk");
+  function draw() {
+    drawRibbons();
+    $("prevBtn").disabled = S.step === 0;
+    $("nextBtn").hidden = S.step === STEPS.length - 1;
+    ({ intro, name, text, cover, persona, type, lines, try: tryOut, bind })[STEPS[S.step].key]();
+  }
+
+  function intro() {
+    const has = S.title || S.text || Object.values(S.lines).some((a) => a.flat().length);
+    desk.innerHTML = `<h2>本を寄贈しよう</h2><p class="lead">あなたの物語を、トルサ図書館の書架にならべるための部屋です。</p>
+      <div class="intro-grid"><div><b>1. 書く</b>題名・作者・本文を入れる</div><div><b>2. 飾る</b>部品を選んで表紙をつくる</div><div><b>3. 命をふきこむ</b>性格・くせ・セリフを決める</div><div><b>4. 綴じる</b>できたファイルを管理人さんへ</div></div>
+      <p class="note">書きかけの本は、このブラウザに自動でしおりがはさまります（あとで続きから書けます）。</p>
+      <div class="row-btns" style="margin-top:14px">${has ? `<button type="button" class="btn primary" id="contBtn">続きから書く</button><button type="button" class="btn" id="newBtn">新しい本を書く</button>` : `<button type="button" class="btn primary" id="startBtn">はじめる</button>`}<button type="button" class="btn" id="loadBtn">綴じた本を開いて直す</button></div>`;
+    const b = (id, f) => { const el = $(id); if (el) el.addEventListener("click", f); };
+    b("contBtn", () => { const i = STEPS.findIndex((s, k) => k > 0 && !S.seen[s.key]); go(i > 0 ? i : 1); });
+    b("startBtn", () => go(1));
+    b("newBtn", () => { confirmBox("いまの書きかけの本は消えてしまうよ～。新しい本を書く？", "新しい本を書く", () => { S = newBook(); save(); go(1); }); });
+    b("loadBtn", () => $("fileIn").click());
+  }
+
+  function name() {
+    desk.innerHTML = `<h2>本の名前</h2><p class="lead">図書館の目録や、本を手に取ったときに出る名前です。</p>
+      <label class="field"><span>題名<em>必ず</em></span><input class="txt" id="fTitle" maxlength="60" value="${esc(S.title)}" placeholder="例：星降る夜の物語"></label>
+      <label class="field"><span>作者の名前<em>ペンネームでOK</em></span><input class="txt" id="fAuthor" maxlength="40" value="${esc(S.author)}" placeholder="例：ケイ"></label>
+      <div class="field"><span>どんなお話？<em>目録の「カテゴリー」になります</em></span><div class="chips" id="fGenres">${GENRES.map((g) => `<button type="button" class="chip${S.genre === g ? " on" : ""}" data-g="${esc(g)}">${esc(g)}</button>`).join("")}</div><input class="txt" id="fGenre" maxlength="20" value="${esc(S.genre)}" placeholder="ほかの言葉でもOK"></div>`;
+    $("fTitle").addEventListener("input", (e) => { S.title = e.target.value; save(); });
+    $("fAuthor").addEventListener("input", (e) => { S.author = e.target.value; save(); });
+    $("fGenre").addEventListener("input", (e) => { S.genre = e.target.value; save(); $("fGenres").querySelectorAll(".chip").forEach((c) => c.classList.toggle("on", c.dataset.g === S.genre)); });
+    $("fGenres").addEventListener("click", (e) => { const c = e.target.closest(".chip"); if (!c) return; S.genre = c.dataset.g; $("fGenre").value = S.genre; save(); $("fGenres").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x === c)); });
+  }
+
+  function text() {
+    desk.innerHTML = `<h2>本文</h2><p class="lead">1行が1つの段落になります。空いた行は、そのまま「間」として残ります。</p>
+      <label class="field"><span>お話<em>必ず</em></span><textarea class="txt big-text" id="fText" placeholder="ここにお話を書くか、貼りつけてね">${esc(S.text)}</textarea><span class="count" id="fCount"></span></label>
+      <div class="row-btns"><button type="button" class="btn small" id="peek">ためし読みする</button></div>`;
+    const count = () => { const n = Array.from(S.text.replace(/\s/g, "")).length; $("fCount").textContent = `${n.toLocaleString()} 文字 ・ ${paragraphs().filter(Boolean).length} 段落`; };
+    $("fText").addEventListener("input", (e) => { S.text = e.target.value; save(); count(); });
+    $("peek").addEventListener("click", () => openReader(null));
+    count();
+  }
+
+  let MAKER = null;
+  function cover() {
+    desk.innerHTML = `<h2>表紙</h2><p class="lead">部品ごとに種類を選ぶと、すぐに表紙が変わります。</p>
+      <div class="cover-head"><label class="field"><span>表紙に書く題名<em>空なら本の題名</em></span><input class="txt" id="cTitle" maxlength="60" value="${esc(S.coverTitle)}" placeholder="${esc(S.title || "星降る夜の物語")}"></label>
+      <label class="field"><span>小さな副題<em>なくてもOK</em></span><input class="txt" id="cSub" maxlength="40" value="${esc(S.coverSub)}" placeholder="例：作者の名前"></label></div>
+      <div id="makerWrap"></div>`;
+    MAKER = C.PARTS.maker($("makerWrap"), C.coverHTML, { plain: true, fields: false, bookId: "gift-" + S.id, initial: coverOf(), onChange: (c) => { const { title, subtitle, ...rest } = c; S.cover = rest; save(); } });
+    $("cTitle").addEventListener("input", (e) => { S.coverTitle = e.target.value; save(); MAKER.set({ title: S.coverTitle || S.title || "名もなき本" }); });
+    $("cSub").addEventListener("input", (e) => { S.coverSub = e.target.value; save(); MAKER.set({ subtitle: S.coverSub }); });
+  }
+
+  function persona() {
+    desk.innerHTML = `<h2>性格</h2><p class="lead">選ぶと、セリフのお手本が入ります（あとで自由に書きかえられます）。</p>
+      <div class="cards" id="pCards">${Object.entries(PERSONAS).map(([k, p]) => `<button type="button" class="card${S.persona === k ? " on" : ""}" data-k="${k}"><span class="ico">${esc(p.ico)}</span><b>${esc(p.name)}</b><small>${esc(p.desc)}</small></button>`).join("")}<button type="button" class="card${S.persona === "own" ? " on" : ""}" data-k="own"><span class="ico">✎</span><b>自分で考える</b><small>お手本は入れずに、セリフをぜんぶ自分で書く。</small></button></div>
+      <div class="sub-row" id="pApply" hidden><span class="note" style="margin:0">いまのセリフを、この性格のお手本に入れかえる？</span><button type="button" class="btn small" id="pApplyBtn">入れかえる</button></div>
+      <label class="field" style="margin-top:16px"><span>ひとことで言うと？<em>なくてもOK・管理人さんへのメモになります</em></span><input class="txt" id="pNote" maxlength="60" value="${esc(S.personaNote)}" placeholder="例：無口・無愛想・ちょっとツンデレ"></label>
+      <div class="field"><span>棚の上に出るしるし<em>本棚で、この本の上にふわふわ出ます</em></span><div class="chips" id="pShelf">${SHELF_EMOTES.map((m) => `<button type="button" class="chip${S.shelfEmote === m ? " on" : ""}" data-m="${esc(m)}">${m ? esc(m) : "なし"}</button>`).join("")}</div></div>
+      <div class="field"><span>置いてほしい場所</span><div class="chips" id="pHall">${HALLS.map(([k, n]) => `<button type="button" class="chip${S.hall === k ? " on" : ""}" data-h="${k}">${esc(n)}</button>`).join("")}</div><p class="note">棚のどこに置くかは、空いているところに自動で決まります。</p></div>`;
+    const hasLines = () => Object.values(S.lines).some((a) => a.flat().length);
+    $("pCards").addEventListener("click", (e) => {
+      const c = e.target.closest(".card"); if (!c) return;
+      S.persona = c.dataset.k; save();
+      $("pCards").querySelectorAll(".card").forEach((x) => x.classList.toggle("on", x === c));
+      const p = PERSONAS[S.persona];
+      if (p && !S.shelfEmoteSet) { S.shelfEmote = p.shelf; $("pShelf").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x.dataset.m === S.shelfEmote)); }
+      if (!p) { $("pApply").hidden = true; return; }
+      if (!hasLines()) { applyPersona(); toast(`「${p.name}」のお手本を入れたよ`); $("pApply").hidden = true; }
+      else $("pApply").hidden = false;
+    });
+    $("pApplyBtn").addEventListener("click", () => { applyPersona(); $("pApply").hidden = true; toast("お手本に入れかえたよ"); });
+    $("pNote").addEventListener("input", (e) => { S.personaNote = e.target.value; save(); });
+    $("pShelf").addEventListener("click", (e) => { const c = e.target.closest(".chip"); if (!c) return; S.shelfEmote = c.dataset.m; S.shelfEmoteSet = true; save(); $("pShelf").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x === c)); });
+    $("pHall").addEventListener("click", (e) => { const c = e.target.closest(".chip"); if (!c) return; S.hall = c.dataset.h; save(); $("pHall").querySelectorAll(".chip").forEach((x) => x.classList.toggle("on", x === c)); });
+  }
+  function applyPersona() { const p = PERSONAS[S.persona]; if (!p) return; const cp = (a) => a.map((l) => ({ ...l })); S.lines = { first: cp(p.lines.first), revisit: cp(p.lines.revisit), frequent: cp(p.lines.frequent), afterRead: cp(p.lines.afterRead), catalog: cp(p.lines.catalog), jump: cp(p.lines.jump), refuse: p.lines.refuse.map(cp), accept: cp(p.lines.accept) }; save(); }
+
+  function type() {
+    desk.innerHTML = `<h2>くせ</h2><p class="lead">この本が図書館で見せる、特別なふるまいです。</p>
+      <div class="cards type-cards" id="tCards">${Object.entries(TYPES).map(([k, t]) => `<button type="button" class="card${S.type === k ? " on" : ""}" data-k="${k}"><span class="ico">${esc(t.ico)}</span><b>${esc(t.name)}</b><small>${esc(t.desc)}</small><span class="ex">たとえば：${esc(t.ex)}</span></button>`).join("")}</div>
+      <div id="tOpt"></div>`;
+    const opt = () => {
+      $("tOpt").innerHTML = S.type === "refuser" ? `<div class="sub-row"><b>何回断る？</b>${[1, 2, 3].map((n) => `<button type="button" class="chip${S.refuseCount === n ? " on" : ""}" data-rc="${n}">${n} 回</button>`).join("")}</div><p class="note">断る回数ぶん、断るときのセリフを書きます。</p>`
+        : S.type === "revisit" ? `<div class="sub-row"><b>何回目から特別なセリフ？</b>${[3, 4, 5, 7, 10].map((n) => `<button type="button" class="chip${S.frequentFrom === n ? " on" : ""}" data-ff="${n}">${n} 回目</button>`).join("")}</div>` : "";
+    };
+    opt();
+    desk.addEventListener("click", typeClick);
+    function typeClick(e) {
+      if (STEPS[S.step].key !== "type") { desk.removeEventListener("click", typeClick); return; }
+      const c = e.target.closest(".card"), rc = e.target.closest("[data-rc]"), ff = e.target.closest("[data-ff]");
+      if (c) { S.type = c.dataset.k; $("tCards").querySelectorAll(".card").forEach((x) => x.classList.toggle("on", x === c)); opt(); }
+      if (rc) { S.refuseCount = +rc.dataset.rc; opt(); }
+      if (ff) { S.frequentFrom = +ff.dataset.ff; opt(); }
+      save();
+    }
+  }
+
+  // セリフの欄（type によって出す欄が変わる）
+  function sections() {
+    const s = [];
+    if (S.type === "jumper") s.push(["jump", "棚から飛び出したとき", "近くで待っていると、本が飛び出してきて話しかけます。", 5]);
+    if (S.type !== "refuser") s.push(["first", "はじめて手に取ったとき", "いちばん最初に会ったときのセリフ。", 5]);
+    if (S.type === "refuser") { for (let i = 0; i < S.refuseCount; i++) s.push([`refuse.${i}`, `断るとき（${i + 1} 回目）`, i ? "もう一度たのまれたときの断り方。" : "はじめて手に取られたときの断り方。", 4]); s.push(["accept", "やっと読ませてくれるとき", "断る回数のあと、ついに開いてくれるときのセリフ。", 5]); }
+    s.push(["revisit", "また会いに来たとき", S.type === "refuser" ? "一度読ませてくれたあとに、また手に取ったとき。" : "2回目からのセリフ。", 5]);
+    if (S.type === "revisit") s.push(["frequent", `何度も通ったとき（${S.frequentFrom} 回目から）`, "常連さんになったときの、特別なセリフ。", 5]);
+    s.push(["afterRead", "読み終わったとき", "本文を最後まで読んで、本を閉じたときのひとこと。", 1]);
+    s.push(["catalog", "目録から来たとき", "蔵書目録から直接開かれたときのひとこと。", 1]);
+    return s;
+  }
+  const getArr = (key) => { if (key.startsWith("refuse.")) { const i = +key.split(".")[1]; S.lines.refuse[i] ||= []; return S.lines.refuse[i]; } return (S.lines[key] ||= []); };
+  const emoteSelect = (v) => `<select aria-label="気持ち">${EMOTES.map(([k, n, m]) => `<option value="${k}"${k === v ? " selected" : ""}>${esc(n)}${m ? " " + esc(m) : ""}</option>`).join("")}</select>`;
+  function lines() {
+    desk.innerHTML = `<h2>セリフ</h2><p class="lead">「${esc(TYPES[S.type].name)}」のセリフです。性格の章で選んだお手本が入っています。</p><div id="lSecs"></div>`;
+    const render = () => {
+      $("lSecs").innerHTML = sections().map(([key, title, hint, max]) => { const arr = getArr(key); if (!arr.length) arr.push({ emote: "normal", text: "" });
+        return `<section class="sec" data-key="${key}"><h3>${esc(title)}</h3><p class="hint">${esc(hint)}</p>${arr.map((l, i) => `<div class="ln" data-i="${i}">${emoteSelect(l.emote)}<textarea class="txt" rows="2" maxlength="300" placeholder="セリフを書いてね">${esc(l.text)}</textarea><div class="tools">${max > 1 ? `<button type="button" class="icon-btn" data-act="up" title="上へ" aria-label="上へ"${i ? "" : " disabled"}>↑</button><button type="button" class="icon-btn" data-act="del" title="消す" aria-label="消す">×</button>` : ""}</div></div>`).join("")}${max > 1 && arr.length < max ? `<button type="button" class="add-ln" data-act="add">＋ ひとこと足す</button>` : ""}</section>`; }).join("");
+    };
+    render();
+    $("lSecs").addEventListener("input", (e) => { const sec = e.target.closest(".sec"), ln = e.target.closest(".ln"); if (!sec || !ln) return; const l = getArr(sec.dataset.key)[+ln.dataset.i]; if (e.target.tagName === "TEXTAREA") l.text = e.target.value; save(); });
+    $("lSecs").addEventListener("change", (e) => { const sec = e.target.closest(".sec"), ln = e.target.closest(".ln"); if (!sec || !ln || e.target.tagName !== "SELECT") return; getArr(sec.dataset.key)[+ln.dataset.i].emote = e.target.value; save(); });
+    $("lSecs").addEventListener("click", (e) => {
+      const b = e.target.closest("[data-act]"); if (!b) return; const sec = b.closest(".sec"), arr = getArr(sec.dataset.key), ln = b.closest(".ln"), i = ln ? +ln.dataset.i : -1;
+      if (b.dataset.act === "add") arr.push({ emote: arr.length ? arr[arr.length - 1].emote : "normal", text: "" });
+      if (b.dataset.act === "del") { arr.splice(i, 1); if (!arr.length) arr.push({ emote: "normal", text: "" }); }
+      if (b.dataset.act === "up" && i > 0) [arr[i - 1], arr[i]] = [arr[i], arr[i - 1]];
+      save(); render();
+      if (b.dataset.act === "add") { const t = sec.parentNode.querySelector(`.sec[data-key="${sec.dataset.key}"] .ln:last-of-type textarea`); if (t) t.focus(); }
+    });
+  }
+
+  /* ---------- ためしに会う ---------- */
+  const filled = (a) => (a || []).filter((l) => l.text.trim());
+  const SIM = { met: 0, refused: 0, accepted: false };
+  function tryOut() {
+    const b = bookView(), dummies = [];
+    let x = 14; const r = (k) => (Math.sin(k * 12.9898) * 43758.5453) % 1;
+    for (let k = 0; x < 900; k++) { const w = 16 + Math.abs(r(k)) * 12, h = 70 + Math.abs(r(k + 9)) * 32, col = ["#7c3b3f", "#3f5a7c", "#5a4a7a", "#8a6a3a", "#44694c", "#6a3f5c"][k % 6]; dummies.push([x, w, h, col]); x += w + 2; }
+    const spot = 5;
+    desk.innerHTML = `<h2>ためしに会う</h2><p class="lead">図書館での会い方をためせます。ここで話しても、本当の図書館の記録には残りません。</p>
+      <div class="scenarios" id="scn"></div>
+      <div class="shelf-scene" id="shelf"><div class="board" style="bottom:0"></div></div>
+      <div class="row-btns"><button type="button" class="btn small" id="resetSim">はじめて会う状態にもどす</button><button type="button" class="btn small" id="peek2">本文をためし読み</button></div>`;
+    const shelf = $("shelf");
+    const row = document.createElement("div"); row.style.cssText = "position:absolute;left:0;right:0;bottom:14px;height:110px";
+    dummies.forEach(([dx, w, h, col], k) => { if (k === spot) return; const d = document.createElement("span"); d.className = "dummy"; d.style.cssText = `left:${dx}px;width:${w}px;height:${h}px;background:${col}`; row.appendChild(d); });
+    const mine = document.createElement("button"); mine.type = "button"; mine.className = "my-book" + (S.type === "jumper" ? " restless" : ""); mine.setAttribute("aria-label", `${b.title}を手に取る`);
+    mine.style.cssText = `left:${dummies[spot][0]}px;background:${S.cover.color};--a:${S.cover.accent}`; mine.innerHTML = "<i style='top:12px'></i><i style='bottom:14px'></i>";
+    row.appendChild(mine);
+    if (S.shelfEmote) { const em = document.createElement("span"); em.className = "shelf-emote"; em.textContent = S.shelfEmote; em.style.cssText = `left:${dummies[spot][0] + 17}px;bottom:118px`; row.appendChild(em); }
+    shelf.appendChild(row);
+    mine.addEventListener("click", () => openBook("shelf"));
+    const sc = [["shelf", "棚から手に取る"]];
+    if (S.type === "jumper") sc.unshift(["jump", "近くで待つ（飛び出す）"]);
+    sc.push(["catalog", "目録から開く"], ["read", "読み終わる"]);
+    $("scn").innerHTML = sc.map(([k, n]) => `<button type="button" class="chip" data-s="${k}">${esc(n)}</button>`).join("") + `<span class="note" style="margin:0 0 0 6px;align-self:center">いま：${SIM.met ? `${SIM.met} 回会った` : "はじめて"}${S.type === "refuser" ? (SIM.accepted ? "・読ませてくれた" : `・${SIM.refused} 回断られた`) : ""}</span>`;
+    $("scn").addEventListener("click", (e) => { const c = e.target.closest(".chip"); if (!c) return; const k = c.dataset.s; if (k === "read") openReader(() => afterRead()); else openBook(k); });
+    $("resetSim").addEventListener("click", () => { SIM.met = 0; SIM.refused = 0; SIM.accepted = false; toast("はじめて会う状態にもどしたよ"); tryOut(); });
+    $("peek2").addEventListener("click", () => openReader(null));
+  }
+  function linesFor(source) {
+    const L = S.lines, def = [{ emote: "silent", text: "……（ここにセリフが入ります）" }];
+    let ls, refusing = false;
+    if (source === "catalog") ls = filled(L.catalog).slice(0, 1);
+    else if (source === "jump") { ls = filled(L.jump); SIM.met++; }
+    else if (S.type === "refuser") {
+      if (SIM.accepted) ls = filled(L.revisit);
+      else if (SIM.refused < S.refuseCount) { ls = filled(L.refuse[SIM.refused]); SIM.refused++; refusing = true; }
+      else { ls = filled(L.accept); SIM.accepted = true; }
+      SIM.met++;
+    } else if (S.type === "revisit") { ls = SIM.met === 0 ? filled(L.first) : (filled(L.frequent).length && SIM.met + 1 >= S.frequentFrom) ? filled(L.frequent) : filled(L.revisit); SIM.met++; }
+    else { ls = SIM.met === 0 ? filled(L.first) : filled(L.revisit); SIM.met++; }
+    return { ls: ls.length ? ls : def, refusing };
+  }
+  function openBook(source) {
+    const { ls, refusing } = linesFor(source);
+    const read = { label: "読む", primary: true, run: () => { closeTalk(); openReader(() => afterRead()); } };
+    const back = { label: source === "catalog" ? "目録に戻る" : "棚に戻す", run: () => { closeTalk(); if (STEPS[S.step].key === "try") tryOut(); } };
+    const acts = refusing ? [{ label: "もう一度たのむ", primary: true, run: () => openBook("shelf") }, back] : [read, back];
+    talk(ls, acts, source === "jump");
+  }
+  function afterRead() { const a = filled(S.lines.afterRead).slice(0, 1); if (a.length) talk(a, [{ label: "棚に戻す", primary: true, run: () => { closeTalk(); if (STEPS[S.step].key === "try") tryOut(); } }]); }
+
+  let tQueue = [], tTimer = 0, tFull = "", tDone = null;
+  function talk(ls, actions, jump) {
+    const b = bookView();
+    $("talkCover").innerHTML = C.coverHTML(b) + `<span class="emo" id="talkEmo"></span>`;
+    $("talkCover").classList.toggle("jump", !!jump); void $("talkCover").offsetWidth;
+    $("talkName").textContent = b.title; $("talkActions").innerHTML = "";
+    $("talk").hidden = false; tQueue = ls.slice();
+    tDone = () => actions.forEach((a, i) => { const el = document.createElement("button"); el.type = "button"; el.className = "btn" + (a.primary ? " primary" : ""); el.textContent = a.label; el.addEventListener("click", a.run); $("talkActions").appendChild(el); if (!i) el.focus(); });
+    tNext();
+  }
+  function tNext() {
+    clearInterval(tTimer); if (!tQueue.length) return;
+    const l = tQueue.shift(); tFull = l.text; $("talkEmo").textContent = EMO_MARK[l.emote] || ""; $("talkNext").hidden = true;
+    const chars = Array.from(tFull); let i = 0; $("talkLine").textContent = "";
+    tTimer = setInterval(() => { $("talkLine").textContent += chars[i++] || ""; if (i >= chars.length) tEnd(); }, 34);
+  }
+  function tEnd() { clearInterval(tTimer); tTimer = 0; $("talkLine").textContent = tFull; if (tQueue.length) $("talkNext").hidden = false; else { const f = tDone; tDone = null; f && f(); } }
+  $("talkSay").addEventListener("click", () => { if (tTimer) tEnd(); else if (tQueue.length) tNext(); });
+  function closeTalk() { clearInterval(tTimer); $("talk").hidden = true; }
+  addEventListener("keydown", (e) => {
+    if (!$("talk").hidden && (e.key === "Enter" || e.key === " ") && !e.target.closest("button")) { e.preventDefault(); if (tTimer) tEnd(); else if (tQueue.length) tNext(); }
+    if (e.key === "Escape") { if (!$("reader").hidden) closeReader(); else if (!$("talk").hidden) closeTalk(); }
+  });
+
+  let readerDone = null;
+  function openReader(done) {
+    readerDone = done;
+    const ps = paragraphs();
+    $("readerPage").innerHTML = `<h2>${esc(S.title || "名もなき本")}</h2><p class="meta">${esc(S.author || "名もなき作者")}${S.genre ? "　・　" + esc(S.genre) : ""}</p>${ps.length ? ps.map((p) => (p ? `<p>${esc(p)}</p>` : '<p class="blank"></p>')).join("") : "<p>（本文がまだありません）</p>"}<p class="fin">おしまい</p><button type="button" class="btn close" id="rClose" style="color:var(--paper-ink)">本を閉じる</button>`;
+    $("reader").hidden = false; $("readerPage").scrollTop = 0; $("rClose").addEventListener("click", closeReader);
+  }
+  function closeReader() { $("reader").hidden = true; const f = readerDone; readerDone = null; f && f(); }
+  $("reader").addEventListener("click", (e) => { if (e.target === $("reader")) closeReader(); });
+
+  /* ---------- 綴じる ---------- */
+  function problems() {
+    const p = [], L = S.lines, need = (k, label, step) => { if (!filled(L[k]).length) p.push([label, step]); };
+    if (!S.title.trim()) p.push(["題名", 1]);
+    if (!S.author.trim()) p.push(["作者の名前", 1]);
+    if (!paragraphs().some(Boolean)) p.push(["本文", 2]);
+    if (S.type !== "refuser") need("first", "はじめて手に取ったときのセリフ", 6);
+    if (S.type === "jumper") need("jump", "飛び出したときのセリフ", 6);
+    if (S.type === "refuser") { for (let i = 0; i < S.refuseCount; i++) if (!filled(L.refuse[i]).length) p.push([`断るとき（${i + 1} 回目）のセリフ`, 6]); need("accept", "読ませてくれるときのセリフ", 6); }
+    need("revisit", "また会いに来たときのセリフ", 6);
+    need("afterRead", "読み終わったときのセリフ", 6);
+    need("catalog", "目録から来たときのセリフ", 6);
+    return p;
+  }
+  function bind() {
+    const p = problems();
+    const items = [["題名と作者", !p.some(([l]) => l === "題名" || l === "作者の名前"), 1], ["本文", !p.some(([l]) => l === "本文"), 2], ["表紙", true, 3], ["性格とくせ", true, 5], ["セリフ", !p.some(([, s]) => s === 6), 6]];
+    desk.innerHTML = `<h2>綴じる</h2><p class="lead">本を一冊のファイルにまとめます。</p>
+      <div class="bind-area"><div class="bind-book" id="bBook">${C.coverHTML(bookView())}</div><div>
+        <ul class="check">${items.map(([n, ok, st]) => `<li class="${ok ? "" : "ng"}"><span class="mark">${ok ? "✓" : "!"}</span>${esc(n)}${ok ? "" : `<button type="button" class="btn small go" data-go="${st}">書きに行く</button>`}</li>`).join("")}</ul>
+        ${p.length ? `<p class="warn">まだ足りないところ：${p.map(([l]) => esc(l)).join("、")}</p>` : ""}
+        <div class="row-btns"><button type="button" class="btn primary" id="bindBtn"${p.length ? " disabled" : ""}>本を綴じる</button></div>
+      </div></div>
+      <div class="done-box" id="doneBox" hidden><b>できあがり！</b> 「<span id="fname"></span>」ができました。
+        <ol><li>このファイルを、図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。</li><li>管理人さんが書架に入れてくれたら、図書館で会えるよ。</li></ol>
+        <div class="row-btns" style="margin-top:10px"><button type="button" class="btn small" id="dlAgain">もう一度ダウンロード</button><button type="button" class="btn small" id="shareBtn" hidden>送る（共有）</button><button type="button" class="btn small" id="another">新しい本を書く</button></div></div>`;
+    desk.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(+b.dataset.go)));
+    $("bindBtn").addEventListener("click", () => {
+      const f = makeFile();
+      $("bBook").classList.remove("bound"); void $("bBook").offsetWidth; $("bBook").classList.add("bound"); sparkles($("bBook"));
+      download(f); $("fname").textContent = f.name; $("doneBox").hidden = false;
+      guideSay(["わぁ～、すてきな本ができたね～！", "そのファイルを管理人さんに渡してね～。図書館で会えるのを楽しみにしてるよ～。"]);
+      $("dlAgain").onclick = () => download(f);
+      const file = typeof File !== "undefined" ? new File([f.blob], f.name, { type: "application/json" }) : null;
+      if (file && navigator.canShare && navigator.canShare({ files: [file] })) { $("shareBtn").hidden = false; $("shareBtn").onclick = () => navigator.share({ files: [file], title: S.title, text: "トルサ図書館への寄贈本です" }).catch(() => {}); }
+      $("another").onclick = () => confirmBox("新しい本を書く？ いまの本は、ダウンロードしたファイルから、いつでも開いて直せるよ～。", "新しい本を書く", () => { S = newBook(); save(); go(1); });
+    });
+  }
+  function makeFile() {
+    const L = S.lines, clean = (a) => filled(a).map((l) => ({ emote: l.emote, text: l.text.trim() }));
+    const lines = { first: clean(L.first), revisit: clean(L.revisit), afterRead: clean(L.afterRead)[0], catalog: clean(L.catalog)[0] };
+    if (S.type === "revisit") { lines.frequent = clean(L.frequent); lines.frequentFrom = S.frequentFrom; }
+    if (S.type === "jumper") lines.jump = clean(L.jump);
+    if (S.type === "refuser") { lines.refuse = L.refuse.slice(0, S.refuseCount).map(clean); lines.accept = clean(L.accept); }
+    const data = {
+      torsaLibraryGift: 1, createdAt: new Date().toISOString(), madeWith: "トルサ図書館 寄贈の間",
+      book: { id: "gift-" + S.id, title: S.title.trim(), type: S.type, hall: S.hall, shelfEmote: S.shelfEmote, refuseCount: S.type === "refuser" ? S.refuseCount : undefined, personality: { preset: PERSONAS[S.persona] ? PERSONAS[S.persona].name : "", note: S.personaNote.trim() }, cover: { ...coverOf(), title: (S.coverTitle || S.title).trim() }, lines },
+      work: { title: S.title.trim(), author: S.author.trim(), genre: S.genre.trim() || "寄贈本", paragraphs: paragraphs() }
+    };
+    const safe = S.title.trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g, "").slice(0, 30) || "本";
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
+    return { blob, name: `寄贈本_${safe}.json` };
+  }
+  function download(f) { const a = document.createElement("a"); a.href = URL.createObjectURL(f.blob); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
+  function sparkles(el) { const r = el.getBoundingClientRect(); for (let i = 0; i < 26; i++) { const s = document.createElement("span"); s.className = "sparkle"; const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 110; s.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px`; document.body.appendChild(s); setTimeout(() => s.remove(), 1100); } }
+
+  /* ---------- 綴じた本を開いて直す ---------- */
+  $("fileIn").addEventListener("change", async (e) => {
+    const f = e.target.files[0]; e.target.value = ""; if (!f) return;
+    let raw; try { raw = JSON.parse(await f.text()); } catch (err) { toast("このファイルは開けなかったよ"); return; }
+    const g = window.TorsaGifts.clean(raw, PARTS);
+    if (!g) { toast("寄贈本のファイルではないみたい"); return; }
+    const b = g.book, w = g.work;
+    S = newBook();
+    Object.assign(S, { id: b.id.replace(/^gift-/, ""), title: b.title, author: w.author, genre: w.genre === "寄贈本" ? "" : w.genre, text: w.paragraphs.join("\n"), coverTitle: b.cover.title === b.title ? "" : b.cover.title, coverSub: b.cover.subtitle || "",
+      shelfEmote: b.shelfEmote, shelfEmoteSet: true, hall: b.hall, type: b.type, refuseCount: b.refuseCount || 2, frequentFrom: b.lines.frequentFrom || 4,
+      personaNote: (raw.book.personality && typeof raw.book.personality.note === "string" ? raw.book.personality.note : "").slice(0, 60) });
+    const { title, subtitle, ...cv } = b.cover; S.cover = { ...cv, parts: { ...C.PARTS.DEFAULT, ...(cv.parts || {}) } };
+    const one = (l) => (l ? [l] : []);
+    S.lines = { first: b.lines.first || [], revisit: b.lines.revisit || [], frequent: b.lines.frequent || [], afterRead: one(b.lines.afterRead), catalog: one(b.lines.catalog), jump: b.lines.jump || [], refuse: [0, 1, 2].map((i) => (b.lines.refuse && b.lines.refuse[i]) || []), accept: b.lines.accept || [] };
+    save(); toast(`「${b.title}」を開いたよ`); go(1);
+  });
+
+  // かんたんな確認の窓（ブラウザの confirm は使わない）
+  function confirmBox(msg, ok, run) {
+    talkConfirm([{ emote: "question", text: msg }], [{ label: ok, primary: true, run: () => { closeTalk(); run(); } }, { label: "やめておく", run: closeTalk }]);
+  }
+  function talkConfirm(ls, acts) {
+    $("talkCover").innerHTML = C.coverHTML(GUIDE_BOOK) + `<span class="emo" id="talkEmo"></span>`; $("talkName").textContent = "若草の本"; $("talkActions").innerHTML = ""; $("talk").hidden = false;
+    tQueue = ls.slice(); tDone = () => acts.forEach((a, i) => { const el = document.createElement("button"); el.type = "button"; el.className = "btn" + (a.primary ? " primary" : ""); el.textContent = a.label; el.addEventListener("click", a.run); $("talkActions").appendChild(el); if (!i) el.focus(); }); tNext();
+  }
+
+  draw();
+  guideSay(STEPS[S.step].talk);
+})();
+</script>
+</body>
+</html>

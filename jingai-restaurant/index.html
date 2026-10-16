@@ -127,26 +127,27 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 .panes{display:grid;grid-template-columns:300px minmax(0,1fr);gap:28px;min-height:0;padding-bottom:16px}
 
 /* 左：伝票の一覧 */
-.list{min-height:0;overflow:auto;padding:10px 6px 20px 2px;display:grid;gap:12px;align-content:start;overscroll-behavior:contain}
+.list{min-height:0;overflow-y:auto;overflow-x:hidden;padding:10px 16px 20px 2px;display:grid;gap:12px;align-content:start;overscroll-behavior:contain}
 .list-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;padding-inline:2px}
 .list-head .label{font-size:11px}
 .list-head span{font-size:12px;color:var(--smoke)}
-.slip{position:relative;display:block;width:100%;text-align:left;color:var(--slip-ink);background:repeating-linear-gradient(transparent 0 23px,rgba(43,29,25,.06) 23px 24px),var(--slip);padding:14px 16px 16px;box-shadow:0 8px 20px rgba(0,0,0,.45);transform-origin:50% 0;transition:transform .45s var(--ease),box-shadow .45s;animation:drop .55s var(--ease) both;
+.slip{position:relative;display:block;width:100%;text-align:left;color:var(--slip-ink);rotate:var(--r,0deg);filter:drop-shadow(0 7px 10px rgba(0,0,0,.5));transition:translate .45s var(--ease),filter .45s;animation:drop .55s var(--ease) both}
+@keyframes drop{from{opacity:0;transform:translateY(-14px) rotate(-1.5deg)}to{opacity:1;transform:none}}
+.slip:hover{translate:4px 0}
+.slip[aria-current="true"]{translate:12px 0;filter:drop-shadow(0 12px 16px rgba(0,0,0,.65))}
+.paper{position:relative;display:block;background:repeating-linear-gradient(transparent 0 23px,rgba(43,29,25,.06) 23px 24px),var(--slip);padding:14px 16px 16px;transition:box-shadow .35s;
   -webkit-mask:radial-gradient(circle 4px at 50% 100%,transparent 98%,#000) 0 100%/11px 8px repeat-x,linear-gradient(#000,#000) 0 0/100% calc(100% - 7px) no-repeat;
           mask:radial-gradient(circle 4px at 50% 100%,transparent 98%,#000) 0 100%/11px 8px repeat-x,linear-gradient(#000,#000) 0 0/100% calc(100% - 7px) no-repeat}
-.slip{transform:rotate(var(--r,0deg))}
-@keyframes drop{from{opacity:0;transform:translateY(-14px) rotate(-1.5deg)}to{opacity:1;transform:rotate(var(--r,0deg))}}
-.slip:hover{transform:translateX(4px) rotate(calc(var(--r,0deg) - .4deg));box-shadow:0 12px 26px rgba(0,0,0,.55)}
-.slip[aria-current="true"]{transform:translateX(12px) rotate(var(--r,0deg));box-shadow:0 14px 30px rgba(0,0,0,.6),-4px 0 0 var(--stamp)}
+.slip[aria-current="true"] .paper{box-shadow:inset 4px 0 0 var(--stamp)}
 /* 伝票の紙：繊維・ムラ・縁の焼け・ピン穴 */
-.slip::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background-image:var(--grain),var(--mottle);background-size:220px,520px;mix-blend-mode:multiply;opacity:.8}
-.slip::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 26px rgba(110,70,30,.32);background:radial-gradient(circle 3px at 50% 8px,#3a2219 55%,rgba(58,34,25,.3) 70%,transparent 80%)}
-.slip-top{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(179,32,47,.5);padding-bottom:4px;margin-bottom:6px}
+.paper::before{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;background-image:var(--grain),var(--mottle);background-size:220px,520px;mix-blend-mode:multiply;opacity:.8}
+.paper::after{content:"";position:absolute;inset:0;pointer-events:none;z-index:2;box-shadow:inset 0 0 26px rgba(110,70,30,.32);background:radial-gradient(circle 3px at 50% 8px,#3a2219 55%,rgba(58,34,25,.3) 70%,transparent 80%)}
+.slip-top{position:relative;z-index:1;display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid rgba(179,32,47,.5);padding-bottom:4px;margin-bottom:6px}
 .slip-top small{font-family:var(--f-label);letter-spacing:.2em;font-size:11px;color:var(--stamp)}
 .slip-top b{font-family:var(--f-label);font-size:15px;letter-spacing:.06em;font-variant-numeric:tabular-nums}
-.slip-title{display:block;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.08em;line-height:1.4}
-.slip-sum{display:block;font-size:12.5px;color:var(--slip-sub);line-height:1.6;margin-top:3px}
-.slip-tags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
+.slip-title{position:relative;z-index:1;display:block;font-family:var(--f-display);font-weight:700;font-size:17px;letter-spacing:.08em;line-height:1.4}
+.slip-sum{position:relative;z-index:1;display:block;font-size:12.5px;color:var(--slip-sub);line-height:1.6;margin-top:3px}
+.slip-tags{position:relative;z-index:1;display:flex;gap:6px;margin-top:8px;flex-wrap:wrap}
 .tag{font-size:10.5px;letter-spacing:.1em;padding:0 6px;border:1px solid currentColor;color:#8a7868}
 .tag.cat{color:var(--stamp)}
 .slip .seal{position:absolute;right:12px;bottom:14px;width:30px;height:30px;border:2px solid var(--stamp);border-radius:50%;color:var(--stamp);display:grid;place-items:center;font-family:var(--f-display);font-weight:800;font-size:12px;transform:rotate(-12deg) scale(1.8);opacity:0;mix-blend-mode:multiply;transition:transform .25s cubic-bezier(.3,1.6,.5,1),opacity .15s}
@@ -189,7 +190,8 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
 .doc.facility::after,.doc.menu::after{box-shadow:inset 0 0 100px rgba(0,0,0,.75);background:linear-gradient(180deg,transparent 41.6%,rgba(0,0,0,.35) 42%,rgba(191,154,94,.08) 42.15%,transparent 42.6%)}
 
 /* 血のにじみ */
-.stains{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:3}
+.stains{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:0}
+.doc-inner{position:relative;z-index:1}
 .stain{position:absolute;background-size:100% 100%;background-repeat:no-repeat;mix-blend-mode:multiply;opacity:0;transform:scale(.8);transition:opacity 3.2s ease .25s,transform 4.5s var(--ease) .25s}
 .ready .stain,.slip .stain{opacity:var(--o,.8);transform:none}
 .slip .stain{transition:none}
@@ -254,7 +256,7 @@ button{font:inherit;color:inherit;background:none;border:0;cursor:pointer;paddin
   .app.reading .reader{display:block}
   .app.reading .list-head{display:none}
   .mobile-back{display:inline-block;margin:0 0 12px}
-  .slip[aria-current="true"]{transform:none}
+  .slip[aria-current="true"]{translate:4px 0}
   .doc.guide .gstamp{top:18px;right:16px}
 }
 </style>
@@ -498,7 +500,7 @@ const SPOTS=[
 function stainsFor(id,cat){
   const r=rng(hash(id));
   const pool=SPOTS.slice();const picks=[];
-  if(cat==="guide")picks.push(pool.splice(4,1)[0]);
+  if(cat==="guide"){picks.push(pool.splice(4,1)[0]);pool.splice(0,1)}
   const n=cat==="facility"?1:cat==="guide"?2:2+(r()<.55?1:0);
   while(picks.length<n){picks.push(pool.splice(Math.floor(r()*pool.length),1)[0])}
   return `<div class="stains" aria-hidden="true">${picks.map(p=>{
@@ -575,18 +577,18 @@ function drawStops(){
 const hl=(s,t)=>t?s.split(t).map(esc).join(`<mark>${esc(t)}</mark>`):s;
 function drawList(anim){
   const t=q.value.trim();
-  const rows=t?DOCS.filter(d=>(d.title+d.summary+d.body.join("")+(d.fields||[]).flat().join("")+CAT_FULL[d.cat]).includes(t)):DOCS.filter(d=>d.cat===cat);
+  const rows=t?DOCS.filter(d=>(d.title+d.summary+d.body.join("")+(d.fields||[]).flat().join("")+(d.open||[]).join("")+(d.list||[]).join("")+CAT_FULL[d.cat]).includes(t)):DOCS.filter(d=>d.cat===cat);
   const head=t?`<div class="list-head"><span class="label">検索</span><span>「${esc(t)}」${rows.length} 件</span></div>`
               :`<div class="list-head"><span class="label">${CATS[cat].en} · ${CAT_FULL[cat]}</span><span>${rows.length} 件</span></div>`;
   list.innerHTML=head+(rows.length?rows.map((d,i)=>{
     const openN=(d.open||[]).length+(d.fields||[]).filter(f=>f[1]===null).length;
     const rot=((hash(d.id)%13)-6)/10;
-    return `<button class="slip" data-doc="${d.id}" aria-current="${d.id===cur}" style="--r:${rot}deg;${anim?`animation-delay:${i*60}ms`:"animation:none"}">${slipStain(d.id)}
+    return `<button class="slip" data-doc="${d.id}" aria-current="${d.id===cur}" style="--r:${rot}deg;${anim?`animation-delay:${i*60}ms`:"animation:none"}"><span class="paper">${slipStain(d.id)}
       <span class="slip-top"><small>${CATS[d.cat].en}</small><b>${d.no}</b></span>
       <span class="slip-title">${hl(d.title,t)}</span>
       <span class="slip-sum">${hl(d.summary,t)}</span>
       <span class="slip-tags">${t?`<span class="tag cat">${CAT_FULL[d.cat]}</span>`:""}${openN?`<span class="tag">未記入 ${openN}</span>`:""}</span>
-      <span class="seal">${CATS[d.cat].seal}</span></button>`}).join("")
+      <span class="seal">${CATS[d.cat].seal}</span></span></button>`}).join("")
     :`<p class="empty">当てはまる資料はまだありません。別の言葉で探すか、上のレールからカテゴリを選んでください。</p>`);
   list.querySelectorAll(".slip").forEach(b=>b.onclick=()=>go(b.dataset.doc));
 }

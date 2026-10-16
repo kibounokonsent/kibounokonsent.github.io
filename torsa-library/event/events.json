@@ -1,0 +1,990 @@
+{
+  "_note": "トルサのイベント（全画面の一枚絵が、部品ごとに動く）。1つのイベントは、絵のファイル1つ（art）と、ここの設定でできています。セリフは lines、表情は faces、部品は parts、骨（動く中心）は bones、さわったときの反応は touch、動きの大きさは motion。くわしくは event/events/README.md。",
+  "events": {
+    "vault-fall": {
+      "name": "禁書庫で捕まる",
+      "sounds": {
+        "pan":   { "src": "event/events/pan.opus", "volume": 0.9, "loop": true  },
+        "kuchu": { "src": "event/events/kuchu.opus", "volume": 0.6, "loop": true }
+      },
+      "_triggerNote": "いつ起こるか。hall＝どの棟で（vault＝禁書庫）、delaySec＝入ってから何秒後、minAffinity＝トルサの好感度がいくつ以上で（0ならいつでも）、once＝一度見たらもう起こらない（来館記録をリセットすると、また起こる）。URL の最後に ?event=vault-fall を付けると、入館してすぐ見られます。",
+      "trigger": {
+        "hall": "vault",
+        "delaySec": 8,
+        "minAffinity": 0,
+        "once": true
+      },
+      "_artNote": "絵は1つのファイル（art）にまとまっています。中は部品ごとのレイヤー（id が部品名）。レイヤーごとに描き直して上書きすれば、そのまま動きます。canvas はキャンバスの大きさ。",
+      "art": "event/events/vault-fall.svg",
+      "canvas": [
+        234.23241,
+        438.26485
+      ],
+      "_cameraNote": "トルサの位置と角度。anchor＝キャンバスの中の目印の点（いまはブローチ）、at＝その点を画面のどこに置くか（左上0〜右下1）、view＝画面に入れる広さ（キャンバスの単位で 幅・高さ）、rotate＝傾き（度。マイナスで左に傾く）。phone はスマホの縦画面のときだけ変えたい値。zoom はイベントの間にゆっくり寄る量（1.03＝3%）。",
+      "camera": {
+        "anchor": [
+          111,
+          160
+        ],
+        "at": [
+          0.383,
+          0.324
+        ],
+        "view": [
+          237,
+          178
+        ],
+        "rotate": -13,
+        "zoom": 1.03,
+        "phone": {
+          "at": [
+            0.4,
+            0.31
+          ],
+          "view": [
+            150,
+            230
+          ]
+        }
+      },
+      "_boxNote": "会話の箱の色。color＝地の色、ink＝文字の色、line＝ふちの色",
+      "box": {
+        "color": "#f7f2e5",
+        "ink": "#2b2a3a",
+        "line": "#c9a35a"
+      },
+      "bg": {
+        "top": "#2a1c46",
+        "bottom": "#120c1f",
+        "glow": "#5b3a7a",
+        "smoke": true,
+        "motes": 26,
+        "image": "",
+        "leaves": {
+          "count": 8,
+          "size": [340, 460],
+          "sway": 4,
+          "speed": 0.45,
+          "edges": true,
+          "depth": false,
+          "fadeBase": 0,
+          "edgeOut": 0.06,
+          "spread": 80,
+          "images": [
+            { "src": "event/events/leaf1.svg", "pivot": [0.79, 0.99], "angle": -7 },
+            { "src": "event/events/leaf2.svg", "pivot": [0.02, 0.99], "angle": 36 },
+            { "src": "event/events/leaf3.svg", "pivot": [0.95, 0.99], "angle": -49 }
+          ]
+        }
+      },
+      "_partsNote": "奥から順に重ねます。id＝絵のファイルの中のレイヤーの id、bone＝くっつく骨、z＝奥行き（マウスの方を向いたときの動き。大きいほど手前で大きく動く。マイナスは奥）、touch＝さわったときの場所の名前（下の touch）。部品を足すときは、絵のファイルにレイヤーを1つ足して、ここに1行足します。 hidden: true の部品は、最初はかくれていて、セリフや選択肢の show で出てきます（hide でかくす）。いつもかくしておきたい部品も hidden: true にします（いまは汗 ase）。",
+      "parts": [
+        {
+          "id": "leaf_back",
+          "bone": "leaf_back",
+          "z": -3,
+          "touch": "leaf"
+        },
+           { "id": "milk_2",
+            "bone": "body",
+             "z": -2, "touch": "snack",
+              "hidden": true, "autoHide": 3,
+               "autoHideFade": 1 },
+        {
+          "id": "coat_back",
+          "bone": "body",
+          "z": -0.5,
+          "touch": "body"
+        },
+        {
+          "id": "legs",
+          "bone": "legs",
+          "z": 0.5,
+          "touch": "body"
+        },
+        {
+          "id": "shirt",
+          "bone": "body",
+          "z": 0,
+          "touch": "body"
+        },
+        {
+          "id": "neck_shade",
+          "bone": "head",
+          "z": -1
+        },
+        {
+          "id": "hair_back",
+          "bone": "hair",
+          "z": -2.5,
+          "touch": "head"
+        },
+        {
+          "id": "lock_back_l",
+          "bone": "lock_back_l",
+          "z": -2,
+          "touch": "head"
+        },
+        {
+          "id": "lock_back_r",
+          "bone": "lock_back_r",
+          "z": -2,
+          "touch": "head"
+        },
+        {
+          "id": "ear_l",
+          "bone": "ear_l",
+          "z": -0.5,
+          "touch": "ear"
+        },
+        {
+          "id": "ear_r",
+          "bone": "ear_r",
+          "z": -0.5,
+          "touch": "ear"
+        },
+        {
+          "id": "horn_r",
+          "bone": "horn_r",
+          "z": -1.5,
+          "touch": "horn"
+        },
+        {
+          "id": "horn_l",
+          "bone": "horn_l",
+          "z": -1.5,
+          "touch": "horn"
+        },
+        {
+          "id": "face",
+          "bone": "head",
+          "z": 0,
+          "touch": "head"
+        },
+        {
+          "id": "cape_shoulder_l",
+          "bone": "body",
+          "z": 1,
+          "touch": "body"
+        },
+        {
+          "id": "cape_shoulder_r",
+          "bone": "body",
+          "z": 1,
+          "touch": "body"
+        },
+        {
+          "id": "collar",
+          "bone": "collar",
+          "z": 2,
+          "touch": "collar"
+        },
+        {
+          "id": "brooch",
+          "bone": "collar",
+          "z": 2.5,
+          "touch": "collar"
+        },
+        {
+          "id": "lock_r",
+          "bone": "lock_r",
+          "z": 2,
+          "touch": "head"
+        },
+        {
+          "id": "lock_l",
+          "bone": "lock_l",
+          "z": 2,
+          "touch": "head"
+        },
+        {
+          "id": "hair_front",
+          "bone": "hair",
+          "z": 2,
+          "touch": "head"
+        },
+        {
+          "id": "ahoge",
+          "bone": "ahoge",
+          "z": 0.5,
+          "touch": "head"
+        },
+        {
+          "id": "eye_r",
+          "bone": "eye_r",
+          "z": 1.5,
+          "touch": "head"
+        },
+        {
+          "id": "eye_l",
+          "bone": "eye_l",
+          "z": 1.5,
+          "touch": "head"
+        },
+        {
+          "id": "blush",
+          "bone": "head",
+          "z": 1.2,
+          "alpha": "blush",
+          "touch": "head"
+        },
+        {
+          "id": "nipa",
+          "bone": "head",
+          "z": 1.5,
+          "alpha": "lines"
+        },
+        {
+          "id": "ase",
+          "bone": "sweat",
+          "z": 2,
+          "alpha": "sweat",
+          "hidden": true
+        },
+        {
+          "id": "cape_r",
+          "bone": "cape_r",
+          "z": 1.5,
+          "touch": "body"
+        },
+        {
+          "id": "cape_l",
+          "bone": "cape_l",
+          "z": 1.5,
+          "touch": "body"
+        },
+        {
+          "id": "leaf_right",
+          "bone": "leaf_right",
+          "z": 5,
+          "touch": "leaf"
+        },
+        {
+          "id": "leaf_top",
+          "bone": "leaf_top",
+          "z": 6,
+          "touch": "leaf"
+        },
+        {
+          "id": "leaf_left",
+          "bone": "leaf_left",
+          "z": 5.5,
+          "touch": "leaf"
+        },
+        {
+          "id": "bou",
+          "bone": "bou",
+          "z": 2.5,
+          "touch": "snack"
+        },
+        {
+          "id": "milk",
+          "bone": "body",
+          "z": 2.6,
+          "touch": "snack",
+          "hidden": true,
+          "autoHide": 3,
+           "autoHideFade": 1 
+        }
+      ],
+      "_touchNote": "イベント中にトルサにさわったときの反応。場所ごとに lines（ひとこと。ランダムに1つ）と sfx（効果音）。さわったときの動きは event/events.js の react( にあります。会話は、トルサ以外の場所か会話の箱をクリックすると進みます。 音は、さわるたびに poyon（ぽよん）、ひとことが出るときに heart。ふだんの音に戻すなら sfx を pat に。flinch＝さわったときにビクッとする強さ（いまはチョコバー）。bounce＝さわった部品が跳ねる向きと大きさ（{ \"x\": 横, \"y\": 縦〈マイナスで上〉, \"r\": 回転〈度〉, \"speed\": 速さ, \"stop\": 止まる早さ }）。touch の場所ごと、または secrets の部品ごとに書けます。葉に bounce を書くと、leafPoke（回転）のかわりに bounce の向きで跳ねます。",
+      "touch": {
+        "head": {
+          "sfx": "poyon",
+          "lines": [
+            "ひゃっ……い、いま、なでないでぇ…………♡",
+            "うぅ……んふぁ……♡",
+            "…変になっちゃうぅ……♡",
+            "ふぁ……ぁ、そこなでなでされると安心しちゃうよぉ……でも、今は、へんになっちゃうよぉ……",
+"んぁ……頭なでなで、嬉しいけど……今は、それどころじゃないのぉ……あぁ……",
+"あぅ……なでられるの、好きなのに……今は、腰がとまらないよぉ……",
+"ふにゃぁ……優しくしないでぇ……もっと、激しくしてほしいのにぃ……",
+"ひぁ……頭撫でられると、とけちゃう……でも、下も、とけちゃいそうだよぉ……"
+          ]
+        },
+        "ear": {
+          "sfx": "poyon",
+          "lines": [
+            "ひゃんっ！ み、耳はだめぇ…！",
+            "ふぁぁ……みみ、くすぐったいよぉ……でも、今は、それどころじゃ……あぁ……",
+"ひゃっ……みみ、噛まれ……あ、あ、そこ、だめぇ……感じちゃうよぉ……",
+"んぁ……おみみ、触られるの、好きだけど……今は、んぁ、だめぇ……",
+"あぅ……おみみ、ふわふわして……あ、あ、それ以上したらイっちゃう……",
+"ふにゃぁ……みみ、そんな……あ、あ、声が、止まらないよぉ……"
+          ]
+        },
+        "horn": {
+          "sfx": "poyon",
+          "lines": [
+            "ひゃうっ……♡",
+            "さわっらないでぇ……",
+            "ぁ……つの、さわらないでぇ……そこ、敏感なんだよぉ……！",
+"ひゃんっ！！ つの、だめぇ……そこ触られると、変な声でちゃうぅ……！",
+"あぅ……つのを、そんな……あ、あ、変になっちゃうよぉ……",
+"ふにゃぁ……つの、やめてぇ……今、触られたらイっちゃうよぉ……",
+"んひぃ……つの、ダメ、ダメなのぉ……そこ、弱いんだからぁ……！"
+          ]
+        },
+        "collar": {
+          "sfx": "poyon",
+          "lines": [
+            "え、襟はめくらないでぇ……！顔、見えちゃう…………♡",
+            "……いまは、ここにかくれてたいのぉ……",
+            "あぅ……えり、つかまれ……あ、あ、そんなに引っ張ったらぁ……",
+"ひゃん……えり、掴まれるの……あ、あ、ちょっとくるしいよぉ……",
+"んぁ……えり、そんな……あ、あ、首、締まっちゃうよぉ……",
+"ふにゃぁ……えり、引っ張らないでぇ……あ、あ、イっちゃうからぁ……"
+          ]
+        },
+        "leaf": {
+          "sfx": "poyon",
+          "lines": [
+            "んぅ……♡どかしてよぉ"
+          ]
+        },
+        "body": {
+          "sfx": "poyon",
+          "lines": [
+            "わ……ゆらさないでぇ……♡",
+            "…なかが変になるぅ……♡"
+          ]
+        },
+                "snack": {
+          "sfx": "poyon",
+          "flinch": 1,
+          "lines": [
+            "ひゃっ♡びくびくするぅ……！",
+            "ふにゃぁ……そこ、優しく……あ、あ、もう、だめぇ……！",
+            "んぁ……ちんぽ、触られると……あ、あ、すぐ、イっちゃうよぉ……！",
+            "ひぁぁっ！？ そ、そこ……あ、あ、だめぇ……！"
+          ],
+          "on": {
+            "5": {
+              "say": "あぅ……ちんぽ、そんな……あ、あ、イく、イっちゃうよぉ……！",
+              "face": "fluster",
+              "blush": 0.5
+            },
+            "10": {
+              "say": "ひゃんっ……そ、そこはぁ……あ、あ、もう、でちゃうぅ……！ふぁ……ぁ、もう、だめぇ……イっちゃう……あぁ、ぁ……！♡",
+              "face": "secret",
+              "show": ["milk"],
+              "jump": 2,
+              "flash": 1
+            }
+          },
+          "cycle": 10
+        }
+      },
+      "_secretsNote": "小ネタ。部品の id（葉なら leaf_back など）ごとに、さわったときの反応を、ふつうの葉とは別にできます。lines は1回目・2回目…と順番に出て、最後まで出たら repeat からランダムに出ます（repeat がなければ最後のひとこと）。sfx＝効果音、jump＝トルサが跳ねる高さ、leafPoke＝葉のゆれの大きさ（ふつうは 3.5）。いまは leaf_back（一番下の葉）と milk（ミルク）。",
+      "secrets": {
+        "leaf_back": {
+          "sfx": "poyon",
+          "jump": 2.6,
+          "bounce": {
+            "x": 0,
+            "y": -20
+          },
+          "lines": [
+            "ひゃあっ！？ おっ、おしこまないでぇ……♡",
+            "そんなにしたら……ぁ♡",
+            "そこは……ぁ、だめぇ……っ",
+            "んぅ……ぁっ♡",
+              "ひぁあッ！？ 奥ぐりぐりしちゃ……あ、あ、イく、イっちゃうよぉ……！",
+"んぁ……そんなに奥、されたら……あ、あ、もう、だめぇ……！"
+          ],
+          "repeat": [
+            "だめぇ……っ♡",
+            "んぅ……♡"
+          ],
+                    "on": {
+            "5": {
+              "say": "あぅ……奥、そんな……あ、あ、もう、限界だよぉ……！",
+              "face": "fluster",
+              "blush": 0.5
+            },
+            "10": {
+              "say": "ひゃんっ……奥、そんな……あ、あ、イく、イっちゃうぅ……！♡",
+              "face": "secret",
+              "show": ["milk", "milk_2"],
+              "jump": 2,
+              "flash": 1
+            }
+          },
+          "cycle": 10
+        },
+        "milk": {
+          "sfx": "poyon",
+          "lines": [
+            "よっ、よごれちゃうよぉ……っ♡",
+            "やめぇっ、なめちゃダメぇ♡"
+          ],
+          "repeat": [
+            "ひゃぅ……おいしいのぉ？♡"
+          ]
+        }
+      },
+      "_bonesNote": "骨。pivot＝回る中心（キャンバスの座標）、parent＝くっついている骨。葉は leaf: true で、in＝巻きつくときに回る向きと角度（度）。 pivotOf＝その部品の絵のまんなかを回る中心にする（pivot を書かなくてよい）。wobble＝からだとは別に、その骨だけでゆれる（r 角度・x と y ずれ・speed 速さ）。いまはチョコバー（bou）。 葉（leaf: true）には、葉ごとに sway＝ゆれの大きさ（度）、speed＝速さ、wiggle＝うねうねの強さ（倍）、tilt＝いつも傾けておく角度（度。プラスで時計回り）も書けます。書かない葉は motion の leafSway・leafSpeed を使います。 swayX・swayY＝回るかわりに（または一緒に）、横・縦にふわふわ動く量（キャンバスの単位）。縦に揺らすなら sway を 0 にして swayY を 2〜4 くらい。boneMotion でも途中から変えられます。",
+      "bones": [
+        {
+          "id": "root",
+          "pivot": [
+            118,
+            292
+          ]
+        },
+        {
+          "id": "body",
+          "pivot": [
+            118,
+            252
+          ],
+          "parent": "root"
+        },
+        {
+          "id": "legs",
+          "pivot": [
+            118,
+            252
+          ],
+          "parent": "root"
+        },
+        {
+          "id": "head",
+          "pivot": [
+            113,
+            152
+          ],
+          "parent": "body"
+        },
+        {
+          "id": "hair",
+          "pivot": [
+            112,
+            112
+          ],
+          "parent": "head"
+        },
+        {
+          "id": "ahoge",
+          "pivot": [
+            127,
+            103
+          ],
+          "parent": "hair"
+        },
+        {
+          "id": "lock_l",
+          "pivot": [
+            95,
+            136
+          ],
+          "parent": "hair"
+        },
+        {
+          "id": "lock_r",
+          "pivot": [
+            127,
+            135
+          ],
+          "parent": "hair"
+        },
+        {
+          "id": "lock_back_l",
+          "pivot": [
+            101,
+            112
+          ],
+          "parent": "hair"
+        },
+        {
+          "id": "lock_back_r",
+          "pivot": [
+            124,
+            108
+          ],
+          "parent": "hair"
+        },
+        {
+          "id": "ear_l",
+          "pivot": [
+            101,
+            128
+          ],
+          "parent": "head"
+        },
+        {
+          "id": "ear_r",
+          "pivot": [
+            127,
+            129
+          ],
+          "parent": "head"
+        },
+        {
+          "id": "horn_l",
+          "pivot": [
+            100,
+            121
+          ],
+          "parent": "head"
+        },
+        {
+          "id": "horn_r",
+          "pivot": [
+            119,
+            121
+          ],
+          "parent": "head"
+        },
+        {
+          "id": "eye_l",
+          "pivot": [
+            99,
+            126
+          ],
+          "parent": "head"
+        },
+        {
+          "id": "eye_r",
+          "pivot": [
+            121.7,
+            126
+          ],
+          "parent": "head"
+        },
+        {
+          "id": "sweat",
+          "pivot": [
+            146,
+            112
+          ],
+          "parent": "head"
+        },
+        {
+          "id": "collar",
+          "pivot": [
+            114,
+            158
+          ],
+          "parent": "body"
+        },
+        {
+          "id": "cape_l",
+          "pivot": [
+            56,
+            186
+          ],
+          "parent": "body"
+        },
+        {
+          "id": "cape_r",
+          "pivot": [
+            180,
+            188
+          ],
+          "parent": "body"
+        },
+        {
+          "id": "leaf_back",
+          "pivot": [
+            0,
+            432
+          ],
+          "leaf": true,
+          "in": -1,
+          "phase": 0.0,
+          "sway": 1,
+          "speed": 0.5,
+          "wiggle": 0.2,
+          "tilt": 0,
+          "swayX": -1,
+          "swayY": 4
+        },
+        {
+          "id": "leaf_right",
+          "pivot": [
+            196,
+            402
+          ],
+          "leaf": true,
+          "in": -6,
+          "phase": 1.7
+        },
+        {
+          "id": "leaf_top",
+          "pivot": [
+            44,
+            -4
+          ],
+          "leaf": true,
+          "in": -5,
+          "phase": 3.1
+        },
+        {
+          "id": "leaf_left",
+          "pivot": [
+            110,
+            -6
+          ],
+          "leaf": true,
+          "in": 4,
+          "phase": 4.4
+        },
+        {
+          "id": "bou",
+          "parent": "root",
+          "pivotOf": "bou",
+          "wobble": {
+            "r": 0.7,
+            "x": 0.1,
+            "y": 0.1,
+            "speed": 1.6
+          }
+        }
+      ],
+      "_motionNote": "ふだんの動きの大きさ。breathe＝呼吸（秒）、breatheAmount＝呼吸の強さ、sway＝頭のゆらぎ（度）、hairLag＝髪の遅れ（0〜1）、leafSway＝葉のゆれ（度）、leafSpeed＝葉のゆれの速さ、look＝マウスの方を向く強さ、legsFollow＝足がからだのゆれについていく量（0〜1。1 でからだと同じだけ動く）、struggle＝葉から抜け出そうと上へゆさゆさもがく強さ（0でなし、1でふつう）、struggleSpeed＝1秒に何回伸びあがるか、allSpeed＝すべての動きの速さ（1でふつう、2で2倍）",
+      "motion": {
+        "breathe": 3.6,
+        "breatheAmount": 0.012,
+        "sway": 0.8,
+        "hairLag": 0.55,
+        "leafSway": 2.2,
+        "leafSpeed": 0.55,
+        "look": 1,
+        "legsFollow": 0.85,
+        "struggle": 0,
+        "struggleSpeed": 1.4,
+        "allSpeed": 1
+      },
+      "_facesNote": "表情（セリフの face で選ぶ）。blush＝頬の赤み（0〜1.6）、lines＝照れ線（0〜1）、sweat＝汗（0〜1）、squeeze＝目をぎゅっとつむる（0〜1）、hide＝襟に顔をうずめる（0〜1）、tremble＝からだが小さく震える（0〜1）、tilt＝頭のかたむき（度）",
+      "faces": {
+        "dazed": {
+          "blush": 0.45,
+          "lines": 0,
+          "sweat": 0,
+          "squeeze": 0.7,
+          "hide": 0,
+          "tremble": 0.0,
+          "tilt": 1
+        },
+        "fluster": {
+          "blush": 0.9,
+          "lines": 0.6,
+          "sweat": 0,
+          "squeeze": 0.5,
+          "hide": 0.2,
+          "tremble": 0.17,
+          "tilt": -0.4
+        },
+        "panic": {
+          "blush": 0.8,
+          "lines": 0.3,
+          "sweat": 0,
+          "squeeze": 0.9,
+          "hide": 0.1,
+          "tremble": 0.5,
+          "tilt": 0.0
+        },
+        "hide": {
+          "blush": 1.5,
+          "lines": 1,
+          "sweat": 0,
+          "squeeze": 1,
+          "hide": 1,
+          "tremble": 0.15,
+          "tilt": -1
+        },
+        "relief": {
+          "blush": 0.8,
+          "lines": 0.3,
+          "sweat": 0,
+          "squeeze": 0.25,
+          "hide": 0.5,
+          "tremble": 0.0,
+          "tilt": 0.6
+        },
+        "secret": {
+          "blush": 1.2,
+          "lines": 0.8,
+          "sweat": 0,
+          "squeeze": 0.6,
+          "hide": 0.75,
+          "tremble": 0.06,
+          "tilt": -0.6
+        }
+      },
+      "_linesNote": "会話。speaker を空にすると地の文（だれも話していない文）。face＝表情、leaves＝葉の動き（rest ふつう／wiggle うねうね／tight きゅっと巻きつく／loose ほどける）、shake＝画面がゆれる、sfx＝効果音（sfx.json の名前） show／hide＝部品を出す・かくす（例: \"show\": [\"milk\"]）。choices＝選択肢（{ label 文字, shake ゆれ, show 出す部品, sfx 効果音, lines そのあとの会話 }）。選ぶまで会話は進みません。数字キー 1・2 でも選べます。 motion＝そこから共通の動きを変える（例: \"motion\": { \"leafSpeed\": 1.2 }）。boneMotion＝その骨だけ変える（例: \"boneMotion\": { \"leaf_back\": { \"speed\": 1.1, \"sway\": 4 } }、チョコバーは { \"bou\": { \"wobble\": { \"speed\": 3 } } }）。なめらかに変わり、イベントの最後まで続きます。いまは葉が巻きつくセリフで struggle（もがく）が始まり、ほどけるセリフで止まります。選択肢のあとは allSpeed: 2 で、すべての動きが2倍の速さになります。",
+      "intro": {
+        "sfx": "pat",
+        "shake": 1
+      },
+      "lines": [
+        {
+          "speaker": "",
+          "text": "足元の影が、ぬるりと動いた。本棚の隙間から伸びてきたのは、桃色に濡れた触手だった。それは蛇のようにしなやかに、けれど確かな力でトルサの細い足首に絡みついた。",
+          "face": "dazed",
+          "leaves": "rest"
+        },
+        {
+          "text": "や……ぁ、これ、なに……？",
+          "face": "dazed",
+          "leaves": "rest",
+          "sfx": "pat"
+        },
+
+                {
+          "speaker": "",
+          "text": "触手の一本が彼のシャツの裾から潛り込む。ひやりとした粘液が素肌を撫で、トルサは身をよじった。しかし、拘束は緩まない。それどころか、別の触手が彼のズボンに巻きつき、勢いよくずり下ろす。",
+          "face": "dazed",
+          "sound": "kuchu",
+          "leaves": "wiggle"
+        },
+
+
+        {
+          "text": "ふわぁ……くすぐったいよぉ……んん、そこ、だめぇ……♡",
+          "face": "fluster",
+                              "shake": 0.6,
+          "leaves": "wiggle"
+        },
+
+                        {
+          "speaker": "",
+          "text": "触手は彼の言葉を無視してさらに奥へと進む。羊の少年の腰が、びくんと跳ねた。彼は必死に膝を閉じようとするけれど、触手がそれを許さない。むしろ、閉じようとする力を利用してより深く彼を開かせていく。触手は彼のズボンを完全に引き抜き、床に落とした。羊の少年の白い脚が、薄暗い書庫のなかで露わになる。彼のふわふわとした尾が、恐怖とも羞恥ともつかない感情で小刻みに震えていた。",
+          "face": "dazed",
+          "leaves": "wiggle"
+        },
+
+                {
+          "text": "や……ぁ、見ないでぇ……",
+          "face": "hide",
+          "leaves": "wiggle",
+          "sfx": "pat"
+        },
+
+                                {
+          "speaker": "",
+          "text": "触手の一本が彼の下着の隙間からぬるりと侵入する。ひんやりとした粘液が、彼の一番敏感な場所を撫でた。",
+          "face": "dazed",
+          "leaves": "rest",
+                    "sfx": "pat",
+                    "motion": {
+            "struggle": 0.1
+          }
+        },
+
+                        {
+          "text": "ひゃんっ！！ そ、そこは……ぁ、だめぇ……っ♡",
+          "leaves": "tight",
+                    "shake": 0.6,
+                    
+          "sfx": "pat",
+                    "motion": {
+            "struggle": 0.1
+          }
+        },
+
+                                        {
+          "speaker": "",
+          "text": "けれど触手は容赦なく彼の窄まった場所をくすぐるように、やわやわと押し広げていく。トルサの腰がびくんびくんと跳ねた。彼は必死に逃げようとするけれど、宙に浮いた姿勢では何の抵抗にもならない。",
+          "face": "dazed",
+                    "shake": 0.6,
+          "leaves": "rest",
+                    "sfx": "pat",
+                    "motion": {
+            "struggle": 0.2
+          }
+        },
+
+                                {
+          "text": "ふにゃぁ……そんなに……そんなにしたら……ぁ",
+          "leaves": "tight",
+          "sfx": "pat"
+        },
+
+                                                {
+          "speaker": "",
+          "text": "触手は彼のなかをゆっくりと探るように動いた。まるで、彼の弱いところを探し当てようとするかのように。ぬめる感触が内壁をなぞるたび、トルサの口からは甘い吐息が漏れていく。",
+          "face": "dazed",
+        "shake": 0.6,
+          "leaves": "rest"
+        },
+        
+                                {
+          "text": "んん……そこ、だめ……へんな感じになっちゃう……ぁ♡",
+          "leaves": "tight",
+          "sfx": "pat"
+        },
+
+                                                        {
+          "speaker": "",
+          "text": "触手の先端が彼の前立腺をかすかに押した。トルサの体がびくんと大きく跳ね、彼の口からは掠れた声が漏れる。",
+          "face": "dazed",
+                    "shake": 0.6,
+          "leaves": "rest"
+        },
+
+                                        {
+          "text": "ひゃんっ……！？ な、なにこれぇ……へんになるよぉ……♡",
+          "leaves": "tight",
+          "sfx": "pat"
+        },
+
+                                                                {
+          "speaker": "",
+          "text": "触手は、もはやためらいを捨てた。それは無数の桃色の蛇が群がるように、トルサの身体を包み込む。脚を開かせたまま、ぬめる先端が彼の窄まりに容赦なく押し込まれる。",
+          "face": "dazed",
+          "sound": "pan",
+                    "shake": 0.6,
+                              "boneMotion": { "leaf_back": { "speed": 1.5, "sway": 4 } },
+                    "motion": { "struggle": 0.7, "struggleSpeed": 2 },
+          "leaves": "rest"
+        },
+
+                                                {
+          "text": "ひゃうっ……！？ ま、まって、そんないきなりぃ……！",
+          "leaves": "tight",
+          "sfx": "pat"
+        },
+
+          {
+          "speaker": "",
+          "text": "しかし触手は構わず深くに挿し込まれていく。ぬぷ、ぬぷりと粘つく音を立てて彼の中をゆっくりとこじ開ける。羊の少年の白い腹が、苦しさと妙な圧迫で細かく痙攣した。",
+          "face": "dazed",
+                    "shake": 0.6,
+          "leaves": "rest"
+        },
+
+              {
+          "text": "んぁ……ぁ、くるし……ぃ…でも……なにか、きちゃうよぉ……",
+          "leaves": "tight",
+          "sfx": "pat"
+        },
+
+                  {
+          "speaker": "",
+          "text": "触手は返事もせず根元まで埋まると、すぐに抽送を始めた。最初はゆっくりと、まるで彼のなかを味わうかのように。ぬちゃ、ぬちゃと粘液の音が、禁書庫の静けさに響く。",
+          "face": "dazed",
+                    "shake": 0.6,
+          "leaves": "rest"
+        },
+
+                      {
+          "text": "やぁ……ん、ぅ、そんな……ゆっくり、しないでぇ……",
+          "leaves": "tight",
+          "sfx": "pat"
+        },
+
+                          {
+          "speaker": "",
+          "text": "言いながらも彼の太ももはぷるぷると震え、触手をきゅうきゅうと締めつけている。触手は急に動きを変えた。勢いよく奥まで突き、ずるりと引き抜く。それを何度も繰り返す。激しさを増した律動に、トルサの喉からは掠れた悲鳴が漏れ続けた。",
+          "face": "dazed",
+                    "shake": 1,
+        "motion": { "struggle": 0.3, "allSpeed": 3 },
+          "leaves": "rest"
+        },
+
+                        {
+          "text": "ひぁっ、ぁ、あっ、や、やだ、そこ、だめ、奥、ぐりぐりしちゃぁあっ！",
+          "leaves": "wiggle",
+          "sfx": "pat"
+        },
+
+                                  {
+          "speaker": "",
+          "text": "抽送はさらに激しさを増す。ぐぷ、ぐぷ、と太い触手が彼の窄まりをめくれ上がらせるほどに。トルサの尾がぶるぶると震え、背中が反った。",
+          "face": "dazed",
+                    "shake": 1,
+        "motion": { "allSpeed": 4 },
+          "leaves": "rest"
+        },
+
+
+        {
+          "text": "あ、あ、イく、イっちゃうよぉ……！",
+          "face": "relief",
+          "leaves": "tight",
+          "choices": [
+            {
+              "label": "ほっとく",
+              "shake": 0.4,
+              "show": [
+                "milk"
+              ],
+              "sfx": "pat",
+              "lines": [
+                        {
+          "text": "も、もう、だめ、なにか、きちゃうきちゃうよぉ……！♡",
+          "leaves": "wiggle",
+          "sfx": "pat"
+        },
+
+         {
+          "speaker": "",
+          "text": "触手は彼の限界を悟ったのか一層深く、一層速く彼を突き上げた。トルサは声もなく口を開け、びくんびくんと全身を痙攣させる。彼の熱い飛沫が、宙に散った。",
+          "face": "dazed",
+                    "shake": 1,
+        "motion": { "struggle": 0.0, "allSpeed": 0.1 },
+                      "show": ["milk","milk_2"],
+              "sfx": "pat",
+              "flash": { "count": 2, "strength": 0.6 },
+          "leaves": "rest",
+                    "stopSound": [
+            { "name": "kuchu", "fade": 2 },
+            { "name": "pan", "fade": 2 }
+          ]
+          
+        },
+                                {
+          "text": "ぁ……あ…",
+          "leaves": "wiggle",
+          "sfx": "pat"
+        },
+
+         {
+          "speaker": "",
+          "text": "事切れたように、彼は触手の拘束に身を預ける。触手は満足したのか、ゆっくりと彼のなかから抜け出す。羊の少年は、脱力したまま宙吊りにされていた。脚はがくがくと震え、太ももには粘液が光っている。触手がするりと彼の腕を解く。トルサはその場にへたりと座り込んだ。羊の耳が、へにょりと垂れている。",
+          "face": "dazed",
+"leaves": "loose"
+        }
+              ],
+              "boneMotion": {
+                "leaf_back": {
+                  "speed": 1.3
+                }
+              },
+              "motion": {
+                "allSpeed": 4
+              }
+            },
+            {
+              "label": "たすける",
+              "lines": [
+                {
+                  "text": "……はぅ、うぅ……あ……りがと……ぅ？",
+                  "face": "relief",
+                  "leaves": "loose"
+                }
+              ],
+              "motion": {
+                "allSpeed": 2
+              }
+            }
+          ]
+        },
+        {
+          "text": "うぅ……もう、ばかぁ……",
+          "face": "secret",
+          "leaves": "loose",
+          "sfx": "pat",
+          "struggle": 0
+        }
+      ],
+      "_afterNote": "イベントが終わって館内にもどったときの、トルサのひとこと（いつもの吹き出し）",
+      "after": {
+        "text": "……さ、さあ！ 気を取り直して、奥へ行こお……",
+        "face": "sweat"
+      }
+    }
+  }
+}

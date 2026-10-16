@@ -1,22 +1,444 @@
 {
   "_note": "館内の広さと配置（仮案）。長さの単位は、館内の高さを1000としたときの長さ。bays は本棚の位置。柱・アーチ・ランタン・鉢植え・両端の扉・歩ける範囲は、bays から自動で決まる。zones は画面上部に出る場所の名前。",
   "_worldNote": "startX＝入館したときに立つ位置（1800が月の窓の前）。endRoom＝いちばん端の本棚の柱から、さらにどこまで歩いて見られるか（大きいほど端まで遠く行ける。扉の幅より小さくはならない）。doorBay＝両端の扉の区画の幅。eastExtra＝トルサが右側に立っているので、東の端だけ多めに歩ける長さ（扉がトルサに隠れないように）。",
-  "world": { "startX": 1800, "endRoom": 820, "doorBay": 500, "eastExtra": 320 },
+  "world": {
+    "startX": 1800,
+    "endRoom": 820,
+    "doorBay": 500,
+    "eastExtra": 320
+  },
   "_artNote": "背景の絵を差し替えるときは、assets/svg/ の SVG を加工して、ここにパスを書く（例: \"assets/svg/back.svg\"）。空なら自動で描いた絵を使う。mid は本棚の位置と手に取れる本の位置が対応しているので、viewBox（0 0 3600 1000）と本棚の配置は変えないこと。",
-  "art": { "sky": "assets/svg/custom/sky.svg", "back": "", "mid": "", "front": "" },
+  "art": {
+    "sky": "assets/svg/custom/sky.svg",
+    "back": "",
+    "mid": "",
+    "front": ""
+  },
   "walkSpeed": 9,
   "zones": [
-    { "name": "西の書架", "to": 1460 },
-    { "name": "月の窓", "from": 1460, "to": 2140 },
-    { "name": "東の書架", "from": 2140 }
+    {
+      "name": "西の書架",
+      "to": 1460
+    },
+    {
+      "name": "月の窓",
+      "from": 1460,
+      "to": 2140
+    },
+    {
+      "name": "東の書架",
+      "from": 2140
+    }
   ],
   "_baysNote": "本棚を増やすときは、x を 460 ずつずらして足す（例：東の端なら { \"id\": \"e4\", \"x\": 3550, \"seed\": 79 }、西の端なら { \"id\": \"w0\", \"x\": -350, \"seed\": 7 }）。1460〜2140 は月の窓なので置かない。両端の扉は、いちばん外の本棚のさらに外へ自動で動く。",
   "bays": [
-    { "id": "w1", "x": 110, "seed": 11 },
-    { "id": "w2", "x": 570, "seed": 23 },
-    { "id": "w3", "x": 1030, "seed": 37 },
-    { "id": "e1", "x": 2170, "seed": 41 },
-    { "id": "e2", "x": 2630, "seed": 53 },
-    { "id": "e3", "x": 3090, "seed": 67 }
-  ]
+    {
+      "id": "w1",
+      "x": 110,
+      "seed": 11
+    },
+    {
+      "id": "w2",
+      "x": 570,
+      "seed": 23
+    },
+    {
+      "id": "w3",
+      "x": 1030,
+      "seed": 37
+    },
+    {
+      "id": "e1",
+      "x": 2170,
+      "seed": 41
+    },
+    {
+      "id": "e2",
+      "x": 2630,
+      "seed": 53
+    },
+    {
+      "id": "e3",
+      "x": 3090,
+      "seed": 67
+    }
+  ],
+  "_hallsNote": "halls：館の棟。main＝本館、east＝東の書館（本館の東の扉から入って右へ進む）、west＝西の書館（本館の西の扉から入って左へ進む）。どの棟も本棚の並び（bays）は同じで、窓の絵（window＝scene.json の部品の名前）と、場所の名前（zones）と、置く本がちがう。doors は両端の扉の行き先（棟の名前、\"annex\"＝図書館の間、\"forbidden\"＝禁書庫、null＝まだ開かない扉）。dark は暗くする側と長さ（西の書館の奥）。rayColors は窓から差す光の色。本を棟に置くときは books.json の本に \"hall\": \"east\" などを書く（書かなければ本館）。theme は棟の色と素材：dir のフォルダにある色ちがいの部品（recolored）を使い、swap で部品を差しかえ、sky で空（天井）の絵を変え、decor で飾り（plants＝鉢植え、crystalPart＝水晶玉の部品、crystals／ivy／candles／centerpiece／front＝false で置かない、backColors＝奥の壁の色、wall＝\"stone\" で石の壁）を変える。色ちがいの部品は tools/theme/make_themes.py で作り直せる。vault＝禁書庫（西の書館のいちばん奥の扉から、年齢確認のあとに入る）。",
+  "halls": {
+    "main": {
+      "name": "本館",
+      "window": "window",
+      "windowName": "月の窓",
+      "windowLine": "moonWindow",
+      "doors": {
+        "west": "west",
+        "east": "east"
+      },
+      "theme": {
+        "_note": "本館：胡桃色の木・紺の床・金・青い水晶・シダの鉢・月のステンドグラス（もとの部品そのまま）"
+      }
+    },
+    "east": {
+      "name": "東の書館",
+      "window": "window_celestial",
+      "windowName": "天体の窓",
+      "windowLine": "celestialWindow",
+      "enterLine": "enterEast",
+      "doors": {
+        "west": "main",
+        "east": "annex"
+      },
+      "zones": [
+        {
+          "name": "星図の書架",
+          "to": 1460
+        },
+        {
+          "name": "天体の窓",
+          "from": 1460,
+          "to": 2140
+        },
+        {
+          "name": "彗星の書架",
+          "from": 2140
+        }
+      ],
+      "rayColors": [
+        "#ffd98a",
+        "#9fe0e6",
+        "#fff1c2",
+        "#ffe9b8",
+        "#c3a6ff",
+        "#9fe0e6",
+        "#ffc98a"
+      ],
+      "theme": {
+        "_note": "夜の紫檀と真鍮：赤みのこい紫檀・葡萄酒色の床・すもも色の夜の壁・琥珀の水晶・赤いろうそくと橙の火",
+        "dir": "assets/themes/east",
+        "recolored": [
+          "bookcase_b2",
+          "pillar",
+          "arch",
+          "grand_arch",
+          "ladder",
+          "desk",
+          "end_door",
+          "orrery",
+          "carpet",
+          "tama",
+          "tower",
+          "wall_panel",
+          "far_shelf",
+          "lantern",
+          "candle"
+        ],
+        "sky": "assets/themes/east/sky.svg",
+        "decor": {
+          "plants": [
+            {
+              "part": "tree_a",
+              "w": 118
+            },
+            {
+              "part": "tree_small_a",
+              "w": 110
+            },
+            {
+              "part": "tree_b",
+              "w": 150
+            },
+            {
+              "part": "tree_small_b",
+              "w": 88
+            }
+          ],
+          "backColors": {
+            "#272d64": "#3a2650",
+            "#141943": "#1e1230",
+            "#2c3370": "#4a2f5e",
+            "#141a40": "#24142c",
+            "#3a4384": "#5a3a6e"
+          },
+          "centerpiece": [
+            {
+              "part": "tree_small_a",
+              "x": 1486,
+              "w": 86
+            },
+            {
+              "part": "orrery_hex",
+              "x": 1640,
+              "w": 176
+            },
+            {
+              "part": "tree_b",
+              "x": 1995,
+              "w": 150
+            },
+            {
+              "part": "tree_small_b",
+              "x": 2130,
+              "w": 70
+            }
+          ],
+          "shelfTop": [
+            {
+              "part": "aloe",
+              "w": 64
+            }
+          ]
+        }
+      }
+    },
+    "west": {
+      "name": "西の書館",
+      "window": "window_star",
+      "windowName": "星の窓",
+      "windowLine": "starWindow",
+      "enterLine": "enterWest",
+      "doors": {
+        "east": "main",
+        "west": "vault"
+      },
+      "zones": [
+        {
+          "name": "奥の暗がり",
+          "to": 560
+        },
+        {
+          "name": "夜露の書架",
+          "from": 560,
+          "to": 1460
+        },
+        {
+          "name": "星の窓",
+          "from": 1460,
+          "to": 2140
+        },
+        {
+          "name": "銀河の書架",
+          "from": 2140
+        }
+      ],
+      "dark": {
+        "side": "west",
+        "length": 1500,
+        "alpha": 0.9
+      },
+      "rayColors": [
+        "#cfe0ff",
+        "#e8eeff",
+        "#b9cfff",
+        "#ffffff",
+        "#d6c8ff",
+        "#b9cfff",
+        "#e8eeff"
+      ],
+      "theme": {
+        "_note": "夜の銀と白い花：青みの銀の黒檀・藍の床に銀の模様・群青の夜の壁・紫の水晶・白いろうそくと藤色の火",
+        "dir": "assets/themes/west",
+        "recolored": [
+          "bookcase_b2",
+          "pillar",
+          "arch",
+          "grand_arch",
+          "ladder",
+          "desk",
+          "end_door",
+          "orrery",
+          "lantern",
+          "carpet",
+          "tower",
+          "wall_panel",
+          "far_shelf",
+          "window_star",
+          "candle"
+        ],
+        "sky": "assets/themes/west/sky.svg",
+        "decor": {
+          "crystalPart": "tama_purple",
+          "plants": [
+            {
+              "part": "blossom_a",
+              "w": 120
+            },
+            {
+              "part": "tree_small_b",
+              "w": 92
+            },
+            {
+              "part": "blossom_b",
+              "w": 100
+            },
+            {
+              "part": "tree_small_a",
+              "w": 108
+            }
+          ],
+          "backColors": {
+            "#272d64": "#1f2f66",
+            "#141943": "#0f1838",
+            "#2c3370": "#2a3d78",
+            "#141a40": "#101a3a"
+          },
+          "shelfTop": [
+            {
+              "part": "flower_lily",
+              "w": 46
+            },
+            {
+              "part": "flower_calla",
+              "w": 30
+            }
+          ]
+        }
+      }
+    },
+    "vault": {
+      "name": "禁書庫",
+      "window": "window",
+      "windowName": "鉄格子の窓",
+      "windowLine": "vaultWindow",
+      "enterLine": "vaultEnter",
+      "_vaultNote": "ageGate：入る前に年齢確認（文章は rooms.json の forbidden.ageGate）。vault：トルサが禁書庫用のセリフ（vaultLines）になる。smoke：all＝棟ぜんたいに赤い煙。drips：天井からしずく。whispers：ときどき聞こえるひとこと。 sparkles：false で、きらめき（星・漂う光・流れ星）を出さない。",
+      "ageGate": true,
+      "vault": true,
+      "doors": {
+        "west": null,
+        "east": "west"
+      },
+      "zones": [
+        {
+          "name": "封印の書架",
+          "to": 1460
+        },
+        {
+          "name": "鉄格子の窓",
+          "from": 1460,
+          "to": 2140
+        },
+        {
+          "name": "階段の下",
+          "from": 2140
+        }
+      ],
+      "shade": {
+        "base": 0.5,
+        "ends": 0.62,
+        "lanternRadius": 430
+      },
+      "smoke": "all",
+      "drips": true,
+      "rayColors": [
+        "#ff6a8a",
+        "#d94a6a",
+        "#ff8aa0",
+        "#ff5a7a",
+        "#c03a5a",
+        "#ff8aa0",
+        "#d94a6a"
+      ],
+      "whispers": [
+        "（鎖が、ひとりでに小さく鳴った）",
+        "「……久しぶりの客だ」",
+        "「読むなら、最後まで。途中で閉じるのは許さない」",
+        "（ろうそくの火が、青く揺れた）",
+        "「封を解いたのは、あなた？」",
+        "（どこかで、紙を引っかくような音がした）",
+        "「……ここの本は、読む人を選ぶんだよ」"
+      ],
+      "theme": {
+        "_note": "地下の石と鉄：灰紫の石の柱とアーチ・石の床と天井・鉄の本棚・鉄格子の窓・青白い火。ふつうの植物はなく、石の鉢に植わった妖しい桃紫の草（ゆっくり揺れる）と、宙に浮かぶ灰色の星だけ",
+        "dir": "assets/themes/vault",
+        "recolored": [
+          "pillar",
+          "arch",
+          "grand_arch",
+          "tower",
+          "wall_panel",
+          "far_shelf",
+          "end_door",
+          "ladder",
+          "lantern"
+        ],
+        "swap": {
+          "bookcase_b2": "grim_shelf",
+          "carpet": "stone_floor",
+          "window": "vault_gate"
+        },
+        "sky": "assets/parts/vault_ceiling.svg",
+        "decor": {
+          "plants": [
+            {
+              "layers": [
+                {
+                  "part": "vault_plant_leaves",
+                  "sway": true
+                },
+                {
+                  "part": "vault_plant_pot"
+                }
+              ],
+              "sway": {
+                "x": 51,
+                "y": 78,
+                "dur": 8
+              },
+              "w": 200,
+              "bottom": 862
+            }
+          ],
+          "ivy": false,
+          "crystals": false,
+          "floatingBooks": 0,
+          "centerpiece": false,
+          "front": false,
+          "bookcaseFlip": false,
+          "wall": "stone",
+          "backColors": {
+            "#272d64": "#24202a",
+            "#141943": "#100d14",
+            "#2c3370": "#3a3442",
+            "#141a40": "#110e14",
+            "#3a4384": "#3a3442"
+          },
+          "floaters": {
+            "part": "candle_blue",
+            "w": 13,
+            "drop": 44,
+            "glowY": -22,
+            "glow": 34
+          },
+          "orbs": [
+            {
+              "part": "vault_orb",
+              "x": 560,
+              "y": 300,
+              "w": 70
+            },
+            {
+              "part": "vault_orb",
+              "x": 1180,
+              "y": 420,
+              "w": 50
+            },
+            {
+              "part": "vault_orb",
+              "x": 2420,
+              "y": 330,
+              "w": 80
+            },
+            {
+              "part": "vault_orb",
+              "x": 3060,
+              "y": 440,
+              "w": 56
+            }
+          ],
+          "_plantsNote": "plants の layers：同じ枠に重ねる部品（上に書いたものから順に重なる。sway: true の部品だけ揺れる）。sway の x・y は揺れの支点（枠の中の％）、dur は1往復の秒数。w は幅、bottom は下端。orbs：宙に浮かぶ飾り（part・中心の x, y・幅 w・glow で光の半径、false で光なし）"
+        }
+      },
+      "sparkles": false
+    }
+  }
 }

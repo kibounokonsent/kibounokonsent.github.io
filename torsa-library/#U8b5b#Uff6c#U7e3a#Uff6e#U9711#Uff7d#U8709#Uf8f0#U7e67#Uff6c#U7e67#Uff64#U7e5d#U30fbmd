@@ -45,7 +45,7 @@
   "shelfEmote": "✦",
   "cover": {
     "template": "moon",
-    "color": "#3a2f6a",
+    "color": "#ffffff",
     "accent": "#f0d78c",
     "emblem": "moon",
     "title": "星空の本",
@@ -101,8 +101,10 @@
 
 | 値 | 選べるもの |
 |---|---|
-| `template`（形） | `classic`（額縁）, `grimoire`（魔導書）, `starchart`（星図）, `botanical`（ツタ）, `moon`（月の満ち欠け）, `simple`（帯） |
-| `emblem`（紋章） | `star`, `moon`, `leaf`, `key`, `eye`, `heart`, `feather`, `flame`, `none` |
+| `template`（形） | `classic`（額縁）, `grimoire`（魔導書）, `starchart`（星図）, `botanical`（ツタ）, `moon`（月の満ち欠け）, `simple`（帯）, `wahon`（和綴じ）, `clockwork`（時計じかけ）, `ocean`（青海波）, `stained`（ステンドグラス）, `map`（古地図）, `quilt`（パッチワーク）, `ribbon`（リボン）, `forest`（夜の森）, `deco`（アール・デコ） |
+| `emblem`（紋章） | `star`, `moon`, `leaf`, `key`, `eye`, `heart`, `feather`, `flame`, `sun`（太陽）, `crown`（王冠）, `flower`（花）, `drop`（しずく）, `bell`（鈴）, `hourglass`（砂時計）, `none` |
+
+> 見本は、サイトのURLの最後に `?covers` を付けて開くと一覧で見られます（例：`index.html?covers`）。
 | `color` / `accent` | 地の色 / 飾りの色（`#3a2f6a` のような色コード） |
 | `textColor` | 題名の色（省略すると `accent` と同じ） |
 | `title` / `subtitle` | 表紙に書く題名 / 小さな副題 |
@@ -125,3 +127,9 @@
 
 JSON の書き間違いは、「JSON チェック」などで検索して出てくる確認サイトに貼ると、どこが違うか教えてくれます。
 わからなくなったら、ファイルごと渡してくれればこちらで直します。
+
+## 東の書館・西の書館・禁書庫・図書館の間に置くとき
+
+- 東の書館・西の書館・禁書庫に置くときは、`place` はそのままで、`"hall": "east"`（東）・`"hall": "west"`（西）・`"hall": "vault"`（禁書庫）を足します。禁書庫の本は鉄の本棚に入り、年齢確認をするまで蔵書目録にも出ません。
+- 図書館の間の展示台に並べたいときは、rooms.json の `annex.display` に本の id を足します（棚にもそのまま残ります）。図書館の間だけに置くなら、`place` のかわりに `"room": "annex"` を書きます。
+- works.json の `genre` が、蔵書目録の「カテゴリー」になります。

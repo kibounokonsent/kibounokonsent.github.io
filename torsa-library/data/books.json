@@ -1,7 +1,7 @@
 {
   "_note": "本のキャラクター設定（すべて仮案）。収録作品の本文は works.json 側にあり、workId で結びつけています。",
   "_emoteNote": "emote（感情）に使える名前: normal / happy / heart / smug / shy / sweat / surprise / excited / angry / sad / sleepy / silent / question。吹き出しの形やまわりの記号（汗・照れ線・怒りマーク・音符・Zzzなど）が自動で変わります。",
-  "_coverNote": "表紙の設定。cover.template（形）: classic（額縁と紋章と題名プレート）/ grimoire（金具と留め具のある魔導書）/ starchart（星図）/ botanical（ツタと葉の縁取り）/ moon（月の満ち欠け）/ simple（帯だけのシンプル）。emblem（紋章）: star / moon / leaf / key / eye / heart / feather / flame / none。color＝地の色、accent＝飾りの色、textColor＝題名の色（省略するとaccent）、title＝表紙に書く題名（省略すると本の名前）、subtitle＝小さな副題、titleDirection＝horizontal（横書き）/ vertical（縦書き）。cover.image に画像のパスを入れると、テンプレートの代わりにその画像を使う。",
+  "_coverNote": "表紙の設定。cover.template（形）: classic（額縁と紋章と題名プレート）/ grimoire（金具と留め具のある魔導書）/ starchart（星図）/ botanical（ツタと葉の縁取り）/ moon（月の満ち欠け）/ simple（帯だけのシンプル）/ wahon（和綴じと題名の紙）/ clockwork（歯車と時計の文字盤）/ ocean（夜の海と青海波）/ stained（アーチ窓のステンドグラス）/ map（古地図と羅針盤）/ quilt（パッチワーク）/ ribbon（リボンと題名の札）/ forest（夜の森と月）/ deco（アール・デコ）。emblem（紋章）: star / moon / leaf / key / eye / heart / feather / flame / sun / crown / flower / drop / bell / hourglass / none。見本は index.html?covers で一覧できる。color＝地の色、accent＝飾りの色、textColor＝題名の色（省略するとaccent）、title＝表紙に書く題名（省略すると本の名前）、subtitle＝小さな副題、titleDirection＝horizontal（横書き）/ vertical（縦書き）。cover.image に画像のパスを入れると、テンプレートの代わりにその画像を使う。　部品を組み合わせた表紙：cover.parts を書くと、地（base）・地模様（pattern）・枠（frame）・角の飾り（corners）・背（spine）・帯（band）・紋章の台（emblemBase）・題名の札（plate）・留め具（clasp）・ちらし（sparkle）・題名の位置（titlePos）・紋章の位置（emblemPos）を選んで組み合わせた表紙になります（parts を書くと template は使いません）。選べる名前は js/cover-parts.js の PARTS。index.html?covers の「表紙をつくる」で選んで、書き方をコピーできます。紋章に sword（剣）・snowflake（雪の結晶）・anchor（いかり）・butterfly（蝶）も増えました。",
   "_placeNote": "place は置き場所。bay は library.json の本棚ID、row は段（0が一番上〜4）、slot は左から何冊目あたりに置くか。",
   "books": [
     {
@@ -62,14 +62,15 @@
           "emote": "angry",
           "text": "ちょっと！目録から直接来るなんてずるいわよ！"
         }
-      }
+      },
+      "hall": "west"
     },
     {
       "id": "friendly",
       "title": "仮題・若草の本",
       "workId": "work-02",
       "type": "friendly",
-      "_typeNote": "② 親しげに迎えてくれる本",
+      "_typeNote": "② 親しげに迎えてくれる本（お話し好き：トルサの好感度を教えてくれる）",
       "place": {
         "bay": "e1",
         "row": 3,
@@ -110,8 +111,63 @@
         "catalog": {
           "emote": "happy",
           "text": "目録から探してくれたの？うれしいな～。"
+        },
+        "donate": [
+          {
+            "emote": "happy",
+            "text": "本の寄贈のこと？ うれしいな～、仲間がふえるんだね～。"
+          },
+          {
+            "emote": "normal",
+            "text": "「寄贈の間」に行くとね、題名と本文を書いて、表紙を部品から選んで作れるんだ～。"
+          },
+          {
+            "emote": "excited",
+            "text": "それから、その本の性格とセリフ、それに、飛び出したり、なかなか読ませてくれなかったりする“くせ”も決められるよ～。"
+          },
+          {
+            "emote": "normal",
+            "text": "できあがると、本をとじたファイルがもらえるから、それを図書館の管理人さんに渡してね～。"
+          },
+          {
+            "emote": "heart",
+            "text": "管理人さんが書架に入れてくれたら、ここで会えるよ～。楽しみにしてるね～。"
+          }
+        ]
+      },
+      "affinityReport": [
+        {
+          "min": 0,
+          "emote": "normal",
+          "text": "トルサくん？ まだちょっと人見知りしてるみたいだよ～。"
+        },
+        {
+          "min": 10,
+          "emote": "happy",
+          "text": "トルサくん、君のこと気になってるみたい～。ちらちら見てるよ～。"
+        },
+        {
+          "min": 30,
+          "emote": "happy",
+          "text": "トルサくん、君が来るとうれしそうにしてるよ～。"
+        },
+        {
+          "min": 60,
+          "emote": "heart",
+          "text": "トルサくん、君のこと、かなり好きみたいだね～。"
+        },
+        {
+          "min": 85,
+          "emote": "heart",
+          "text": "トルサくんに相当好かれてるね～。見てるこっちが照れちゃう～。"
+        },
+        {
+          "min": 100,
+          "emote": "heart",
+          "text": "もう、トルサくんったら君の話ばっかりしてるよ～。大好きなんだね～。"
         }
-      }
+      ],
+      "hall": "east"
     },
     {
       "id": "jumper",
@@ -171,7 +227,8 @@
           "emote": "excited",
           "text": "目録からでも、ちゃんと飛んでいくよ！"
         }
-      }
+      },
+      "hall": "east"
     },
     {
       "id": "refuser",
@@ -243,9 +300,9 @@
           "emote": "sweat",
           "text": "……目録から来たのか。まあ、いい。"
         }
-      }
+      },
+      "hall": "west"
     },
-
     {
       "id": "revenge",
       "title": "エイコウ-01 / REVENGE",
@@ -259,8 +316,8 @@
       "shelfEmote": "✨",
       "cover": {
         "template": "starchart",
-    "color": "#ffffff",
-    "accent": "#000000",
+        "color": "#ffffff",
+        "accent": "#000000",
         "emblem": "star",
         "title": "REVENGE",
         "subtitle": "EIKOU-01",
@@ -273,11 +330,11 @@
             "emote": "normal",
             "text": "よく来たね！"
           },
-                    {
+          {
             "emote": "normal",
             "text": "僕の名前はエイコウ！第一話なんだよ！読んでてってよ！"
           },
-                              {
+          {
             "emote": "shy",
             "text": "それでもし...気にいってくれたなら...これからも僕の兄弟の話とかも読んでほしいな。"
           }
@@ -287,12 +344,11 @@
             "emote": "happy",
             "text": "また来たの？うれしいな！"
           },
-                    {
+          {
             "emote": "heart",
             "text": "もしかして、僕のこと好きになってくれた？"
           },
-                  
-                    {
+          {
             "emote": "shy",
             "text": "照れちゃうよ～！"
           }
@@ -306,6 +362,81 @@
           "text": "目録から来てくれたんだ！ありがとう！"
         }
       }
+    },
+    {
+      "id": "kei-bushi",
+      "title": "我、この地を守りし武士なり",
+      "workId": "kei-01",
+      "type": "revisit",
+      "_typeNote": "無口・無愛想・ちょっとツンデレ。何度も訪れると反応が変わる",
+      "place": {
+        "bay": "w2",
+        "row": 2,
+        "slot": 5
+      },
+      "shelfEmote": "…",
+      "cover": {
+        "title": "我、この地を守りし武士なり",
+        "subtitle": "ケイ",
+        "titleDirection": "vertical",
+        "color": "#2a2c36",
+        "accent": "#b8c4d6",
+        "emblem": "sword",
+        "parts": {
+          "base": "leather",
+          "pattern": "scales",
+          "frame": "single",
+          "corners": "bracket",
+          "spine": "banded",
+          "band": "none",
+          "emblemBase": "shield",
+          "plate": "slip",
+          "clasp": "none",
+          "sparkle": "leaves",
+          "titlePos": "top",
+          "emblemPos": "middle"
+        }
+      },
+      "lines": {
+        "first": [
+          {
+            "emote": "silent",
+            "text": "……。"
+          },
+          {
+            "emote": "question",
+            "text": "私を読むのか？"
+          }
+        ],
+        "revisit": [
+          {
+            "emote": "silent",
+            "text": "……また来たのか。"
+          },
+          {
+            "emote": "normal",
+            "text": "読むなら、勝手にしろ。"
+          }
+        ],
+        "frequent": [
+          {
+            "emote": "shy",
+            "text": "……べつに、待ってなどいない。"
+          }
+        ],
+        "frequentFrom": 4,
+        "afterRead": {
+          "emote": "shy",
+          "text": "最後まで読んだのか……どうだった…？"
+        },
+        "catalog": {
+          "emote": "silent",
+          "text": "……目録から来たのか。……そうか。"
+        }
+      }
     }
-  ]
+  ],
+  "_roomNote": "hall：本を置く棟。書かなければ本館。\"east\"＝東の書館、\"west\"＝西の書館、\"vault\"＝禁書庫（place で棚の位置を決める。禁書庫の本は年齢確認をするまで蔵書目録にも出ない）。room：\"annex\" と書くと図書館の間だけに置かれる（place はいらない）。",
+  "_affinityReportNote": "affinityReport：お話し好きの本が、トルサの好感度を数字ではなく言葉で教えてくれます。2回目からの会話の最後に、好感度が min 以上のうちいちばん大きい min のセリフを言います。どの本にも書けます（いまは若草の本）。",
+  "_donateNote": "lines.donate を書いた本は、手に取ったときに「本を寄贈するには？」のボタンが出て、そのセリフのあとで寄贈の間（donate.html）に案内します。寄贈された本は book_data フォルダに入れるだけで書架に並びます（js/book-gifts.js）。"
 }
