@@ -2,7 +2,7 @@
    トルサ図書館：イベント（全画面の一枚絵が、部品ごとに Live2D のように動く）
    ---------------------------------------------------------
    index.html から読み込まれます。設定（セリフ・表情・部品・骨・動きの大きさ・いつ起こるか）は
-   event/events.json にあるので、ふだんはこのファイルを開かなくても直せます。
+   event/events.json（と、EXTRA に書いたファイル）にあるので、ふだんはこのファイルを開かなくても直せます。
 
    いじりやすい場所（このファイルの中を検索してください）
    ・CSS        … 画面の見た目（会話の箱・「吹き出し非表示」・さわったときのひとこと・うしろの煙）
@@ -15,10 +15,18 @@
    ・struggle   … 葉から抜け出そうと、上へゆさゆさもがく動き（motion の struggle で強さ、struggleSpeed で速さ）
    ・allSpeed   … すべての動きの速さ（motion の allSpeed。2 で2倍。frame( の中）
    ・drawLeaves( … うしろのゆらゆら揺れる葉っぱ（bg.leaves。作るのは buildLeaves(）
+   ・prefetch(  … 部品の絵を読みこむ。部品の "art" に別のファイルを書くと、そのファイルの絵を使う（羊の間のイベントの小物 props.svg など）
+   ・setOutfit( … （イベントに "outfit": "b" で、はじめからその服）着がえ（2枚目の絵に入れかえる）。parts の "outfit": "b" と、セリフなどの "outfit": "b"
+   ・buildShadow( … 絵の下に敷く影（イベントの "shadow"。ベッドに寝転がっているときなど）
    ・flash(     … 白くぱちぱち光る（セリフ・選択肢・さわったときの "flash"）
    ・BOX_VARS   … 会話の箱の見た目（events.json の "box"。いちばん外に書くと全イベント共通）
    ・special(   … 何回目かにさわったときの特別な反応（secrets・touch の "on"）
    ・playSound( … 効果音ファイルを鳴らす（イベントの "sounds" に登録、"sound" で鳴らす、"stopSound" で止める）
+
+   ・onRoom(    … 部屋（羊の間など）に入ったときに起こるイベント（trigger の room・after・minAffinity。書き方は onHall の上）
+   ・EXTRA      … events.json のほかに読みこむイベントのファイル（羊の間のイベントは event/hitsuji-no-ma/event.json）
+   ・ask(       … イベントが始まる前の「見る／今は見ない」の画面。注意書きは data/event-notice.json に書きます
+                  （「今は見ない」を選んでも、パレットの「思い出」からいつでも見られます）
 
    確認用：ブラウザのコンソールで __event("vault-fall") と打つと、その場でイベントが始まります。
    URL の最後に ?event=vault-fall を付けると、入館してすぐに始まります。
@@ -35,10 +43,21 @@ window.TorsaEvents = (ctxIn) => {
   const lerp = (a, b, k) => a + (b - a) * k;
 
   let CONF = null;
-  const confReady = fetch(ctx.url || "event/events.json")
-    .then((r) => { if (!r.ok) throw new Error("events.json"); return r.json(); })
-    .then((j) => (CONF = j))
-    .catch((e) => { console.warn("event/events.json を読み込めなかったので、イベントは起こりません", e); return null; });
+  // 追加のイベント：events.json とは別のファイルに書いたイベントも読みこむ（同じ名前のイベントがあれば、events.json の方を使う）
+  // 例：羊の間のイベントは event/hitsuji-no-ma/event.json。ふやすときは、この一覧にファイルを足す
+  const EXTRA = ctx.extraUrls || ["event/hitsuji-no-ma/event.json"];
+  const getJ = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const confReady = Promise.all([getJ(ctx.url || "event/events.json"), ...EXTRA.map(getJ)]).then(([base, ...more]) => {
+    if (!base) console.warn("event/events.json を読み込めませんでした（ほかのファイルのイベントだけ使います）");
+    const c = base && base.events ? base : { ...(base || {}), events: {} };
+    more.forEach((j) => {
+      if (!j || !j.events) return;
+      Object.entries(j.events).forEach(([id, ev]) => { if (!c.events[id]) c.events[id] = ev; });
+      if (j.sounds) c.sounds = { ...j.sounds, ...(c.sounds || {}) };
+    });
+    if (!Object.keys(c.events).length) { console.warn("イベントが1つもないので、イベントは起こりません"); return null; }
+    return (CONF = c);
+  });
 
   /* ---------- CSS（画面の見た目） ---------- */
   const CSS = `
@@ -48,13 +67,16 @@ window.TorsaEvents = (ctxIn) => {
 .ev:focus { outline: none; }
 .ev-bg { position: absolute; inset: 0; background: radial-gradient(ellipse 70% 60% at 50% 38%, var(--ev-glow) 0%, transparent 70%), linear-gradient(var(--ev-top), var(--ev-bottom)); }
 .ev-bg.has-img { background-size: cover; background-position: center; }
-.ev-bg::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(0,0,0,.18) 0 46px, transparent 46px 210px); filter: blur(10px); opacity: .55; }
-.ev-smoke { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; filter: blur(30px); opacity: .32; pointer-events: none;
-  background: radial-gradient(circle, rgba(220, 70, 110, .55), rgba(150, 40, 90, .18) 45%, transparent 70%); }
+.ev-bg.no-stripes::after { display: none; }
+/* 縦のしま：ぼかし（filter）を使わず、しまのふちをグラデーションでやわらかくした（画面いっぱいのぼかしは重い） */
+.ev-bg::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(90deg, rgba(0,0,0,.05) 0, rgba(0,0,0,.18) 12px, rgba(0,0,0,.18) 34px, rgba(0,0,0,.05) 46px, transparent 58px, transparent 198px, rgba(0,0,0,.05) 210px); opacity: .55; }
+/* 煙：大きな「ぼかし（filter: blur）」は、動くたびに毎フレームかけ直すのでとても重い。ぼかしの代わりに、ふちがやわらかいグラデーションにした（見た目はほぼ同じ） */
+.ev-smoke { position: absolute; width: 70vmax; height: 70vmax; border-radius: 50%; opacity: .32; pointer-events: none; will-change: transform;
+  background: radial-gradient(circle, rgba(220, 70, 110, .5), rgba(170, 50, 96, .3) 25%, rgba(150, 40, 90, .14) 45%, rgba(150, 40, 90, .05) 60%, transparent 72%); }
 .ev-smoke.a { left: -30vmax; bottom: -38vmax; animation: ev-drift 19s ease-in-out infinite alternate; }
 .ev-smoke.b { right: -34vmax; top: -30vmax; opacity: .22; animation: ev-drift 23s ease-in-out -7s infinite alternate-reverse; }
 @keyframes ev-drift { to { transform: translate(9vmax, -6vmax) scale(1.15); } }
-.ev-motes i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: #ffd6e6; box-shadow: 0 0 8px 2px rgba(255, 150, 190, .55); opacity: 0;
+.ev-motes i { position: absolute; width: 4px; height: 4px; border-radius: 50%; background: var(--ev-mote, #ffd6e6); box-shadow: 0 0 8px 2px var(--ev-mote-glow, rgba(255, 150, 190, .55)); opacity: 0;
   animation: ev-mote var(--d) linear var(--dl) infinite; }
 @keyframes ev-mote { 0% { opacity: 0; transform: translate(0, 0); } 15% { opacity: .8; } 85% { opacity: .6; } 100% { opacity: 0; transform: translate(var(--dx), -38vh); } }
 .ev-cv, .ev-leaves { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
@@ -104,6 +126,22 @@ window.TorsaEvents = (ctxIn) => {
 .ev-pop.show { opacity: 1; transform: none; }
 .ev.touching { cursor: grab; }
 @media (prefers-reduced-motion: reduce) { .ev-smoke, .ev-motes i { animation: none; } }
+/* イベントの前の「見る／今は見ない」 */
+.ev-ask { position: fixed; inset: 0; z-index: 195; display: grid; place-items: center; padding: 20px; background: rgba(6, 4, 14, .72); opacity: 0; transition: opacity .35s ease; }
+.ev-ask.on { opacity: 1; }
+.ev-ask[hidden] { display: none; }
+.ev-ask-box { width: min(460px, 100%); max-height: 86vh; overflow: auto; box-sizing: border-box; padding: 22px 22px 18px; border-radius: var(--ev-radius, 14px); background: var(--ev-box, #f7f2e5); color: var(--ev-ink, #2b2a3a);
+  box-shadow: 0 0 0 1.5px var(--ev-line, #c9a35a), 0 0 0 5px rgba(247, 242, 229, .92), 0 0 0 6.5px rgba(201, 163, 90, .7), 0 16px 40px rgba(0, 0, 0, .55); text-align: center; font-family: var(--font-ui, "Zen Maru Gothic", sans-serif); }
+.ev-ask-box h2 { margin: 0 0 4px; font: 700 18px/1.5 var(--font-display, serif); letter-spacing: .08em; }
+.ev-ask-box .ev-ask-name { margin: 0 0 12px; font-size: 13px; opacity: .7; }
+.ev-ask-box .ev-ask-text { margin: 0 0 16px; padding: 12px 14px; border-radius: 10px; background: rgba(160, 60, 80, .08); border: 1px solid rgba(160, 60, 80, .3); font-size: 14px; line-height: 1.8; text-align: left; white-space: pre-wrap; }
+.ev-ask-box .ev-ask-text:empty { display: none; }
+.ev-ask-btns { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.ev-ask-btns button { font: 700 14px/1.4 var(--font-ui, sans-serif); letter-spacing: .06em; padding: 9px 22px; border-radius: 999px; cursor: pointer; border: 1px solid #c9a35a; background: #fff8e8; color: #2b2a3a; }
+.ev-ask-btns button.go { background: linear-gradient(180deg, #f0d48a, #c99a44); border-color: #f0d48a; }
+.ev-ask-btns button:focus-visible { outline: 2px solid #6a4a1c; outline-offset: 2px; }
+.ev-ask-box .ev-ask-note { margin: 12px 0 0; font-size: 12px; opacity: .65; }
+
 `;
   const style = document.createElement("style");
   style.textContent = CSS;
@@ -143,13 +181,14 @@ window.TorsaEvents = (ctxIn) => {
   const loadImg = (src) => new Promise((res) => { const im = new Image(); im.onload = () => res(im); im.onerror = () => { console.warn("イベントの部品が読めません:", src); res(null); }; im.src = src; });
   // 部品の中で、絵がある範囲（キャンバスの座標）を調べる。描き直した部品でも、自動で範囲が合う
   function measure(im, W, H) {
-    const c = document.createElement("canvas"), k = 2; c.width = Math.ceil(W * k); c.height = Math.ceil(H * k);
+    // 範囲を調べるだけなので、小さく描いて調べる（2倍で描いていたときより、調べる点の数が16分の1。イベントが始まるときに固まらない）
+    const c = document.createElement("canvas"), k = 0.5; c.width = Math.ceil(W * k); c.height = Math.ceil(H * k);
     const x = c.getContext("2d", { willReadFrequently: true }); x.drawImage(im, 0, 0, c.width, c.height);
     let d; try { d = x.getImageData(0, 0, c.width, c.height).data; } catch (e) { return [0, 0, W, H]; }
     let x0 = c.width, y0 = c.height, x1 = -1, y1 = -1;
     for (let y = 0; y < c.height; y++) for (let xx = 0; xx < c.width; xx++) if (d[(y * c.width + xx) * 4 + 3] > 3) { if (xx < x0) x0 = xx; if (xx > x1) x1 = xx; if (y < y0) y0 = y; if (y > y1) y1 = y; }
     if (x1 < 0) return null;
-    const p = 2;
+    const p = 3;
     return [Math.max(0, x0 / k - p), Math.max(0, y0 / k - p), Math.min(W, (x1 + 1) / k + p), Math.min(H, (y1 + 1) / k + p)];
   }
   // 絵のファイル（1つ）から、レイヤー（id）ごとに部品の絵を作る。使っているグラデーションだけを入れる
@@ -162,18 +201,39 @@ window.TorsaEvents = (ctxIn) => {
     const vb = rootEl.getAttribute("viewBox"), w = rootEl.getAttribute("width"), h = rootEl.getAttribute("height");
     return `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="${w}" height="${h}" viewBox="${vb}"><defs>${defs.map((d) => new XMLSerializer().serializeToString(d)).join("")}</defs>${body}</svg>`;
   }
+  // 部品の "art" に別のファイルを書くと、その部品はそのファイルの絵（レイヤー）を使う（小物など）。
+  // 別のファイルの viewBox は、イベントの絵と同じ座標で書く（はみ出した場所に置くときは、viewBox を広げる。例 "-160 -120 580 520"）
+  // scratchOrigin：Scratch から書き出したままの絵（viewBox が 0,0 から始まる）を、そのまま入れても位置がそろうようにする。
+  // Scratch の書き出しには translate(x, y) が入っていて、ここから「Scratch のコスチュームのどこか」がわかるので、
+  // イベントに "scratchOrigin": [-101.69759, -1.31719] と書いておけば、同じコスチュームの大きさで描いた絵は自動で同じ場所に来る
+  function scratchPlace(ev, doc, o) {
+    const so = ev.scratchOrigin; if (!Array.isArray(so) || o[0] !== 0 || o[1] !== 0) return o;
+    const g = [...doc.getElementsByTagName("g")].find((e) => /^\s*translate\(/.test(e.getAttribute("transform") || "")); if (!g) return o;
+    const m = g.getAttribute("transform").match(/translate\(\s*([-\d.e]+)[\s,]+([-\d.e]+)/); if (!m) return o;
+    return [so[0] - Number(m[1]), so[1] - Number(m[2]), o[2], o[3]];
+  }
   function prefetch(id) {
     if (cache[id]) return cache[id].ready;
     const ev = CONF && CONF.events[id]; if (!ev) return Promise.resolve(null);
-    const c = (cache[id] = { imgs: {}, boxes: {} });
+    const c = (cache[id] = { imgs: {}, boxes: {}, origin: {} });
     const [W, H] = ev.canvas;
-    c.ready = fetch(ev.art).then((r) => { if (!r.ok) throw new Error(ev.art); return r.text(); }).then((txt) => {
-      const doc = new DOMParser().parseFromString(txt, "image/svg+xml"), rootEl = doc.documentElement;
+    const files = [...new Set(ev.parts.map((p) => p.art || ev.art))];
+    c.ready = Promise.all(files.map((f) => fetch(f).then((r) => { if (!r.ok) throw new Error(f); return r.text(); })
+      .then((txt) => [f, new DOMParser().parseFromString(txt, "image/svg+xml")])
+      .catch((e) => { console.warn("イベントの絵を読み込めません:", e); return [f, null]; }))).then((list) => {
+      const D = Object.fromEntries(list);
       return Promise.all(ev.parts.map((p) => {
+        const f = p.art || ev.art, doc = D[f]; if (!doc) return null;
+        const rootEl = doc.documentElement;
+        let o = [0, 0, W, H];
+        const vb = (rootEl.getAttribute("viewBox") || "").split(/[\s,]+/).map(Number), vbOk = vb.length === 4 && vb.every(Number.isFinite);
+        if (f !== ev.art) { if (vbOk) o = vb; o = scratchPlace(ev, doc, o); }
+        // メインの絵（art）も、canvas と大きさがちがう Scratch の書き出し（例 334×408）なら、scratchOrigin で位置を合わせる（canvas の数字はそのままでいい）
+        else if (vbOk && (Math.abs(vb[2] - W) > 1 || Math.abs(vb[3] - H) > 1)) o = scratchPlace(ev, doc, vb);
         const svg = partSVG(doc, rootEl, p.layer || p.id);
         if (!svg) { console.warn("イベントの絵に、このレイヤーがありません:", p.layer || p.id); return null; }
         const url = URL.createObjectURL(new Blob([svg], { type: "image/svg+xml" }));
-        return loadImg(url).then((im) => { if (!im) return; c.imgs[p.id] = im; c.boxes[p.id] = measure(im, W, H); });
+        return loadImg(url).then((im) => { if (!im) return; c.imgs[p.id] = im; c.origin[p.id] = o; const b = measure(im, o[2], o[3]); c.boxes[p.id] = b && [b[0] + o[0], b[1] + o[1], b[2] + o[0], b[3] + o[1]]; });
       }));
     }).catch((e) => console.warn("イベントの絵を読み込めません:", e)).then(() => c);
     return c.ready;
@@ -196,6 +256,7 @@ window.TorsaEvents = (ctxIn) => {
   const RX = { head: -9, ear_l: -9, ear_r: -9, horn: -9, collar: -9, body: -9, leaf: {}, blush: 0, blushAt: -9, trem: 0, tremAt: -9, jump: null, pokeAmt: {}, flinch: null, bounce: {} };
   let lastM = {}, lastA = {}, headPt = null, alphaData = {}, replay = false;
   // 部品の見え方（0〜1）。parts の "hidden": true は最初かくれていて、セリフや選択肢の "show" で出てくる
+  let ORDER = []; // 描く順番（着がえの部品は、同じレイヤー名の1枚目の部品のすぐ上に重ねる）
   const VIS = {}, VIS_T = {}, VIS_F = {}, popInAt = {}; // VIS_F＝何秒かけて出る・消えるか（fadeSec）
   const autoT = {}; // autoHide のタイマー
   let choosing = false, secretN = {}, touchN = {}; // touchN＝さわった回数（on の何回目に使う）
@@ -210,7 +271,7 @@ window.TorsaEvents = (ctxIn) => {
     cssW = root.clientWidth || innerWidth; cssH = root.clientHeight || innerHeight;
     dpr = Math.min(2, devicePixelRatio || 1);
     cv.width = Math.round(cssW * dpr); cv.height = Math.round(cssH * dpr);
-    if (!lv.hidden) { lv.width = cv.width; lv.height = cv.height; }
+    if (!lv.hidden) leafSize();
     // カメラ：キャンバスの anchor の点を、画面の at（左上0〜右下1）に置く。view＝画面に入れる広さ（幅・高さ）、rotate＝傾き（度）
     const portrait = cssH > cssW * 1.15;
     const C0 = EV.camera, cfg = (portrait && C0.phone) ? { ...C0, ...C0.phone } : C0;
@@ -227,12 +288,47 @@ window.TorsaEvents = (ctxIn) => {
       const im = C.imgs[p.id], b = C.boxes[p.id]; if (!im || !b) return;
       const [x0, y0, x1, y1] = b, w = Math.max(1, Math.ceil((x1 - x0) * ppu)), h = Math.max(1, Math.ceil((y1 - y0) * ppu));
       const c = document.createElement("canvas"); c.width = w; c.height = h;
-      const [W, H] = EV.canvas;
-      c.getContext("2d").drawImage(im, -x0 * ppu, -y0 * ppu, W * ppu, H * ppu);
+      const [W, H] = EV.canvas, o = (C.origin && C.origin[p.id]) || [0, 0, W, H];
+      c.getContext("2d").drawImage(im, (o[0] - x0) * ppu, (o[1] - y0) * ppu, o[2] * ppu, o[3] * ppu);
       bmp[p.id] = { c, x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
     });
   }
   addEventListener("resize", () => { if (!playing) return; clearTimeout(resizeT); resizeT = setTimeout(layout, 150); });
+
+  /* ---------- 影（イベントの "shadow"） ---------- */
+  // 絵ぜんたいの形から影を作って、絵の下に敷く（ベッドに寝転がっているときなど）。部品の絵から自動で作るので、絵を描き直しても合う
+  // "shadow": [{ "x": 6, "y": 9, "soft": 3, "alpha": 0.45, "color": "#050a26" }, …]
+  //   x・y＝影のずれ（絵の単位。画面の右・下がプラス。絵を傾けても、影は画面の同じ向きに落ちる）、soft＝ぼかしの大きさ（絵の単位）、alpha＝濃さ、skip＝影に入れない部品
+  // 小さな絵にしてから広げてぼかすので、毎フレームの処理はほとんど増えない
+  let SHD = [];
+  function buildShadow() {
+    SHD = [];
+    const list = EV.shadow ? (Array.isArray(EV.shadow) ? EV.shadow : [EV.shadow]) : [];
+    if (!list.length || !C) return;
+    const [W, H] = EV.canvas, org = (p) => (C.origin && C.origin[p.id]) || [0, 0, W, H];
+    // 影は、いちばん上の骨（root や、小物用の動かない骨）ごとに分けて作る。トルサが動いても、小物の影は動かない
+    const topOf = (bid) => { let b = EV.bones.find((x) => x.id === bid), n = 0; while (b && b.parent && n++ < 50) { const q = EV.bones.find((x) => x.id === b.parent); if (!q) break; b = q; } return b ? b.id : "root"; };
+    list.forEach((o) => {
+      const all = EV.parts.filter((p) => !(p.hidden || p.alpha || p.noShadow || (o.skip || []).includes(p.id)) && C.imgs[p.id]);
+      // 着がえ（outfit）ごとにも分ける：1枚目のトルサ・2枚目のトルサ・小物の影は、それぞれ別に作って、見えているものだけ描く
+      const kindOf = (p) => (p.outfit ? "o:" + p.outfit : p.art ? "prop" : "base");
+      [...new Set(all.map((p) => topOf(p.bone) + "|" + kindOf(p)))].forEach((key) => {
+      const top = key.split("|")[0];
+      const use = all.filter((p) => topOf(p.bone) + "|" + kindOf(p) === key);
+      if (!use.length) return;
+      // 影の範囲：使う部品の絵の範囲をぜんぶ合わせたところ（小物が絵の外にあっても入る）
+      const L = Math.min(...use.map((p) => org(p)[0])), T = Math.min(...use.map((p) => org(p)[1])), R = Math.max(...use.map((p) => org(p)[0] + org(p)[2])), B = Math.max(...use.map((p) => org(p)[1] + org(p)[3]));
+      const s = Math.max(0.5, o.soft ?? 4), pad = 6, w = Math.ceil((R - L) / s) + pad * 2, h = Math.ceil((B - T) / s) + pad * 2;
+      const c = document.createElement("canvas"); c.width = w; c.height = h; const x = c.getContext("2d");
+      use.forEach((p) => { const q = org(p); x.drawImage(C.imgs[p.id], pad + (q[0] - L) / s, pad + (q[1] - T) / s, q[2] / s, q[3] / s); });
+      x.globalCompositeOperation = "source-in"; x.fillStyle = o.color || "#050a26"; x.fillRect(0, 0, w, h);
+      // もう一段やわらかく（小さな絵の上で、ずらして重ねる）
+      const c2 = document.createElement("canvas"); c2.width = w; c2.height = h; const y = c2.getContext("2d");
+      for (let i = -2; i <= 2; i++) for (let j = -2; j <= 2; j++) { y.globalAlpha = 1 / 9; y.drawImage(c, i, j); }
+      SHD.push({ c: c2, x0: L - pad * s, y0: T - pad * s, w: w * s, h: h * s, ox: o.x || 0, oy: o.y || 0, alpha: o.alpha ?? 0.4, bone: top, rep: use[0].id, reps: use.map((pp) => pp.id) });
+      });
+    });
+  }
 
   /* ---------- 骨（行列） ---------- */
   const mul = (m, n) => [m[0] * n[0] + m[2] * n[1], m[1] * n[0] + m[3] * n[1], m[0] * n[2] + m[2] * n[3], m[1] * n[2] + m[3] * n[3], m[0] * n[4] + m[2] * n[5] + m[4], m[1] * n[4] + m[3] * n[5] + m[5]];
@@ -243,6 +339,24 @@ window.TorsaEvents = (ctxIn) => {
   };
   const pulse = (t, d) => (t > 0 && t < d ? Math.sin(Math.PI * t / d) : 0);
   const damp = (t, f, k) => (t > 0 ? Math.exp(-k * t) * Math.sin(2 * Math.PI * f * t) : 0);
+  // bounce の、いまのずれ。pace：動く速さ（1＝ふつう〈y が 4 くらいのときの速さ〉、0.5＝半分、2＝2倍）。pace を書くと、x・y・r を大きくしても速さは変わらず、
+  // そのぶん遠くまで、ゆっくり時間をかけて動く。書かなければ今までどおり speed（1秒に何回ゆれるか）と stop（止まるまでの早さ）で動く
+  // carry：跳ねている途中でもう一度さわったとき、それまでのずれ。すっと消していくので、位置が飛ばない
+  function bounceOff(k, t) {
+    let f = k.speed ?? 2.2, st = k.stop ?? 4;
+    if (k.pace > 0) { const A = Math.max(Math.abs(k.x || 0), Math.abs(k.y || 0), Math.abs(k.r || 0), 0.5); f = 2.2 * k.pace * 4 / A; st = st * f / 2.2; }
+    const u = t - k.at, d = damp(u, f, st), c = k.carry, e = c && u > 0 ? Math.exp(-u * Math.max(3, f * 4)) : c ? 1 : 0;
+    const v = (key) => (k[key] || 0) * d + (c ? c[key] * e : 0), o = { x: v("x"), y: v("y"), r: v("r") };
+    if (Math.abs(o.x) < 1e-3 && Math.abs(o.y) < 1e-3 && Math.abs(o.r) < 1e-3 && u > 0.5) return { x: 0, y: 0, r: 0 };
+    return o;
+  }
+  function setBounce(bone, conf, t) {
+    if (!bone || !conf) return;
+    const old = RX.bounce[bone];
+    RX.bounce[bone] = { ...conf, at: t, carry: old ? bounceOff(old, t) : null };
+  }
+  // セリフ・選択肢の "bounce": { "boubou": { "y": -12, "pace": 1 } }（骨の名前ごと）
+  function bounceBones(map) { if (map && typeof map === "object") Object.entries(map).forEach(([bone, conf]) => { if (conf && typeof conf === "object") setBounce(bone, conf, AT); }); }
 
   // 骨の回る中心。"pivotOf": "部品名" と書くと、その部品の絵のまんなかを中心にする（絵を描き直しても自動で合う）
   function pivotOf(b) {
@@ -352,6 +466,13 @@ window.TorsaEvents = (ctxIn) => {
       P["_a_" + b.id] = clamp(L.alpha * (0.2 + 0.8 * L.enter), 0, 1);
     });
     // wobble：からだとは別に、その骨だけでゆれる（チョコバーなど）。r＝回る角度、x・y＝ずれ、speed＝速さ。さわってビクッとしたときは大きくはねる
+    // 縦のゆれの形。"dir": "up"＝元の位置から上へ行って元の位置にもどる（下へは行かない）、"down"＝下へ行ってもどる。
+    // "hop": true をいっしょに書くと、ボールがはねるように、元の位置でトンとはね返る形になる
+    const wobY = (w, a, ph) => {
+      if (w.dir !== "up" && w.dir !== "down") return a * Math.sin(ph);
+      const k = w.hop ? Math.abs(Math.sin(ph / 2)) : 0.5 - 0.5 * Math.cos(ph); // 0（元の位置）〜1（いちばん遠く）
+      return (w.dir === "up" ? -1 : 1) * Math.abs(a) * k;
+    };
     EV.bones.filter((b) => b.wobble).forEach((b) => {
       const w = { ...b.wobble, ...((BO[b.id] || {}).wobble || {}) }, ph = w.phase ?? 0.7;
       const sm = (key, d) => { const id = b.id + ".w." + key, tv = w[key] ?? d; SB[id] = SB[id] === undefined ? tv : lerp(SB[id], tv, km); return SB[id]; };
@@ -359,15 +480,29 @@ window.TorsaEvents = (ctxIn) => {
       P[b.id] = {
         r: (wr * Math.sin(wt * 2.2 + ph) + wr * 0.35 * Math.sin(wt * 3.7 + ph * 2)) * R + 7 * flA * damp(flU, 3.5, 4.5) * R,
         x: sm("x", 0.5) * Math.sin(wt * 1.6 + ph * 3) * R,
-        y: sm("y", 0.4) * Math.sin(wt * 2.6 + ph) * R - 2 * flinch * R
+        y: wobY(w, sm("y", 0.4), wt * 2.6 + ph) * R - 2 * flinch * R
       };
     });
     // bounce：さわったとき、その骨が横・縦・回転の向きに、ぶるんと跳ねてだんだん止まる
+    // offset：骨を決めた位置へずらして、そのまま止めておく（"boneMotion": { "boubou": { "offset": { "y": -10 } } }）。
+    // x・y＝ずれ、r＝回転。ゆれ（wobble）や跳ね（bounce）は、この位置を中心に動く。もどすときは { "offset": { "y": 0 } }。
+    // ease＝その位置まで動く速さ（1＝ふつう、大きいほど早く着く）
+    EV.bones.forEach((b) => {
+      const o = { ...(b.offset || {}), ...((BO[b.id] || {}).offset || {}) };
+      ["x", "y", "r"].forEach((key) => {
+        const id = b.id + ".o." + key, tv = typeof o[key] === "number" ? o[key] : 0;
+        if (SB[id] === undefined && !tv) return;
+        const ke = 1 - Math.exp(-dt * 6 * (o.ease ?? 1));
+        SB[id] = SB[id] === undefined ? 0 : SB[id] + (tv - SB[id]) * ke;
+        if (Math.abs(SB[id]) < 1e-4 && !tv) return;
+        const q2 = P[b.id] || (P[b.id] = {}); q2[key] = (q2[key] || 0) + SB[id];
+      });
+    });
     Object.entries(RX.bounce).forEach(([bone, k]) => {
-      const d = damp(t - k.at, k.speed ?? 2.2, k.stop ?? 4) * R; if (!d) return;
+      const o = bounceOff(k, t); if (!o.x && !o.y && !o.r) return;
       const q2 = P[bone] || (P[bone] = {});
-      q2.x = (q2.x || 0) + (k.x || 0) * d; q2.y = (q2.y || 0) + (k.y || 0) * d;
-      if (!(EV.bones.find((b) => b.id === bone) || {}).leaf) q2.r = (q2.r || 0) + (k.r || 0) * d; // 葉の回転は poke で足している
+      q2.x = (q2.x || 0) + o.x * R; q2.y = (q2.y || 0) + o.y * R;
+      if (!(EV.bones.find((b) => b.id === bone) || {}).leaf) q2.r = (q2.r || 0) + o.r * R; // 葉の回転は poke で足している
     });
     return P;
   }
@@ -398,7 +533,14 @@ window.TorsaEvents = (ctxIn) => {
     // 頭の位置（さわったときのひとことを、この横に出す）
     const hb = EV.bones.find((b) => b.id === "head");
     if (hb && W.head) { const m = mul(base, W.head), x = hb.pivot[0], y = hb.pivot[1] - 40; headPt = [(m[0] * x + m[2] * y + m[4]) / dpr, (m[1] * x + m[3] * y + m[5]) / dpr]; }
-    for (const p of EV.parts) {
+    // 影（絵の下）。それぞれの影は、その部品たちのいちばん上の骨（root など）といっしょに動く
+    if (SHD.length) {
+      g.imageSmoothingEnabled = true; g.imageSmoothingQuality = "high";
+      // 影のこさ＝その部品のまとまりが見えている割合（一部だけ着がえても、影が二重にならない）
+      SHD.forEach((sh) => { let va = 0; for (const id of sh.reps) va += VIS[id] ?? 1; va /= sh.reps.length; if (va <= 0.004) return; const m = mul(base, W[sh.bone] || [1, 0, 0, 1, 0, 0]); g.setTransform(m[0], m[1], m[2], m[3], m[4] + sh.ox * cs, m[5] + sh.oy * cs); g.globalAlpha = sh.alpha * va; g.drawImage(sh.c, sh.x0, sh.y0, sh.w, sh.h); });
+      g.globalAlpha = 1;
+    }
+    for (const p of ORDER) {
       const im = bmp[p.id]; if (!im) continue;
       let a = 1;
       if (p.alpha === "blush") a = clamp(P._blush, 0, 1);
@@ -525,11 +667,16 @@ window.TorsaEvents = (ctxIn) => {
     }
     items.sort((a, b) => a.layer - b.layer);
     BL = { sprites, items };
-    lv.width = cv.width; lv.height = cv.height;
+    leafSize();
+  }
+  // うしろの葉の層は、画面いっぱいを毎フレーム描き直すので、細かさをおさえる（奥行きのある葉はもともとぼかしてあるので、見た目はほぼ同じ）
+  function leafSize() {
+    const o = (EV && EV.bg && EV.bg.leaves) || {}, k = o.depth === false ? Math.min(dpr, 1.5) : Math.min(dpr, 1);
+    lv.width = Math.round(cssW * k); lv.height = Math.round(cssH * k);
   }
   function drawLeaves(t, sk) {
     if (!BL || lv.hidden) return;
-    const o = EV.bg.leaves, R = reduced ? 0.35 : 1, W = lv.width, H = lv.height;
+    const o = EV.bg.leaves, R = reduced ? 0.35 : 1, W = lv.width, H = lv.height, dpr = W / Math.max(1, cssW); // この層の細かさ
     const unit = Math.min(cssW, cssH) / 700 * dpr, sway = (o.sway ?? 7) * R, sp = o.speed ?? 0.6;
     const flat = o.depth === false, LS = flat ? [0.85, 1, 1.15] : [0.6, 0.85, 1.25], PX = flat ? [8, 12, 16] : [5, 12, 24]; // 奥行きごとの大きさと、マウスの方へずれる量
     lg.setTransform(1, 0, 0, 1, 0, 0); lg.clearRect(0, 0, W, H);
@@ -625,8 +772,8 @@ window.TorsaEvents = (ctxIn) => {
   }
   function hit(cx, cy) {
     const r = cv.getBoundingClientRect(), px = (cx - r.left) * dpr, py = (cy - r.top) * dpr;
-    for (let i = EV.parts.length - 1; i >= 0; i--) {
-      const p = EV.parts[i], im = bmp[p.id], m = lastM[p.id];
+    for (let i = ORDER.length - 1; i >= 0; i--) {
+      const p = ORDER[i], im = bmp[p.id], m = lastM[p.id];
       if (!im || !m || (lastA[p.id] ?? 1) < 0.25) continue;
       const det = m[0] * m[3] - m[1] * m[2]; if (!det) continue;
       const dx = px - m[4], dy = py - m[5];
@@ -650,7 +797,17 @@ window.TorsaEvents = (ctxIn) => {
   }
   // ひとことが出るときは、ふだんトルサをなでてセリフが出るときと同じ音（heart）
   function popLine(text) { pop(text); SFX.play(EV.touchLineSfx || "heart"); }
+  // touchSets：途中からさわったときの反応を入れかえる。イベントに "touchSets": { "名前": { "touch": {…}, "secrets": {…} } } と書き、
+  // セリフ・選択肢・on に "touchSet": "名前" と書くと、そこから反応がかわる（"touchSet": "" で元にもどる）。
+  // 書いた種類・部品だけ入れかわり、書いていないものは元のまま。何回目（on）・何番目のひとこと（lines）は、入れかえたときから数えなおす
+  let TSET = "";
+  function touchConf() {
+    const ts = (TSET && (EV.touchSets || {})[TSET]) || {};
+    return { touch: { ...(EV.touch || {}), ...(ts.touch || {}) }, secrets: { ...(EV.secrets || {}), ...(ts.secrets || {}) } };
+  }
+  function setTouchSet(name) { if (name === undefined) return; TSET = name ? String(name) : ""; }
   function react(p, quiet) {
+    const TC = touchConf();
     const t = AT, rt = (performance.now() - t0) / 1000, kind = p.touch; // t＝動きの時計（allSpeed で速くなる）、rt＝ほんとうの時間（ひとことの間隔）
     if (kind === "ear") RX[p.bone] = t;
     else if (kind === "leaf") RX.leaf[p.bone] = t;
@@ -658,20 +815,20 @@ window.TorsaEvents = (ctxIn) => {
     if (kind === "head" || kind === "collar" || kind === "ear") { RX.blush = Math.min(0.7, RX.blush * Math.exp(-(t - RX.blushAt) * 0.5) + 0.22); RX.blushAt = t; }
     if (kind === "horn" || kind === "ear") { RX.trem = 1; RX.tremAt = t; }
     // on：何回目にさわったときに、特別な反応を起こすか（secrets は部品ごと、touch は場所ごとに数える）
-    const secC = (EV.secrets || {})[p.id], cnf = secC || (EV.touch || {})[kind] || {};
+    const secC = TC.secrets[p.id], cnf = secC || TC.touch[kind] || {};
     let saidSpecial = false;
     if (!quiet && cnf.on) {
-      const key = secC ? p.id : "touch:" + kind;
+      const key = TSET + "|" + (secC ? p.id : "touch:" + kind);
       let n = touchN[key] = (touchN[key] || 0) + 1;
       if (cnf.cycle > 0) { n = ((n - 1) % cnf.cycle) + 1; } // cycle：その回数で数えなおす（くり返し起こす）
       const sp = cnf.on[String(n)];
       if (sp) saidSpecial = special(sp, p, t, rt);
     }
     // 小ネタ：部品ごとの特別な反応（event/events.json の secrets）。lines は順番に、最後まで出たら repeat からランダムに
-    const sec = (EV.secrets || {})[p.id];
+    const sec = TC.secrets[p.id];
     // bounce：さわった部品が跳ねる向き（x＝横、y＝縦〈マイナスで上〉、r＝回転）。secrets（部品ごと）が touch（場所ごと）より優先
-    const bc = (sec && sec.bounce) || ((EV.touch || {})[kind] || {}).bounce;
-    if (bc) { RX.bounce[p.bone] = { at: t, ...bc }; if (kind === "leaf") RX.pokeAmt[p.bone] = bc.r ?? 0; }
+    const bc = (sec && sec.bounce) || (TC.touch[kind] || {}).bounce;
+    if (bc) { setBounce(p.bone, bc, t); if (kind === "leaf") RX.pokeAmt[p.bone] = bc.r ?? 0; }
     if (sec) {
       if (sec.jump) RX.jump = { at: t, h: sec.jump };
       if (sec.leafPoke && kind === "leaf" && !bc) RX.pokeAmt[p.bone] = sec.leafPoke;
@@ -679,13 +836,13 @@ window.TorsaEvents = (ctxIn) => {
       if (!quiet) fx(sec);
       if (sec.flinch) { RX.flinch = { at: t, amt: sec.flinch }; RX.trem = Math.max(RX.trem, 0.5 * sec.flinch); RX.tremAt = t; }
       if (!quiet && !saidSpecial && rt - popAt > 1.4) {
-        const n = secretN[p.id] = (secretN[p.id] || 0) + 1, ls = sec.lines || [];
+        const sk = TSET + "|" + p.id, n = secretN[sk] = (secretN[sk] || 0) + 1, ls = sec.lines || [];
         const text = n <= ls.length ? ls[n - 1] : (sec.repeat && sec.repeat.length ? sec.repeat[Math.floor(Math.random() * sec.repeat.length)] : ls[ls.length - 1]);
         if (text) { popAt = rt; popLine(text); }
       }
       return;
     }
-    const conf = (EV.touch || {})[kind] || {};
+    const conf = TC.touch[kind] || {};
     if (conf.flinch) { RX.flinch = { at: t, amt: conf.flinch }; RX.trem = Math.max(RX.trem, 0.5 * conf.flinch); RX.tremAt = t; }
     if (conf.sfx) SFX.play(conf.sfx);
     if (!quiet) fx(conf);
@@ -695,12 +852,14 @@ window.TorsaEvents = (ctxIn) => {
   // shake＝画面のゆれ、jump＝跳ねる高さ、flinch＝ビクッ、bounce＝さわった部品が跳ねる、sfx＝いつもの効果音、flash・sound・stopSound、motion・boneMotion
   function special(r, p, t, rt) {
     if (r.face) setFace(r.face);
+    if (r.outfit !== undefined) setOutfit(r.outfit, r.fadeSec ?? 0.5);
+    setTouchSet(r.touchSet);
     if (r.show) setShown(r.show, true, r.fadeSec);
     if (r.hide) setShown(r.hide, false, r.fadeSec);
     if (r.shake) { shakeAt = rt; shakeAmt = r.shake; }
     if (r.jump) RX.jump = { at: t, h: r.jump };
     if (r.flinch) { RX.flinch = { at: t, amt: r.flinch }; RX.trem = Math.max(RX.trem, 0.5 * r.flinch); RX.tremAt = t; }
-    if (r.bounce) RX.bounce[p.bone] = { at: t, ...r.bounce };
+    if (r.bounce) setBounce(p.bone, r.bounce, t);
     if (r.blush) { RX.blush = Math.min(1.2, RX.blush + r.blush); RX.blushAt = t; }
     if (r.sfx) SFX.play(r.sfx);
     applyMotion(r); fx(r);
@@ -751,6 +910,40 @@ window.TorsaEvents = (ctxIn) => {
     });
   }
 
+  // 着がえ（2枚目の絵に入れかえる）：parts に "outfit": "b" と書いた部品が2枚目のトルサ。セリフ・選択肢・さわったときの on に "outfit": "b" と書くと、
+  // 1枚目のトルサの部品をかくして、2枚目の部品を出す（"outfit": "" で1枚目にもどる）。小物（art があって outfit がない部品）と、はじめからかくれている部品はそのまま
+  // 着がえの部品（"outfit"）は、layer の名前が同じ1枚目の部品のすぐ上に描く。
+  // こうすると、服を1つずつ hide／show で入れかえても（少しずつ着がえる）、重なり順がくずれない
+  function drawOrder(parts) {
+    // 1枚目に同じ名前がない着がえの部品（例：belt_b）は、parts で1つ前に書いた着がえの部品（shirt_b）のすぐ上に描く
+    const key = (p) => p.layer || p.id, isBase = (p) => !p.outfit && !p.art, base = new Set(parts.filter(isBase).map(key));
+    const after = {}, chained = new Set(), ids = new Set(parts.map((p) => p.id));
+    // "drawAfter": "shirt_b" と書いた部品は、その部品のすぐ上に描く（重なり順を自分で決めたいとき。どの部品にも書ける）
+    parts.forEach((p) => { if (p.drawAfter && ids.has(p.drawAfter) && p.drawAfter !== p.id) { (after[p.drawAfter] = after[p.drawAfter] || []).push(p); chained.add(p.id); } });
+    parts.forEach((p, i) => {
+      if (chained.has(p.id) || !p.outfit || base.has(key(p))) return;
+      const prev = parts[i - 1];
+      if (prev && prev.outfit) { (after[prev.id] = after[prev.id] || []).push(p); chained.add(p.id); }
+    });
+    const out = [], done = new Set(), put = (p) => { if (done.has(p.id)) return; done.add(p.id); out.push(p); (after[p.id] || []).forEach(put); };
+    parts.forEach((p) => {
+      if ((p.outfit && base.has(key(p))) || chained.has(p.id)) return;
+      put(p);
+      if (isBase(p)) parts.forEach((q) => { if (q.outfit && key(q) === key(p) && !chained.has(q.id)) put(q); });
+    });
+    parts.forEach((p) => { if (!done.has(p.id)) out.push(p); }); // drawAfter がぐるぐる回っているときも、部品が消えないように
+    return out;
+  }
+  function setOutfit(name, fadeSec) {
+    const want = name && name !== "base" ? String(name) : "", on = [], off = [];
+    EV.parts.forEach((p) => {
+      if ((p.art && !p.outfit) || (p.hidden && !p.outfit)) return;
+      ((p.outfit || "") === want ? on : off).push(p.id);
+    });
+    setShown(off, false, fadeSec); setShown(on, true, fadeSec);
+    on.forEach((id) => { delete popInAt[id]; }); // からだ全体が入れかわるので、部品ごとのふわっと大きくなる動きはしない
+  }
+
   /* ---------- 会話 ---------- */
   function setFace(name) {
     const f = (EV.faces || {})[name] || {};
@@ -762,13 +955,21 @@ window.TorsaEvents = (ctxIn) => {
     q(".ev-name").textContent = speaker;
     q(".ev-box").classList.toggle("narr", !speaker);
     if (l.face) setFace(l.face);
+    // "blush": 0.9 ＝このセリフの頬の赤み（表情の blush より優先。次に face を書いたセリフで、その表情の赤みにもどる）
+    if (typeof l.blush === "number") T.blush = l.blush;
     if (l.leaves) L.mode = l.leaves;
     if (l.shake) { shakeAt = (performance.now() - t0) / 1000; shakeAmt = l.shake; }
+    // flinch＝ビクッとする強さ、jump＝ぴょこっと跳ねる高さ（さわったときと同じ動きを、セリフでも起こせる）
+    if (l.flinch) { RX.flinch = { at: AT, amt: l.flinch }; RX.trem = Math.max(RX.trem, 0.5 * l.flinch); RX.tremAt = AT; }
+    if (l.jump) RX.jump = { at: AT, h: l.jump };
     if (l.sfx) SFX.play(l.sfx);
     fx(l);
     applyMotion(l);
+    if (l.outfit !== undefined) setOutfit(l.outfit, l.fadeSec ?? 0.5);
+    setTouchSet(l.touchSet);
     if (l.show) setShown(l.show, true, l.fadeSec);
     if (l.hide) setShown(l.hide, false, l.fadeSec);
+    bounceBones(l.bounce);
     q(".ev-choices").hidden = true; q(".ev-choices").innerHTML = ""; choosing = false;
     const el = q(".ev-text"), chars = Array.from(l.text);
     el.setAttribute("aria-label", l.text);
@@ -803,9 +1004,14 @@ window.TorsaEvents = (ctxIn) => {
     const wait = c.shake && !reduced ? (c.wait ?? 0.45) * 1000 : 0;
     setTimeout(() => {
       if (!playing || ending) return;
+      if (c.outfit !== undefined) setOutfit(c.outfit, c.fadeSec ?? 0.5);
+      setTouchSet(c.touchSet);
       if (c.show) setShown(c.show, true, c.fadeSec);
       if (c.hide) setShown(c.hide, false, c.fadeSec);
+      bounceBones(c.bounce);
       applyMotion(c);
+      if (c.flinch) { RX.flinch = { at: AT, amt: c.flinch }; RX.trem = Math.max(RX.trem, 0.5 * c.flinch); RX.tremAt = AT; }
+      if (c.jump) RX.jump = { at: AT, h: c.jump };
       if (c.sfx) SFX.play(c.sfx);
       fx(c);
       lines.splice(li + 1, 0, ...(c.lines || []));
@@ -832,14 +1038,21 @@ window.TorsaEvents = (ctxIn) => {
     root.hidden = false; root.classList.remove("on", "out", "ui-off", "talking");
     setupBg();
     C = await prefetch(id);
+    buildShadow();
     await buildLeaves();
     Object.keys(EV.sounds || {}).forEach(loadSound); // 効果音を先に読んでおく
     FL = []; flashEl.style.opacity = "0";
     bmp = {}; ppu = 0;
     lines = (EV.lines || []).slice(); li = -1; choosing = false;
     MO = {}; BO = {}; SM = {}; SB = {}; PH = {};
-    Object.keys(VIS).forEach((k) => { delete VIS[k]; delete VIS_T[k]; delete VIS_F[k]; delete popInAt[k]; }); Object.keys(autoT).forEach((k) => { clearTimeout(autoT[k]); delete autoT[k]; }); secretN = {}; touchN = {};
-    EV.parts.forEach((p) => { if (p.hidden) { VIS[p.id] = 0; VIS_T[p.id] = 0; } });
+    Object.keys(VIS).forEach((k) => { delete VIS[k]; delete VIS_T[k]; delete VIS_F[k]; delete popInAt[k]; }); Object.keys(autoT).forEach((k) => { clearTimeout(autoT[k]); delete autoT[k]; }); secretN = {}; touchN = {}; TSET = "";
+    ORDER = drawOrder(EV.parts);
+    EV.parts.forEach((p) => { if (p.hidden || p.outfit) { VIS[p.id] = 0; VIS_T[p.id] = 0; } }); // outfit（2枚目の絵）の部品も、はじめはかくしておく
+    // イベントに "outfit": "b" と書くと、はじめからその服で始まる（1枚目のトルサはかくれる）
+    if (EV.outfit && EV.outfit !== "base") EV.parts.forEach((p) => {
+      if ((p.art && !p.outfit) || p.hidden) return; // はじめからかくれている部品（"hidden": true）は、着がえの服でもかくれたまま
+      const v = p.outfit === String(EV.outfit) ? 1 : 0; VIS[p.id] = v; VIS_T[p.id] = v;
+    });
     q(".ev-choices").hidden = true;
     q(".ev-text").innerHTML = ""; q(".ev-name").textContent = ""; q(".ev-next").hidden = true;
     FACE_KEYS.forEach((key) => { S[key] = T[key] = 0; });
@@ -849,7 +1062,7 @@ window.TorsaEvents = (ctxIn) => {
     Object.assign(RX, { head: -9, ear_l: -9, ear_r: -9, horn: -9, collar: -9, body: -9, leaf: {}, blush: 0, blushAt: -9, trem: 0, tremAt: -9, jump: null, pokeAmt: {}, flinch: null, bounce: {} }); lastM = {}; lastA = {};
     q(".ev-pop").classList.remove("show");
     layout();
-    t0 = performance.now(); lastT = 0; AT = 0; fallAt = 0.05; sweatAt = 0; squeezeAt = 2; squeezeFrom = -9; flickAt = 5; flickFrom = -9;
+    t0 = performance.now(); lastT = 0; AT = 0; fallAt = (EV.intro && EV.intro.fall === false) ? -99 : 0.05; sweatAt = 0; squeezeAt = 2; squeezeFrom = -9; flickAt = 5; flickFrom = -9; // intro の fall: false で、始まりに上からすとんと落ちる動きをなくす
     const intro = EV.intro || {};
     shakeAt = 0.14; shakeAmt = intro.shake ?? 1;
     if (!raf) raf = requestAnimationFrame(frame);
@@ -878,6 +1091,14 @@ window.TorsaEvents = (ctxIn) => {
     const bg = EV.bg || {}, el = q(".ev-bg");
     el.style.setProperty("--ev-top", bg.top || "#2a1c46"); el.style.setProperty("--ev-bottom", bg.bottom || "#120c1f"); el.style.setProperty("--ev-glow", bg.glow || "#5b3a7a");
     el.classList.toggle("has-img", !!bg.image); el.style.backgroundImage = bg.image ? `url("${bg.image}")` : "";
+    // imageSize：模様の絵を、その大きさでくり返して並べる（例 "420px"。書かなければ画面いっぱいに1枚）。imagePosition：並べはじめの位置
+    el.style.backgroundSize = bg.image && bg.imageSize ? bg.imageSize : ""; el.style.backgroundRepeat = bg.image && bg.imageSize ? "repeat" : "";
+    el.style.backgroundPosition = bg.image && bg.imagePosition ? bg.imagePosition : "";
+    // stripes: false で、うしろの縦のしま（本棚の影のような）を消す
+    el.classList.toggle("no-stripes", bg.stripes === false);
+    // moteColor・moteGlow：ただよう光のつぶの色（書かなければピンク）
+    if (bg.moteColor) el.style.setProperty("--ev-mote", bg.moteColor); else el.style.removeProperty("--ev-mote");
+    if (bg.moteGlow) el.style.setProperty("--ev-mote-glow", bg.moteGlow); else el.style.removeProperty("--ev-mote-glow");
     el.querySelectorAll(".ev-smoke").forEach((s) => (s.hidden = bg.smoke === false));
     // 会話の箱：events.json のいちばん外の "box"（すべてのイベントで共通）に、イベントの中の "box"（そのイベントだけ）を上から重ねる
     const bx = { ...((CONF && CONF.box) || {}), ...(EV.box || {}) };
@@ -917,24 +1138,90 @@ window.TorsaEvents = (ctxIn) => {
     e.stopPropagation();
   }, true);
 
+  /* ---------- イベントの前の「見る／今は見ない」（注意書きは data/event-notice.json） ---------- */
+  // data/event-notice.json がないときも、ことばだけの画面を出す
+  const NOTICE_DEF = { ask: true, askOnReplay: true, title: "イベントが始まります", text: "", watch: "見る", skip: "今は見ない", cancel: "やめておく", skipNote: "「今は見ない」を選んでも、パレットの「思い出」から、いつでも見られます。" };
+  const noticeReady = fetch(ctx.noticeUrl || "data/event-notice.json").then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  async function ask(id, opts) {
+    const replaying = !!(opts && opts.replay);
+    await confReady; if (!CONF || !CONF.events[id]) return play(id, opts);
+    const nj = (await noticeReady) || {}, N = { ...NOTICE_DEF, ...(nj.default || {}), ...((nj.events || {})[id] || {}) };
+    if (N.ask === false || (replaying && N.askOnReplay === false)) return play(id, opts);
+    const ev = CONF.events[id], el = document.createElement("div");
+    el.className = "ev-ask"; el.setAttribute("role", "dialog"); el.setAttribute("aria-modal", "true"); el.setAttribute("aria-label", N.title);
+    el.innerHTML = `<div class="ev-ask-box"><h2>${esc(N.title)}</h2><p class="ev-ask-name">${esc(ev.name || id)}</p><p class="ev-ask-text">${esc(N.text || "")}</p>
+      <div class="ev-ask-btns"><button type="button" class="go">${esc(N.watch)}</button><button type="button" class="no">${esc(replaying ? N.cancel : N.skip)}</button></div>
+      ${replaying ? "" : `<p class="ev-ask-note">${esc(N.skipNote)}</p>`}</div>`;
+    document.body.appendChild(el); document.body.classList.add("ev-asking");
+    requestAnimationFrame(() => el.classList.add("on"));
+    SFX.play("sparkle");
+    return new Promise((res) => {
+      const close = (watch) => {
+        removeEventListener("keydown", onKey, true);
+        el.classList.remove("on"); document.body.classList.remove("ev-asking"); setTimeout(() => el.remove(), 350);
+        if (watch) { setTimeout(() => res(play(id, opts)), 250); return; }
+        // 今は見ない：見たことにして（もう勝手には起こらない）、思い出から見られるようにする
+        if (!replaying) { const mem = ctx.mem; if (mem) { (mem.events ||= {})[id] = mem.events[id] || 1; ctx.save && ctx.save(); } if (N.skipSay && ctx.say) setTimeout(() => ctx.say(N.skipSay, 5200), 500); }
+        res(false);
+      };
+      const onKey = (e) => { if (e.key === "Escape") { e.preventDefault(); e.stopPropagation(); close(false); } };
+      addEventListener("keydown", onKey, true);
+      el.querySelector(".go").addEventListener("click", () => close(true));
+      el.querySelector(".no").addEventListener("click", () => close(false));
+      setTimeout(() => el.querySelector(".go").focus({ preventScroll: true }), 50);
+    });
+  }
+
   /* ---------- いつ起こるか（event/events.json の trigger） ---------- */
-  let waitT = 0;
+  // trigger の書き方
+  //   hall: "vault"        … その棟（館）に入ったとき
+  //   room: "sheep"        … その部屋（羊の間など）に入ったとき
+  //   after: "vault-fall"  … そのイベントを見たあとだけ（["a", "b"] と並べると、ぜんぶ見たあと）
+  //   minAffinity: 200     … トルサの好感度がこの値より上のとき
+  //   delaySec: 6          … 入ってから何秒で始まるか
+  //   once: false          … 何度でも起こす（書かなければ、一度見たら起こらない）
+  const seenAll = (a) => !a || (Array.isArray(a) ? a : [a]).every((id) => ctx.mem && ctx.mem.events && ctx.mem.events[id]);
+  let waitT = 0, roomT = 0;
   function onHall(hallId) {
     clearTimeout(waitT);
     confReady.then(() => {
       if (!CONF) return;
       Object.entries(CONF.events).forEach(([id, ev]) => {
-        const tr = ev.trigger || {}; if (tr.hall !== hallId) return;
+        const tr = ev.trigger || {}; if (tr.room || tr.hall !== hallId) return;
         if (tr.once !== false && ctx.mem && ctx.mem.events && ctx.mem.events[id]) return;
+        if (!seenAll(tr.after)) return;
         prefetch(id); // 先に絵を読んでおく
         const tryPlay = () => {
           if (playing || (ctx.hall && ctx.hall() !== hallId)) return;
           if ((ctx.affinity ? ctx.affinity() : 0) < (tr.minAffinity || 0)) return;
           if (ctx.busy && ctx.busy()) { waitT = setTimeout(tryPlay, 2500); return; }
-          play(id);
+          if (document.body.classList.contains("ev-asking")) return;
+          ask(id);
         };
         waitT = setTimeout(tryPlay, (tr.delaySec ?? 8) * 1000);
       });
+    });
+  }
+  // 部屋に入ったとき（index.html の enterRoom から呼ばれる）。部屋を出たら onRoom() で待つのをやめる
+  function onRoom(roomId) {
+    clearTimeout(roomT);
+    if (!roomId) return;
+    confReady.then(() => {
+      if (!CONF) return;
+      const hit = Object.entries(CONF.events).find(([id, ev]) => {
+        const tr = ev.trigger || {};
+        return tr.room === roomId && !(tr.once !== false && ctx.mem && ctx.mem.events && ctx.mem.events[id]) && seenAll(tr.after) && (ctx.affinity ? ctx.affinity() : 0) >= (tr.minAffinity || 0);
+      });
+      if (!hit) return;
+      const [id, ev] = hit, tr = ev.trigger;
+      prefetch(id);
+      const tryPlay = () => {
+        if (playing || (ctx.room && ctx.room() !== roomId)) return;
+        if (ctx.roomBusy && ctx.roomBusy()) { roomT = setTimeout(tryPlay, 2500); return; }
+        if (document.body.classList.contains("ev-asking")) return;
+        ask(id);
+      };
+      roomT = setTimeout(tryPlay, (tr.delaySec ?? 5) * 1000);
     });
   }
 
@@ -948,6 +1235,9 @@ window.TorsaEvents = (ctxIn) => {
   window.__event = (id) => play(id || (CONF && Object.keys(CONF.events)[0]));
 
   // 思い出（パレット）用：イベントの一覧
-  const list = () => (CONF ? Object.entries(CONF.events).map(([id, e]) => ({ id, name: e.name || id, hall: (e.trigger || {}).hall || "" })) : []);
-  return { play, prefetch, onHall, list, get playing() { return playing; }, ready: confReady };
+  // trigger＝いつ起こるか（イベント確認のページ event-preview.html で、条件を表示するのに使う）
+  const list = () => (CONF ? Object.entries(CONF.events).map(([id, e]) => ({ id, name: e.name || id, hall: (e.trigger || {}).hall || (e.trigger || {}).room || "", trigger: { ...(e.trigger || {}) } })) : []);
+  // 思い出から見るとき（replay）も、注意書きの画面を出す（data/event-notice.json の askOnReplay を false にすると出さない）
+  const playAsked = (id, opts) => ((opts && opts.replay) ? ask(id, opts) : play(id, opts));
+  return { play: playAsked, playNow: play, ask, prefetch, onHall, onRoom, list, get playing() { return playing; }, ready: confReady };
 };

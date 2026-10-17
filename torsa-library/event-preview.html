@@ -3,70 +3,169 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>禁書庫イベント確認</title>
+<title>イベントの確認</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Kaisei+Decol:wght@500;700&family=Shippori+Mincho:wght@500;600&family=Zen+Maru+Gothic:wght@500;700&display=swap">
 <style>
-/* イベントだけを確認するためのページ（サイト本体は index.html。ここではイベントを何度でも見られる） */
+/* トルサ図書館：イベントだけを確認するページ（サイト本体は index.html）。
+   event/events.js が読みこむイベント（event/events.json と、羊の間のイベントなど追加のファイル）を一覧にして、
+   条件（好感度・先に見るイベント）に関係なく、何度でも見られます。サイトの来館記録は変わりません。 */
 :root {
-  --night: #0d0a17; --gold: #d6b062; --lamp: #f3d08a; --ink: #f2ecdc; --ink-soft: #bdb6cf;
+  --night: #0d0a17; --panel: rgba(30, 22, 52, .78); --line: rgba(214, 176, 98, .45);
+  --gold: #d6b062; --lamp: #f3d08a; --ink: #f2ecdc; --ink-soft: #bdb6cf; --ink-dim: #8f87a6;
   --font-display: "Kaisei Decol", "Hiragino Mincho ProN", "Yu Mincho", serif;
   --font-ui: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", "Yu Gothic", sans-serif;
-  --font-read: "Shippori Mincho", "Hiragino Mincho ProN", "Yu Mincho", serif;
   color-scheme: dark;
 }
-html, body { height: 100%; margin: 0; }
-body { background: radial-gradient(ellipse at 50% 30%, #2a1c46, var(--night) 70%); color: var(--ink); font-family: var(--font-ui); display: grid; place-items: center; padding: 16px; box-sizing: border-box; }
-main { max-width: 34em; text-align: center; }
-h1 { font-family: var(--font-display); font-weight: 700; font-size: clamp(24px, 6vw, 34px); letter-spacing: .12em; margin: 0 0 .2em; }
-h1 small { display: block; font-size: 13px; letter-spacing: .3em; color: var(--lamp); font-family: var(--font-ui); margin-bottom: .6em; }
-p { color: var(--ink-soft); line-height: 1.9; margin: .6em 0 1.6em; }
-button.start { border: 1px solid rgba(214, 176, 98, .7); background: linear-gradient(#4a2e62, #2c1b3e); color: var(--ink); font: 700 16px var(--font-ui); letter-spacing: .14em; padding: 12px 34px; border-radius: 999px; cursor: pointer; box-shadow: 0 8px 26px rgba(0,0,0,.4); }
-button.start::before { content: "✦"; color: var(--gold); margin-right: .6em; font-size: .8em; }
-button.start:hover { background: linear-gradient(#5a3874, #36214a); }
-button.start:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
-.keys { font-size: 12px; color: #8f87a6; margin-top: 1.6em; }
-.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: #f7f2e5; color: #2b2a3a; padding: 10px 20px; border-radius: 14px; box-shadow: 0 0 0 1.5px #c9a35a; opacity: 0; transition: opacity .4s; pointer-events: none; max-width: calc(100vw - 32px); box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { min-height: 100%; }
+body { margin: 0; min-height: 100vh; background: radial-gradient(ellipse at 50% 0%, #2a1c46, var(--night) 70%) fixed; color: var(--ink); font: 500 15px/1.7 var(--font-ui); }
+main { max-width: 860px; margin: 0 auto; padding: 32px max(16px, env(safe-area-inset-left)) 48px; box-sizing: border-box; }
+h1 { font: 700 clamp(24px, 5vw, 32px)/1.3 var(--font-display); letter-spacing: .12em; margin: 0; }
+h1 small { display: block; font: 700 12px/1.6 var(--font-ui); letter-spacing: .3em; color: var(--lamp); margin-bottom: .5em; }
+.lead { color: var(--ink-soft); margin: .8em 0 1.4em; }
+.opts { display: flex; flex-wrap: wrap; gap: 8px 20px; padding: 12px 16px; border: 1px solid var(--line); border-radius: 12px; background: rgba(20, 14, 36, .6); font-size: 14px; }
+.opts label { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; }
+.opts input { accent-color: var(--gold); width: 16px; height: 16px; }
+.evs { list-style: none; margin: 18px 0 0; padding: 0; display: grid; gap: 12px; }
+.ev-card { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 6px 16px; align-items: center; padding: 16px 18px; border: 1px solid var(--line); border-radius: 14px; background: var(--panel); box-shadow: 0 8px 24px rgba(0, 0, 0, .3); }
+.ev-card h2 { margin: 0; font: 700 18px/1.4 var(--font-display); letter-spacing: .06em; }
+.ev-card h2 code { margin-left: .6em; font: 500 12px var(--font-ui); color: var(--ink-dim); letter-spacing: 0; }
+.conds { grid-column: 1; display: flex; flex-wrap: wrap; gap: 6px; margin: 0; padding: 0; list-style: none; }
+.conds li { font-size: 12.5px; padding: 1px 10px; border-radius: 999px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .1); color: var(--ink-soft); }
+.conds li b { color: var(--lamp); font-weight: 700; }
+.play { grid-column: 2; grid-row: 1 / span 2; border: 1px solid rgba(214, 176, 98, .7); background: linear-gradient(#4a2e62, #2c1b3e); color: var(--ink); font: 700 15px var(--font-ui); letter-spacing: .12em; padding: 10px 24px; border-radius: 999px; cursor: pointer; white-space: nowrap; }
+.play::before { content: "✦"; color: var(--gold); margin-right: .5em; font-size: .8em; }
+.play:hover { background: linear-gradient(#5a3874, #36214a); }
+.play:focus-visible, .phone-close:focus-visible { outline: 2px solid var(--lamp); outline-offset: 3px; }
+@media (max-width: 560px) { .ev-card { grid-template-columns: 1fr; } .play { grid-column: 1; grid-row: auto; justify-self: start; } }
+.msg { margin-top: 18px; padding: 14px 16px; border-radius: 12px; border: 1px dashed var(--line); color: var(--ink-soft); font-size: 14px; }
+.keys { font-size: 12.5px; color: var(--ink-dim); margin-top: 22px; }
+.toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); z-index: 300; background: #f7f2e5; color: #2b2a3a; padding: 10px 20px; border-radius: 14px; box-shadow: 0 0 0 1.5px #c9a35a; opacity: 0; transition: opacity .4s; pointer-events: none; max-width: calc(100vw - 32px); box-sizing: border-box; }
 .toast.show { opacity: 1; }
+/* スマホの大きさで見る：390×844 の画面を、まどの高さに合わせて小さくして見せる */
+.phone { position: fixed; inset: 0; z-index: 250; display: grid; place-items: center; background: rgba(6, 4, 14, .86); }
+.phone-frame { position: relative; width: 390px; height: 844px; border-radius: 44px; overflow: hidden; box-shadow: 0 0 0 10px #1c1530, 0 0 0 11px var(--line), 0 30px 80px rgba(0, 0, 0, .6); transform-origin: center; }
+.phone-frame iframe { width: 100%; height: 100%; border: 0; display: block; background: #000; }
+.phone-close { position: fixed; top: max(14px, env(safe-area-inset-top)); right: 16px; border: 1px solid var(--line); background: #2c1b3e; color: var(--ink); font: 700 14px var(--font-ui); padding: 8px 18px; border-radius: 999px; cursor: pointer; }
+/* ?play= で開いたとき（スマホの大きさの中など）は、一覧を出さずにイベントだけ */
+body.bare main { display: none; }
+body.bare { background: #000; }
 </style>
 </head>
 <body>
 <main>
-
-  <button class="start" id="start">イベントを見る</button>
-  <p class="keys">「（吹き出し非表示）」で絵だけを見られます（H キーでも切りかえ）</p>
+  <h1><small>トルサ図書館</small>イベントの確認</h1>
+  <p class="lead">図書館で起こるイベントを、条件（好感度・先に見るイベント）に関係なく、何度でも見られます。ここで見ても、サイトの来館記録や「思い出」は変わりません。</p>
+  <div class="opts">
+    <label><input type="checkbox" id="optAsk"> 始まる前の「見る／今は見ない」の画面も出す</label>
+    <label><input type="checkbox" id="optPhone"> スマホの大きさで見る</label>
+  </div>
+  <ul class="evs" id="list" aria-label="イベントの一覧"></ul>
+  <p class="msg" id="msg" hidden></p>
+  <p class="keys">会話は、会話の箱かトルサ以外の場所をクリック（タップ）するか Enter で進みます。イベント中のトルサや小物にさわると反応します。「吹き出し非表示」か H キーで、絵だけを見られます。</p>
 </main>
-<div class="toast" id="toast"></div>
+<div class="phone" id="phone" hidden role="dialog" aria-modal="true" aria-label="スマホの大きさで見る">
+  <div class="phone-frame" id="phoneFrame"><iframe id="phoneView" title="スマホの大きさのイベント"></iframe></div>
+  <button class="phone-close" id="phoneClose" type="button">とじる</button>
+</div>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
 
 <script src="event/events.js"></script>
 <script>
 (() => {
-  // 確認用の小さな効果音（サイト本体では index.html の効果音を使います）
+  "use strict";
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+  const qs = new URLSearchParams(location.search), playId = qs.get("play");
+  if (playId) document.body.classList.add("bare");
+
+  // 確認用の小さな効果音（サイト本体では index.html の効果音を使います。名前はサイトと同じ）
   let ac = null;
   const tone = (f, t, d, v = .08, to = f, type = "sine") => { const o = ac.createOscillator(), g = ac.createGain(); o.type = type; o.frequency.setValueAtTime(f, t); o.frequency.exponentialRampToValueAtTime(to, t + d); g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(v, t + .01); g.gain.exponentialRampToValueAtTime(.0001, t + d); o.connect(g).connect(ac.destination); o.start(t); o.stop(t + d + .02); };
-  const noise = (t, d, freq, v) => { const n = ac.createBufferSource(), b = ac.createBuffer(1, ac.sampleRate * d, ac.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length) ** 2; n.buffer = b; const f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = freq; const g = ac.createGain(); g.gain.value = v; n.connect(f).connect(g).connect(ac.destination); n.start(t); };
+  const noise = (t, d, freq, v) => { const n = ac.createBufferSource(), b = ac.createBuffer(1, Math.max(1, ac.sampleRate * d), ac.sampleRate), ch = b.getChannelData(0); for (let i = 0; i < ch.length; i++) ch[i] = (Math.random() * 2 - 1) * (1 - i / ch.length) ** 2; n.buffer = b; const f = ac.createBiquadFilter(); f.type = "lowpass"; f.frequency.value = freq; const g = ac.createGain(); g.gain.value = v; n.connect(f).connect(g).connect(ac.destination); n.start(t); };
   const SOUNDS = {
     thud: (t) => { tone(140, t, .32, .3, 48); noise(t, .28, 700, .5); tone(90, t + .1, .2, .12, 50); },
     sweat: (t) => { tone(1500, t, .26, .08, 520); tone(1900, t + .22, .06, .05); },
     surprise: (t) => { tone(330, t, .16, .1, 1350); tone(2637, t + .12, .2, .04); },
     pat: (t) => { noise(t, .13, 1300, .25); tone(500, t, .12, .03, 560); },
-    shy: (t) => { tone(1120, t, .22, .08, 1318); tone(1500, t + .16, .4, .07, 1760); }
+    shy: (t) => { tone(1120, t, .22, .08, 1318); tone(1500, t + .16, .4, .07, 1760); },
+    heart: (t) => { tone(880, t, .16, .07, 1046); tone(1318, t + .12, .3, .06, 1568); },
+    tap: (t) => { noise(t, .08, 2400, .2); tone(700, t, .08, .04, 520); },
+    hover: (t) => { tone(1046, t, .12, .03, 1174); },
+    sparkle: (t) => { [1568, 2093, 2637].forEach((f, i) => tone(f, t + i * .06, .3, .04)); },
+    appear: (t) => { tone(523, t, .5, .05, 784); tone(1046, t + .1, .5, .03); }
   };
   const SFX = {
     play(name) { if (!ac) return; const f = SOUNDS[name]; if (f) f(ac.currentTime + .01); },
     blip() { if (!ac) return; tone(560 + Math.random() * 90, ac.currentTime, .05, .035, 620, "triangle"); }
   };
-  const toast = (text) => { const el = document.getElementById("toast"); el.textContent = "トルサ：" + text; el.classList.add("show"); setTimeout(() => el.classList.remove("show"), 4200); };
-  const EVENTS = window.TorsaEvents({ standalone: true, SFX, say: (l) => toast(typeof l === "string" ? l : l.text), onEnd: () => document.getElementById("start").focus() });
-  EVENTS.ready.then(() => EVENTS.prefetch("vault-fall"));
-  document.getElementById("start").addEventListener("click", () => {
-    try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch (e) {}
-    document.getElementById("start").textContent = "もう一度見る";
-    EVENTS.play("vault-fall");
+  const startAudio = () => { try { ac = ac || new (window.AudioContext || window.webkitAudioContext)(); ac.resume(); } catch (e) {} };
+  const toast = (text) => { const el = $("toast"); el.textContent = "トルサ：" + text; el.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("show"), 4200); };
+
+  if (!window.TorsaEvents) { $("msg").hidden = false; $("msg").textContent = "event/events.js が読みこめませんでした。このページは、サイトと同じフォルダ（torsa-library）に置いてください。"; return; }
+  const EVENTS = window.TorsaEvents({ standalone: true, SFX, say: (l) => toast(typeof l === "string" ? l : l.text), onEnd: () => { const b = document.querySelector(`.play[data-id="${CSS.escape(lastId)}"]`); if (b) b.focus(); } });
+  let lastId = "";
+
+  // 場所の名前（サイトの設定から。読めなければ、ここの名前）
+  const PLACE = { main: "本館", east: "東の書館", west: "西の書館", vault: "禁書庫", sheep: "羊の間", annex: "図書館の間" };
+  const getJ = (u) => fetch(u).then((r) => (r.ok ? r.json() : null)).catch(() => null);
+  const namesReady = Promise.all([getJ("data/library.json"), getJ("data/rooms.json")]).then(([lib, rooms]) => {
+    Object.entries((lib && lib.halls) || {}).forEach(([k, v]) => { if (v && v.name) PLACE[k] = v.name; });
+    Object.entries((rooms && rooms.rooms) || {}).forEach(([k, v]) => { if (v && v.name) PLACE[k] = v.name; });
   });
-  if (new URLSearchParams(location.search).has("auto")) setTimeout(() => EVENTS.play("vault-fall"), 300);
+
+  const play = (id) => {
+    lastId = id; startAudio();
+    if ($("optPhone").checked) { openPhone(id); return; }
+    if ($("optAsk").checked) EVENTS.ask(id, { replay: true }); else EVENTS.playNow(id, { replay: true });
+  };
+
+  // スマホの大きさ：このページを ?play= で開いて、390×844 の枠に入れる
+  const fitPhone = () => { const k = Math.min(1, (innerHeight - 90) / 844, (innerWidth - 40) / 390); $("phoneFrame").style.transform = `scale(${k})`; };
+  function openPhone(id) {
+    $("phoneView").src = `${location.pathname}?play=${encodeURIComponent(id)}${$("optAsk").checked ? "&ask=1" : ""}`;
+    $("phone").hidden = false; fitPhone(); $("phoneClose").focus();
+  }
+  const closePhone = () => { $("phone").hidden = true; $("phoneView").src = "about:blank"; const b = document.querySelector(`.play[data-id="${CSS.escape(lastId)}"]`); if (b) b.focus(); };
+  $("phoneClose").addEventListener("click", closePhone);
+  addEventListener("resize", () => { if (!$("phone").hidden) fitPhone(); });
+  addEventListener("keydown", (e) => { if (e.key === "Escape" && !$("phone").hidden) closePhone(); });
+  addEventListener("message", (e) => { if (e.origin === location.origin && e.data && e.data.torsaPreview === "close" && !$("phone").hidden) closePhone(); });
+
+  // ?play=名前 で開いたとき（スマホの大きさの枠の中など）：すぐにそのイベントを始める
+  if (playId) {
+    EVENTS.ready.then(() => setTimeout(() => (qs.has("ask") ? EVENTS.ask(playId, { replay: true }) : EVENTS.playNow(playId, { replay: true })), 300));
+    addEventListener("pointerdown", startAudio, { once: true });
+    // スマホの大きさの枠の中で Esc を押したら、外のページに「とじる」を伝える
+    if (parent !== window) addEventListener("keydown", (e) => { if (e.key === "Escape") parent.postMessage({ torsaPreview: "close" }, location.origin); }, true);
+    return;
+  }
+
+  // 一覧
+  Promise.all([EVENTS.ready, namesReady]).then(() => {
+    const list = EVENTS.list(), all = Object.fromEntries(list.map((e) => [e.id, e.name]));
+    if (!list.length) {
+      $("msg").hidden = false;
+      $("msg").innerHTML = "イベントが見つかりませんでした。<br>event フォルダ（events.json や hitsuji-no-ma など）が、このページと同じ torsa-library フォルダの中にあるか確かめてください。<br>また、パソコンで直接ファイルを開く（ダブルクリック）と読みこめないことがあります。VS Code の Live Preview など、サーバーで開いてください。";
+      return;
+    }
+    $("list").innerHTML = list.map((e) => {
+      const t = e.trigger || {}, conds = [];
+      if (t.room) conds.push(`<li><b>${esc(PLACE[t.room] || t.room)}</b>に入ったとき</li>`);
+      else if (t.hall) conds.push(`<li><b>${esc(PLACE[t.hall] || t.hall)}</b>に入ったとき</li>`);
+      else conds.push(`<li>自動では起こらない</li>`);
+      if (t.minAffinity) conds.push(`<li>好感度 <b>${esc(t.minAffinity)}</b> 以上</li>`);
+      (Array.isArray(t.after) ? t.after : t.after ? [t.after] : []).forEach((a) => conds.push(`<li><b>${esc(all[a] || a)}</b> を見たあと</li>`));
+      if (t.delaySec != null) conds.push(`<li>${esc(t.delaySec)} 秒後</li>`);
+      conds.push(`<li>${t.once === false ? "何度でも起こる" : "一度だけ（あとは思い出から）"}</li>`);
+      return `<li class="ev-card"><h2>${esc(e.name)}<code>${esc(e.id)}</code></h2><ul class="conds">${conds.join("")}</ul><button class="play" type="button" data-id="${esc(e.id)}">見る</button></li>`;
+    }).join("");
+    list.forEach((e) => EVENTS.prefetch(e.id)); // 絵を先に読んでおく
+  });
+  $("list").addEventListener("click", (e) => { const b = e.target.closest(".play"); if (b) play(b.dataset.id); });
 })();
 </script>
 </body>

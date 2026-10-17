@@ -1,0 +1,965 @@
+{
+  "_note": "羊の間のイベント（トルサの部屋で、ベッドに寝転がっているところを見つけてしまう）。動かし方は event/events.js（events.json と同じ書き方）。絵 hirune.svg は仮の絵で、レイヤー（id）の名前を変えずに描き直せば、そのまま入れかえられます（レイヤー分けは layer-tool.html）。背景は bed.svg（ベッドのキルトの模様）をくり返して並べています。",
+  "events": {
+    "hitsuji-hirune": {
+      "name": "羊の間：ひみつのおひるね",
+      "_triggerNote": "room＝羊の間に入ったとき。after＝禁書庫のイベント（vault-fall）を見たあと。minAffinity＝トルサの好感度が200以上。delaySec＝入ってから何秒で始まるか。一度見たら起こらず、パレットの「思い出」から見返せます。",
+      "trigger": {
+        "room": "sheep",
+        "after": "vault-fall",
+        "minAffinity": 200,
+        "delaySec": 5
+      },
+      "scratchOrigin": [-101.47536, 15.51341],
+      "outfit": "b",
+      "art": "event/hitsuji-no-ma/hirune.svg",
+      "canvas": [
+        263.10425,
+        284.93365
+      ],
+      "_cameraNote": "rotate＝寝転がっている傾き（度）。anchor＝絵の中で画面の at に置く点（いまは胸のあたり）。view＝画面に入れる広さ（小さいほど大きく映る）。phone＝縦長のスマホのとき（傾きも別にできる）。zoom＝40秒かけて、ゆっくり寄る",
+      "camera": {
+        "view": [
+          250,
+          150
+        ],
+        "at": [
+          0.36,
+          0.5
+        ],
+        "anchor": [
+          132,
+          96
+        ],
+        "rotate": -46,
+        "zoom": 1.03,
+        "phone": {
+          "view": [
+            136,
+            215
+          ],
+          "at": [
+            0.48,
+            0.42
+          ],
+          "anchor": [
+            136,
+            100
+          ],
+          "rotate": -18
+        }
+      },
+      "bg": {
+        "image": "event/hitsuji-no-ma/bed.svg",
+        "imageSize": "300px",
+        "stripes": false,
+        "smoke": false,
+        "motes": 16,
+        "moteColor": "#fff1c2",
+        "moteGlow": "rgba(255, 214, 140, .5)",
+        "top": "#1d2b60",
+        "bottom": "#141f4a",
+        "glow": "#2c3c86"
+      },
+      "sounds": {
+        "pan":   { "src": "event/events/pan.opus", "volume": 0.9, "loop": true  },
+        "kuchu": { "src": "event/events/kuchu.opus", "volume": 0.6, "loop": true }
+      },
+      "intro": {
+        "shake": 0.15,
+        "fall": false
+      },
+      "motion": {
+        "breathe": 4.2,
+        "breatheAmount": 0.016,
+        "sway": 0.5,
+        "look": 0.6,
+        "hairLag": 0.5
+      },
+      "box": {
+  "color": "rgba(247, 242, 229, 0.6)",
+  "ring": "rgba(247, 242, 229, 0.45)"
+},
+      "_partsNote": "parts は layer-tool.html の「parts に貼る行」と同じ。patch は脚のあいだの下じき。touch＝さわったときの反応の種類（head・ear・horn・collar・body）。prop_ ではじまるのはベッドの上の小物（props.svg。art に書いたファイルの絵を使う）。トルサの絵より前に書いたものは下、あとに書いたもの（ぬいぐるみ・毛布・本）は上に重なります",
+      "parts": [
+{"id": "prop_pillow", "art": "event/hitsuji-no-ma/props.svg", "bone": "bed"},
+        {
+          "id": "prop_cushion",
+          "art": "event/hitsuji-no-ma/props.svg",
+          "bone": "bed"
+        },
+                {
+          "id": "prop_blanket",
+          "art": "event/hitsuji-no-ma/props.svg",
+          "bone": "bed"
+        },
+        {
+          "id": "patch",
+          "bone": "legs"
+        },
+        {
+          "id": "cape_r",
+          "bone": "cape_r"
+        },
+        {
+          "id": "cape_l",
+          "bone": "cape_l"
+        },
+        { "id": "boubou", "bone": "boubou", "touch": "boubou",  
+              "hidden": true},
+              
+
+        {
+          "id": "legs",
+          "bone": "legs",
+          "touch": "body"
+        },
+        {
+          "id": "arm_r",
+          "bone": "arms",
+          "touch": "collar"
+        },
+        {
+          "id": "arm_l",
+          "bone": "arms",
+          "touch": "collar"
+        },
+        {
+          "id": "hair_back",
+          "bone": "hair",
+          "touch": "head"
+        },
+        {
+          "id": "lock_back_l",
+          "bone": "lock_back_l",
+          "touch": "head"
+        },
+        {
+          "id": "lock_back_r",
+          "bone": "lock_back_r",
+          "touch": "head"
+        },
+        {
+          "id": "shirt",
+          "bone": "body",
+          "touch": "body"
+        },
+        {
+          "id": "lock_l",
+          "bone": "lock_l",
+          "touch": "head"
+        },
+        {
+          "id": "lock_r",
+          "bone": "lock_r",
+          "touch": "head"
+        },
+        {
+          "id": "ear_l",
+          "bone": "ear_l",
+          "touch": "ear"
+        },
+        {
+          "id": "ear_r",
+          "bone": "ear_r",
+          "touch": "ear"
+        },
+        {
+          "id": "horn_r",
+          "bone": "horn_r",
+          "touch": "horn"
+        },
+        {
+          "id": "horn_l",
+          "bone": "horn_l",
+          "touch": "horn"
+        },
+        {
+          "id": "neck_shade",
+          "bone": "head"
+        },
+        {
+          "id": "face",
+          "bone": "head",
+          "touch": "head"
+        },
+        {
+          "id": "hair_front",
+          "bone": "hair",
+          "touch": "head"
+        },
+        {
+          "id": "ahoge",
+          "bone": "ahoge",
+          "touch": "head"
+        },
+        {
+          "id": "eye_r",
+          "bone": "eye_r"
+        },
+        {
+          "id": "eye_l",
+          "bone": "eye_l"
+        },
+        {
+          "id": "blush",
+          "bone": "head",
+          "alpha": "blush"
+        },
+        {
+          "id": "mouth",
+          "bone": "head"
+        },
+        {
+          "id": "hand_l",
+          "bone": "arms",
+          "touch": "collar"
+        },
+        {
+          "id": "hand_r",
+          "bone": "arms",
+          "touch": "collar"
+        },
+        {
+          "id": "book",
+          "bone": "book",
+          "touch": "book"
+        },
+        {
+          "id": "bookmark",
+          "bone": "book",
+          "touch": "body", 
+              "hidden": true, "autoHide": 3,
+               "autoHideFade": 1 },
+                       {
+          "id": "siori",
+          "bone": "book",
+          "touch": "body", 
+              "hidden": true, "autoHide": 3,
+               "autoHideFade": 1 },
+        {
+          "id": "prop_plush",
+          "art": "event/hitsuji-no-ma/props.svg",
+          "bone": "bed"
+        },
+        {"id": "cape_r_b", "layer": "cape_r", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "cape_r"},
+{"id": "cape_l_b", "layer": "cape_l", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "cape_l"},
+{"id": "hair_back_b", "layer": "hair_back", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "hair", "touch": "head"},
+{"id": "lock_back_l_b", "layer": "lock_back_l", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "lock_back_l", "touch": "head"},
+{"id": "lock_back_r_b", "layer": "lock_back_r", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "lock_back_r", "touch": "head"},
+{"id": "arm_l_b", "layer": "arm_l", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "arm_chest", "touch": "collar"},
+{"id": "arm_r_b", "layer": "arm_r", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "arms", "touch": "collar"},
+{"id": "shirt_b", "layer": "shirt", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "body", "touch": "body"},
+{"id": "belt_b", "layer": "belt", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "body", "touch": "body", "drawAfter": "legs_b"},
+{"id": "legs_b", "layer": "legs", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "legs", "touch": "body", "drawAfter": "shirt_b"},
+{"id": "lock_r_b", "layer": "lock_r", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "lock_r", "touch": "head"},
+{"id": "ear_l_b", "layer": "ear_l", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "ear_l", "touch": "ear"},
+{"id": "ear_r_b", "layer": "ear_r", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "ear_r", "touch": "ear"},
+{"id": "lock_l_b", "layer": "lock_l", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "lock_l", "touch": "head"},
+{"id": "horn_r_b", "layer": "horn_r", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "horn_r", "touch": "horn"},
+{"id": "horn_l_b", "layer": "horn_l", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "horn_l", "touch": "horn"},
+{"id": "neck_shade_b", "layer": "neck_shade", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "head"},
+{"id": "face_b", "layer": "face", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "head", "touch": "head"},
+   {"id": "blush_b", "layer": "blush", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "head", "alpha": "blush"},
+{"id": "mouth_b", "layer": "mouth", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "head"},
+{"id": "hair_front_b", "layer": "hair_front", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "hair", "touch": "head"},
+{"id": "ahoge_b", "layer": "ahoge", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "ahoge", "touch": "head"},
+{"id": "eye_r_b", "layer": "eye_r", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "eye_r"},
+{"id": "eye_l_b", "layer": "eye_l", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "eye_l"},
+{"id": "hand_r_b", "layer": "hand_r", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "arms", "touch": "collar"},
+{"id": "hand_l_b", "layer": "hand_l", "art": "event/hitsuji-no-ma/hirune_3.svg", "outfit": "b", "bone": "arm_chest", "touch": "collar"},
+        {
+          "id": "prop_books",
+          "art": "event/hitsuji-no-ma/props.svg",
+          "bone": "bed"
+        }
+      ],
+      "_bonesNote": "骨：pivot＝回る中心（絵の座標）。arms＝顔をかくしている両腕（頭といっしょに動くので、手が顔からずれない）、book＝胸の本（wobble で、息に合わせてかすかにゆれる）",
+"bones": [
+  {"id": "bed", "pivot": [0, 0]},
+  {"id": "root", "pivot": [138, 150]},
+  
+        {
+          "id": "legs",
+          "parent": "root",
+          "pivot": [
+            140,
+            128
+          ]
+        },
+{"id": "boubou", "parent": "root", "pivot": [137, 369], "wobble": {"r": 0, "x": 0, "y": 3, "speed": 1.5}},
+        {
+          "id": "body",
+          "parent": "root",
+          "pivot": [
+            140,
+            138
+          ]
+        },
+        {
+          "id": "cape_l",
+          "parent": "body",
+          "pivot": [
+            122,
+            72
+          ]
+        },
+        {
+          "id": "cape_r",
+          "parent": "body",
+          "pivot": [
+            158,
+            62
+          ]
+        },
+        {
+          "id": "book",
+          "parent": "body",
+          "pivot": [
+            137,
+            142
+          ],
+          "wobble": {
+            "r": 0.5,
+            "speed": 0.9,
+            "x": 0.2,
+            "y": 0.4
+          }
+        },
+        {
+          "id": "head",
+          "parent": "body",
+          "pivot": [
+            134,
+            58
+          ]
+        },
+        {
+          "id": "hair",
+          "parent": "head",
+          "pivot": [
+            134,
+            36
+          ]
+        },
+        {
+          "id": "ahoge",
+          "parent": "hair",
+          "pivot": [
+            153,
+            15
+          ]
+        },
+        {
+          "id": "lock_back_l",
+          "parent": "head",
+          "pivot": [
+            124,
+            26
+          ]
+        },
+        {
+          "id": "lock_back_r",
+          "parent": "head",
+          "pivot": [
+            146,
+            22
+          ]
+        },
+        {
+          "id": "lock_l",
+          "parent": "head",
+          "pivot": [
+            119,
+            50
+          ]
+        },
+        {
+          "id": "lock_r",
+          "parent": "head",
+          "pivot": [
+            151,
+            49
+          ]
+        },
+        {
+          "id": "ear_l",
+          "parent": "head",
+          "pivot": [
+            124,
+            41
+          ]
+        },
+        {
+          "id": "ear_r",
+          "parent": "head",
+          "pivot": [
+            149,
+            42
+          ]
+        },
+        {
+          "id": "horn_l",
+          "parent": "head",
+          "pivot": [
+            121,
+            28
+          ]
+        },
+        {
+          "id": "horn_r",
+          "parent": "head",
+          "pivot": [
+            146,
+            28
+          ]
+        },
+        {
+          "id": "eye_l",
+          "parent": "head",
+          "pivotOf": "eye_l"
+        },
+        {
+          "id": "eye_r",
+          "parent": "head",
+          "pivotOf": "eye_r"
+        },
+        {
+          "id": "arms",
+          "parent": "head",
+          "pivot": [
+            138,
+            60
+          ],
+          "wobble": {
+            "r": 0.6,
+            "speed": 1.2,
+            "x": 0.3,
+            "y": 0.3
+          }
+        },
+        {"id": "arm_chest", "parent": "body", "pivot": [118, 82], "wobble": {"r": 0.5, "speed": 1.1, "x": 0.2, "y": 0.2}}
+      ],
+      "_facesNote": "表情：blush＝頬の赤み、squeeze＝目をぎゅっ、hide＝顔をうずめる、tremble＝ぷるぷる、tilt＝首のかたむき（度）",
+      "faces": {
+        "sleep": {
+          "blush": 0.25,
+          "squeeze": 0.15
+        },
+        "wake": {
+          "blush": 0.5,
+          "squeeze": 0.1,
+          "tremble": 0.2
+        },
+        "caught": {
+          "blush": 1.1,
+          "squeeze": 0.9,
+          "tremble": 0.7,
+          "hide": 0.4,
+          "tilt": -1.5
+        },
+        "shy": {
+          "blush": 1.3,
+          "squeeze": 0.7,
+          "tremble": 0.3,
+          "hide": 0.6,
+          "tilt": 2
+        },
+        "soft": {
+          "blush": 0.8,
+          "squeeze": 0.3,
+          "tilt": 1.5
+        }
+      },
+      "lines": [
+        
+             {
+          "speaker": "",
+          "text": "トルサは気持ちよさそうに寝ている。",
+          "face": "dazed",
+          "leaves": "rest"
+        },
+     {
+          "speaker": "",
+          "text": "いつもと変わらない静かな夜だった。彼の丸い羊の耳が微かにピクピクと動いている。白くて柔らかそうなその耳は、眠っていてもなお周囲の音に敏感に反応しているらしい。月明かりがカーテンの隙間から差し込み、トルサのあどけない寝顔とふわふわの髪を優しく照らしていた。彼の閉じたまぶたの上には、長いまつ毛の影が落ちている。小さな鼻はすんすんと空気を吸い、唇は少しだけ緩んでなにかいい夢でも見ているかのようだった。",
+          "face": "dazed",
+          "leaves": "rest"
+        },
+             {
+          "speaker": "",
+          "text": "あなたの手が、そっとトルサの頬に触れる。その指先はひんやりとしていて、眠っている彼の肌には少し冷たく感じられたかもしれない。",
+          "face": "dazed",
+          "leaves": "rest"
+        },
+
+                     {
+          "speaker": "",
+          "text": "トルサは微かに身じろぎしたが、まだ目を覚まさない。無防備な寝顔を晒したまま、規則正しい寝息を続けている。プレイヤーの手はそのままトルサの首筋へと滑り、鎖骨のあたりをなぞった。彼の肌はすべすべしていて、羊の獣人らしくところどころに産毛のような柔らかい毛が生えている。その手触りを確かめるように、プレイヤーはゆっくりと手を動かした。",
+          "face": "dazed",
+          "caught": {"tremble": 1.5},
+          "flinch": 0.2, 
+          "leaves": "rest"
+        },
+
+        {
+          "text": "んぅ……",
+          "face": "sleep", "blush": 0.9,
+          "leaves": "rest",
+          "sfx": "pat",
+           "caught": { "tremble": 1}},
+                             {
+          "speaker": "",
+          "text": "トルサが小さく声を漏らす。まぶたが微かに震えたが、まだ深い眠りの底にいるようだ。あなたは構わず、彼のシャツのボタンに指をかける。パジャマ代わりの粗末なシャツは、簡単に外れた。布団を剥ぐように、あなたはそれをたくし上げていく。トルサの白い胸元が露わになる。鎖骨の下には、小さなピンク色の乳首が二つ慎ましげに息づいていた。",
+          "hide": ["shirt_b", "arm_l_b", "arm_r_b", "hand_l_b", "hand_r_b"], "show": ["shirt", "arm_l", "arm_r", "hand_l", "hand_r"], "leaves": "wiggle", "fadeSec": 0.6,"face": "sleep", "blush": 0.9},
+
+                               {
+          "speaker": "",
+          "text": "冬の冷気が肌に触れたのであろう、トルサは少しだけ身を縮めた。しかし、それでも目を覚まさない。あなたはその様子をじっと見下ろしながら、手を下へと滑らせる。肋のひとつひとつを確かめるように、ゆっくりと優しく撫でていく。彼の肌は驚くほど滑らかで、まるで絹のようだった。",
+          "face": "sleep", "blush": 0.9,
+          "leaves": "rest"
+          
+        },
+
+                {
+          "text": "ふにゃ……ぁ…",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 0.9
+        },
+
+                                       {
+          "speaker": "",
+          "text": "トルサの口から、甘えるような寝息が漏れる。彼の意識はまだ夢の中だが、体は少しずつ現実の感触に反応し始めていた。プレイヤーはその反応を確かめるように、手のひらで彼の腹部を撫でる。へその周りを円を描くように触れられ、トルサの腹筋が微かにぴくぴくと痙攣した。",
+          "face": "sleep", "blush": 0.9,
+          "leaves": "rest",
+          "caught": {"tremble": 1.5}
+        },
+
+                                               {
+          "speaker": "",
+          "text": "あなたはズボンの中に手を差し入れる。直接触れたトルサのそこは、まだ柔らかくて温かかった。あなたの指が優しくそれを包み込むと、トルサの口からは小さな吐息が漏れる。",
+          "face": "sleep", "blush": 0.9,
+          "leaves": "rest",
+          "flinch": 0.8, 
+          "caught": {"tremble": 1.5}
+        },
+
+                        {
+          "text": "んん……ぅ、ふぁ……",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1
+        },
+
+                                               {
+          "speaker": "",
+          "text": "トルサの腰が、無意識のうちに小さく揺れる。そして、彼のそこも徐々に硬さを増していった。あなたはそれを確認すると、一度手を離しトルサのズボンと下着を完全に引き抜いた。下半身を露わにされたトルサは、それでもまだ眠っている。無防備なその姿は、まるで捧げ物のようだった。",
+   "outfit": "", "fadeSec": 0.35, "flash": {"count": 1, "strength": 0.55}},
+
+                           {
+          "text": "ふわぁ……んぅ……",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1
+        },
+
+                                                       {
+          "speaker": "",
+          "text": "トルサの脚が、少しだけ開く。まるで夢の中でなにかを感じているかのように。あなたはその隙間に体を滑り込ませると、彼の脚をそっと抱え上げた。そして、自分のものをトルサの入り口に宛てがう。それは、トルサにとってはあまりにも大きなものだった。先端が窄まりに触れただけで、トルサの眉が微かに顰められた。",
+          "face": "sleep", "blush": 1,
+          "leaves": "rest",
+          "show": ["boubou"],
+           "sound": "kuchu",
+          "flinch": 0.8, 
+          "caught": {"tremble": 1.5}
+        },
+
+        {
+          "text": "ん……ぅ…",
+          "face": "sleep", "blush": 1,
+          "leaves": "wiggle"
+        },
+
+        {
+          "speaker": "",
+          "text": "ゆっくりと、プレイヤーは腰を進める。ぬるりとした感触がトルサの入り口を押し広げる。しかし、彼の体はまだ十分にほぐれていない。きつい締め付けが、プレイヤーを迎え入れることを拒んでいるようだった。",
+          "face": "sleep", "blush": 1,
+                    "leaves": "wiggle",
+                    "sfx": "pat",
+                    "boneMotion": { "boubou": { "wobble": { "speed": 2, "y": 10 }}},
+                    "motion": { "struggle": 0.2     }
+        },
+                        {
+          "text": "ふぁ……ぁ…んん…",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1,
+         "shake": 1
+        },
+
+                {
+          "speaker": "",
+          "face": "sleep", "blush": 1,
+          "text": "トルサのまぶたが震える。夢の中で、彼はなにかを感じ取っている。それは痛みにも似た、しかし甘い圧迫感だった。眉がぎゅっと寄せられ、唇が微かに開く。そこから零れる吐息は、次第に甘さを帯びていった。"
+        },
+
+                {
+          "speaker": "",
+          "text": "プレイヤーはさらに深く沈み込む。トルサの窄まりが、ずぶりと頭を飲み込んだ。その瞬間、トルサの全身がびくりと大きく跳ねた。",
+          "face": "sleep", "blush": 1.3,
+                    "leaves": "wiggle",
+                    "sfx": "pat",
+                    "boneMotion": { "boubou": { "wobble": { "speed": 3, "y": 20 }}},
+                    "motion": { "struggle": 0.4     }
+        },
+
+                                {
+          "text": "ひゃ……ぁ…！？",
+          "leaves": "rest",
+          "sfx": "pat",
+          "touchSet": "okita",
+         "face": "sleep", "blush": 1.3,
+         "shake": 1
+        },
+                                        {
+          "text": "え……？ ぁ……、なに……これ……",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+                        {
+          "speaker": "",
+          "text": "あなたはトルサの言葉を無視し、トルサの脚を広げ、迷わず一気に奥まで腰を沈めた。トルサの入り口が、あなたのものをぎゅうぎゅうと押し広げる。彼の体はまだ十分にほぐれていなかったが、そこはすぐにあなたの熱を飲み込んでいった。",
+          "face": "sleep", "blush": 1.3,
+                    "leaves": "wiggle",
+                    "sfx": "pat",
+                    "boneMotion": { "boubou": { "wobble": { "speed": 2, "y": 50, "dir": "up" }}}
+        },
+                                                {
+          "text": "ひぁあっ！！ やっ、やだっ！ こんな……一気に……！",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+                                  {
+          "speaker": "",
+          "text": "トルサの悲鳴に近い喘ぎ声が寝室に響く。しかしあなたは構わず激しく腰を打ち付ける。",
+          "face": "dazed",
+                    "shake": 0.6,
+          "leaves": "rest",
+                    "sfx": "pat",
+                    "motion": {
+            "struggle": 0.5
+          },
+          "sound": "pan",
+          "boneMotion": { "boubou": { "wobble": { "speed": 2, "y": 60, "dir": "up" }}}
+        },
+
+                                                        {
+          "text": "あっ！ だめっ！ 起きたばっかりで……こんなっ……！ ぁあっ！♡",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+                                
+         { "speaker": "",
+          "text": "パンッ、パンッと肌と肌がぶつかる音が部屋に響き渡る。トルサの羊の耳が激しく揺れ、ふわふわの尾がピンと張り詰めている。",
+          "face": "dazed",
+                    "shake": 1,
+          "leaves": "rest",
+                    "sfx": "pat",
+                    "motion": {
+            "struggle": 1.2,
+           "allSpeed": 1.2
+          },
+          
+          "sound": "pan",
+          "boneMotion": { "boubou": { "wobble": { "speed": 3, "y": 85, "dir": "up" }}}
+        },
+
+                                                                {
+          "text": "あっ！ んぁっ！ あっ！ だめっ！ そこっ！ そこ弱いのぉっ 起きたばっかりで……こんなっ……！ ぁあっ！♡",
+          "leaves": "rest",
+          "sfx": "pat",
+          "shake": 1,
+         "face": "sleep", "blush": 1.3
+        },
+
+         {"speaker": "",
+          "text": "トルサの涙目があなたを見上げる。しかしその目は快楽に濡れ、口元はだらしなく緩んでいた。",
+          "face": "sleep", "blush": 1.3},
+
+
+     {
+          "text": "ぁあっ！ すごいっ！♡すごいよぉっ！♡おちんちん……大きくて……っ！♡",
+          "leaves": "rest",
+          "shake": 1,
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+                 {"speaker": "",
+          "text": "あなたはトルサの腰を掴み、より一層激しく突き上げる。",
+          "shake": 1,
+          "face": "sleep", "blush": 1.3},
+
+               {
+          "text": "ひゃうっ！ ぁあっ！ イクッ！ イっちゃうっ！ もうイっちゃうよぉっ！",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+   
+                         {"speaker": "",
+          "text": "トルサの体が大きく反り返る。そしてあなたの腕の中で、ビクビクと痙攣しながら達した。",
+ "face": "sleep", "blush": 1.3,
+  "shake": 2,
+  "motion": { "struggle": 1, "allSpeed": 1 },
+  "show": ["siori"],
+  "flash": { "count": 2, "strength": 0.6 },
+  "leaves": "rest",
+  "boneMotion": { "boubou": { "wobble": { "speed": 1, "y": 10, "dir": "up" } } }
+},
+
+                       {
+          "text": "はぁ……はぁ……ぁ…もう……むり……",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+
+         {"speaker": "",
+          "text": "達したばかりのトルサは息も絶え絶えにそう呟く。しかしあなたは止まらない。",
+          "face": "sleep", "blush": 1.3,
+                              "motion": {
+            "struggle": 1.2,
+           "allSpeed": 1.2
+          },
+          "boneMotion": { "boubou": { "wobble": { "speed": 2, "y": 50, "dir": "up" }}}},
+
+                                 {
+          "text": "やぁっ！ イッたばかりなのにぃっ！ ぁあっ！ だめっ！ おかしくなっちゃうっ！",
+          "leaves": "rest",
+          "shake": 1,
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+
+                 {"speaker": "",
+          "text": "あなたはトルサの言葉を無視して、さらに激しく彼を突き上げた。トルサはもう言葉も出ないのか、ただ喘ぎ声だけを上げている。その声は甘く切なく、そしてどこか嬉しそうだった。",
+          "face": "sleep", "blush": 1.3,
+          "shake": 2,
+                              "motion": {
+            "struggle": 1.2,
+           "allSpeed": 1.2
+          },
+          "boneMotion": { "boubou": { "wobble": { "speed": 3, "y": 85, "dir": "up" }}}},
+
+                                         {
+          "text": "んぁっ！ あっ！ すごいっ！ 壊れちゃうっ！ 壊れちゃうよぉっ！",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+
+                       {"speaker": "",
+          "text": "より一層深くそして激しくトルサを突き上げる。トルサの白い肌は汗ばみ、その体はあなたの腕の中で無力に揺れていた。",
+          "face": "sleep", "blush": 1.3,
+          "shake": 1
+        },
+
+                                                 {
+          "text": "あぁっ！ だめっ！ またイっちゃうっ！ お願いっ！ 一緒にっ！ 一緒にイってぇっ！",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3
+        },
+
+                       {"speaker": "",
+          "text": "トルサの懇願にあなたはさらに熱を上げた。そして、トルサの最も奥深くにあなたのものが叩きつけられる。",
+          "face": "sleep", "blush": 1.3,
+          "shake": 1
+        },
+
+                                                 {
+          "text": " あったかいっ！ おちんちんあったかいの、いっぱいきてるぅっ！",
+          "leaves": "rest",
+          "sfx": "pat",
+         "face": "sleep", "blush": 1.3,
+         "shake": 2
+        },
+
+                                       {"speaker": "",
+          "text": "その瞬間、トルサの体が大きく痙攣し彼は二度目の絶頂を迎えた。あなたも同時に、彼の奥深くで果てていた。",
+  "face": "sleep", "blush": 1.3,
+  "shake": 2,
+  "motion": { "struggle": 1, "allSpeed": 1 },
+  "show": ["siori"],
+  "flash": { "count": 2, "strength": 0.6 },
+  "leaves": "rest",
+  "stopSound": [
+    { "name": "kuchu", "fade": 2 },
+    { "name": "pan", "fade": 2 }
+  ],
+  "boneMotion": {"boubou": {"offset": {"y": -70}, "wobble": {"y": 0, "r": 0, "x": 0}}}
+},
+
+                                       {
+          "text": "はぁ……はぁ……はぁ……ぁ…",
+  "face": "sleep", "blush": 1.3,
+  "motion": { "struggle": 0.1, "allSpeed": 0.1 },
+  "leaves": "rest",
+  "boneMotion": {"boubou": {"offset": {"y": -20}, "wobble": {"y": 0, "r": 0, "x": 0}}}
+},
+
+                                       {
+          "text": "…好、き……",
+  "face": "sleep", "blush": 1.3,
+  "motion": { "struggle": 0.1, "allSpeed": 0.1 },
+  "leaves": "rest",
+  "boneMotion": {"boubou": {"offset": {"y": -20}, "wobble": {"y": 0, "r": 0, "x": 0}}}
+},
+                                       {
+          "text": "ひゃぁっ！！♡",
+          "face": "sleep", "blush": 1.3,
+          "shake": 2,
+                              "motion": {
+            "struggle": 1.2,
+           "allSpeed": 1.2
+          },
+          "boneMotion": { "boubou": { "wobble": { "speed": 3, "y": 85, "dir": "up" }}}}
+
+      ],
+      "after": "……///",
+      "touchLineSfx": "heart",
+ "_touchNote": "さわったときのひとこと（種類ごと）。flinch＝ビクッとする強さ。on＝何回目にさわったときの特別な反応（say・face・jump・flinch・shake・blush など）",
+      "touch": {
+        "head": {
+          "lines": ["すぅ……すう……んぅ……すぅ……"]},
+
+        "ear": {
+          "flinch": 0.6,
+          "lines": ["ふにゃ……ぁ…"]
+        },
+        "horn": {
+          "flinch": 0.4,
+          "lines": ["ん……ぅ…"]
+        },
+
+        "body": {
+          "lines": ["んん……ぅ、ふぁ……"]
+        }
+      },
+      
+"secrets": {
+  "boubou": {
+    "lines": ["ん……ぁ…？"],
+    "repeat": ["ふわぁ……んぅ……"],
+    "bounce": {"y": -100, "pace": 0.1},
+    "on": {
+      "20": {"say": "ん……ぅ…あ……", "face": "caught", "jump": 2, "show": ["siori"], "flash": {"count": 2, "strength": 0.6}, "boneMotion": {"boubou": {"wobble": {"y": 6, "speed": 3}}}}
+    }
+  },
+  "book": {
+    "lines": ["ん……ぁ、あ……ふぁ……"],
+    "repeat": ["あ……ぁ、や……でも、ん……ぁ"],
+    "flinch": 0.5,
+    "on": {
+      "20": {"say": "はぁ……あ…ぁ……", "face": "caught", "shake": 2, "show": ["siori"], "flash": {"count": 2, "strength": 0.6}, "boneMotion": {"boubou": {"wobble": {"y": 6, "speed": 3}}}}
+    }
+  }
+},
+
+
+      "_touchSetsNote": "途中から入れかわる、さわったときの反応。セリフ・選択肢・on に \"touchSet\": \"okita\" と書くと、そこからこっちの反応になる（\"touchSet\": \"\" で上の反応にもどる）。書いた種類・部品だけ入れかわり、何回目（on）は入れかえたときから数えなおす",
+      "touchSets": {
+        "okita": {
+          "touch": {
+            "head": {
+              "lines": ["ふにゃぁ……そこ、撫でられるともっと、へんになっちゃうよぉ……",
+"ひゃうっ……！ そんなに優しくされたら……ぁ、だめぇ……",
+"ふぁ……そこ、撫でないでぇ……ぜんぶ、とけちゃうからぁ……",
+"やぁ……そんな、頭撫でながらそんな……ぁ、あ、あっ……",
+"ひぁっ……！ だ、だからぁ……そこ、弱いんだってばぁ……",
+"そんなの……そんなの、もっとって思っちゃうじゃない……ぁ",
+"ふにゃぁ……もう、わけわかんなくなっちゃうよぉ……",
+"やぁ……やだぁ……それだけで、イっちゃうからぁ……",
+"んぅ……そこ、撫でるの……ずるいよぉ……",
+"あっ……だめ、そこ……んぅ、ぜんぶぜんぶ溶けちゃいそう……"
+        ]},
+
+            "ear": {
+              "flinch": 0.8,
+              "lines": [
+                "ひゃんっ……！ つのだめぇ……それすごくへんになるからぁ……！",
+"あっ……つの、撫でられると……ぁ、からだ震えちゃうよぉ……",
+"ふぁぁっ……！ つのそんな……あっなんかすごいの来ちゃう……",
+"やぁ……つのそんなにされたらぁ……ああっくらくらするぅ……",
+"ふにゃっ……つの、なでなで、しちゃ……ぁ、だめぇ……",
+"あぅ……つの、つままないでぇ……も、もう、われちゃうよぉ……",
+"ややだぁ……つの、そこ……あっ、ん、だめ、それ、いちばんだめなやつぁ……"
+            ]},
+
+            "collar": {
+              "lines": [
+                "……み、見ないでぇ……"
+              ]}
+
+          },
+          "secrets": {
+      "boubou": {    "lines": ["ひぁっ……ちんぽ、そんな、つよく……ぁ、だめ、でちゃうでちゃうよぉ……"],
+    "repeat": ["ややだぁ……ちんぽなでなで……しちゃだめぇ……あっあぁ……",
+"んぅっ……ちんぽそこ……あっもうびくびくとまんないのぉ……",
+"ふぁっ……ちんぽ、そんな……ぁ、からだのなかぐちゃぐちゃなっちゃう……",
+"あっ……ちんぽ、さわると……ぁ、さっきのまたきちゃうよぉ……",
+"ひゃうっ……ちんぽ、だめっ、そこ、だめぇ……イっちゃうイっちゃうのぉ……",
+"やぁ……ちんぽ、つままないでぇ……ぁ、もう、でる、なんかでちゃう……",
+"ふにゃっ……ちんぽそんな……ぁああっくらくらするぅ……",
+"ひぁっ……ちんぽ、そこ……あっ、ん、だめ、それ、いちばんだめなやつぁ……"],
+    "bounce": {"y": -100, "pace": 0.1},
+    "on": {
+      "20": {"say": "も、もう……だめ……イっちゃう……イっちゃうよぉ……", "face": "caught", "jump": 2, "show": ["siori"], "flash": {"count": 2, "strength": 0.6}, "boneMotion": {"boubou": {"wobble": {"y": 6, "speed": 3}}}}
+ }
+      },
+      "book": {
+    "lines": ["ひゃうっ……！ そ、それ、もっと奥……ぁ、だめ、いっちゃう……"],
+    "repeat": [
+"やぁ……そんなに押し込まないでぇ……ぁ、なか、いっぱいになっちゃう……",
+"ふぁっ……そこ、そんな……ぁ、あ、あっ、もっともっと来てぇ……",
+"んぅっ……そこ、つよ……ぁ、だめ、なかからおされるのぉ……",
+"あっ……そこ、さわると……ぁ、ピストンもっとはげしくなったぁ……",
+"ややだぁ……そこ、つままないでぇ……ぁ、も、もう、われちゃうよぉ……",
+"ふにゃっ……それそんな……ぁああっもっと奥きちゃう……",
+"ひぁっ……そこだめっそこ……ぁいっしょにイっちゃうのぉ……",
+"んんっ……そこそんな……ぁああっピストンとまんないで……",
+"ふぁぁっ……それそこ……あっ、ん、だめ、それ、もっと奥まできちゃう……"],
+    "flinch": 0.5,
+    "on": {
+      "20": {"say": "あっ……あっ……ぁ、イく、イっちゃう……", "face": "caught", "shake": 2, "show": ["siori"], "flash": {"count": 2, "strength": 0.6}, "boneMotion": {"boubou": {"wobble": {"y": 6, "speed": 3}}}}
+    }
+  }
+    }
+  }
+},
+
+
+      "_shadowNote": "shadow：ベッドに寝転がっているとわかる影。x・y＝影のずれ（画面の右・下がプラス）、soft＝ぼかし、alpha＝濃さ。1つめは近くの濃い影、2つめは遠くのやわらかい影",
+      "shadow": [
+        {
+          "x": 7,
+          "y": 9,
+          "soft": 2.5,
+          "alpha": 0.55,
+          "color": "#030614"
+        },
+        {
+          "x": 16,
+          "y": 22,
+          "soft": 8,
+          "alpha": 0.45,
+          "color": "#030614"
+        }
+      ],
+      "_linesNote": "lines の書き方：speaker（\"\" でナレーション）、text、face（faces の名前）、shake（画面のゆれ）、flinch（ビクッ）、jump（ぴょこっ）、flash、sfx、motion（breathe＝呼吸の速さ〈秒〉・sway＝頭のゆれ・allSpeed＝ぜんぶの速さ など）、boneMotion（骨ごと。arms の wobble で手のふるえ、book の wobble で本のゆれ）、choices（選択肢。えらんだ方の lines が次に入る）"
+    }
+  }
+}

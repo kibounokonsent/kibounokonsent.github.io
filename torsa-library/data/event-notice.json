@@ -1,0 +1,20 @@
+{
+  "_note": "イベント（event/events.js のイベント）が始まる前に出る、「見る／今は見ない」の画面の文。text に注意書きを書いてください（改行は \\n）。default はすべてのイベント共通で、events の中にイベントの名前（例: vault-fall）で書くと、そのイベントだけ上書きできます。",
+  "_keysNote": "title＝いちばん上の見出し、text＝注意書き（空なら注意書きの枠は出ません）、watch＝見るボタン、skip＝今は見ないボタン、cancel＝思い出から見るときの、やめるボタン、skipNote＝ボタンの下の小さな説明、skipSay＝今は見ないを選んだあとにトルサが言うひとこと（空なら言わない）、ask＝false でこの画面を出さない、askOnReplay＝false で思い出から見るときは出さない。",
+  "default": {
+    "title": "イベントが始まります",
+    "text": "",
+    "watch": "見る",
+    "skip": "今は見ない",
+    "cancel": "やめておく",
+    "skipNote": "「今は見ない」を選んでも、パレットの「思い出」から、いつでも見られます。",
+    "skipSay": "",
+    "ask": true,
+    "askOnReplay": true
+  },
+  "events": {
+    "vault-fall": {
+      "text": ""
+    }
+  }
+}

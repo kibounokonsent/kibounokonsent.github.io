@@ -41,6 +41,11 @@
           "candle",
           "lantern"
         ]
+      },
+      "_donateDoorNote": "donateDoor：部屋の右奥にある「寄贈の部屋」への扉。name＝扉の上の札の名前。enabled を false にすると扉を出しません。扉を押すと、トルサが torsa.json の doorDonate のセリフを言ってから、寄贈の間（donate.html）を別のタブで開きます。",
+      "donateDoor": {
+        "name": "寄贈の部屋",
+        "enabled": true
       }
     },
     "forbidden": {
@@ -60,6 +65,20 @@
         "no": "18歳未満なので戻る",
         "remember": "session"
       }
+    },
+    "sheep": {
+      "name": "羊の間",
+      "sub": "トルサの部屋",
+      "plate": "THE SHEEP ROOM",
+      "corridorName": "羊の間への廊下",
+      "_note": "羊の間：トルサの部屋（js/sheep.js）。本館の東のはし（東の書館への扉より右）が廊下になっていて、いちばん奥の扉から入れます。enabled を false にすると廊下も扉も出ません。部屋の中でさわれる場所のセリフは torsa.json の lines（sheepBed・sheepPlush・sheepWindow・sheepLampOn・sheepLampOff・sheepShelf・sheepYarn・sheepSlippers・sheepDesk・sheepCap・sheepClock・sheepMilk・sheepGarland）。入ったとき enterSheep、出るとき backFromSheep、扉を押したとき doorSheep、廊下に来たとき enterSheepCorridor。",
+      "enabled": true,
+      "whispers": [
+        "……すぅ、すぅ……（どこからか、やわらかな寝息のような音）",
+        "毛糸玉が、ころんと転がった",
+        "窓の外で、星がひとつ流れた",
+        "ガーランドの星が、ゆらゆら揺れている"
+      ]
     }
   }
 }

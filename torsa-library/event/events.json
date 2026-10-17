@@ -49,10 +49,12 @@
       },
       "_boxNote": "会話の箱の色。color＝地の色、ink＝文字の色、line＝ふちの色",
       "box": {
-        "color": "#f7f2e5",
+        "color": "rgba(247, 242, 229, 0.6)",
         "ink": "#2b2a3a",
-        "line": "#c9a35a"
+        "line": "#c9a35a",
+        "ring": "rgba(247, 242, 229, 0.45)"
       },
+      
       "bg": {
         "top": "#2a1c46",
         "bottom": "#120c1f",
@@ -119,6 +121,18 @@
           "z": -2.5,
           "touch": "head"
         },
+                {
+          "id": "cape_shoulder_l",
+          "bone": "body",
+          "z": 1,
+          "touch": "body"
+        },
+        {
+          "id": "cape_shoulder_r",
+          "bone": "body",
+          "z": 1,
+          "touch": "body"
+        },
         {
           "id": "lock_back_l",
           "bone": "lock_back_l",
@@ -160,18 +174,6 @@
           "bone": "head",
           "z": 0,
           "touch": "head"
-        },
-        {
-          "id": "cape_shoulder_l",
-          "bone": "body",
-          "z": 1,
-          "touch": "body"
-        },
-        {
-          "id": "cape_shoulder_r",
-          "bone": "body",
-          "z": 1,
-          "touch": "body"
         },
         {
           "id": "collar",
@@ -540,7 +542,7 @@
           "id": "eye_l",
           "pivot": [
             99,
-            126
+            140
           ],
           "parent": "head"
         },
@@ -548,7 +550,7 @@
           "id": "eye_r",
           "pivot": [
             121.7,
-            126
+            140
           ],
           "parent": "head"
         },
@@ -588,7 +590,7 @@
           "id": "leaf_back",
           "pivot": [
             0,
-            432
+            400
           ],
           "leaf": true,
           "in": -1,
@@ -836,7 +838,7 @@
           "face": "dazed",
           "sound": "pan",
                     "shake": 0.6,
-                              "boneMotion": { "leaf_back": { "speed": 1.5, "sway": 4 } },
+                              "boneMotion": { "leaf_back": { "speed": 1.5 } },
                     "motion": { "struggle": 0.7, "struggleSpeed": 2 },
           "leaves": "rest"
         },
@@ -852,6 +854,7 @@
           "text": "しかし触手は構わず深くに挿し込まれていく。ぬぷ、ぬぷりと粘つく音を立てて彼の中をゆっくりとこじ開ける。羊の少年の白い腹が、苦しさと妙な圧迫で細かく痙攣した。",
           "face": "dazed",
                     "shake": 0.6,
+                      "boneMotion": { "leaf_back": { "speed": 2 } },
           "leaves": "rest"
         },
 
@@ -866,6 +869,7 @@
           "text": "触手は返事もせず根元まで埋まると、すぐに抽送を始めた。最初はゆっくりと、まるで彼のなかを味わうかのように。ぬちゃ、ぬちゃと粘液の音が、禁書庫の静けさに響く。",
           "face": "dazed",
                     "shake": 0.6,
+                      "boneMotion": { "leaf_back": { "speed": 3 } },
           "leaves": "rest"
         },
 
@@ -881,6 +885,7 @@
           "face": "dazed",
                     "shake": 1,
         "motion": { "struggle": 0.3, "allSpeed": 3 },
+          "boneMotion": { "leaf_back": { "speed": 6 } },
           "leaves": "rest"
         },
 
@@ -896,6 +901,7 @@
           "face": "dazed",
                     "shake": 1,
         "motion": { "allSpeed": 4 },
+          "boneMotion": { "leaf_back": { "speed": 10 } },
           "leaves": "rest"
         },
 
@@ -924,7 +930,7 @@
           "text": "触手は彼の限界を悟ったのか一層深く、一層速く彼を突き上げた。トルサは声もなく口を開け、びくんびくんと全身を痙攣させる。彼の熱い飛沫が、宙に散った。",
           "face": "dazed",
                     "shake": 1,
-        "motion": { "struggle": 0.0, "allSpeed": 0.1 },
+        "motion": { "struggle": 0.0, "allSpeed": 0.5 },
                       "show": ["milk","milk_2"],
               "sfx": "pat",
               "flash": { "count": 2, "strength": 0.6 },

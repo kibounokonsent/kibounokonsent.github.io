@@ -4,7 +4,7 @@
   "useParts": true,
   "parts": {
     "bookcase_b2": {
-      "file": "assets/parts/bookcase_b2.svg",
+      "file": "assets/parts/bookcase_b2.webp",
       "vb": [
         0.0,
         0.0,
@@ -68,7 +68,7 @@
       ]
     },
     "plant": {
-      "file": "assets/parts/plant.svg",
+      "file": "assets/parts/plant.webp",
       "vb": [
         0.0,
         0.0,
@@ -232,7 +232,7 @@
       ]
     },
     "tree_a": {
-      "file": "assets/parts/tree_a.svg",
+      "file": "assets/parts/tree_a.webp",
       "vb": [
         -2.0,
         -2.0,
@@ -241,7 +241,7 @@
       ]
     },
     "tree_b": {
-      "file": "assets/parts/tree_b.svg",
+      "file": "assets/parts/tree_b.webp",
       "vb": [
         88.9,
         34.9,
@@ -318,7 +318,7 @@
       ]
     },
     "tree_small_a": {
-      "file": "assets/parts/tree_small_a.svg",
+      "file": "assets/parts/tree_small_a.webp",
       "vb": [
         412.6,
         188.4,
@@ -327,7 +327,7 @@
       ]
     },
     "tree_small_b": {
-      "file": "assets/parts/tree_small_b.svg",
+      "file": "assets/parts/tree_small_b.webp",
       "vb": [
         528.6,
         188.4,
@@ -336,7 +336,7 @@
       ]
     },
     "blossom_a": {
-      "file": "assets/parts/blossom_a.svg",
+      "file": "assets/parts/blossom_a.webp",
       "vb": [
         655.1,
         254.9,
@@ -345,7 +345,7 @@
       ]
     },
     "blossom_b": {
-      "file": "assets/parts/blossom_b.svg",
+      "file": "assets/parts/blossom_b.webp",
       "vb": [
         756.0,
         292.8,
@@ -444,5 +444,6 @@
       }
     ]
   },
-  "_vaultPartsNote": "vault_plant_leaves（葉）・vault_plant_pot（鉢）・vault_orb（浮かぶ星）は、禁書庫の飾り（元のファイルは assets/parts-src/vault_bg2.svg）。葉と鉢は同じ大きさの枠（vb）で重ねているので、描き直すときも同じ大きさで書き出せば位置がそのまま合います。"
+  "_vaultPartsNote": "vault_plant_leaves（葉）・vault_plant_pot（鉢）・vault_orb（浮かぶ星）は、禁書庫の飾り（元のファイルは assets/parts-src/vault_bg2.svg）。葉と鉢は同じ大きさの枠（vb）で重ねているので、描き直すときも同じ大きさで書き出せば位置がそのまま合います。",
+  "_rasterNote": "重い部品（本棚・鉢植えの木・花・plant）は、軽くするために、あらかじめ絵（.webp）にしたものを使っています。もとの SVG は同じ場所に残してあります。作り直すときは tools/optimize/README.md。"
 }

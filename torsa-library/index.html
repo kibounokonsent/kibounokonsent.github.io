@@ -2,6 +2,7 @@
 <html lang="ja">
 <head>
 <meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <script>
 /* 入館ボタンが押せるようになるまでの間に起きたエラー（プログラムが読めない・途中で止まる）を、ボタンの下の文字に出します。
    原因を調べやすくするためのものです。入館できるようになると、この表示は消えます。 */
@@ -809,6 +810,8 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
 #curtain .ld-dots i:nth-child(2) { animation-delay: .2s; } #curtain .ld-dots i:nth-child(3) { animation-delay: .4s; }
 @keyframes ldSpin { to { transform: rotate(360deg); } }
 @keyframes ldDot { 0%, 100% { opacity: .2; } 40% { opacity: 1; } }
+/* 幕が下りていないときは、読みこみ中の星と点を止める（見えないのに動き続けて重くならないように） */
+#curtain:not(.on) .ld-star, #curtain:not(.on) .ld-dots i { animation: none; }
 
 /* 部屋 */
 .room { position: fixed; inset: 0; z-index: 10; overflow: hidden; background: #0b0d22; }
@@ -857,6 +860,14 @@ body.in-vault .room-whisper { color: #e9c4cf; }
 .annex-floor { left: 0; right: 0; top: 86%; bottom: 0; background: repeating-linear-gradient(90deg, rgba(0, 0, 0, .2) 0 .15cqw, transparent .15cqw 9cqw), linear-gradient(180deg, #4a3224, #2e1f17); }
 .annex-carpet { left: 12%; width: 64%; top: 87.2%; height: 9%; border-radius: 50%; background: radial-gradient(ellipse at 50% 40%, #2c6a4c, #1d5a3e 60%, #123a28); box-shadow: 0 0 0 .3cqw rgba(214, 176, 98, .45) inset, 0 0 0 .9cqw rgba(18, 58, 40, .9) inset, 0 0 0 1.05cqw rgba(214, 176, 98, .35) inset; }
 .lamp-glow.crystal-glow { background: radial-gradient(closest-side, rgba(150, 255, 205, .45), rgba(150, 255, 205, 0)); }
+.annex-part { top: 0; bottom: 0; container-type: inline-size; overflow: visible; }
+.annex-part > * { position: absolute; }
+.annex-alcove { background: linear-gradient(90deg, rgba(0, 0, 0, .25), rgba(0, 0, 0, .1) 30%, rgba(0, 0, 0, .2)); pointer-events: none; }
+.annex-dim { background: linear-gradient(90deg, rgba(4, 10, 8, 0), rgba(4, 10, 8, .55) 60%, rgba(4, 10, 8, .8)); pointer-events: none; }
+.donate-glow { background: radial-gradient(closest-side, rgba(255, 226, 160, .3), rgba(255, 226, 160, 0)); pointer-events: none; animation: breathe 6s ease-in-out infinite; }
+.donate-door { border: 0; padding: 0; background: transparent; cursor: pointer; border-radius: 48% 48% 4px 4px / 30% 30% 4px 4px; }
+.donate-door:hover, .donate-door:focus-visible { background: radial-gradient(closest-side, rgba(255, 236, 190, .18), transparent); outline: none; }
+.donate-door:focus-visible { box-shadow: 0 0 0 2px #f3d08a; }
 .annex-glow { background: radial-gradient(closest-side, rgba(255, 220, 169, .28), transparent); pointer-events: none; animation: breathe 7s ease-in-out infinite; }
 @keyframes breathe { 50% { opacity: .65; } }
 .room-motes { inset: 0; pointer-events: none; overflow: hidden; }
@@ -954,7 +965,7 @@ body.fx-off .hdrip i, body.fx-off .hpuddle i { animation: none; opacity: 0; }
 @media (prefers-reduced-motion: reduce) { .hdrip i, .hpuddle i { animation: none !important; opacity: 0; } }
 /* 窓のガラス */
 .glass svg { width: 100%; height: 100%; display: block; }
-.glass-shimmer { overflow: hidden; clip-path: polygon(9.9% 95.1%, 9.9% 46.6%, 10.2% 42.0%, 11.3% 37.5%, 13.1% 33.2%, 15.5% 29.1%, 18.5% 25.3%, 22.0% 21.8%, 26.1% 18.8%, 30.6% 16.3%, 35.5% 14.2%, 40.6% 12.8%, 46.0% 11.9%, 51.4% 11.6%, 56.8% 11.9%, 62.1% 12.8%, 67.2% 14.2%, 72.1% 16.3%, 76.6% 18.8%, 80.7% 21.8%, 84.3% 25.3%, 87.3% 29.1%, 89.7% 33.2%, 91.4% 37.5%, 92.5% 42.0%, 92.8% 46.6%, 92.9% 95.1%); }
+.glass-shimmer { overflow: hidden; /* 窓のアーチの形に切り抜く（多角形の切り抜きは毎フレーム重いので、角丸の四角で同じ形にする） */ clip-path: inset(11.6% 9.9% 4.9% 9.9% round 50% 50% 0 0 / 42% 42% 0 0); }
 .glass-shimmer i { position: absolute; top: -10%; bottom: -10%; left: -45%; width: 28%; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 252, 235, .2) 45%, rgba(255, 255, 255, .32) 50%, rgba(255, 252, 235, .2) 55%, rgba(255, 255, 255, 0)); transform: skewX(-16deg); animation: glassSweep 13s ease-in-out infinite; will-change: transform; }
 @keyframes glassSweep { 0%, 62% { transform: translateX(0) skewX(-16deg); } 100% { transform: translateX(560%) skewX(-16deg); } }
 body.lite .glass-shimmer, body.fx-off .glass-shimmer { display: none; }
@@ -1251,6 +1262,8 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
 <script src="event/events.js"></script>
 <!-- カネル（好感度100のイベント・赤い月の間。設定は kaneru/kaneru.json） -->
 <script src="kaneru/kaneru.js"></script>
+<!-- 羊の間（トルサの部屋）と、本館の東のはしの廊下（js/sheep.js） -->
+<script src="js/sheep.js"></script>
 <script>
 (() => {
   "use strict";
@@ -1880,7 +1893,7 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     // 画面の端が館内の端を越えないように。せまい画面では、両端の扉の前より先へは行かない
     const D = WORLD.plan ? WORLD.plan.doors : null;
     // westEnd：カネルの廊下があるときは、廊下のいちばん奥まで歩ける。ただし奥の扉（westDoor）が画面の左寄りに見えるところで止まる（スマホでも扉がトルサに隠れない）
-    const lo = WORLD.westEnd != null ? Math.max(WORLD.westEnd + cam.viewU / 2, (WORLD.westDoor ?? -Infinity) + .2 * cam.viewU) : Math.max(cam.L + cam.viewU / 2, D ? D[0].x : -Infinity), hi = Math.min(cam.L + cam.W - cam.viewU / 2, D ? D[1].x : Infinity);
+    const lo = WORLD.westEnd != null ? Math.max(WORLD.westEnd + cam.viewU / 2, (WORLD.westDoor ?? -Infinity) + .2 * cam.viewU) : Math.max(cam.L + cam.viewU / 2, D ? D[0].x : -Infinity), hi = WORLD.eastDoor != null ? WORLD.eastDoor + .1 * cam.viewU : Math.min(cam.L + cam.W - cam.viewU / 2, D ? D[1].x : Infinity); // eastDoor：羊の間への廊下があるとき。奥の扉が画面のまんなかより少し左に見えるところで止まる（トルサに隠れない）
     const c = (v) => (lo > hi ? cam.L + cam.W / 2 : Math.min(hi, Math.max(lo, v)));
     cam.target = c(cam.target); cam.x = c(cam.x);
   }
@@ -1888,15 +1901,18 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     const leftU = cam.x - cam.viewU / 2;
     const px = cam.W * cam.s < cam.vw ? -(cam.vw - cam.W * cam.s) / 2 : (leftU - cam.L) * cam.s; cam.px = px;
     const bob = Math.sin(cam.phase) * Math.min(1, Math.abs(cam.vel) / 4) * 2.2;
-    const kx = Math.round(px * 10) / 10, kb = Math.round(bob * 10) / 10;
+    // 層の位置は、画面の点（デバイスピクセル）のちょうど上にそろえる。半端な位置だと、細い線や小さな星が動くたびにちらつく（スマホで「ぱちぱち」見える）
+    const dp = window.devicePixelRatio || 1, sn = (v) => Math.round(v * dp) / dp + 0;
+    const kx = sn(px), kb = sn(bob);
     if (kx === cam.lastPx && kb === cam.lastBob) return;
     cam.lastPx = kx; cam.lastBob = kb; FX.due = true;
-    const mt = `translate3d(${-px}px, ${bob}px, 0)`; $("mid").style.transform = mt; $("midTop").style.transform = mt; $("knTop").style.transform = mt;
-    $("sky").style.transform = `translate3d(${-px * PAR.sky}px, 0, 0)`;
-    const bt = `translate3d(${-px * PAR.back}px, ${bob * .4}px, 0)`; $("back").style.transform = bt; $("backTop").style.transform = bt;
-    $("front").style.transform = `translate3d(${-px * PAR.front}px, ${bob * 1.4}px, 0)`;
+    const mt = `translate3d(${-kx}px, ${kb}px, 0)`; $("mid").style.transform = mt; $("midTop").style.transform = mt; $("knTop").style.transform = mt;
+    $("sky").style.transform = `translate3d(${sn(-px * PAR.sky)}px, 0, 0)`;
+    const bt = `translate3d(${sn(-px * PAR.back)}px, ${sn(bob * .4)}px, 0)`; $("back").style.transform = bt; $("backTop").style.transform = bt;
+    $("front").style.transform = `translate3d(${sn(-px * PAR.front)}px, ${sn(bob * 1.4)}px, 0)`;
     $("me").style.left = Math.max(0, Math.min(100, ((cam.x - cam.L) / cam.W) * 100)) + "%";
     if (window.__knPar) window.__knPar(cam.x, cam.s); // カネルの廊下の窓の外（遠くの景色）を、少し遅れて動かす
+    if (window.__shCam) window.__shCam(cam.x); // 羊の間への廊下：遠いときは描かない（js/sheep.js）
   }
   let lastZone = null, zoneTimer = null, jumpWait = 0, lastT = performance.now();
   const PAUSE = { on: false };
@@ -1906,6 +1922,7 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     clampCam();
     const prev = cam.x;
     cam.x += (cam.target - cam.x) * (reduced ? 1 : .09);
+    if (Math.abs(cam.target - cam.x) * cam.s < .2) cam.x = cam.target; // 止まりぎわの、目に見えないほどのゆっくりした動きを続けない（細かいちらつきと、むだな描き直しを止める）
     cam.vel = cam.x - prev;
     if (Math.abs(cam.vel) > .3) cam.phase += dt * .012;
     // 本との会話・目録・読書のあいだは、後ろの館内を止めて軽くする
@@ -2051,8 +2068,22 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     if (fps < 30 && FX_LEVEL === "full") applyFxLevel("lite", false);
   }
   // 夜の暗さ：画面に合わせて毎フレーム描く。明かりのまわりと、手もとのランタン（画面のまん中）は丸く明るく抜く
+  // 夜の暗さは、立ち位置と画面の大きさが変わったときだけ、半分の大きさの見えないキャンバスに描き直す（やわらかい影なので見た目は同じ）
+  const SHADECACHE = { cv: null, key: "" };
   function drawShade(g) {
     const o = SHADE.opt; if (!o) return;
+    const key = `${HALL_ID},${Math.round(cam.px || 0)},${cam.s.toFixed(4)},${cam.vw},${cam.H},${SHADE.holes.length}`;
+    const cv = SHADECACHE.cv || (SHADECACHE.cv = document.createElement("canvas")), k = 2;
+    if (key !== SHADECACHE.key) {
+      SHADECACHE.key = key;
+      const w = Math.ceil(cam.vw / k), h = Math.ceil(cam.H / k); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+      const c2 = cv.getContext("2d"); c2.setTransform(1 / k, 0, 0, 1 / k, 0, 0); c2.globalCompositeOperation = "source-over"; c2.globalAlpha = 1; c2.clearRect(0, 0, cam.vw, cam.H);
+      paintShade(c2, o);
+    }
+    g.globalCompositeOperation = "source-over"; g.globalAlpha = 1; g.imageSmoothingEnabled = true;
+    g.drawImage(cv, 0, 0, cam.vw, cam.H);
+  }
+  function paintShade(g, o) {
     // 前のフレームの星の透明度が残っていると、暗さが毎フレームちらつくので必ず戻す
     g.globalAlpha = 1;
     const P = WORLD.plan, s = cam.s, px = cam.px || 0, vw = cam.vw, H = cam.H, X = (u) => -px + (u - cam.L) * s;
@@ -2108,18 +2139,30 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     g.globalAlpha = 1; g.globalCompositeOperation = "source-over";
   }
   // 月の窓の光：光の筋・床に落ちる色・ちり
+  // 光の筋は大きな半透明の面で、毎フレーム描くと重いので、半分の大きさの見えないキャンバスに描いておき、
+  // 立ち位置・窓の明るさ・画面の大きさが変わったときだけ描き直す（毎フレームは、その絵を1回重ねるだけ）
+  const RAYCACHE = { cv: null, key: "" };
   function drawRays(g, t) {
     const L = MOON.level; if (L < .01) return;
-    const m = layerMap(), s = cam.s;
-    g.globalCompositeOperation = "lighter";
-    RAYS.forEach((r, i) => {
-      const a = m.back(r.u - 24, r.v), b = m.back(r.u + 24, r.v), c = m.mid(r.f + 90, 1000), e = m.mid(r.f - 90, 1000);
-      r._pts = [a, b, c, e];
-      const sh = .75 + .25 * Math.sin(t * .9 + i * 1.3);
-      const lg = g.createLinearGradient(0, a[1], 0, c[1]); lg.addColorStop(0, r.c + "00"); lg.addColorStop(.15, r.c + "55"); lg.addColorStop(.7, r.c + "22"); lg.addColorStop(1, r.c + "0a");
-      g.globalAlpha = L * sh * .8; g.fillStyle = lg; g.beginPath(); g.moveTo(...a); g.lineTo(...b); g.lineTo(...c); g.lineTo(...e); g.closePath(); g.fill();
-      const pc = m.mid(r.f, 950); g.globalAlpha = L * .6; g.save(); g.translate(pc[0], pc[1]); g.scale(110 * s, 26 * s); g.drawImage(sprite(r.c, "orb"), -1, -1, 2, 2); g.restore();
-    });
+    const m = layerMap(), s = cam.s, vw = cam.vw, H = cam.H, k = 2;
+    RAYS.forEach((r) => { r._pts = [m.back(r.u - 24, r.v), m.back(r.u + 24, r.v), m.mid(r.f + 90, 1000), m.mid(r.f - 90, 1000)]; });
+    const key = `${Math.round(cam.px || 0)},${s.toFixed(4)},${Math.round(L * 50)},${vw},${H}`;
+    const cv = RAYCACHE.cv || (RAYCACHE.cv = document.createElement("canvas"));
+    if (key !== RAYCACHE.key) {
+      RAYCACHE.key = key;
+      const w = Math.ceil(vw / k), h = Math.ceil(H / k); if (cv.width !== w || cv.height !== h) { cv.width = w; cv.height = h; }
+      const o = cv.getContext("2d"); o.setTransform(1 / k, 0, 0, 1 / k, 0, 0); o.clearRect(0, 0, vw, H); o.globalCompositeOperation = "lighter";
+      RAYS.forEach((r) => {
+        const [a, b, c, e] = r._pts;
+        if (Math.max(a[0], b[0], c[0], e[0]) < 0 || Math.min(a[0], b[0], c[0], e[0]) > vw) return;
+        const lg = o.createLinearGradient(0, a[1], 0, c[1]); lg.addColorStop(0, r.c + "00"); lg.addColorStop(.15, r.c + "55"); lg.addColorStop(.7, r.c + "22"); lg.addColorStop(1, r.c + "0a");
+        o.globalAlpha = L * .7; o.fillStyle = lg; o.beginPath(); o.moveTo(...a); o.lineTo(...b); o.lineTo(...c); o.lineTo(...e); o.closePath(); o.fill();
+        const pc = m.mid(r.f, 950); o.globalAlpha = L * .6; o.save(); o.translate(pc[0], pc[1]); o.scale(110 * s, 26 * s); o.drawImage(sprite(r.c, "orb"), -1, -1, 2, 2); o.restore();
+      });
+    }
+    // 光のゆらぎは、絵ぜんたいの明るさをゆっくり変えて出す
+    g.globalCompositeOperation = "lighter"; g.globalAlpha = .88 + .12 * Math.sin(t * .9); g.imageSmoothingEnabled = true;
+    g.drawImage(cv, 0, 0, vw, H);
     MOON.dust.forEach((p) => {
       const pts = RAYS[p.ray]._pts; if (!pts) return; const [a, b, c, e] = pts, u = .5 + p.k * .8;
       const x = a[0] + (b[0] - a[0]) * u + ((e[0] + (c[0] - e[0]) * u) - (a[0] + (b[0] - a[0]) * u)) * p.t + Math.sin(t / 1.4 + p.ph) * 6, y = a[1] + (c[1] - a[1]) * p.t;
@@ -2462,13 +2505,29 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
       return window.TorsaEvents
         ? window.TorsaEvents({ reduced, SFX, save, say, get mem() { return mem; }, get DATA() { return DATA; },
         hall: () => HALL_ID, affinity: () => affinity(), ready: () => !!DATA,
-        busy: () => overlayBusy() || !$("setPanel").hidden || document.body.classList.contains("at-door") || !$("room").hidden })
+        busy: () => overlayBusy() || document.body.classList.contains("ev-asking") || !$("setPanel").hidden || document.body.classList.contains("at-door") || !$("room").hidden,
+        // 部屋で起こるイベント（羊の間など。trigger の room）：いまいる部屋と、部屋の中で何かしているあいだは待つ
+        room: () => ROOM.cur, roomBusy: () => overlayBusy() || document.body.classList.contains("ev-asking") || !$("setPanel").hidden || !$("palette").hidden || $("curtain").classList.contains("on") })
         : null;
     } catch (e) { console.error("イベントのプログラムを起動できませんでした（イベントは起こりません）", e); (window.__initErrors = window.__initErrors || []).push("イベント（event/events.js）：" + (e && e.message)); return null; }
   })();
 
 /* ---------- カネル：kaneru/kaneru.js と kaneru/kaneru.json にあります ---------- */
   // 好感度が100になると本館でイベントが起こり、そのあと西の書館の奥に「赤い廊下」と「赤い月の間」ができる
+  // 羊の間（トルサの部屋）と、本館の東のはしの廊下（js/sheep.js）
+  const SHEEP = (() => {
+    try {
+      return window.SheepModule
+        ? window.SheepModule({ SFX, get DATA() { return DATA; }, say: (line, ms) => say(line, ms), hall: () => HALL_ID, camX: () => cam.x,
+          world: () => ({ L: cam.L, W: cam.W, doors: WORLD.plan ? WORLD.plan.doors : [] }),
+          reachEast: (end, door) => { WORLD.eastEnd = end; WORLD.eastDoor = door; clampCam(); }, cancelWalk: () => { cam.dir = 0; },
+          enterRoom: (id, el) => enterRoom(id, el),
+          // 図書館の部品（assets/parts）をそのまま使うための道具
+          parts: () => (SCENE && SCENE.parts) || {}, placePart: (p, slot) => placePart(p, slot),
+          partFile: (n) => { const t = PART_THEME; PART_THEME = null; const f = partFile(n); PART_THEME = t; return f; }, glassSVG: () => GLASS_SVG })
+        : null;
+    } catch (e) { console.error("羊の間のプログラムを起動できませんでした", e); (window.__initErrors = window.__initErrors || []).push("羊の間（js/sheep.js）：" + (e && e.message)); return null; }
+  })();
   const KANERU = (() => {
     try {
       return window.KaneruModule
@@ -2477,7 +2536,7 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
         hall: () => HALL_ID, affinity: () => affinity(), inRoom: () => !!ROOM.cur,
         moving: () => performance.now() < HALL_MOVING || $("curtain").classList.contains("on"),
         ready: () => !!DATA && !document.body.classList.contains("at-door") && $("entrance").hidden,
-        busy: () => overlayBusy() || !$("setPanel").hidden || !$("palette").hidden || document.body.classList.contains("at-door") || $("curtain").classList.contains("on") || !!(EVENTS && EVENTS.playing),
+        busy: () => overlayBusy() || document.body.classList.contains("ev-asking") || !$("setPanel").hidden || !$("palette").hidden || document.body.classList.contains("at-door") || $("curtain").classList.contains("on") || !!(EVENTS && EVENTS.playing),
         torsaName: () => (DATA && DATA.torsa.name) || "トルサ",
         world: () => ({ L: cam.L, W: cam.W, doors: WORLD.plan ? WORLD.plan.doors : [] }), windowX: () => WIN.cx,
         toScreen: (x, y) => ({ x: (x - cam.L) * cam.s - (cam.px || 0), y: y * cam.s, s: cam.s }),
@@ -3219,10 +3278,15 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
 
   /* ---------- 扉の奥の部屋 ---------- */
   // 部屋の絵は 1600×1000 の舞台に、部品の絵と、ここで描いた家具を並べて作る（位置は舞台の % で指定）
-  const at = (x, y, w, h) => `left:${f1(x / 16)}%;top:${f1(y / 10)}%;width:${f1(w / 16)}%;${h != null ? `height:${f1(h / 10)}%;` : ""}`;
+  // STAGE_W：舞台の横幅（ふつうは 1600。図書館の間は、右奥の「寄贈の部屋」への扉のぶんだけ広い）
+  let STAGE_W = 1600;
+  const at = (x, y, w, h) => `left:${f1(x / STAGE_W * 100)}%;top:${f1(y / 10)}%;width:${f1(w / STAGE_W * 100)}%;${h != null ? `height:${f1(h / 10)}%;` : ""}`;
+  const ANNEX_W = 2400;
   // 部屋のテーマ：PART_THEME の recolored に入っている部品は、dir のフォルダの色ちがいを使う
   let PART_THEME = null;
-  const partFile = (name) => (PART_THEME && (PART_THEME.recolored || []).includes(name) ? `${PART_THEME.dir}/${name}.svg` : `assets/parts/${name}.svg`);
+  // 棟ごとの色ちがいの部品も、もとの部品と同じ形式（.svg か、軽くするために絵にした .webp）を使う
+  const PART_EXT = (name) => (SCENE && SCENE.parts && SCENE.parts[name] && /\.webp$/.test(SCENE.parts[name].file) ? ".webp" : ".svg");
+  const partFile = (name) => (PART_THEME && (PART_THEME.recolored || []).includes(name) ? `${PART_THEME.dir}/${name}${PART_EXT(name)}` : `assets/parts/${name}${PART_EXT(name)}`);
   const part = (name, x, y, w, extra = "", cls = "") => `<img class="part ${cls}" src="${partFile(name)}" alt="" style="${at(x, y, w)}${extra}">`;
   const flipX = "transform:scaleX(-1);";
   // 鎖：(x1,y1)→(x2,y2) に輪をつなげる
@@ -3260,12 +3324,32 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     return pool[Math.floor(rng(seed)() * pool.length)];
   }
 
+  // 図書館の間の右奥：寄贈の部屋への扉（rooms.json の annex.donateDoor で名前などを変えられる）
+  function donateAlcove(sp0) {
+    const dd = roomCfg("annex").donateDoor || {}, X = 1533, EW = ANNEX_W - X;
+    STAGE_W = EW;
+    const sp = (name, a, b, bottom, extra, cls) => sp0(name, a - X, b - X, bottom, extra, cls), A = (x, y, w, h) => at(x - X, y, w, h);
+    let s = `<div class="annex-alcove" style="${A(X, 0, EW, 1000)}"></div><div class="annex-floor"></div>`;
+    [1540, 1760].forEach((x) => { s += sp("wall_panel", x, x + 236, 885, "filter:brightness(.62);"); });
+    s += `<div class="donate-glow" style="${A(1530, 300, 420, 560)}"></div>`;
+    s += sp("end_door", 1590, 1870, 862, "filter:sepia(.25) hue-rotate(60deg) brightness(.95);", "donate-door-art");
+    s += sp("arch", 1533, 1960, 198) + sp("pillar", 1927, 1993, 838) + sp("tama", 1946, 1974, 151) + `<div class="lamp-glow crystal-glow" style="${A(1920, 96, 80, 80)}"></div>`;
+    s += sp("candle", 1563, 1577, 742) + sp("candle", 1883, 1897, 742);
+    [1570, 1890].forEach((x, k) => { s += `<div class="lamp-glow candle-glow" style="${A(x - 34, 668, 68, 68)}animation-delay:${-k * 1.1}s"></div>`; });
+    s += `<button class="donate-door" type="button" style="${A(1600, 390, 260, 470)}" aria-label="${esc(dd.name || "寄贈の部屋")}への扉"></button>`;
+    s += `<span class="door-sign donate-sign" style="left:${f1((1730 - X) / EW * 100)}%;top:${f1(352 / 10)}%">${esc(dd.name || "寄贈の部屋")}</span>`;
+    s += sp("tree_a", 1995, 2155, 866) + `<div class="annex-dim" style="${A(2040, 0, 360, 1000)}"></div>`;
+    STAGE_W = 1600;
+    return `<div class="annex-part" style="left:${f1(X / ANNEX_W * 100)}%;width:${f1(EW / ANNEX_W * 100)}%">${s}</div>`;
+  }
   function annexHTML() {
     // 展示台に並べる本：rooms.json の annex.display に書いた本（ほかの棟の本でもOK）と、"room": "annex" の本
     const ids = roomCfg("annex").display || [];
     const books = ids.map((id) => DATA.books.books.find((b) => b.id === id)).filter((b) => b && !gatedPlace(roomOf(b))).concat(DATA.books.books.filter((b) => b.room === "annex" && !ids.includes(b.id)));
-    const cfg = roomCfg("annex"); PART_THEME = cfg.theme || null;
-    let s = `<div class="annex-wall"></div><div class="annex-stars"></div>`;
+    const cfg = roomCfg("annex"); PART_THEME = cfg.theme || null; STAGE_W = 1600;
+    // もとの部屋（1600 の舞台）はそのまま枠に入れて、右に寄贈の部屋のくぼみの枠をつなげる（文字の大きさなどが変わらないように）
+    const head = `<div class="annex-wall"></div><div class="annex-stars"></div>`;
+    let s = "";
     // 館内の部品と同じ決まり（slot＝左はし・右はし・下はし）で置く。舞台は 1600×1000、床は 860、まんなかは 760
     const C = 760, PIL = [20, 480, 1040, 1500];
     const sp = (name, a, b, bottom, extra = "", cls = "") => {
@@ -3290,9 +3374,9 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     s += sp("desk", 570, 950, 860);
     s += `<div class="lamp-glow" style="${at(753, 520, 200, 180)}"></div>`;
     s += `<button class="cabinet" id="cabinetBtn" style="${at(600, 600, 130, 111)}" aria-label="目録の箱をひらく（蔵書目録）">${cabinetSVG()}</button>`;
-    s += `<span class="obj-label pulse" style="left:${f1(665 / 16)}%;top:${f1(575 / 10)}%">蔵書目録</span>`;
+    s += `<span class="obj-label pulse" style="left:${f1(665 / STAGE_W * 100)}%;top:${f1(575 / 10)}%">蔵書目録</span>`;
     const pk = todaysPick();
-    if (pk) s += bookBtn(pk, "pick-book", at(751, 644, 54) + "position:absolute;", `<span class="rb-cover">${coverHTML(pk)}</span>`) + `<span class="obj-label" style="left:${f1(778 / 16)}%;top:${f1(712 / 10)}%">${esc(cfg.pickTitle || "今日の一冊")}</span>`;
+    if (pk) s += bookBtn(pk, "pick-book", at(751, 644, 54) + "position:absolute;", `<span class="rb-cover">${coverHTML(pk)}</span>`) + `<span class="obj-label" style="left:${f1(778 / STAGE_W * 100)}%;top:${f1(712 / 10)}%">${esc(cfg.pickTitle || "今日の一冊")}</span>`;
     s += sp("flower_lily", 884, 930, 714);
     // 展示台：机の左右に、1段に2冊ずつ
     const per = Math.ceil(books.length / 2), sides = [books.slice(0, per), books.slice(per)];
@@ -3311,11 +3395,14 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
       });
     });
     // 床には鉢植えの木（本棚の前のはし）
-    s += sp("tree_b", 120, 290, 866) + sp("tree_small_a", 1240, 1330, 866) + sp("tree_a", 1400, 1560, 866);
-    s += part("front_plant", -120, 700, 380, "opacity:.95;") + part("front_plant", 1340, 700, 380, flipX + "opacity:.95;");
-    PART_THEME = null;
+    const hasDoor = (cfg.donateDoor || {}).enabled !== false;
+    s += sp("tree_b", 120, 290, 866) + sp("tree_small_a", 1240, 1330, 866) + (hasDoor ? "" : sp("tree_a", 1400, 1560, 866));
+    s += part("front_plant", -120, 700, 380, "opacity:.95;") + (hasDoor ? "" : part("front_plant", 1340, 700, 380, flipX + "opacity:.95;"));
     s += motesHTML(22);
-    return s;
+    // 右奥：寄贈の部屋への扉（本棚の右の柱の、さらに右のくぼみ）。その先は少し暗い壁で、右へ見わたしたとき扉がトルサに隠れないようにしている
+    const ext = hasDoor ? donateAlcove(sp) : "";
+    PART_THEME = null; STAGE_W = 1600;
+    return head + `<div class="annex-part" style="left:0;width:${f1(1600 / ANNEX_W * 100)}%">${s}</div>` + ext;
   }
 
   const ROOM = { cur: null, whisperT: 0, from: null, built: {} };
@@ -3347,10 +3434,11 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     curtain(() => {
       ROOM.cur = id;
       const st = $("roomStage");
-      const kn = KANERU && KANERU.owns(id);
-      st.style.cssText = kn ? KANERU.stageStyle(id) : "";
+      const kn = KANERU && KANERU.owns(id), sh = SHEEP && SHEEP.owns(id);
+      st.style.cssText = kn ? KANERU.stageStyle(id) : sh ? "" : `width:max(100vw, ${ANNEX_W / 10}vh);aspect-ratio:${ANNEX_W / 100} / 10;`;
       if (ROOM.kn) { KANERU.unmount(); ROOM.kn = false; }
-      st.innerHTML = kn ? KANERU.roomHTML(id) : annexHTML();
+      if (ROOM.sh) { SHEEP.unmount(); ROOM.sh = false; }
+      st.innerHTML = kn ? KANERU.roomHTML(id) : sh ? SHEEP.roomHTML(id) : annexHTML();
       const roomFiles = filesIn(st.innerHTML);
       $("room").className = "room room-" + id;
       $("roomEn").textContent = cfg.plate || ""; $("roomName").textContent = cfg.name || placeName(id);
@@ -3358,10 +3446,12 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
       $("roomBackTo").textContent = (DATA.library.halls && DATA.library.halls[HALL_ID] ? DATA.library.halls[HALL_ID].name : "館内") + "へもどる";
       seqTimers.forEach(clearTimeout); $("bubble").classList.remove("show");
       // トルサもいっしょに入る。禁書庫の中では、セリフも反応もぜんぶ禁書庫用になる
-      if (!kn) setTimeout(() => { if (ROOM.cur) torsa("enterAnnex"); }, 1100);
-      const sc = $("roomScroll"); sc.scrollLeft = Math.max(0, st.offsetWidth * (kn ? KANERU.roomCenter(id) : 760 / 1600) - sc.clientWidth / 2); // 机のあたりをまんなかに（カネルの部屋は、それぞれの決めた場所）
+      if (!kn) setTimeout(() => { if (ROOM.cur) { if (sh) SHEEP.enterLine(); else torsa("enterAnnex"); } }, 1100);
+      const sc = $("roomScroll"); sc.scrollLeft = Math.max(0, st.offsetWidth * (kn ? KANERU.roomCenter(id) : sh ? SHEEP.roomCenter(id) : 760 / ANNEX_W) - sc.clientWidth / 2); // 机のあたりをまんなかに（カネルの部屋は、それぞれの決めた場所）
       RC.set = false;
       if (kn) { KANERU.mount(id, st); ROOM.kn = true; }
+      if (sh) { SHEEP.mount(st); ROOM.sh = true; }
+      if (EVENTS && EVENTS.onRoom) EVENTS.onRoom(id); // 部屋で起こるイベント（羊の間のイベントなど。event/events.js の onRoom）
       const narrow = st.offsetWidth > sc.clientWidth + 8;
       $("roomHint").textContent = narrow ? "← 横にスクロールすると、部屋を見わたせます →" : "";
       $("roomHint").style.opacity = narrow ? 1 : 0; if (narrow) setTimeout(() => { $("roomHint").style.opacity = 0; }, 5000);
@@ -3372,19 +3462,26 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
       return waitFiles(roomFiles);
     });
   }
+  // 寄贈の部屋（donate.html）へ：トルサがひとこと言ってから、別のタブで開く（開けないときは同じタブで）
+  function openDonate(el) {
+    burstAt(el, 18, 1.1); SFX.play("sparkle"); torsa("doorDonate");
+    setTimeout(() => { const w = window.open("donate.html", "_blank"); if (!w) location.href = "donate.html"; }, 900);
+  }
   function leaveRoom(force) {
     if (!ROOM.cur) return;
     const id = ROOM.cur;
     // 赤い月の間からは、まず廊下へもどる
     const back = force !== true && KANERU && KANERU.backTo(id);
     if (back) { enterRoom(back, ROOM.from); return; }
+    if (EVENTS && EVENTS.onRoom) EVENTS.onRoom(null);
     curtain(() => {
       if (ROOM.kn) { KANERU.unmount(); ROOM.kn = false; }
+      if (ROOM.sh) { SHEEP.unmount(); ROOM.sh = false; }
       if (document.body.classList.contains("gazing") && window.__gaze) window.__gaze(false);
       $("room").hidden = true; document.body.classList.remove("in-room"); ROOM.cur = null; clearTimeout(ROOM.whisperT); scheduleWhisper(8000);
       $("roomStage").innerHTML = ""; $("roomStage").style.cssText = "";
       if (ROOM.from && ROOM.from.isConnected) ROOM.from.focus({ preventScroll: true });
-      setTimeout(() => { if (KANERU && KANERU.owns(id)) KANERU.leaveLine(id); else torsa("backFromAnnex"); }, 500);
+      setTimeout(() => { if (KANERU && KANERU.owns(id)) KANERU.leaveLine(id); else if (SHEEP && SHEEP.owns(id)) SHEEP.leaveLine(); else torsa("backFromAnnex"); }, 500);
     });
   }
   function scheduleWhisper(ms) {
@@ -3403,6 +3500,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
   $("roomStage").addEventListener("click", (e) => {
     const bb = e.target.closest(".room-book");
     if (bb) { const b = DATA.books.books.find((x) => x.id === bb.dataset.id); if (!b) return; burstAt(bb, 22, 1.4); SFX.play("pickup"); openBook(b, "shelf"); return; }
+    if (e.target.closest(".donate-door")) { openDonate(e.target.closest(".donate-door")); return; }
     if (e.target.closest("#cabinetBtn")) { burstAt(e.target.closest("#cabinetBtn"), 16, 1); catReturn = $("cabinetBtn"); openCatalog({ place: "all" }); torsa("catalog"); }
   });
   $("roomStage").addEventListener("pointerover", (e) => { const bb = e.target.closest(".room-book, .cabinet"); if (bb && !bb.contains(e.relatedTarget)) SFX.play("hover"); });
@@ -3487,7 +3585,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
   // 棟のテーマの部品：recolored に書いた部品は dir のフォルダの色ちがい、swap に書いた部品は別の部品に差しかえる
   function themedParts(base, th) {
     const out = { ...base };
-    (th.recolored || []).forEach((n) => { if (base[n]) out[n] = { ...base[n], file: `${th.dir}/${n}.svg` }; });
+    (th.recolored || []).forEach((n) => { if (base[n]) out[n] = { ...base[n], file: `${th.dir}/${n}${/\.webp$/.test(base[n].file) ? ".webp" : ".svg"}` }; });
     Object.entries(th.swap || {}).forEach(([n, to]) => { if (base[to]) out[n] = { ...base[to] }; });
     return out;
   }
@@ -3502,7 +3600,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     return s;
   }
   function buildHall(id) {
-    HALL_ID = id; WORLD.westEnd = WORLD.westDoor = undefined; // westEnd／westDoor：西の書館の奥にカネルの廊下があるとき（kaneru/kaneru.js）
+    HALL_ID = id; WORLD.westEnd = WORLD.westDoor = undefined; WORLD.eastEnd = WORLD.eastDoor = undefined; // westEnd／westDoor：西の書館の奥にカネルの廊下があるとき（kaneru/kaneru.js）
     document.body.dataset.hall = id;
     document.body.classList.toggle("in-vault", !!(HALL().vault)); vaultView = null;
     const library = DATA.library, scene = SCENE, H = HALL();
@@ -3566,6 +3664,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
         if (EVENTS) EVENTS.onHall(id);
         // カネルのイベントのあと：本館の西のはしに、赤い月の間への廊下が出る
         if (KANERU) KANERU.onHall(id);
+        if (SHEEP) SHEEP.onHall(id); // 本館の東のはし：羊の間への廊下
         // 好感度が高いと、禁書庫でできごとが起こる（セリフは torsa.json の vaultLines に、affinity.vaultEvent.key の名前で足す）
         const ev = AFF().vaultEvent;
         if (HALL().vault && ev && affinity() >= (ev.min ?? 100)) {
@@ -3581,7 +3680,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
   /* ---------- パレット（右上）：蔵書目録・設定・転送・思い出 ---------- */
   // 転送の行き先：library.json の halls と、rooms.json の部屋（図書館の間）。並びは WARP_ORDER。色は点の色
   const WARP_ORDER = ["main", "east", "annex", "west", "vault"];
-  const WARP_DOT = { main: "#8fb6ff", east: "#e0a26a", annex: "#7fd6a0", west: "#c7c9ff", vault: "#e0607a", redmoon: "#ff3a52" };
+  const WARP_DOT = { sheep: "#f0d9a8", main: "#8fb6ff", east: "#e0a26a", annex: "#7fd6a0", west: "#c7c9ff", vault: "#e0607a", redmoon: "#ff3a52" };
   function openPalette(open) {
     $("palette").hidden = !open; $("paletteBtn").setAttribute("aria-expanded", String(open));
     if (!open) { $("warpList").hidden = true; $("memList").hidden = true; $("warpBtn").setAttribute("aria-expanded", "false"); $("memBtn").setAttribute("aria-expanded", "false"); }
@@ -3667,6 +3766,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
       SCENE = scene;
       const firstFiles = buildHall("main");
       if (KANERU) KANERU.onHall("main"); // カネルの廊下（本館の西のはし。イベントのあとだけ）
+      if (SHEEP) SHEEP.onHall("main"); // 羊の間への廊下（本館の東のはし）
       cam.x = cam.target = (library.world && library.world.startX) ?? WIN.cx;
       setupRays(); MOON.ready = true; initFX(library);
       if (/[?&]covers\b/.test(location.search)) showCoverGallery();
