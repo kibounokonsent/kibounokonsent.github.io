@@ -71,14 +71,18 @@ window.TorsaModule = (ctx) => {
       await rebuild();
       ready = true;
       addEventListener("resize", () => { clearTimeout(building); building = setTimeout(() => { if (Math.abs(cv.parentElement.clientHeight - cssH) > 8) rebuild(); }, 250); });
+      // 設定の「最軽量」を選んだり外したりしたら、その細かさで絵を作り直す
+      new MutationObserver(() => { if (targetDpr() !== dpr) { clearTimeout(building); building = setTimeout(rebuild, 120); } }).observe(document.body, { attributes: true, attributeFilter: ["class"] });
       requestAnimationFrame(frame);
       return rig;
     }
+    // 絵の細かさ：ふだんは画面の細かさ（2倍まで）。最軽量のときは1倍
+    const targetDpr = () => Math.min(document.body.classList.contains("fx-min") ? 1 : 2, devicePixelRatio || 1);
     // 画面の大きさに合わせて、部品を一度だけ絵にしておく
     async function rebuild() {
       const [, , fw, fh] = rig.frame;
       // 新しい大きさの絵をぜんぶ作ってから、キャンバスの大きさを変える（作っているあいだにトルサが消えないように）
-      const nH = cv.parentElement.clientHeight || 500, nDpr = Math.min(2, devicePixelRatio || 1);
+      const nH = cv.parentElement.clientHeight || 500, nDpr = targetDpr();
       const cH = Math.round(nH * nDpr), cW = Math.round(nH * nDpr * fw / fh), nppu = cH / fh;
       const pad = 1.5, out = {}, ppu = nppu;
       await Promise.all(rig.parts.map((p) => new Promise((ok) => {
@@ -90,12 +94,12 @@ window.TorsaModule = (ctx) => {
         img.src = u;
       })));
       cssH = nH; dpr = nDpr; cv.height = cH; cv.width = cW; ppuNow = nppu;
-      bmp = out;
+      bmp = out; stillDrawn = false;
       pose(lastT, performance.now()); draw(lastT);
     }
 
     /* ---------- 動き：ふだん（呼吸・ゆれ・耳・アホ毛・まばたき） ---------- */
-    let idleT = 0, lastNow = 0, lastT = 0, lastDraw = 0;
+    let idleT = 0, lastNow = 0, lastT = 0, lastDraw = 0, stillDrawn = false;
     function pose(t, now, dt = 0) {
       const q = (id) => boneById[id].q;
       boneList.forEach((b) => Object.assign(b.q, { x: 0, y: 0, r: 0, sx: 1, sy: 1 }));
@@ -237,6 +241,10 @@ window.TorsaModule = (ctx) => {
       // 会話・目録のあいだは止める。ひかえめのときは1秒に30回まで
       if (cl.contains("paused") && !reacts.length && !cl.contains("kn-live")) return; // kn-live＝カネルのイベント中（トルサの表情が変わるので動かす）
       if (cl.contains("lite") && now - lastDraw < 32) return;
+      // 動きがオフで、さわった反応も表情の変化も終わっているときは、同じ絵なので描き直さない（見た目は同じ）
+      const still = cl.contains("fx-off") || cl.contains("torsa-still") || reduced;
+      const settled = !reacts.length && S.sweat <= .05 && Math.abs(S.blush - S.blushTo) < .003 && Math.abs(S.sweat - S.sweatTo) < .003 && Math.abs(S.droop - S.droopTo) < .003;
+      if (still && settled) { if (stillDrawn) return; stillDrawn = true; } else stillDrawn = false;
       // じっとしているとき（さわっていない・マウスも止まっている）は1秒に30回まで。ゆっくりした呼吸やゆれは、30回でも見た目が変わらない
       // （館内のきらめきの層と同じフレームに描く。描き直しのないフレームができるので軽くなる）
       if (!reacts.length && now - PTR.at > 2500 && Math.round(now / 16.667) % 2 !== 0 && now - lastDraw < 40) return;
@@ -251,7 +259,7 @@ window.TorsaModule = (ctx) => {
       react(part, side) { if (!ready || reduced || document.body.classList.contains("torsa-still")) return; const now = performance.now(); const same = reacts.filter((r) => r.part === part), last = same[same.length - 1];
         // 同じところを続けてなでても、動きが積み重なりすぎないようにする（顔の部品がずれないように）
         if (last && now - last.at < (SPECIAL.cooldown[part] ?? 420)) return; if (same.length >= 2) reacts.splice(reacts.indexOf(same[0]), 1); reacts.push({ part, side, at: now }); if (SPECIAL.afterReact[part]) SPECIAL.afterReact[part]({ S, idleT }); },
-      face(name) { const f = FACE[name] || FACE.normal; S.blushTo = f.blush || 0; S.sweatTo = f.sweat || 0; S.droopTo = f.droop || 0; S.flat = !!f.flat; if (ready && (reduced || document.body.classList.contains("fx-off") || document.body.classList.contains("torsa-still"))) { S.blush = S.blushTo; S.sweat = S.sweatTo; S.droop = S.droopTo; pose(idleT, performance.now()); draw(idleT); } }
+      face(name) { const f = FACE[name] || FACE.normal; S.blushTo = f.blush || 0; S.sweatTo = f.sweat || 0; S.droopTo = f.droop || 0; S.flat = !!f.flat; if (ready && (reduced || document.body.classList.contains("fx-off") || document.body.classList.contains("torsa-still"))) { S.blush = S.blushTo; S.sweat = S.sweatTo; S.droop = S.droopTo; pose(idleT, performance.now()); draw(idleT); } stillDrawn = false; }
     };
   })();
 

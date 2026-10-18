@@ -220,7 +220,7 @@ body.fx-off .kn-motes { display: none; }
     function refit() { if (alive && rig && Math.abs(canvas.clientHeight - cssH) > 8) rebuild(); }
     function onResize() { clearTimeout(building); building = setTimeout(() => { if (alive && Math.abs(canvas.clientHeight - cssH) > 8) rebuild(); }, 250); }
     async function rebuild() {
-      const [, , fw, fh] = rig.frame, nH = canvas.clientHeight || 400, dpr = Math.min(3, devicePixelRatio || 1);
+      const [, , fw, fh] = rig.frame, nH = canvas.clientHeight || 400, dpr = Math.min(cls().contains("fx-min") ? 1.5 : 3, devicePixelRatio || 1); // 最軽量では絵の細かさを下げる
       const cH = Math.round(nH * dpr), cW = Math.round(cH * fw / fh), np = cH / fh, pad = 1.5, out = {};
       // 部品の絵は、話すために左へ出てきたときの大きさ（いちばん大きいとき）で作っておく。
       // 大きくなっても引きのばさないので、話すときもぼやけない（小さいときは縮めて描くだけ）

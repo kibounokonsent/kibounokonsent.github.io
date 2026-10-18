@@ -914,17 +914,19 @@
       }
     ]
   },
-  "_affinityNote": "affinity：トルサの好感度（0〜max。画面には出ません）。max は、羊の間のイベント（好感度200）のために 100 から 300 に上げました。来館・本を読む・本と話す・トルサと話す・さわる、で少しずつたまります。gain＝1回でふえる量（2026年10月に、上がりにくくするためにすべて半分にしました）、cooldownSec＝同じ行動でふえるまでの待ち時間（秒）。read は同じ本だと1日1回だけ。blushFrom 以上になると、照れ顔（blush）が blushChance の割合で赤面（soblush）になります。lines は「好感度が min 以上のときに、ふだんのセリフに足されるセリフ」（キーは lines と同じ：talk・idle・pat など）。vaultEvent は、好感度が min 以上で禁書庫に入ったとき、vaultLines の key のセリフを一度だけ言います（セリフはあとで足してください。ない間は何も起きません）。確認用に、ブラウザのコンソールで __affinity() で今の値、__affinity(100) で値を変えられます。",
+  "_affinityNote": "affinity：トルサの好感度（0〜max。画面には出ません）。max は、羊の間のイベント（好感度200）のために 100 から 300 に、そのあと 500 に上げました（若草の本が 500 まで教えてくれます）。来館・本を読む・本と話す・トルサと話す・さわる、で少しずつたまります。gain＝1回でふえる量（2026年10月に、上がりにくくするためにすべて半分にしました。そのあと、本を最後まで読む readEnd をいちばん大きくしました）。read＝本をひらく、readEnd＝本を最後（おしまい）までスクロールして閉じる、visit＝入館（1時間に1回まで）、cooldownSec＝同じ行動でふえるまでの待ち時間（秒）。read と readEnd は同じ本だと1日1回だけ。blushFrom 以上になると、照れ顔（blush）が blushChance の割合で赤面（soblush）になります。lines は「好感度が min 以上のときに、ふだんのセリフに足されるセリフ」（キーは lines と同じ：talk・idle・pat など）。vaultEvent は、好感度が min 以上で禁書庫に入ったとき、vaultLines の key のセリフを一度だけ言います（セリフはあとで足してください。ない間は何も起きません）。確認用に、ブラウザのコンソールで __affinity() で今の値、__affinity(100) で値を変えられます。",
   "affinity": {
-    "max": 300,
+    "max": 500,
     "gain": {
       "visit": 0.75,
       "read": 0.5,
+      "readEnd": 4,
       "bookTalk": 0.25,
       "torsaTalk": 0.125,
       "touch": 0.125
     },
     "cooldownSec": {
+      "visit": 3600,
       "bookTalk": 30,
       "torsaTalk": 20,
       "touch": 15

@@ -180,6 +180,12 @@ body.lite .live-halo { animation: none; opacity: 0; } body.lite .live-halo.restl
 .live:hover, .live:focus-visible { transform: translateY(-10%); box-shadow: inset -3px 0 0 rgba(0,0,0,.25), 0 0 18px 5px rgba(243, 208, 138, .7); animation: none; }
 .live.restless { animation: restless 2.2s ease-in-out infinite; }
 .live.gone { visibility: hidden; }
+/* 浮かんでいる本（books.json の float）：表紙を向けて、月の窓の前にふわふわ浮かぶ */
+.float-book { position: absolute; pointer-events: none; }
+.float-book .live.cover-book { position: absolute; inset: 0; width: 100%; height: 100%; background: none; border-radius: 3px; pointer-events: auto; cursor: pointer; transform: rotate(var(--rot, 0deg)); box-shadow: 0 0 24px 8px rgba(214, 240, 196, .5), 0 10px 16px rgba(0, 0, 0, .45); }
+.float-book .live.cover-book::before, .float-book .live.cover-book::after { display: none; }
+.float-book .live.cover-book > svg, .float-book .live.cover-book > img { display: block; width: 100%; height: 100%; border-radius: 3px; object-fit: cover; }
+.float-book .live.cover-book:hover, .float-book .live.cover-book:focus-visible { transform: rotate(var(--rot, 0deg)) translateY(-6%) scale(1.08); box-shadow: 0 0 30px 10px rgba(232, 250, 214, .6), 0 14px 20px rgba(0, 0, 0, .45); }
 @keyframes glow { 50% { box-shadow: inset -3px 0 0 rgba(0,0,0,.25), 0 0 16px 4px rgba(243, 208, 138, .6); } }
 @keyframes restless { 0%, 68%, 100% { transform: none; } 74% { transform: translateY(-8%) rotate(-3deg); } 80% { transform: rotate(2deg); } 86% { transform: translateY(-4%); } }
 .door-hit { position: absolute; border: 0; padding: 0; background: transparent; border-radius: 50% 50% 0 0 / 22% 22% 0 0; cursor: pointer; }
@@ -719,6 +725,15 @@ body:not(.at-door) #sceneWrap::after { visibility: hidden; transition: opacity 1
 body.fx-off .float, body.fx-off .fbook, body.fx-off .dglow, body.fx-off .live.restless, body.fx-off .live-halo.restless, body.fx-off .moon-halo, body.fx-off #backTop .halo, body.fx-off .crest { animation: none !important; }
 body.fx-off #skyfx, body.fx-off #trail { display: none; }
 
+/* 明るさ（opacity）だけを変える大きな層は、自分の層にしておく。
+   変えるたびに画面ぜんたいのグラデーションを描き直さず、合成だけで済む（見た目は同じ） */
+#vignette, #floorlight, #backTop .boost { will-change: opacity; }
+
+/* 最軽量：オフに加えて、手前の植物・窓のつやもやめ、画面の描き直しを1秒に30回までにする。
+   きらめきの層は半分の細かさで描き、トルサ・カネルの絵も細かさを下げる（js/torsa.js・kaneru/kaneru.js） */
+body.fx-min #front, body.fx-min #backTop .glass, body.fx-min #backTop .glass-shimmer { display: none; }
+body.fx-min .btn.primary, body.fx-min .obj-label.pulse { animation: none !important; }
+
 /* 設定ボタンと設定パネル */
 .icon-btn { display: inline-flex; align-items: center; gap: 6px; }
 .icon-btn::before { content: none; }
@@ -751,7 +766,7 @@ body.fx-off #skyfx, body.fx-off #trail { display: none; }
 .switch:checked { background: rgba(214, 176, 98, .55); }
 .switch:checked::after { transform: translateX(18px); background: #fff1c4; box-shadow: 0 0 8px rgba(243, 208, 138, .8); }
 .switch:focus-visible { outline: 2px solid var(--lamp); outline-offset: 2px; }
-.seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid rgba(214, 176, 98, .6); border-radius: 999px; overflow: hidden; }
+.seg { display: grid; grid-auto-flow: column; grid-auto-columns: 1fr;border: 1px solid rgba(214, 176, 98, .6); border-radius: 999px; overflow: hidden; }
 .seg button { border: 0; background: transparent; color: #d9d3ec; padding: .45em 0; font-size: 13px; letter-spacing: .06em; }
 .seg button + button { border-left: 1px solid rgba(214, 176, 98, .35); }
 .seg button[aria-checked="true"] { background: linear-gradient(180deg, #fbe8b4, #d9ac57); color: #2a1f2e; font-weight: 700; }
@@ -968,7 +983,8 @@ body.fx-off .hdrip i, body.fx-off .hpuddle i { animation: none; opacity: 0; }
 .glass-shimmer { overflow: hidden; /* 窓のアーチの形に切り抜く（多角形の切り抜きは毎フレーム重いので、角丸の四角で同じ形にする） */ clip-path: inset(11.6% 9.9% 4.9% 9.9% round 50% 50% 0 0 / 42% 42% 0 0); }
 .glass-shimmer i { position: absolute; top: -10%; bottom: -10%; left: -45%; width: 28%; background: linear-gradient(90deg, rgba(255, 255, 255, 0), rgba(255, 252, 235, .2) 45%, rgba(255, 255, 255, .32) 50%, rgba(255, 252, 235, .2) 55%, rgba(255, 255, 255, 0)); transform: skewX(-16deg); animation: glassSweep 13s ease-in-out infinite; will-change: transform; }
 @keyframes glassSweep { 0%, 62% { transform: translateX(0) skewX(-16deg); } 100% { transform: translateX(560%) skewX(-16deg); } }
-body.lite .glass-shimmer, body.fx-off .glass-shimmer { display: none; }
+/* #backTop .dyn（display:block）より強くするため #backTop をつける（つけないと、ひかえめ・オフでも光が走りつづけていた） */
+body.lite #backTop .glass-shimmer, body.fx-off #backTop .glass-shimmer { display: none; }
 @media (prefers-reduced-motion: reduce) { .glass-shimmer { display: none; } }
 /* 棟ごとの、窓から差す光の色 */
 body[data-hall="east"] #backTop .halo { background: radial-gradient(closest-side, rgba(255, 220, 150, .9), rgba(255, 220, 150, 0)); }
@@ -1104,6 +1120,7 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
       <button role="radio" data-fx="full" id="fxFull">きらきら</button>
       <button role="radio" data-fx="lite" id="fxLite">ひかえめ</button>
       <button role="radio" data-fx="off" id="fxOff">オフ</button>
+      <button role="radio" data-fx="min" id="fxMin">最軽量</button>
     </div>
     <span class="set-note" id="fxNote"></span>
   </div>
@@ -1290,7 +1307,8 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     const A = AFF(), g = (A.gain || {})[kind]; if (!g) return;
     const now = Date.now(), cool = ((A.cooldownSec || {})[kind] || 0) * 1000;
     mem.affCool ||= {};
-    if (kind === "read" && bookId) { const day = new Date().toDateString(); mem.affRead ||= {}; if (mem.affRead[bookId] === day) return; mem.affRead[bookId] = day; }
+    // 本ごとの行動（read＝本をひらく、readEnd＝最後まで読む）は、同じ本だと1日1回だけ
+    if (bookId) { const day = new Date().toDateString(), k = kind === "read" ? bookId : `${kind}:${bookId}`; mem.affRead ||= {}; if (mem.affRead[k] === day) return; mem.affRead[k] = day; }
     else if (cool && now - (mem.affCool[kind] || 0) < cool) return;
     mem.affCool[kind] = now;
     mem.affinity = Math.min(A.max || 100, Math.round(((mem.affinity || 0) + g) * 100) / 100); save();
@@ -1917,11 +1935,14 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
   let lastZone = null, zoneTimer = null, jumpWait = 0, lastT = performance.now();
   const PAUSE = { on: false };
   function loop(t) {
+    // 最軽量：画面の描き直しは1秒に30回まで（歩く速さ・止まり方は時間で計算するので変わらない）
+    const capped = FX_LEVEL === "min";
+    if (capped && t - lastT < 30) { requestAnimationFrame(loop); return; }
     const dt = Math.min(50, t - lastT); lastT = t;
     if (cam.dir && !uiBusy()) cam.target += cam.dir * (DATA ? DATA.library.walkSpeed || 9 : 9) * dt / 16;
     clampCam();
     const prev = cam.x;
-    cam.x += (cam.target - cam.x) * (reduced ? 1 : .09);
+    cam.x += (cam.target - cam.x) * (reduced ? 1 : capped ? 1 - Math.pow(.91, dt / 16.667) : .09);
     if (Math.abs(cam.target - cam.x) * cam.s < .2) cam.x = cam.target; // 止まりぎわの、目に見えないほどのゆっくりした動きを続けない（細かいちらつきと、むだな描き直しを止める）
     cam.vel = cam.x - prev;
     if (Math.abs(cam.vel) > .3) cam.phase += dt * .012;
@@ -2012,13 +2033,20 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
      ==================================================== */
   const IS_MOBILE = matchMedia("(pointer: coarse)").matches || Math.min(screen.width, screen.height) < 760;
   const SHADE = { opt: null, holes: [], grad: null };
-  // 演出の段階：full＝きらきら / lite＝ひかえめ / off＝オフ。設定で選んでいなければ、スマホはひかえめ、ほかはきらきら
+  // 演出の段階：full＝きらきら / lite＝ひかえめ / off＝オフ / min＝最軽量（オフ＋描き直しを1秒に30回・きらめきの層を半分の細かさ）。
+  // 設定で選んでいなければ、スマホはひかえめ、ほかはきらきら
   let FX_LEVEL = "full";
   function applyFxLevel(level, chosen) {
+    if (!["full", "lite", "off", "min"].includes(level)) level = "full";
     FX_LEVEL = level;
+    const min = level === "min";
     document.body.classList.toggle("lite", level !== "full");
-    document.body.classList.toggle("fx-off", level === "off");
-    FX.on = !reduced && level !== "off";
+    document.body.classList.toggle("fx-off", level === "off" || min);
+    document.body.classList.toggle("fx-min", min);
+    FX.on = !reduced && level !== "off" && !min;
+    // きらめきの層（夜の暗さ・月の光・煙）はやわらかい絵なので、最軽量では半分の細かさで描く
+    const dpr = min ? .5 : 1;
+    if (FX.dpr !== dpr) { FX.dpr = dpr; if (FX.allStars) { ["fx", "skyfx", "trail"].forEach((id) => sizeCanvas($(id))); FX.due = true; } }
     if (FX.allStars) {
       const n = level === "full" ? 1 : 2;
       FX.stars = FX.allStars.filter((_, i) => i % n === 0).slice(0, level === "full" ? 999 : 60);
@@ -2026,7 +2054,7 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     }
     if (chosen) PERF.done = true;
     document.querySelectorAll(".seg button[data-fx]").forEach((b) => b.setAttribute("aria-checked", String(b.dataset.fx === level)));
-    const note = { full: "光や動きをぜんぶ見せます。", lite: "軽量版。光と動きを少し減らして、動きが重いときでもなめらかにします。スマホではこちらがおすすめ。", off: "いちばん軽い版。きらめきや動く飾りを止めます。" }[level];
+    const note = { full: "光や動きをぜんぶ見せます。", lite: "軽量版。光と動きを少し減らして、動きが重いときでもなめらかにします。スマホではこちらがおすすめ。", off: "きらめきや動く飾りを止めます。", min: "いちばん軽い版。オフに加えて、手前の植物と窓のつやを消し、画面の描き直しを減らして、絵の細かさも少し下げます。古いスマホや、電池を長持ちさせたいときに。" }[level];
     const el = document.getElementById("fxNote"); if (el) el.textContent = note;
   }
   const FX = { on: !reduced, stars: [], orbs: [], parts: [], shoot: [], nextShoot: 4000, dpr: 1, sprites: {}, quality: 2 };
@@ -2161,9 +2189,10 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
       });
     }
     // 光のゆらぎは、絵ぜんたいの明るさをゆっくり変えて出す
-    g.globalCompositeOperation = "lighter"; g.globalAlpha = .88 + .12 * Math.sin(t * .9); g.imageSmoothingEnabled = true;
+    g.globalCompositeOperation = "lighter"; g.globalAlpha = FX.on ? .88 + .12 * Math.sin(t * .9) : .94; g.imageSmoothingEnabled = true;
     g.drawImage(cv, 0, 0, vw, H);
-    MOON.dust.forEach((p) => {
+    // オフ・最軽量では、光の中を舞うちりは出さない（止まったちりが残らないように）
+    if (FX.on) MOON.dust.forEach((p) => {
       const pts = RAYS[p.ray]._pts; if (!pts) return; const [a, b, c, e] = pts, u = .5 + p.k * .8;
       const x = a[0] + (b[0] - a[0]) * u + ((e[0] + (c[0] - e[0]) * u) - (a[0] + (b[0] - a[0]) * u)) * p.t + Math.sin(t / 1.4 + p.ph) * 6, y = a[1] + (c[1] - a[1]) * p.t;
       g.globalAlpha = L * Math.sin(p.t * Math.PI) * (.5 + .5 * Math.sin(t / .7 + p.ph)); g.drawImage(sprite("#fff8e0", "orb"), x - 4, y - 4, 8, 8);
@@ -2185,9 +2214,16 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     if (!busy) watchPerf(dt);
     const t = performance.now() / 1000, d = FX.dpr;
     if (!busy) {
-    if (fxDue) {
-    const c = $("fx"), g = c.getContext("2d"); g.setTransform(d, 0, 0, d, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.clearRect(0, 0, c.width, c.height);
-    drawShade(g); drawRays(g, t); drawSmoke(g, t); drawOrrery(g, t);
+    // オフ・最軽量：この層で動くものがないので、立ち位置・月の明るさ・画面が変わったときだけ描き直す（2秒に1回は念のため描く）
+    let paint = fxDue;
+    if (paint && !FX.on) {
+      const key = `${HALL_ID},${Math.round(cam.px || 0)},${cam.s.toFixed(4)},${cam.vw},${cam.H},${Math.round(MOON.level * 200)},${SHADE.holes.length},${SMOKE.length}`;
+      paint = FX.due || key !== FX.stillKey || t - (FX.stillAt || 0) > 2;
+      if (paint) { FX.stillKey = key; FX.stillAt = t; }
+    }
+    if (paint) {
+    const c = $("fx"), g = c.getContext("2d"); g.setTransform(d, 0, 0, d, 0, 0); g.globalAlpha = 1; g.globalCompositeOperation = "source-over"; g.clearRect(0, 0, c.width / d, c.height / d);
+    drawShade(g); drawRays(g, t); drawSmoke(g, t); drawOrrery(g, FX.on ? t : 0);
     if (FX.on && HALL().sparkles !== false) {
     // 館内（本棚の前の空気）：またたく星と、ゆっくり漂う光
     g.globalCompositeOperation = "lighter";
@@ -2209,7 +2245,7 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     if (HALL().sparkles === false) { FX.shoot.length = 0; FX.nextShoot = Math.max(FX.nextShoot, 3000); }
     // 空：流れ星
     const vw = cam.vw, k = $("skyfx"), h = k.getContext("2d");
-    if (FX.shoot.length || FX.skyDirty) { h.setTransform(d, 0, 0, d, 0, 0); h.globalAlpha = 1; h.clearRect(0, 0, k.width, k.height); FX.skyDirty = FX.shoot.length > 0; }
+    if (FX.shoot.length || FX.skyDirty) { h.setTransform(d, 0, 0, d, 0, 0); h.globalAlpha = 1; h.clearRect(0, 0, k.width / d, k.height / d); FX.skyDirty = FX.shoot.length > 0; }
     FX.nextShoot -= dt;
     { const on = FX.shoot.length > 0 || FX.nextShoot < 0; if (on === !!FX.skyHidden) { k.style.display = on ? "" : "none"; FX.skyHidden = !on; } }
     if (FX.nextShoot < 0) { FX.nextShoot = 5000 + Math.random() * 9000; FX.shoot.push({ x: vw * (.3 + Math.random() * .8), y: cam.H * (.02 + Math.random() * .15), vx: -(7 + Math.random() * 4), vy: 2.4 + Math.random() * 1.5, life: 70 }); }
@@ -2226,7 +2262,7 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     if (!FX.parts.length && !FX.trailDirty) { if (!FX.trailHidden) { tr.style.display = "none"; FX.trailHidden = true; } return; }
     if (FX.trailHidden) { tr.style.display = ""; FX.trailHidden = false; }
     FX.trailDirty = FX.parts.length > 0;
-    q.setTransform(d, 0, 0, d, 0, 0); q.globalAlpha = 1; q.clearRect(0, 0, tr.width, tr.height); q.globalCompositeOperation = "lighter";
+    q.setTransform(d, 0, 0, d, 0, 0); q.globalAlpha = 1; q.clearRect(0, 0, tr.width / d, tr.height / d); q.globalCompositeOperation = "lighter";
     FX.parts = FX.parts.filter((p) => p.life > 0);
     FX.parts.forEach((p) => {
       p.x += p.vx * dt / 16; p.y += p.vy * dt / 16; p.vy += .012 * dt / 16; p.vx *= .985; p.life -= dt / 16;
@@ -3106,10 +3142,37 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
   }
 
   /* ---------- 本棚の本を置く ---------- */
+  // 浮かべる本の位置（books.json の float：x・y は表紙のまん中、w は幅。高さは表紙の形 3:4 から決める）
+  function floatSpots(books) {
+    const spots = {};
+    books.forEach((b) => { const f = b.float; if (!f) return; const w = f.w || 56, h = w * 4 / 3; spots[b.id] = { x: (f.x ?? 1530) - w / 2, y: (f.y ?? 330) - h / 2, w, h, float: true, rot: f.rot || 0 }; });
+    return spots;
+  }
   function placeBooks(spots) {
     const mid = $("midTop"), W = cam.W, X0 = cam.L;
     DATA.books.books.forEach((b) => {
       const sp = spots[b.id]; if (!sp) return;
+      if (sp.float) {
+        // 表紙を向けて、ふわふわ浮かんでいる本（まわりの光は box-shadow。浮かぶ動きは .float と同じで、ひかえめ・オフでは止まる）
+        const wrap = document.createElement("div");
+        wrap.className = "float-book float";
+        wrap.style.cssText = `left:${((sp.x - X0) / W) * 100}%;top:${sp.y / 10}%;width:${(sp.w / W) * 100}%;height:${sp.h / 10}%;--rot:${sp.rot}deg`;
+        const el = document.createElement("button");
+        el.className = "live cover-book";
+        el.dataset.id = b.id;
+        el.setAttribute("aria-label", `${b.title}を手に取る`);
+        el.innerHTML = coverHTML(b);
+        el.addEventListener("click", () => { burstAt(el, 26, 1.6); SFX.play("pickup"); openBook(b, "shelf"); });
+        el.addEventListener("pointerenter", () => { burstAt(el, 8, .6); SFX.play("hover"); });
+        wrap.appendChild(el); mid.appendChild(wrap);
+        b._x = sp.x + sp.w / 2;
+        if (b.shelfEmote) {
+          const em = document.createElement("span"); em.className = "shelf-emote"; em.textContent = b.shelfEmote; em.dataset.for = b.id;
+          em.style.cssText = `left:${((sp.x + sp.w / 2 - X0) / W) * 100}%;top:${(sp.y - 10) / 10}%`;
+          mid.appendChild(em);
+        }
+        return;
+      }
       const el = document.createElement("button");
       el.className = "live" + (b.type === "jumper" ? " restless" : "");
       el.dataset.id = b.id;
@@ -3161,8 +3224,9 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
   const applySize = () => { $("rBody").className = "r-body " + sizes[sizeIdx][0]; $("sizeBtn").textContent = "文字 " + sizes[sizeIdx][1]; };
   $("sizeBtn").addEventListener("click", () => { sizeIdx = (sizeIdx + 1) % 3; applySize(); try { localStorage.setItem(KEY + "-size", sizeIdx); } catch (e) {} });
   applySize();
-  let readingBook = null;
+  let readingBook = null, readToEnd = false;
   function openReader(book) {
+    readToEnd = false;
     like("read", book.id);
     SFX.play("page");
     const w = DATA.works.works.find((x) => x.id === book.workId); readingBook = book;
@@ -3172,11 +3236,13 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
       : `<p>works.json に「${esc(book.workId)}」が見つかりませんでした。</p>`;
     $("reader").hidden = false; $("rBody").scrollTop = 0; updateProgress(); $("closeReader").focus({ preventScroll: true });
   }
-  function updateProgress() { const b = $("rBody"), max = b.scrollHeight - b.clientHeight; $("progress").style.width = (max > 0 ? (b.scrollTop / max) * 100 : 100) + "%"; }
+  // 最後（「おしまい」のあたり）までスクロールしたら「読みおわった」にする（短くてスクロールしない本は、ひらいただけで読みおわり）
+  function updateProgress() { const b = $("rBody"), max = b.scrollHeight - b.clientHeight; $("progress").style.width = (max > 0 ? (b.scrollTop / max) * 100 : 100) + "%"; if (max <= 0 || b.scrollTop >= max - 40) readToEnd = true; }
   $("rBody").addEventListener("scroll", updateProgress, { passive: true });
   $("closeReader").addEventListener("click", () => {
     $("reader").hidden = true; const b = readingBook; if (!b) return;
     bookMem(b.id).read++; save();
+    if (readToEnd) like("readEnd", b.id); // 最後まで読むと、好感度がいちばんふえる
     if (b.lines.afterRead) talk(b, [b.lines.afterRead], [{ label: "棚に戻す", primary: true, run: () => { closeTalk(); torsa("afterRead"); } }]);
     else torsa("afterRead");
   });
@@ -3609,10 +3675,12 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     const HS = library.halls || {};
     WORLD.plan.doors.forEach((d) => { const t = (H.doors || {})[d.side]; d.to = t === undefined ? null : t; d.part = d.to && HS[d.to] && HS[d.to].ageGate ? "forbidden_door" : "end_door"; });
     const hallBooks = DATA.books.books.filter((b) => !b.room && (b.hall || "main") === id);
+    // float を書いた本は棚に入れず、館内に浮かべる（若草の本など）
+    const shelfBooks = hallBooks.filter((b) => !b.float);
     const art = library.art || {};
     const useArt = (el, path, fit, gen) => { $(el).innerHTML = path ? `<img src="${esc(path)}" alt="" style="width:100%;height:100%;display:block;object-fit:${fit};object-position:50% 100%">` : gen; };
     const useParts = scene && scene.useParts && scene.parts;
-    const m = midSVG(library, hallBooks);
+    const m = midSVG(library, shelfBooks);
     const TH = H.theme || {};
     const built = useParts ? buildFromParts(themedParts(scene.parts, TH), library, { ...(scene.decor || {}), ...(TH.decor || {}), window: H.window || "window" }) : { mid: m.svg, back: backSVG(), front: frontSVG() };
     useArt("sky", TH.sky || art.sky, "cover", skySVG()); useArt("back", art.back, "cover", built.back); useArt("front", art.front, "cover", built.front); useArt("mid", art.mid, "fill", built.mid);
@@ -3620,7 +3688,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     $("backTop").querySelectorAll(".dyn").forEach((el) => el.remove()); BACKDYN.length = 0;
     (built.backDyn || []).forEach((d) => { const el = document.createElement("div"); el.className = "dyn " + d.cls; if (d.id) el.id = d.id; if (d.html) el.innerHTML = d.html; $("backTop").appendChild(el); BACKDYN.push({ el, ...d }); });
     if (useParts) { SHADE.opt = { ...((scene.decor && scene.decor.shade) || {}), ...(H.shade || {}) }; SHADE.holes = shadeHoles(); }
-    placeBooks(useParts ? partSpots(library, hallBooks, (TH.decor || {}).ladder !== false) : m.spots);
+    placeBooks({ ...(useParts ? partSpots(library, shelfBooks, (TH.decor || {}).ladder !== false) : m.spots), ...floatSpots(hallBooks) });
     if (H.drips) $("midTop").insertAdjacentHTML("beforeend", hallDrips());
     placeDoors(); setupSmoke(); FX.due = true; cam.lastPx = NaN;
     scheduleWhisper(6000);
