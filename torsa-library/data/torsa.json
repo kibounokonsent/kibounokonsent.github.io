@@ -918,12 +918,12 @@
   "affinity": {
     "max": 500,
     "gain": {
-      "visit": 0.75,
-      "read": 0.5,
+      "visit": 1,
+      "read": 1,
       "readEnd": 4,
       "bookTalk": 0.25,
-      "torsaTalk": 0.125,
-      "touch": 0.125
+      "torsaTalk": 0.15,
+      "touch": 0.15
     },
     "cooldownSec": {
       "visit": 3600,
