@@ -418,8 +418,14 @@
     {
     "id": "gift-2zv4libgiz8t",
     "title": "たんぽぽ",
+    "workId": "zuu-01",
     "type": "friendly",
     "hall": "",
+    "place": {
+      "bay": "w2",
+      "row": 2,
+      "slot": 1
+    },
     "shelfEmote": "～",
     "personality": {
       "preset": "おっとり",

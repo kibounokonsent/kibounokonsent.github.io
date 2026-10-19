@@ -43,9 +43,12 @@ window.TorsaGifts = (() => {
       if (r.ok && /html/i.test(r.headers.get("content-type") || "")) { const t = await r.text(); for (const m of t.matchAll(/href="([^"?#]+?\.json)"/gi)) { try { add(decodeURIComponent(m[1])); } catch (e) { add(m[1]); } } }
     } catch (e) { /* 一覧を見せないサーバー */ }
     if (/\.github\.io$/i.test(location.hostname)) {
-      const owner = location.hostname.split(".")[0], seg = location.pathname.split("/").filter(Boolean)[0];
-      const repo = seg && !/\./.test(seg) ? seg : `${owner}.github.io`;
-      const gh = await getJSON(`https://api.github.com/repos/${owner}/${repo}/contents/${DIR.slice(0, -1)}`, 6000);
+      const owner = location.hostname.split(".")[0];
+      const path = location.pathname.replace(/(?:index\.html)?\/?$/, "").split("/").filter(Boolean);
+      const repo = `${owner}.github.io`;
+      let gh = await getJSON(`https://api.github.com/repos/${owner}/${repo}/contents/${[...path, DIR.slice(0, -1)].join("/")}`, 6000);
+      // Project Pages use the first path segment as the repository name.
+      if (!Array.isArray(gh) && path.length) gh = await getJSON(`https://api.github.com/repos/${owner}/${path[0]}/contents/${DIR.slice(0, -1)}`, 6000);
       if (Array.isArray(gh)) gh.forEach((f) => f && f.type === "file" && add(f.name));
     }
     return [...names].sort();
