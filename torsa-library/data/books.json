@@ -414,6 +414,71 @@
         }
       }
     },
+
+    {
+    "id": "gift-2zv4libgiz8t",
+    "title": "たんぽぽ",
+    "type": "friendly",
+    "hall": "",
+    "shelfEmote": "～",
+    "personality": {
+      "preset": "おっとり",
+      "note": ""
+    },
+    "cover": {
+      "titleDirection": "horizontal",
+      "color": "#f0be81",
+      "accent": "#a35f00",
+      "emblem": "star",
+      "parts": {
+        "base": "washi",
+        "scene": "dunes",
+        "pattern": "none",
+        "sparkle": "bubbles",
+        "spine": "plain",
+        "frame": "double",
+        "corners": "metal",
+        "band": "none",
+        "emblemBase": "circle",
+        "emblemPos": "middle",
+        "plate": "plate",
+        "titleDeco": "none",
+        "titlePos": "bottom",
+        "clasp": "none",
+        "bookmark": "none",
+        "finish": "none"
+      },
+      "title": "たんぽぽ",
+      "subtitle": ""
+    },
+    "lines": {
+      "first": [
+        {
+          "emote": "happy",
+          "text": "あら～、はじめまして～。"
+        },
+        {
+          "emote": "normal",
+          "text": "ゆっくりでいいから、のんびり読んでいってね～。"
+        }
+      ],
+      "revisit": [
+        {
+          "emote": "happy",
+          "text": "また来てくれたのね～。お茶でもいかが～？"
+        }
+      ],
+      "afterRead": {
+        "emote": "happy",
+        "text": "読んでくれてありがとう～。少し休んでいってね～。"
+      },
+      "catalog": {
+        "emote": "normal",
+        "text": "あらあら、目録から来てくれたのね～。"
+      }
+    }
+  },
+
     {
       "id": "kei-bushi",
       "title": "我、この地を守りし武士なり",
