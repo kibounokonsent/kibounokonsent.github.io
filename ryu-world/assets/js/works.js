@@ -19,7 +19,7 @@ const WORKS = [
 
     // ---------- フロンズワールド ----------
     { world: "fronz", era: 1, title: "古代世界", tentative: true, summary: "", url: "" },
-    { world: "fronz", era: 2, title: "龍の里", summary: "", url: "" },
+    { world: "fronz", era: 2, title: "龍の里", summary: "霧深き山々に、竜の里あり。ジーング・レイズドは、婚約相手を探すため、里から里へと渡り歩く旅に出る", url: "https://kibounokonsent.github.io/ryu-no-sato/index.html" },
     {
         world: "fronz", era: 3, title: "エイコウ",
         summary:
