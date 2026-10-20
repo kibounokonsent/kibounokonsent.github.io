@@ -485,6 +485,87 @@
     }
   },
 
+
+ {
+    "id": "gift-hmcpsiq6rnzg",
+    "title": "とある天使の物語",
+    "type": "jumper",
+    "hall": "",
+    "shelfEmote": "♪",
+          "place": {
+        "bay": "w3",
+        "row": 1,
+        "slot": 8
+      },
+    "personality": {
+      "preset": "人なつっこい",
+      "note": "何もかもが新鮮に感じる子。読み終わるごとにいろんなところにワープしてくれると嬉しい"
+    },
+    "cover": {
+      "titleDirection": "horizontal",
+      "color": "#f2bffd",
+      "accent": "#cd62f3",
+      "textColor": "#f7acfb",
+      "emblem": "compass",
+      "parts": {
+        "base": "velvet",
+        "scene": "none",
+        "pattern": "none",
+        "sparkle": "dust",
+        "spine": "stitched",
+        "frame": "single",
+        "corners": "star",
+        "band": "corner",
+        "emblemBase": "sunburst",
+        "emblemPos": "middle",
+        "plate": "emboss",
+        "titleDeco": "diamonds",
+        "titlePos": "top",
+        "clasp": "cord",
+        "bookmark": "charm",
+        "finish": "frost"
+      },
+      "title": "とある天使の物語",
+      "subtitle": ""
+    },
+    "lines": {
+      "first": [
+        {
+          "emote": "happy",
+          "text": "わあ、はじめまして！ 僕のこと読んでいかない？"
+        },
+        {
+          "emote": "smug",
+          "text": "ほら！見せてあげるよ！"
+        }
+      ],
+      "revisit": [
+        {
+          "emote": "happy",
+          "text": "あっ、またあったね！"
+        },
+        {
+          "emote": "question",
+          "text": "もう一回読んでいく？"
+        }
+      ],
+      "afterRead": {
+        "emote": "smug",
+        "text": "おしまい！次はどこに行こうかな"
+      },
+      "catalog": {
+        "emote": "surprise",
+        "text": "わあ！目録から来ちゃった！"
+      },
+      "jump": [
+        {
+          "emote": "excited",
+          "text": "やぁ！こんにちは！僕のこと読んでいかない？"
+        }
+      ]
+    }
+  },
+
     {
       "id": "kei-bushi",
       "title": "我、この地を守りし武士なり",
