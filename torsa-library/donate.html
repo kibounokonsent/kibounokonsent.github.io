@@ -223,7 +223,7 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
 </div>
 <div class="reader" id="reader" hidden><div class="reader-page" id="readerPage"></div></div>
 <div class="toast" id="toast" hidden></div>
-<input type="file" id="fileIn" accept=".json,application/json" hidden>
+<input type="file" id="fileIn" accept=".txt,text/plain,.json,application/json" hidden>
 
 <script src="js/cover-parts.js"></script>
 <script src="js/cover-core.js"></script>
@@ -485,9 +485,11 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
         : S.type === "revisit" ? `<div class="sub-row"><b>何回目から特別なセリフ？</b>${[3, 4, 5, 7, 10].map((n) => `<button type="button" class="chip${S.frequentFrom === n ? " on" : ""}" data-ff="${n}">${n} 回目</button>`).join("")}</div>` : "";
     };
     opt();
-    desk.addEventListener("click", typeClick);
+    // 章を開くたびに受け口が増えないように、前のものを外してから付ける
+    if (type.click) desk.removeEventListener("click", type.click);
+    desk.addEventListener("click", (type.click = typeClick));
     function typeClick(e) {
-      if (STEPS[S.step].key !== "type") { desk.removeEventListener("click", typeClick); return; }
+      if (STEPS[S.step].key !== "type") { desk.removeEventListener("click", typeClick); type.click = null; return; }
       const c = e.target.closest(".card"), rc = e.target.closest("[data-rc]"), ff = e.target.closest("[data-ff]");
       if (c) { S.type = c.dataset.k; $("tCards").querySelectorAll(".card").forEach((x) => x.classList.toggle("on", x === c)); opt(); }
       if (rc) { S.refuseCount = +rc.dataset.rc; opt(); }
@@ -639,7 +641,7 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
         <div class="row-btns"><button type="button" class="btn primary" id="bindBtn"${p.length ? " disabled" : ""}>本を綴じる</button></div>
       </div></div>
       <div class="done-box" id="doneBox" hidden><b>できあがり！</b> 「<span id="fname"></span>」ができました。
-        <ol><li>このファイルを、図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。</li><li>管理人さんが書架に入れてくれたら、図書館で会えるよ。</li></ol>
+        <ol><li>このファイル（テキストファイル）を、図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。メモ帳などで開くと、中身をたしかめられるよ。</li><li>管理人さんが書架に入れてくれたら、図書館で会えるよ。</li></ol>
         <div class="row-btns" style="margin-top:10px"><button type="button" class="btn small" id="dlAgain">もう一度ダウンロード</button><button type="button" class="btn small" id="shareBtn" hidden>送る（共有）</button><button type="button" class="btn small" id="another">新しい本を書く</button></div></div>`;
     desk.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(+b.dataset.go)));
     $("bindBtn").addEventListener("click", () => {
@@ -648,7 +650,7 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
       download(f); $("fname").textContent = f.name; $("doneBox").hidden = false;
       guideSay(["わぁ～、すてきな本ができたね～！", "そのファイルを管理人さんに渡してね～。図書館で会えるのを楽しみにしてるよ～。"]);
       $("dlAgain").onclick = () => download(f);
-      const file = typeof File !== "undefined" ? new File([f.blob], f.name, { type: "application/json" }) : null;
+      const file = typeof File !== "undefined" ? new File([f.blob], f.name, { type: "text/plain" }) : null;
       if (file && navigator.canShare && navigator.canShare({ files: [file] })) { $("shareBtn").hidden = false; $("shareBtn").onclick = () => navigator.share({ files: [file], title: S.title, text: "トルサ図書館への寄贈本です" }).catch(() => {}); }
       $("another").onclick = () => confirmBox("新しい本を書く？ いまの本は、ダウンロードしたファイルから、いつでも開いて直せるよ～。", "新しい本を書く", () => { S = newBook(); save(); go(1); });
     });
@@ -665,8 +667,9 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
       work: { title: S.title.trim(), author: S.author.trim(), genre: S.genre.trim() || "寄贈本", paragraphs: paragraphs() }
     };
     const safe = S.title.trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g, "").slice(0, 30) || "本";
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" });
-    return { blob, name: `寄贈本_${safe}.json` };
+    // テキストファイルにする（メモ帳などで開いて読める・直せる。書き方は js/book-gifts.js の toText）
+    const blob = new Blob(["\uFEFF" + window.TorsaGifts.toText(data).replace(/\n/g, "\r\n")], { type: "text/plain;charset=utf-8" });
+    return { blob, name: `寄贈本_${safe}.txt` };
   }
   function download(f) { const a = document.createElement("a"); a.href = URL.createObjectURL(f.blob); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
   function sparkles(el) { const r = el.getBoundingClientRect(); for (let i = 0; i < 26; i++) { const s = document.createElement("span"); s.className = "sparkle"; const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 110; s.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px`; document.body.appendChild(s); setTimeout(() => s.remove(), 1100); } }
@@ -674,14 +677,16 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   /* ---------- 綴じた本を開いて直す ---------- */
   $("fileIn").addEventListener("change", async (e) => {
     const f = e.target.files[0]; e.target.value = ""; if (!f) return;
-    let raw; try { raw = JSON.parse(await f.text()); } catch (err) { toast("このファイルは開けなかったよ"); return; }
+    let raw = null; try { raw = window.TorsaGifts.parse(await f.text(), f.name); } catch (err) { raw = null; }
+    if (!raw) { toast("このファイルは開けなかったよ"); return; }
     const g = window.TorsaGifts.clean(raw, PARTS);
     if (!g) { toast("寄贈本のファイルではないみたい"); return; }
     const b = g.book, w = g.work;
     S = newBook();
     Object.assign(S, { id: b.id.replace(/^gift-/, ""), title: b.title, author: w.author, genre: w.genre === "寄贈本" ? "" : w.genre, text: w.paragraphs.join("\n"), coverTitle: b.cover.title === b.title ? "" : b.cover.title, coverSub: b.cover.subtitle || "",
       shelfEmote: b.shelfEmote, shelfEmoteSet: true, hall: b.hall, type: b.type, refuseCount: b.refuseCount || 2, frequentFrom: b.lines.frequentFrom || 4,
-      personaNote: (raw.book.personality && typeof raw.book.personality.note === "string" ? raw.book.personality.note : "").slice(0, 60) });
+      personaNote: (raw.book.personality && typeof raw.book.personality.note === "string" ? raw.book.personality.note : "").slice(0, 60),
+      persona: (Object.entries(PERSONAS).find(([, p]) => raw.book.personality && p.name === raw.book.personality.preset) || [""])[0] });
     const { title, subtitle, ...cv } = b.cover; S.cover = { ...cv, parts: { ...C.PARTS.DEFAULT, ...(cv.parts || {}) } };
     const one = (l) => (l ? [l] : []);
     S.lines = { first: b.lines.first || [], revisit: b.lines.revisit || [], frequent: b.lines.frequent || [], afterRead: one(b.lines.afterRead), catalog: one(b.lines.catalog), jump: b.lines.jump || [], refuse: [0, 1, 2].map((i) => (b.lines.refuse && b.lines.refuse[i]) || []), accept: b.lines.accept || [] };

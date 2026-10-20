@@ -716,16 +716,65 @@ window.TorsaEvents = (ctxIn) => {
   // イベントの "sounds" に名前とファイルを書いておき、セリフ・選択肢・さわったときに "sound": "名前" で鳴らす。"stopSound": "名前"（true ですべて）で止める
   // sounds の書き方：{ "src": "ファイル", "volume": 0〜1, "loop": true でループ, "rate": 再生の速さ, "fadeIn": ループが大きくなるまでの秒 }
   // src は ["a.opus", "a.mp3"] のように並べると、そのブラウザで鳴らせる方を使う（iPhone などで .opus が鳴らないときの保険）
+  //
+  // 鳴らし方（音が鳴らないことがあったので、2026-10 に作り直し）
+  //   1. Web Audio（サイトの効果音と同じしくみ）で鳴らす。いちど画面にさわると、そのあとはいつでも鳴らせる
+  //      （<audio> だけだと、iPhone・iPad・学校のタブレットなどで、さわってから少し遅れて鳴らす音や、
+  //        さわらずに鳴らす音（始まりの音・ループ）が止められてしまっていた）
+  //   2. Web Audio で読めないファイル（そのブラウザが対応していない形式など）は、今までどおり <audio> で鳴らす
+  //   src に並べたファイルは、鳴らせる方から順にためす（.opus が鳴らないブラウザでは .mp3 を使う、など）
   const SND = {}, LOOPS = {};
   const sndConf = (name) => ((EV && EV.sounds) || {})[name] || ((CONF && CONF.sounds) || {})[name];
   const sndType = (s) => /\.(opus|ogg)$/i.test(s) ? 'audio/ogg; codecs="opus"' : /\.mp3$/i.test(s) ? "audio/mpeg" : /\.(m4a|aac)$/i.test(s) ? "audio/mp4" : /\.wav$/i.test(s) ? "audio/wav" : /\.webm$/i.test(s) ? "audio/webm" : "";
-  function pickSrc(src) { const list = Array.isArray(src) ? src : [src], a = document.createElement("audio"); return list.find((s) => a.canPlayType(sndType(s))) || list[0]; }
+  // 鳴らせそうな順に並べる（「鳴らせる」と答えたファイルを先に。どれもだめなら書いた順のまま）
+  function srcList(src) {
+    const list = (Array.isArray(src) ? src : [src]).filter((s) => typeof s === "string" && s);
+    let a = null; try { a = document.createElement("audio"); } catch (e) { /* なし */ }
+    const can = (s) => (a && a.canPlayType ? a.canPlayType(sndType(s)) : "");
+    return list.filter((s) => can(s)).concat(list.filter((s) => !can(s)));
+  }
+
+  // Web Audio の土台。ブラウザは「さわったとき」にしか音を出す許可をくれないので、さわるたびに起こしておく
+  let AC = null, AC_FAIL = false;
+  function audioCtx() {
+    if (AC || AC_FAIL) return AC;
+    try { AC = new (window.AudioContext || window.webkitAudioContext)(); } catch (e) { AC_FAIL = true; AC = null; }
+    return AC;
+  }
+  function wakeAudio() {
+    const a = audioCtx(); if (!a) return;
+    if (a.state !== "running") { try { a.resume(); } catch (e) { /* 起こせない */ } }
+    // 古い iPhone は、さわったときに一度なにか鳴らさないと音が出ないので、無音を一瞬だけ鳴らす
+    if (!wakeAudio.done) { try { const b = a.createBuffer(1, 1, 22050), s = a.createBufferSource(); s.buffer = b; s.connect(a.destination); s.start(0); wakeAudio.done = true; } catch (e) { /* なし */ } }
+  }
+  ["pointerdown", "touchend", "keydown", "click"].forEach((t) => addEventListener(t, wakeAudio, { capture: true, passive: true }));
+
+  // ファイルを Web Audio 用に読みこむ（読めなければ null）
+  function decode(ab) {
+    const a = audioCtx(); if (!a) return Promise.resolve(null);
+    return new Promise((res) => {
+      try { const p = a.decodeAudioData(ab, (b) => res(b), () => res(null)); if (p && p.then) p.then(res, () => res(null)); } catch (e) { res(null); }
+    });
+  }
+  async function loadBuffer(list) {
+    if (!audioCtx()) return null;
+    for (const url of list) {
+      try { const r = await fetch(url); if (!r.ok) { console.warn("効果音のファイルが見つかりません:", url); continue; } const b = await decode(await r.arrayBuffer()); if (b) return { b, url }; } catch (e) { /* 次のファイルをためす */ }
+    }
+    return null;
+  }
   function loadSound(name) {
     const key = EID + ":" + name; if (SND[key]) return SND[key];
     const c = sndConf(name); if (!c || !c.src) { console.warn("効果音がありません（events.json の sounds）:", name); return null; }
-    const au = new Audio(pickSrc(c.src)); au.preload = "auto";
-    au.addEventListener("error", () => console.warn("効果音のファイルが読めません:", au.src), { once: true });
-    return (SND[key] = { au, c });
+    const list = srcList(c.src); if (!list.length) { console.warn("効果音の src が空です（events.json の sounds）:", name); return null; }
+    const s = { c, list, buf: null, au: null };
+    s.ready = loadBuffer(list).then((r) => { s.buf = r ? r.b : null; return s.buf; });
+    return (SND[key] = s);
+  }
+  // <audio> で鳴らすとき用（Web Audio で読めなかったときだけ作る）
+  function audioEl(s) {
+    if (!s.au) { s.au = new Audio(s.list[0]); s.au.preload = "auto"; s.au.addEventListener("error", () => console.warn("効果音のファイルが読めません:", s.au.src), { once: true }); }
+    return s.au.cloneNode();
   }
   function fadeTo(au, to, sec, done) {
     const from = au.volume, st = performance.now();
@@ -733,29 +782,49 @@ window.TorsaEvents = (ctxIn) => {
     const step = () => { const k = Math.min(1, (performance.now() - st) / (sec * 1000)); au.volume = clamp(from + (to - from) * k, 0, 1); if (k < 1) requestAnimationFrame(step); else done && done(); };
     requestAnimationFrame(step);
   }
+  // 1つの音を鳴らす。返すのは「止める」ための手（stop(秒)）
+  function startSound(s, { loop, vol, rate, fadeIn }) {
+    const h = { stopped: false, stop: null };
+    const viaBuffer = (b) => {
+      const a = audioCtx(); if (a.state !== "running") { try { a.resume(); } catch (e) { /* なし */ } }
+      const src = a.createBufferSource(), g = a.createGain(), t = a.currentTime;
+      src.buffer = b; src.loop = !!loop; try { src.playbackRate.value = rate; } catch (e) { /* なし */ }
+      if (loop && fadeIn > 0) { g.gain.setValueAtTime(0, t); g.gain.linearRampToValueAtTime(vol, t + fadeIn); } else g.gain.setValueAtTime(vol, t);
+      src.connect(g).connect(a.destination); src.start(t);
+      h.stop = (sec) => { const n = a.currentTime; try { g.gain.cancelScheduledValues(n); g.gain.setValueAtTime(g.gain.value, n); g.gain.linearRampToValueAtTime(0, n + Math.max(0.01, sec)); src.stop(n + Math.max(0.01, sec) + 0.05); } catch (e) { try { src.stop(); } catch (e2) { /* もう止まっている */ } } };
+    };
+    const viaElement = () => {
+      const au = audioEl(s); au.playbackRate = rate;
+      if (loop) { au.loop = true; au.volume = 0; au.play().then(() => { if (!h.stopped) fadeTo(au, vol, fadeIn); }).catch((e) => console.warn("効果音を鳴らせませんでした:", au.src, e && e.name)); }
+      else { au.volume = vol; au.play().catch((e) => console.warn("効果音を鳴らせませんでした:", au.src, e && e.name)); }
+      h.stop = (sec) => fadeTo(au, 0, sec, () => au.pause());
+    };
+    const go = (b) => { if (h.stopped) return; if (b && audioCtx()) viaBuffer(b); else viaElement(); };
+    if (s.buf) go(s.buf); else s.ready.then(go);
+    return { stop: (sec) => { if (h.stopped) return; h.stopped = true; if (h.stop) h.stop(sec); } };
+  }
   // "sound": "pan" ／ ["pan", "kuchu"] ／ { "name": "kuchu", "loop": true, "volume": 0.5 }（ここに書いた値が sounds より優先）
   function playSound(spec) {
     if (!spec) return;
     if (Array.isArray(spec)) { spec.forEach(playSound); return; }
     const o = typeof spec === "string" ? { name: spec } : spec, s = loadSound(o.name); if (!s) return;
-    if (SFX.muted) return; // サイトで音を消しているときは鳴らさない
+    if (SFX.on === false || SFX.muted) return; // サイトの設定で効果音を消しているときは鳴らさない
     const loop = o.loop ?? s.c.loop ?? false, vol = clamp((o.volume ?? s.c.volume ?? 1) * (typeof SFX.volume === "number" ? SFX.volume : 1), 0, 1);
-    const au = s.au.cloneNode(); au.playbackRate = o.rate ?? s.c.rate ?? 1;
+    const opt = { loop, vol, rate: o.rate ?? s.c.rate ?? 1, fadeIn: o.fadeIn ?? s.c.fadeIn ?? 0.3 };
     if (loop) {
       if (LOOPS[o.name]) return; // もう鳴っているループは、重ねない
-      au.loop = true; au.volume = 0; LOOPS[o.name] = au;
-      au.play().then(() => fadeTo(au, vol, o.fadeIn ?? s.c.fadeIn ?? 0.3)).catch(() => {});
+      LOOPS[o.name] = startSound(s, opt);
       return;
     }
-    au.volume = vol; au.play().catch(() => {});
+    startSound(s, opt);
   }
   // "stopSound": "kuchu" ／ ["kuchu"] ／ true（ループをぜんぶ）／ { "name": "kuchu", "fade": 1.5 }（fade＝何秒かけて小さくして止めるか）
   function stopSound(spec, sec = 0.4) {
     if (spec === true || spec === "all") { Object.keys(LOOPS).forEach((n) => stopSound(n, sec)); return; }
     if (Array.isArray(spec)) { spec.forEach((n) => stopSound(n, sec)); return; }
-    const name = typeof spec === "string" ? spec : spec && spec.name, au = LOOPS[name]; if (!au) return;
+    const name = typeof spec === "string" ? spec : spec && spec.name, h = LOOPS[name]; if (!h) return;
     delete LOOPS[name];
-    fadeTo(au, 0, (spec && spec.fade != null) ? spec.fade : sec, () => au.pause());
+    h.stop((spec && spec.fade != null) ? spec.fade : sec);
   }
   // セリフ・選択肢・さわったときに共通：flash・stopSound・sound
   function fx(o) { if (!o) return; if (o.flash) flash(o.flash); if (o.stopSound) stopSound(o.stopSound); if (o.sound) playSound(o.sound); }
