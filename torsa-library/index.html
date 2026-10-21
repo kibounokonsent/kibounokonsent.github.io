@@ -3752,9 +3752,11 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
   window.__face = (f) => setFace(f, 0); // 確認用：表情を切りかえる
 
   /* ---------- パレット（右上）：蔵書目録・設定・転送・思い出 ---------- */
-  // 転送の行き先：library.json の halls と、rooms.json の部屋（図書館の間）。並びは WARP_ORDER。色は点の色
-  const WARP_ORDER = ["main", "east", "annex", "west", "vault"];
+  // 転送の行き先：library.json の halls と、rooms.json の部屋（図書館の間・羊の間）。並びは WARP_ORDER。色は点の色
+  const WARP_ORDER = ["main", "sheep", "east", "annex", "west", "vault"];
   const WARP_DOT = { sheep: "#f0d9a8", main: "#8fb6ff", east: "#e0a26a", annex: "#7fd6a0", west: "#c7c9ff", vault: "#e0607a", redmoon: "#ff3a52" };
+  // 部屋の行き先の下に出る小さな文字（rooms.json の warpSub があれば、そちらを使う）
+  const WARP_SUB = { annex: "東の書館の奥", sheep: "本館の東のはし" };
   function openPalette(open) {
     $("palette").hidden = !open; $("paletteBtn").setAttribute("aria-expanded", String(open));
     if (!open) { $("warpList").hidden = true; $("memList").hidden = true; $("warpBtn").setAttribute("aria-expanded", "false"); $("memBtn").setAttribute("aria-expanded", "false"); }
@@ -3765,7 +3767,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     const ids = [...WARP_ORDER.filter((id) => halls[id] || rooms[id]), ...Object.keys(halls).filter((id) => !WARP_ORDER.includes(id)), ...(KANERU ? KANERU.warpIds() : [])];
     $("warpItems").innerHTML = ids.map((id) => {
       const h = halls[id], here = whereNow() === id;
-      const sub = h ? (h.vault ? "地下・年齢確認あり" : h.windowName || "") : (rooms[id] && rooms[id].warpSub) || "東の書館の奥";
+      const sub = h ? (h.vault ? "地下・年齢確認あり" : h.windowName || "") : (rooms[id] && rooms[id].warpSub) || WARP_SUB[id] || "";
       return `<button class="warp-item" data-to="${esc(id)}" style="--dot:${WARP_DOT[id] || "#d6b062"}" ${here ? "disabled" : ""}><i></i><span>${esc(placeName(id))}<br><small>${esc(sub)}</small></span>${here ? '<span class="here">いまここ</span>' : ""}</button>`;
     }).join("");
   }
@@ -3776,7 +3778,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     cam.dir = 0;
     const halls = DATA.library.halls || {}, h = halls[to];
     const go = () => {
-      if (!h) { enterRoom(to, $("paletteBtn")); return; }                       // 図書館の間などの部屋
+      if (!h) { enterRoom(to, $("paletteBtn")); return; }                       // 図書館の間・羊の間などの部屋
       if (h.ageGate && !ageOK()) { openAgeGate($("paletteBtn"), to); return; }   // 禁書庫は年齢確認から
       enterHall(to);
     };
