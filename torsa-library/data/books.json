@@ -484,7 +484,101 @@
       }
     }
   },
-
+{    "id": "gift-gbujn3da58cq",
+    "title": "街灯フラッシュバック",
+    "type": "revisit",
+    "hall": "",
+        "shelfEmote": "zzz",
+          "place": {
+        "bay": "e2",
+        "row": 2,
+        "slot": 8
+      },
+    "personality": {
+      "preset": "気まぐれ",
+      "note": "一人が好き"
+    },
+    "cover": {
+      "titleDirection": "horizontal",
+      "color": "#b88d65",
+      "accent": "#152b2e",
+      "textColor": "#000000",
+      "emblem": "none",
+      "parts": {
+        "base": "twilight",
+        "scene": "city",
+        "pattern": "bricks",
+        "sparkle": "petals",
+        "spine": "banded",
+        "frame": "film",
+        "corners": "none",
+        "band": "none",
+        "emblemBase": "none",
+        "emblemPos": "top",
+        "plate": "label",
+        "titleDeco": "none",
+        "titlePos": "top",
+        "clasp": "none",
+        "bookmark": "none",
+        "finish": "lamp"
+      },
+      "title": "街灯フラッシュバック",
+      "subtitle": "ぬお"
+    },
+    "lines": {
+      "first": [
+        {
+          "emote": "normal",
+          "text": "ありゃ、見つかっちゃった。"
+        },
+        {
+          "emote": "happy",
+          "text": "もしかしたら、これは運命なのかなー。"
+        },
+        {
+          "emote": "question",
+          "text": "ぼくの世界みたいかも？"
+        }
+      ],
+      "revisit": [
+        {
+          "emote": "happy",
+          "text": "あ。また来てくれた。待ってたよー。"
+        }
+      ],
+      "afterRead": {
+        "emote": "happy",
+        "text": "おーしーまい。また来てくれると嬉しいなー。"
+      },
+      "catalog": {
+        "emote": "surprise",
+        "text": "目録の中からぼくを見つけたの？ ずいぶんと見る目があるね。"
+      },
+      "frequent": [
+        {
+          "emote": "happy",
+          "text": "わ。また来てくれたの？"
+        },
+        {
+          "emote": "heart",
+          "text": "たくさん会えて嬉しい。"
+        },
+        {
+          "emote": "heart",
+          "text": "よくわかっているね。"
+        },
+        {
+          "emote": "happy",
+          "text": "読めば読むほど、意味が変わる・わかる。ということを。"
+        },
+        {
+          "emote": "heart",
+          "text": "流石だね。"
+        }
+      ],
+      "frequentFrom": 4
+    }
+  },
 
  {
     "id": "gift-hmcpsiq6rnzg",
