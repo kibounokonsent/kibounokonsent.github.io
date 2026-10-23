@@ -4,70 +4,10 @@
   "_coverNote": "表紙の設定。cover.template（形）: classic（額縁と紋章と題名プレート）/ grimoire（金具と留め具のある魔導書）/ starchart（星図）/ botanical（ツタと葉の縁取り）/ moon（月の満ち欠け）/ simple（帯だけのシンプル）/ wahon（和綴じと題名の紙）/ clockwork（歯車と時計の文字盤）/ ocean（夜の海と青海波）/ stained（アーチ窓のステンドグラス）/ map（古地図と羅針盤）/ quilt（パッチワーク）/ ribbon（リボンと題名の札）/ forest（夜の森と月）/ deco（アール・デコ）。emblem（紋章）: star / moon / leaf / key / eye / heart / feather / flame / sun / crown / flower / drop / bell / hourglass / none。見本は index.html?covers で一覧できる。color＝地の色、accent＝飾りの色、textColor＝題名の色（省略するとaccent）、title＝表紙に書く題名（省略すると本の名前）、subtitle＝小さな副題、titleDirection＝horizontal（横書き）/ vertical（縦書き）。cover.image に画像のパスを入れると、テンプレートの代わりにその画像を使う。　部品を組み合わせた表紙：cover.parts を書くと、地（base）・地模様（pattern）・枠（frame）・角の飾り（corners）・背（spine）・帯（band）・紋章の台（emblemBase）・題名の札（plate）・留め具（clasp）・ちらし（sparkle）・題名の位置（titlePos）・紋章の位置（emblemPos）を選んで組み合わせた表紙になります（parts を書くと template は使いません）。選べる名前は js/cover-parts.js の PARTS。index.html?covers の「表紙をつくる」で選んで、書き方をコピーできます。紋章に sword（剣）・snowflake（雪の結晶）・anchor（いかり）・butterfly（蝶）も増えました。",
   "_placeNote": "place は置き場所。bay は library.json の本棚ID、row は段（0が一番上〜4）、slot は左から何冊目あたりに置くか。",
   "books": [
-    {
-      "id": "tsun",
-      "title": "仮題・紅の本",
-      "workId": "work-01",
-      "type": "revisit",
-      "_typeNote": "① 何度も訪れると反応が変わる本",
-      "place": {
-        "bay": "w3",
-        "row": 2,
-        "slot": 6
-      },
-      "shelfEmote": "!?",
-      "cover": {
-        "template": "classic",
-        "color": "#8e3b46",
-        "accent": "#e8c26a",
-        "emblem": "heart",
-        "title": "紅の本",
-        "subtitle": "仮の副題",
-        "titleDirection": "horizontal",
-        "image": ""
-      },
-      "lines": {
-        "first": [
-          {
-            "emote": "surprise",
-            "text": "な、何よ。いきなり手に取らないでくれる？"
-          },
-          {
-            "emote": "shy",
-            "text": "……まあいいわ。読みたいなら、読ませてあげなくもないけど。"
-          }
-        ],
-        "revisit": [
-          {
-            "emote": "surprise",
-            "text": "何？！ってまたアンタ？"
-          },
-          {
-            "emote": "smug",
-            "text": "ふーん、私が気になるのね！"
-          }
-        ],
-        "frequent": [
-          {
-            "emote": "shy",
-            "text": "……今日も来たのね。べつに、待ってたわけじゃないから。"
-          }
-        ],
-        "frequentFrom": 4,
-        "afterRead": {
-          "emote": "shy",
-          "text": "最後まで読んだの？……ふん、なかなか見る目あるじゃない。"
-        },
-        "catalog": {
-          "emote": "angry",
-          "text": "ちょっと！目録から直接来るなんてずるいわよ！"
-        }
-      },
-      "hall": "west"
-    },
+    
     {
       "id": "friendly",
-      "title": "仮題・若草の本",
+      "title": "若草の本",
       "workId": "guide-01",
       "type": "friendly",
       "_typeNote": "② 親しげに迎えてくれる本（お話し好き：トルサの好感度を教えてくれる）",
@@ -221,149 +161,12 @@
       ]
     },
     {
-      "id": "jumper",
-      "title": "仮題・空色の本",
-      "workId": "work-03",
-      "type": "jumper",
-      "_typeNote": "③ 自分から本棚を飛び出す本。近くまで歩いて少し待つと飛び出してくる。",
-      "place": {
-        "bay": "e2",
-        "row": 1,
-        "slot": 7
-      },
-      "jumpDelayMs": 1500,
-      "shelfEmote": "!!",
-      "cover": {
-        "template": "starchart",
-        "color": "#2f4f86",
-        "accent": "#d9e4f2",
-        "emblem": "star",
-        "title": "空色の本",
-        "subtitle": "仮の副題",
-        "titleDirection": "horizontal",
-        "image": ""
-      },
-      "lines": {
-        "jump": [
-          {
-            "emote": "excited",
-            "text": "とうっ！"
-          },
-          {
-            "emote": "question",
-            "text": "ねえねえ、今こっち見てたよね？見てたよね？"
-          }
-        ],
-        "first": [
-          {
-            "emote": "sweat",
-            "text": "わっ、つかまっちゃった。"
-          },
-          {
-            "emote": "excited",
-            "text": "じっとしてるの、苦手なんだよね。さあ読んで読んで！"
-          }
-        ],
-        "revisit": [
-          {
-            "emote": "excited",
-            "text": "また来た！待ちきれなくて飛び出すところだったよ！"
-          }
-        ],
-        "afterRead": {
-          "emote": "excited",
-          "text": "おしまい！次はもっと高く跳ぶから見ててね！"
-        },
-        "catalog": {
-          "emote": "excited",
-          "text": "目録からでも、ちゃんと飛んでいくよ！"
-        }
-      },
-      "hall": "east"
-    },
-    {
-      "id": "refuser",
-      "title": "仮題・墨色の本",
-      "workId": "work-04",
-      "type": "refuser",
-      "_typeNote": "④ 読ませてくれない本。refuseCount 回断られたあと、次に手に取ると読ませてくれる。目録からは常に読める。",
-      "place": {
-        "bay": "w1",
-        "row": 3,
-        "slot": 3
-      },
-      "refuseCount": 2,
-      "shelfEmote": "zzz",
-      "cover": {
-        "template": "grimoire",
-        "color": "#33334a",
-        "accent": "#b9b4d6",
-        "emblem": "eye",
-        "title": "墨色の本",
-        "subtitle": "",
-        "titleDirection": "horizontal",
-        "image": ""
-      },
-      "lines": {
-        "refuse": [
-          [
-            {
-              "emote": "silent",
-              "text": "……。"
-            },
-            {
-              "emote": "angry",
-              "text": "触らないで。今日は開く気分じゃない。"
-            }
-          ],
-          [
-            {
-              "emote": "angry",
-              "text": "また？……しつこいな。"
-            },
-            {
-              "emote": "sleepy",
-              "text": "（本はぱたんと閉じて、寝たふりをはじめた）"
-            }
-          ]
-        ],
-        "accept": [
-          {
-            "emote": "sweat",
-            "text": "……わかった。そこまで言うなら、少しだけ。"
-          },
-          {
-            "emote": "normal",
-            "text": "ページは、静かにめくって。"
-          }
-        ],
-        "revisit": [
-          {
-            "emote": "normal",
-            "text": "……あなたか。いいよ、開いてあげる。"
-          }
-        ],
-        "afterRead": {
-          "emote": "shy",
-          "text": "……どうだった。べつに、感想は言わなくていい。"
-        },
-        "catalog": {
-          "emote": "sweat",
-          "text": "……目録から来たのか。まあ、いい。"
-        }
-      },
-      "hall": "west"
-    },
-    {
+      "hall": "east",
       "id": "revenge",
       "title": "エイコウ-01 / REVENGE",
       "workId": "eikou-01",
       "type": "friendly",
-      "place": {
-        "bay": "e1",
-        "row": 0,
-        "slot": 3
-      },
+      "place": { "bay": "e1", "row": 0, "slot": 3 },
       "shelfEmote": "✨",
       "cover": {
         "template": "starchart",
@@ -420,12 +223,8 @@
     "title": "たんぽぽ",
     "workId": "zuu-01",
     "type": "friendly",
-    "hall": "",
-    "place": {
-      "bay": "w2",
-      "row": 2,
-      "slot": 1
-    },
+    "hall": "main",
+    "place": { "bay": "w2", "row": 2, "slot": 1 },
     "shelfEmote": "～",
     "personality": {
       "preset": "おっとり",
@@ -487,13 +286,9 @@
 {    "id": "gift-gbujn3da58cq",
     "title": "街灯フラッシュバック",
     "type": "revisit",
-    "hall": "",
+    "hall": "east",
         "shelfEmote": "zzz",
-          "place": {
-        "bay": "e2",
-        "row": 2,
-        "slot": 8
-      },
+          "place": { "bay": "e2", "row": 2, "slot": 8 },
     "personality": {
       "preset": "気まぐれ",
       "note": "一人が好き"
@@ -584,13 +379,9 @@
     "id": "gift-hmcpsiq6rnzg",
     "title": "とある天使の物語",
     "type": "jumper",
-    "hall": "",
+    "hall": "west",
     "shelfEmote": "♪",
-          "place": {
-        "bay": "w1",
-        "row": 1,
-        "slot": 8
-      },
+          "place": { "bay": "w2", "row": 1, "slot": 4 },
     "personality": {
       "preset": "人なつっこい",
       "note": "何もかもが新鮮に感じる子。読み終わるごとにいろんなところにワープしてくれると嬉しい"
@@ -661,16 +452,13 @@
   },
 
     {
+      "hall": "main",
       "id": "kei-bushi",
       "title": "我、この地を守りし武士なり",
       "workId": "kei-01",
       "type": "revisit",
       "_typeNote": "無口・無愛想・ちょっとツンデレ。何度も訪れると反応が変わる",
-      "place": {
-        "bay": "w2",
-        "row": 2,
-        "slot": 5
-      },
+      "place": { "bay": "w2", "row": 2, "slot": 5 },
       "shelfEmote": "…",
       "cover": {
         "title": "我、この地を守りし武士なり",
@@ -731,6 +519,55 @@
           "text": "……目録から来たのか。……そうか。"
         }
       }
+    },
+    {
+      "id": "gift-te2qejpz3d7t",
+      "title": "宇宙に家がある夜",
+      "workId": "gift-te2qejpz3d7t",
+      "type": "friendly",
+      "_typeNote": "無口。無口だけど、本当は手に取ってほしい。",
+      "hall": "west",
+      "shelfEmote": "☆",
+      "cover": {
+        "title": "宇宙に家がある夜",
+        "subtitle": "私の夢銀河",
+        "titleDirection": "horizontal",
+        "color": "#4a0868",
+        "accent": "#be6fa9",
+        "emblem": "moon",
+        "parts": {
+          "base": "leather",
+          "scene": "none",
+          "pattern": "stars",
+          "sparkle": "none",
+          "spine": "banded",
+          "frame": "notched",
+          "corners": "none",
+          "band": "corner",
+          "emblemBase": "sunburst",
+          "emblemPos": "middle",
+          "plate": "plate",
+          "titleDeco": "none",
+          "titlePos": "bottom",
+          "clasp": "strap",
+          "bookmark": "charm",
+          "finish": "none"
+        },
+        "textColor": "#6d2182"
+      },
+      "lines": {
+        "first": [
+          { "emote": "question", "text": "…読むの？" },
+          { "emote": "question", "text": "気になった？" }
+        ],
+        "revisit": [
+          { "emote": "happy", "text": "お気に入り…？" },
+          { "emote": "shy", "text": "また来てくれたんだ…ちょっと嬉しいかも。" }
+        ],
+        "afterRead": { "emote": "smug", "text": "読んでくれたんだ…" },
+        "catalog": { "emote": "silent", "text": "そこから来たんだ。" }
+      },
+      "place": { "bay": "e2", "row": 1, "slot": 6 }
     }
   ],
   "_roomNote": "hall：本を置く棟。書かなければ本館。\"east\"＝東の書館、\"west\"＝西の書館、\"vault\"＝禁書庫（place で棚の位置を決める。禁書庫の本は年齢確認をするまで蔵書目録にも出ない）。room：\"annex\" と書くと図書館の間だけに置かれる（place はいらない）。",

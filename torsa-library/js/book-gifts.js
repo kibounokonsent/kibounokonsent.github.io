@@ -179,6 +179,64 @@ window.TorsaGifts = (() => {
     return o.join("\n").replace(/\n{3,}(?=■)/g, "\n\n") + "\n";
   }
 
+  /* ---------- 管理人用：data/works.json と data/books.json に足す JSON を、テキストにして出す ----------
+     raw   : 寄贈の間で作った本のデータ（toText に渡すものと同じ形）
+     parts : 表紙の部品（C.PARTS.PARTS）
+     books : いまの data/books.json の "books"（渡せれば、空いている棚の場所と重ならない id を決める。なければ仮の場所）
+     返す  : { text, placed, id, hall, place } ／ 本の形になっていないときは null */
+  function toAdminText(raw, parts, books) {
+    const g = clean(raw, parts); if (!g) return null;
+    const known = Array.isArray(books);
+    const list = known ? books : [];
+    // 追加先に同じ id があるときは、x を足してずらす（merge と同じやりかた）
+    while (list.some((b) => b && b.id === g.book.id)) { g.book.id += "x"; g.book.workId = g.work.id = g.book.id; }
+    const placed = place(g, list);
+    let b = g.book; const w = g.work;
+    // 性格（プリセット名とメモ）は、いまの books.json と同じように _typeNote（管理人へのメモ）として残す
+    const pe = raw.book && raw.book.personality || {};
+    const note = [str(pe.preset, 40).trim(), str(pe.note, 80).trim()].filter(Boolean).join("。");
+    if (note) { const { id, title, workId, type, ...rest } = b; b = { id, title, workId, type, _typeNote: note, ...rest }; }
+    delete b.gift; // 手で足した本は、ふつうの本として並べる
+    if (b.hall === "main") delete b.hall; // 本館は書かなくてよい（いまある本と同じ書き方）
+    if (!placed) delete b.place;
+    const HALL_NAME = { main: "本館", east: "東の書館", west: "西の書館" };
+    const hallName = HALL_NAME[b.hall || "main"];
+    const where = placed ? `${hallName}　bay: ${b.place.bay} ／ row: ${b.place.row}（0が一番上）／ slot: ${b.place.slot}` : "（空いている場所が見つかりませんでした。place を自分で決めてください）";
+    // セリフ（emote と text）と place は1行にまとめる（いまの books.json の書き方に合わせる）
+    const json = (v) => JSON.stringify(v, null, 2)
+      .replace(/\{\s*"emote": ("[^"]*"),\s*"text": ("(?:[^"\\]|\\.)*")\s*\}/g, "{ \"emote\": $1, \"text\": $2 }")
+      .replace(/\{\s*"bay": ("[^"]*"),\s*"row": (\d+),\s*"slot": (\d+)\s*\}/g, "{ \"bay\": $1, \"row\": $2, \"slot\": $3 }");
+    const o = [
+      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+      "　トルサ図書館　管理人用　本の追加データ",
+      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
+      `本：${b.title}　／　作者：${w.author}　／　整理番号（id）：${b.id}`,
+      "",
+      "【追加のしかた】2つのファイルに、1つずつ貼ります。",
+      "  1. data/works.json の「\"works\": [ … ]」の中の、最後の } のうしろに , を付けて、",
+      "     下の「works.json に足すもの」を貼る",
+      "  2. data/books.json の「\"books\": [ … ]」の中の、最後の } のうしろに , を付けて、",
+      "     下の「books.json に足すもの」を貼る",
+      "  ※ かたまり同士の間に , が1つ。いちばん最後のかたまりのうしろには , を付けません。",
+      "  ※ この本の寄贈本_○○.txt を book_data に入れてある場合は、book_data から出してください",
+      "     （入れたままだと、同じ本が2冊並びます）。",
+      "",
+      "【置き場所】" + where,
+      ...(g.wantHall && placed && g.wantHall !== (b.hall || "main") ? [`  （寄贈した人は「${HALL_NAME[g.wantHall]}」を希望しましたが、そこは満席か、飛び出す本が先にいるため、${hallName}にしました）`] : []),
+      known ? "  （いまの data/books.json を読んで、空いている場所を選びました）" : "  （data/books.json を読めなかったので、仮の場所です。ほかの本と重なるときは、bay・row・slot のどれかをずらしてください）",
+      "",
+      "■works.json に足すもの（ここから）",
+      json(w),
+      "■works.json に足すもの（ここまで）",
+      "",
+      "■books.json に足すもの（ここから）",
+      json(b),
+      "■books.json に足すもの（ここまで）",
+      ""
+    ];
+    return { text: o.join("\n"), placed, id: b.id, hall: b.hall || "main", place: b.place || null };
+  }
+
   // ファイルの中身（文字）→ 寄贈本のデータ（JSON でもテキストでも）
   function parse(t, name) {
     if (t == null) return null;
@@ -266,5 +324,5 @@ window.TorsaGifts = (() => {
     });
     return gifts.length;
   }
-  return { load, merge, clean, parse, parseText, toText, EMOTES, TYPES };
+  return { load, merge, clean, parse, parseText, toText, toAdminText, EMOTES, TYPES };
 })();
