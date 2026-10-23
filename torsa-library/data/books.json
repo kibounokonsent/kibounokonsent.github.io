@@ -1,5 +1,5 @@
 {
-  "_note": "本のキャラクター設定（すべて仮案）。収録作品の本文は works.json 側にあり、workId で結びつけています。",
+  "_note": "本のキャラクター設定。収録作品の本文は works.json 側にあり、workId で結びつけています。",
   "_emoteNote": "emote（感情）に使える名前: normal / happy / heart / smug / shy / sweat / surprise / excited / angry / sad / sleepy / silent / question。吹き出しの形やまわりの記号（汗・照れ線・怒りマーク・音符・Zzzなど）が自動で変わります。",
   "_coverNote": "表紙の設定。cover.template（形）: classic（額縁と紋章と題名プレート）/ grimoire（金具と留め具のある魔導書）/ starchart（星図）/ botanical（ツタと葉の縁取り）/ moon（月の満ち欠け）/ simple（帯だけのシンプル）/ wahon（和綴じと題名の紙）/ clockwork（歯車と時計の文字盤）/ ocean（夜の海と青海波）/ stained（アーチ窓のステンドグラス）/ map（古地図と羅針盤）/ quilt（パッチワーク）/ ribbon（リボンと題名の札）/ forest（夜の森と月）/ deco（アール・デコ）。emblem（紋章）: star / moon / leaf / key / eye / heart / feather / flame / sun / crown / flower / drop / bell / hourglass / none。見本は index.html?covers で一覧できる。color＝地の色、accent＝飾りの色、textColor＝題名の色（省略するとaccent）、title＝表紙に書く題名（省略すると本の名前）、subtitle＝小さな副題、titleDirection＝horizontal（横書き）/ vertical（縦書き）。cover.image に画像のパスを入れると、テンプレートの代わりにその画像を使う。　部品を組み合わせた表紙：cover.parts を書くと、地（base）・地模様（pattern）・枠（frame）・角の飾り（corners）・背（spine）・帯（band）・紋章の台（emblemBase）・題名の札（plate）・留め具（clasp）・ちらし（sparkle）・題名の位置（titlePos）・紋章の位置（emblemPos）を選んで組み合わせた表紙になります（parts を書くと template は使いません）。選べる名前は js/cover-parts.js の PARTS。index.html?covers の「表紙をつくる」で選んで、書き方をコピーできます。紋章に sword（剣）・snowflake（雪の結晶）・anchor（いかり）・butterfly（蝶）も増えました。",
   "_placeNote": "place は置き場所。bay は library.json の本棚ID、row は段（0が一番上〜4）、slot は左から何冊目あたりに置くか。",
@@ -10,7 +10,7 @@
       "title": "若草の本",
       "workId": "guide-01",
       "type": "friendly",
-      "_typeNote": "② 親しげに迎えてくれる本（お話し好き：トルサの好感度を教えてくれる）",
+      "_typeNote": "図書館の案内役。親しげに迎えてくれる本（お話し好き：トルサの好感度を教えてくれる）。寄贈の案内もする",
       "place": {
         "bay": "e1",
         "row": 3,
@@ -25,13 +25,31 @@
       },
       "shelfEmote": "♪",
       "cover": {
-        "template": "botanical",
-        "color": "#4f7a4a",
-        "accent": "#f2e6b8",
-        "emblem": "leaf",
         "title": "若草の本",
-        "subtitle": "",
+        "subtitle": "図書館の案内役",
         "titleDirection": "vertical",
+        "color": "#6a9a5c",
+        "accent": "#f6ecc0",
+        "textColor": "#fffbe6",
+        "emblem": "leaf",
+        "parts": {
+          "base": "washi",
+          "scene": "lonetree",
+          "pattern": "none",
+          "sparkle": "fireflies",
+          "spine": "stitched",
+          "frame": "rounded",
+          "corners": "leaf",
+          "band": "none",
+          "emblemBase": "circle",
+          "emblemPos": "top",
+          "plate": "slip",
+          "titleDeco": "none",
+          "titlePos": "middle",
+          "clasp": "cord",
+          "bookmark": "tassel",
+          "finish": "none"
+        },
         "image": ""
       },
       "lines": {

@@ -367,7 +367,7 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   const bookView = () => ({ id: "gift-" + S.id, title: S.title || "名もなき本", cover: coverOf() });
 
   /* ---------- 案内役 ---------- */
-  const GUIDE_BOOK = { id: "friendly-guide", title: "若草の本", cover: { title: "若草の本", titleDirection: "vertical", color: "#4f7a4a", accent: "#f2e6b8", emblem: "leaf", parts: { base: "cloth", scene: "none", pattern: "vines", sparkle: "leaves", spine: "plain", frame: "vine", corners: "leaf", band: "none", emblemBase: "wreath", emblemPos: "middle", plate: "label", titleDeco: "none", titlePos: "top", clasp: "none", bookmark: "none", finish: "none" } } };
+  const GUIDE_BOOK = { id: "friendly-guide", title: "若草の本", cover: {"title": "若草の本", "subtitle": "図書館の案内役", "titleDirection": "vertical", "color": "#6a9a5c", "accent": "#f6ecc0", "textColor": "#fffbe6", "emblem": "leaf", "parts": {"base": "washi", "scene": "lonetree", "pattern": "none", "sparkle": "fireflies", "spine": "stitched", "frame": "rounded", "corners": "leaf", "band": "none", "emblemBase": "circle", "emblemPos": "top", "plate": "slip", "titleDeco": "none", "titlePos": "middle", "clasp": "cord", "bookmark": "tassel", "finish": "none"}} };
   $("guideBook").innerHTML = C.coverHTML(GUIDE_BOOK);
   let gQueue = [], gTimer = 0, gFull = "";
   function guideSay(lines) { gQueue = lines.slice(); guideNext(); }
