@@ -3539,7 +3539,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     burstAt(el, 18, 1.1); SFX.play("sparkle"); torsa("doorDonate");
     setTimeout(() => { const w = window.open("donate.html", "_blank"); if (!w) location.href = "donate.html"; }, 900);
   }
-  function leaveRoom(force) {
+  function leaveRoom(force, atWindow) {
     if (!ROOM.cur) return;
     const id = ROOM.cur;
     // 赤い月の間からは、まず廊下へもどる
@@ -3551,6 +3551,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
       if (ROOM.sh) { SHEEP.unmount(); ROOM.sh = false; }
       if (document.body.classList.contains("gazing") && window.__gaze) window.__gaze(false);
       $("room").hidden = true; document.body.classList.remove("in-room"); ROOM.cur = null; clearTimeout(ROOM.whisperT); scheduleWhisper(8000);
+      if (atWindow) { cam.x = cam.target = WIN.cx; cam.dir = 0; clampCam(); cam.lastPx = NaN; render(); } // 転送：同じ棟の窓の前へ
       $("roomStage").innerHTML = ""; $("roomStage").style.cssText = "";
       if (ROOM.from && ROOM.from.isConnected) ROOM.from.focus({ preventScroll: true });
       setTimeout(() => { if (KANERU && KANERU.owns(id)) KANERU.leaveLine(id); else if (SHEEP && SHEEP.owns(id)) SHEEP.leaveLine(); else torsa("backFromAnnex"); }, 500);
@@ -3593,8 +3594,9 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
 
   /* ---------- 年齢確認（禁書庫の前） ---------- */
   let gateFrom = null, gateTo = "vault";
-  function openAgeGate(fromEl, to) {
-    gateTo = to || "vault";
+  let gateWin = false; // 転送で来たときは、年齢確認のあとも窓の前に立つ
+  function openAgeGate(fromEl, to, atWindow) {
+    gateTo = to || "vault"; gateWin = !!atWindow;
     const g = roomCfg("forbidden").ageGate || {};
     gateFrom = fromEl;
     $("ageTitle").textContent = g.title || placeName("forbidden");
@@ -3605,7 +3607,7 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
     $("ageNo").textContent = g.no || "戻る";
     cam.dir = 0; $("ageGate").hidden = false; $("ageNo").focus();
   }
-  $("ageYes").addEventListener("click", () => { $("ageGate").hidden = true; setAgeOK(); SFX.play("sparkle"); enterHall(gateTo); });
+  $("ageYes").addEventListener("click", () => { $("ageGate").hidden = true; setAgeOK(); SFX.play("sparkle"); enterHall(gateTo, gateWin); });
   const declineAge = () => { $("ageGate").hidden = true; if (gateFrom) gateFrom.focus({ preventScroll: true }); setTimeout(() => torsa("ageDeclined"), 250); };
   $("ageNo").addEventListener("click", declineAge);
   $("ageGate").addEventListener("click", (e) => { if (e.target === $("ageGate")) declineAge(); });
@@ -3721,14 +3723,14 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
   let VAULT_EVENT_SAID = false; // 禁書庫のできごとは、ページを開くたびに一度だけ
   // HALL_MOVING：棟や部屋を移っている最中（この時刻まで）。そのあいだはカネルのイベントを起こさない
   var HALL_MOVING = 0;
-  function enterHall(id) {
+  function enterHall(id, atWindow) {
     HALL_MOVING = performance.now() + 3500;
     const from = HALL_ID;
     curtain(() => {
       const files = buildHall(id);
       const d = WORLD.plan.doors.find((x) => x.to === from) || WORLD.plan.doors[0];
       // 来た扉が画面の中に見えるように（西の扉は画面の左寄り、東の扉はトルサに隠れないよう、まんなか寄り）
-      cam.x = cam.target = d.x + (d.side === "west" ? .2 : .08) * cam.viewU; cam.dir = 0; clampCam(); cam.lastPx = NaN; render();
+      cam.x = cam.target = atWindow ? WIN.cx : d.x + (d.side === "west" ? .2 : .08) * cam.viewU; cam.dir = 0; clampCam(); cam.lastPx = NaN; render(); // 転送（atWindow）のときは、その棟の窓の前
       $("zone").style.opacity = 0;
       const fromVault = !!(((DATA.library.halls || {})[from] || {}).vault);
       // 絵が読み込まれるまで暗転したまま待つ。終わったら、となりの棟の絵を先に読んでおく
@@ -3753,10 +3755,10 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
 
   /* ---------- パレット（右上）：蔵書目録・設定・転送・思い出 ---------- */
   // 転送の行き先：library.json の halls と、rooms.json の部屋（図書館の間・羊の間）。並びは WARP_ORDER。色は点の色
-  const WARP_ORDER = ["main", "sheep", "east", "annex", "west", "vault"];
-  const WARP_DOT = { sheep: "#f0d9a8", main: "#8fb6ff", east: "#e0a26a", annex: "#7fd6a0", west: "#c7c9ff", vault: "#e0607a", redmoon: "#ff3a52" };
+  const WARP_ORDER = ["main", "sheep", "east", "annex", "donate", "west", "vault"];
+  const WARP_DOT = { sheep: "#f0d9a8", main: "#8fb6ff", east: "#e0a26a", annex: "#7fd6a0", west: "#c7c9ff", vault: "#e0607a", redmoon: "#ff3a52", donate: "#f2c97a" };
   // 部屋の行き先の下に出る小さな文字（rooms.json の warpSub があれば、そちらを使う）
-  const WARP_SUB = { annex: "東の書館の奥", sheep: "本館の東のはし" };
+  const WARP_SUB = { annex: "東の書館の奥", sheep: "本館の東のはし", donate: "本をつくって寄贈する（別のタブで開きます）" };
   function openPalette(open) {
     $("palette").hidden = !open; $("paletteBtn").setAttribute("aria-expanded", String(open));
     if (!open) { $("warpList").hidden = true; $("memList").hidden = true; $("warpBtn").setAttribute("aria-expanded", "false"); $("memBtn").setAttribute("aria-expanded", "false"); }
@@ -3764,29 +3766,31 @@ $("catSearch").addEventListener("input", (e) => { CAT.q = e.target.value.trim();
   const whereNow = () => (ROOM.cur ? ROOM.cur : HALL_ID);
   function buildWarp() {
     const halls = DATA.library.halls || {}, rooms = (DATA.rooms && DATA.rooms.rooms) || {};
-    const ids = [...WARP_ORDER.filter((id) => halls[id] || rooms[id]), ...Object.keys(halls).filter((id) => !WARP_ORDER.includes(id)), ...(KANERU ? KANERU.warpIds() : [])];
+    const donateOn = !(rooms.annex && rooms.annex.donateDoor && rooms.annex.donateDoor.enabled === false);
+    const ids = [...WARP_ORDER.filter((id) => halls[id] || rooms[id] || (id === "donate" && donateOn)), ...Object.keys(halls).filter((id) => !WARP_ORDER.includes(id)), ...(KANERU ? KANERU.warpIds() : [])];
     $("warpItems").innerHTML = ids.map((id) => {
       const h = halls[id], here = whereNow() === id;
-      const sub = h ? (h.vault ? "地下・年齢確認あり" : h.windowName || "") : (rooms[id] && rooms[id].warpSub) || WARP_SUB[id] || "";
-      return `<button class="warp-item" data-to="${esc(id)}" style="--dot:${WARP_DOT[id] || "#d6b062"}" ${here ? "disabled" : ""}><i></i><span>${esc(placeName(id))}<br><small>${esc(sub)}</small></span>${here ? '<span class="here">いまここ</span>' : ""}</button>`;
+      const sub = h ? (h.vault ? (h.windowName || "") + "の前（地下・年齢確認あり）" : h.windowName ? h.windowName + "の前" : "") : (rooms[id] && rooms[id].warpSub) || WARP_SUB[id] || "";
+      return `<button class="warp-item" data-to="${esc(id)}" style="--dot:${WARP_DOT[id] || "#d6b062"}" ${here ? "disabled" : ""}><i></i><span>${esc(id === "donate" ? "寄贈の間" : placeName(id))}<br><small>${esc(sub)}</small></span>${here ? '<span class="here">いまここ</span>' : ""}</button>`;
     }).join("");
   }
   function warp(to) {
     openPalette(false);
+    if (to === "donate") { if (!overlayBusy()) openDonate($("paletteBtn")); return; } // 寄贈の間（donate.html）は別のタブで開く
     if (overlayBusy() || to === whereNow()) return;
     if (document.body.classList.contains("gazing") && window.__gaze) window.__gaze(false);
     cam.dir = 0;
     const halls = DATA.library.halls || {}, h = halls[to];
     const go = () => {
       if (!h) { enterRoom(to, $("paletteBtn")); return; }                       // 図書館の間・羊の間などの部屋
-      if (h.ageGate && !ageOK()) { openAgeGate($("paletteBtn"), to); return; }   // 禁書庫は年齢確認から
-      enterHall(to);
+      if (h.ageGate && !ageOK()) { openAgeGate($("paletteBtn"), to, true); return; }   // 禁書庫は年齢確認から
+      enterHall(to, true); // 窓の前に転送
     };
     HALL_MOVING = performance.now() + 4500;
     torsa("warp"); SFX.play("appear");
     if (ROOM.cur) {
       // 部屋の中からは、いったん部屋を出てから転送する
-      if (h && to === HALL_ID) { leaveRoom(true); return; }
+      if (h && to === HALL_ID) { leaveRoom(true, true); return; }
       leaveRoom(true); setTimeout(go, 1100); return;
     }
     setTimeout(go, 700);
