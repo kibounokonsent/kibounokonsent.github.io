@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 読み込みの最初の一瞬、白い画面が出ないように -->
+    <style>html{background:#000}</style>
 
     <title>龍の世界</title>
     <link rel="icon" href="assets/images/favicon.svg" type="image/svg+xml">
@@ -26,6 +28,23 @@
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
 
+    <!--
+        スマホ・性能の低い端末では軽量版にする（style.css / script.js が html.is-lite を見る）。
+        見た目の印象は変えず、画像の大きさ・光の粒の数・常に動き続ける演出だけを減らす。
+    -->
+    <script>
+        (function () {
+            var mq = function (q) { return window.matchMedia && window.matchMedia(q).matches; };
+            var c = navigator.connection || {};
+            var lite =
+                mq("(max-width: 700px)") ||
+                (mq("(pointer: coarse)") && mq("(max-width: 1100px)")) ||
+                c.saveData === true ||
+                (navigator.deviceMemory && navigator.deviceMemory <= 2);
+            if (lite) document.documentElement.classList.add("is-lite");
+        })();
+    </script>
+
     <link rel="stylesheet" href="assets/css/style.css">
     <!-- 調律（音・揺らぎ）：全ページ共通 -->
     <script src="assets/js/ryu-tuning.js" data-ambient="genesis"></script>
@@ -39,10 +58,14 @@
          ================================================== -->
 
     <div id="global-dragon">
-        <img
-            src="assets/images/dragon-soft.png"
-            alt=""
-        >
+        <picture>
+            <source media="(max-width: 700px)" srcset="assets/images/dragon-soft-sp.webp" type="image/webp">
+            <source srcset="assets/images/dragon-soft.webp" type="image/webp">
+            <img
+                src="assets/images/dragon-soft.png"
+                alt=""
+            >
+        </picture>
     </div>
 
     <div id="ambient-light" aria-hidden="true"></div>
@@ -204,10 +227,16 @@
                     id="eden-image"
                     class="creation-image"
                 >
-                    <img
-                        src="assets/images/eden.png"
-                        alt=""
-                    >
+                    <picture>
+                        <source media="(max-width: 700px)" srcset="assets/images/eden-sp.webp" type="image/webp">
+                        <source srcset="assets/images/eden.webp" type="image/webp">
+                        <img
+                            src="assets/images/eden.png"
+                            alt=""
+                            loading="lazy"
+                            decoding="async"
+                        >
+                    </picture>
                 </div>
 
             </div>
@@ -250,7 +279,7 @@
                  （速くスクロールしても必ず一文ずつ画面に出る）
                  ========================================== -->
 
-            <div class="scene" id="battle-scene" data-base="0.7">
+            <div class="scene" id="battle-scene" data-base="0.82">
 
                 <div class="scene-stage">
 
@@ -479,12 +508,20 @@
     </main>
 
 
+    <!-- 近道：先に世界を見たい人のために（genesis-skip.js） -->
+    <a id="genesis-skip" href="world/index.html" data-tuning-cue="enter">
+        <span class="skip-mark" aria-hidden="true"></span>
+        <span class="skip-label">眠りを越えて、世界へ</span>
+    </a>
+
+
     <!-- 歓喜の歌（創世が始まる頃から、遠くでかすかに流れる） -->
     <audio id="genesis-music" src="assets/eden/joy.mp3" loop preload="none"></audio>
 
     <script src="assets/js/script.js"></script>
     <script src="assets/js/page-music.js"></script>
     <script src="assets/js/genesis-music.js"></script>
+    <script src="assets/js/genesis-skip.js"></script>
 
 </body>
 

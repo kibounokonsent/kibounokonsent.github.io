@@ -4,6 +4,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 読み込みの最初の一瞬、白い画面が出ないように -->
+    <style>html{background:#000}</style>
 
     <title>エイリアスワールド ― 龍の世界</title>
     <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
@@ -23,6 +25,9 @@
 <body data-realm="alias">
 
     <main id="realm-page">
+
+        <!-- 十二使徒の鎖（背景。alias-chains.js が描く） -->
+        <canvas id="alias-chains" aria-hidden="true"></canvas>
 
         <a id="back-to-map" href="../index.html">世界地図へ戻る</a>
 
@@ -50,6 +55,7 @@
 
     <script src="../../assets/js/works.js"></script>
     <script src="../../assets/js/realm.js"></script>
+    <script src="../../assets/js/alias-chains.js"></script>
 
 </body>
 

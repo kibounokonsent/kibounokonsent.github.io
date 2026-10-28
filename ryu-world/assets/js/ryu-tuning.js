@@ -52,6 +52,77 @@
 
     applyMotion();
 
+    /*
+     * 前のページから闇を通ってきたときは、読み込みが済むまで闇のまま待ち、
+     * 済んでから闇の中から現れる（ページの移り変わり）。
+     *   ・画像・フォント（・場面の再生の準備）が揃うまで待つ
+     *   ・待ちが長いときだけ、中央に小さな灯りがともる
+     *   ・どんなに遅くても5秒で現れる
+     * 楽園の中の場所は、楽園自身の「読み込み中」の闇があるので待たない。
+     */
+    (function arriveFromDark() {
+
+        let arrived = 0;
+        try {
+            arrived = Number(sessionStorage.getItem("ryu-arrive") || 0);
+            sessionStorage.removeItem("ryu-arrive");
+        } catch (e) { return; }
+
+        if (!arrived || Date.now() - arrived > 8000) return;
+        if (root.classList.contains("in-eden-shell")) return;
+
+        root.classList.add("ryu-waiting");
+
+        let done = false;
+        const reveal = () => {
+            if (done) return;
+            done = true;
+            root.classList.add("ryu-revealing");
+            root.classList.remove("ryu-waiting");
+            setTimeout(() => root.classList.remove("ryu-revealing"), 900);
+        };
+
+        const cap = setTimeout(reveal, 5000);
+
+        const loaded = new Promise((res) => {
+            if (document.readyState === "complete") res();
+            else window.addEventListener("load", res, { once: true });
+        });
+
+        // フォントは、待ちすぎないよう2.5秒まで
+        const fonts = Promise.race([
+            document.fonts ? document.fonts.ready : Promise.resolve(),
+            new Promise((res) => setTimeout(res, 2500))
+        ]);
+
+        // 場面を再生するページ（data-wait-ready）は、準備（is-ready）まで待つ
+        const sceneReady = new Promise((res) => {
+            const check = () => {
+                const b = document.body;
+                if (!b || !b.hasAttribute("data-wait-ready")) return res();
+                if (b.classList.contains("is-ready")) return res();
+                new MutationObserver((_, obs) => {
+                    if (b.classList.contains("is-ready")) {
+                        obs.disconnect();
+                        res();
+                    }
+                }).observe(b, { attributes: true, attributeFilter: ["class"] });
+            };
+            if (document.readyState === "loading") {
+                document.addEventListener("DOMContentLoaded", check, { once: true });
+            } else {
+                check();
+            }
+        });
+
+        Promise.all([loaded, fonts, sceneReady]).then(() => {
+            clearTimeout(cap);
+            // 描き終えた次のコマで現れる
+            requestAnimationFrame(() => requestAnimationFrame(reveal));
+        });
+
+    })();
+
 
     /*
      * ======================================================
@@ -80,6 +151,68 @@ html[data-motion="off"] *::after {
     font-family: "Noto Serif JP", "Yu Mincho", "Hiragino Mincho ProN", serif;
     color: #ece9e2;
     text-align: right;
+}
+
+/* ページの移り変わり：去るときの闇 */
+#ryu-veil {
+    position: fixed;
+    inset: 0;
+    z-index: 2147483000;
+    background: #000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.42s ease-in;
+}
+
+#ryu-veil.is-on {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+/* 来たとき：読み込みが済むまで闇のまま（html の背景は各ページで黒） */
+html.ryu-waiting body {
+    opacity: 0;
+}
+
+/* 待ちが長いときだけ、中央に小さな灯り（楽園の「読み込み中」と同じ気配） */
+html.ryu-waiting::before {
+    content: "";
+    position: fixed;
+    left: 50%;
+    top: 50%;
+    z-index: 2147483000;
+    width: 2.4rem;
+    height: 2.4rem;
+    margin: -1.2rem 0 0 -1.2rem;
+    background: radial-gradient(circle, rgba(255, 255, 255, 0.95) 0 1.5px, rgba(255, 255, 255, 0.28) 3px, rgba(255, 255, 255, 0.07) 0.55rem, transparent 1.1rem);
+    opacity: 0;
+    pointer-events: none;
+    animation: ryuWaitMark 2.8s ease-in-out 0.9s infinite;
+}
+
+@keyframes ryuWaitMark {
+    0%, 100% { opacity: 0.2; }
+    50% { opacity: 0.9; }
+}
+
+/* 読み込みが済んだら、闇から現れる */
+html.ryu-revealing body {
+    animation: ryuReveal 0.65s ease-out both;
+}
+
+@keyframes ryuReveal {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+/* ページと一緒に、闇から静かに現れる（先にぽんと出ないように） */
+.ryu-tuning {
+    animation: ryuTuningIn 1.6s ease 0.5s both;
+}
+
+@keyframes ryuTuningIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
 
 .ryu-tuning[data-pos="below-music"] {
@@ -915,7 +1048,70 @@ html[data-motion="off"] *::after {
      * ======================================================
      */
 
+    /*
+     * ======================================================
+     * ページの移り変わり
+     * ------------------------------------------------------
+     * ぱっと切り替わらないように、去るときは短く闇へ沈み、
+     * 次のページは闇から現れる（各ページにもともとある
+     * 浮かび上がりの演出とつながる）。派手にしないよう短く。
+     * ======================================================
+     */
+
+    const LEAVE_MS = 420;
+    const ARRIVE_KEY = "ryu-arrive";
+
+    function leaveTo(href, soundWait, win) {
+
+        const quick = settings.motion === "off";
+
+        let veil = document.getElementById("ryu-veil");
+        if (!veil) {
+            veil = document.createElement("div");
+            veil.id = "ryu-veil";
+            document.body.appendChild(veil);
+        }
+
+        // 次のページに「闇から来た」ことを伝える
+        try { sessionStorage.setItem(ARRIVE_KEY, String(Date.now())); } catch (err) { /* 何もしない */ }
+
+        requestAnimationFrame(() => veil.classList.add("is-on"));
+
+        setTimeout(() => {
+            try { win.location.href = href; } catch (err) { location.href = href; }
+        }, Math.max(quick ? 60 : LEAVE_MS, soundWait));
+
+    }
+
+    // 「戻る」で戻ってきたとき、闇のままにしない
+    window.addEventListener("pageshow", () => {
+        document.getElementById("ryu-veil")?.classList.remove("is-on");
+    });
+
+    // 指やカーソルが乗った時点で、次のページを先に読みはじめる（待ち時間を短く）
+    const prefetched = new Set();
+
+    function prefetch(a) {
+        let url;
+        try { url = new URL(a.href, location.href); } catch (e) { return; }
+        if (url.origin !== location.origin || url.pathname === location.pathname) return;
+        const key = url.href.split("#")[0];
+        if (prefetched.has(key)) return;
+        prefetched.add(key);
+        const l = document.createElement("link");
+        l.rel = "prefetch";
+        l.href = key;
+        document.head.appendChild(l);
+    }
+
     function hookLinks() {
+
+        ["pointerenter", "touchstart", "focusin"].forEach((type) => {
+            document.addEventListener(type, (e) => {
+                const a = e.target.closest?.("a[href]");
+                if (a && !a.target?.startsWith("_blank")) prefetch(a);
+            }, { passive: true, capture: true });
+        });
 
         // window で受ける：ページ側がリンクを自分で扱うとき（楽園の枠など）を先に通すため
         window.addEventListener("click", (e) => {
@@ -924,7 +1120,11 @@ html[data-motion="off"] *::after {
 
             if (!a || e.defaultPrevented || e.button !== 0) return;
             if (e.metaKey || e.ctrlKey || e.shiftKey || e.altKey) return;
-            if (a.target && a.target !== "_self") return;
+            if (a.hasAttribute("download")) return;
+
+            // _parent（楽園の枠の中から世界地図へ戻るとき）だけは扱う
+            const toParent = a.target === "_parent" && window.parent !== window;
+            if (a.target && a.target !== "_self" && !toParent) return;
 
             const href = a.getAttribute("href");
             if (!href || href.startsWith("#") || /^(mailto|tel|javascript):/i.test(href)) return;
@@ -933,15 +1133,21 @@ html[data-motion="off"] *::after {
             try { url = new URL(a.href, location.href); } catch (err) { return; }
             if (url.origin !== location.origin) return;
 
-            if (!canPlay()) return;
+            // 同じページの中の移動（# だけ違う）はそのまま
+            if (url.pathname === location.pathname && url.search === location.search && url.hash) return;
 
-            tapHandled = true;
+            e.preventDefault();
 
             // 旅立ちの音を、少しだけ聞かせてから移る
-            e.preventDefault();
-            const special = a.dataset.tuningCue;
-            (CUES[special] || CUES.leave)();
-            setTimeout(() => { location.href = url.href; }, special ? 650 : 260);
+            let soundWait = 0;
+            if (canPlay()) {
+                tapHandled = true;
+                const special = a.dataset.tuningCue;
+                (CUES[special] || CUES.leave)();
+                soundWait = special ? 650 : 260;
+            }
+
+            leaveTo(url.href, soundWait, toParent ? window.parent : window);
 
         });
 
@@ -1012,7 +1218,51 @@ html[data-motion="off"] *::after {
      * ======================================================
      */
 
+    /*
+     * ======================================================
+     * 旅の記録（どの世界を訪れたか）
+     * ------------------------------------------------------
+     * 世界地図で「訪れた世界が灯る」ために使う。
+     * /world/<世界>/ のページを開いたら、その世界を記録する。
+     * 楽園の小部屋は楽園に、破壊之王の間・コンセントズは
+     * その他の世界に含める。
+     * ======================================================
+     */
+
+    const VISIT_KEY = "ryu-visits";
+    const VISIT_ALIAS = { hakai: "other", consents: "other" };
+
+    function readVisits() {
+        try {
+            return JSON.parse(localStorage.getItem(VISIT_KEY) || "{}") || {};
+        } catch (e) {
+            return {};
+        }
+    }
+
+    function markVisit(key) {
+        if (!key) return;
+        const v = readVisits();
+        if (v[key]) return;
+        v[key] = Date.now();
+        try {
+            localStorage.setItem(VISIT_KEY, JSON.stringify(v));
+        } catch (e) { /* 保存できない環境では記録しない */ }
+    }
+
+    (function recordThisPage() {
+        const m = location.pathname.match(/\/world\/([^/]+)\//);
+        if (m) {
+            markVisit(VISIT_ALIAS[m[1]] || m[1]);
+        }
+        // 世界地図か各世界まで来た人は「創世を一度通った人」
+        if (/\/world\//.test(location.pathname)) markVisit("genesis");
+    })();
+
+
     window.RyuTuning = {
+        visits: readVisits,
+        markVisit,
         get: (key) => settings[key],
         set,
         select: (world) => WORLD_TONES[world]?.(),

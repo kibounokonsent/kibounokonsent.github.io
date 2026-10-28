@@ -353,7 +353,7 @@ body {
 
     letter-spacing: 0.12em;
 
-    opacity: 0.55;
+    opacity: 0.68;
 }
 
 
@@ -574,7 +574,7 @@ body {
 }
 
 #chapter-three .chapter-text p {
-    opacity: 0.7;
+    opacity: 0.8;
 }
 
 
@@ -1741,4 +1741,170 @@ body {
 
     color: #17171a;
     opacity: 0.5;
+}
+
+
+/* =========================================================
+   近道（genesis-skip.js）
+   ---------------------------------------------------------
+   左下にそっと灯る小さな道。物語の邪魔をしないよう、
+   普段は薄く、触れたときだけはっきりする。
+   ========================================================= */
+
+#genesis-skip {
+    position: fixed;
+    left: clamp(1rem, 3vw, 2rem);
+    bottom: calc(clamp(1rem, 4vh, 2rem) + env(safe-area-inset-bottom));
+
+    z-index: 9;
+
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8em;
+
+    padding: 0.6rem 0.4rem;
+
+    color: #eee;
+    text-decoration: none;
+
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+
+    opacity: 0;
+    transform: translateY(6px);
+
+    pointer-events: none;
+
+    transition:
+        opacity 2.4s ease,
+        transform 2.4s ease;
+}
+
+#genesis-skip.is-shown {
+    opacity: 0.5;
+    transform: translateY(0);
+    pointer-events: auto;
+}
+
+#genesis-skip.is-returning.is-shown {
+    opacity: 0.66;
+}
+
+#genesis-skip.is-shown:hover,
+#genesis-skip.is-shown:focus-visible {
+    opacity: 1;
+    transition-duration: 0.5s;
+}
+
+#genesis-skip.is-away {
+    opacity: 0 !important;
+    pointer-events: none;
+    transition-duration: 1.2s;
+}
+
+/* 小さな羽根の光（線＋点） */
+.skip-mark {
+    position: relative;
+
+    display: block;
+
+    width: 22px;
+    height: 1px;
+
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.75));
+}
+
+.skip-mark::after {
+    content: "";
+
+    position: absolute;
+    right: -2px;
+    top: -2px;
+
+    width: 5px;
+    height: 5px;
+
+    background: #fff;
+
+    transform: rotate(45deg) scale(0.7);
+
+    box-shadow: 0 0 8px 1px rgba(255, 255, 255, 0.6);
+
+    animation: skipBreathe 3.2s ease-in-out infinite;
+}
+
+#genesis-skip:hover .skip-mark,
+#genesis-skip:focus-visible .skip-mark {
+    width: 34px;
+}
+
+.skip-mark {
+    transition: width 0.6s ease;
+}
+
+@keyframes skipBreathe {
+    0%, 100% { opacity: 0.45; }
+    50% { opacity: 1; }
+}
+
+@media (max-width: 600px) {
+    #genesis-skip {
+        font-size: 0.68rem;
+        letter-spacing: 0.2em;
+    }
+}
+
+/* 本物の入口へ向かうとき（暗転）は一緒に消える */
+body.leaving #genesis-skip {
+    opacity: 0;
+    transition-duration: 0.6s;
+}
+
+
+/* =========================================================
+   画像を <picture> で包んだ（WebP・スマホ用の小さい画像）。
+   レイアウトは従来どおり img が直接並んでいるのと同じにする。
+   ========================================================= */
+
+#global-dragon picture,
+.creation-image picture {
+    display: contents;
+}
+
+
+/* =========================================================
+   軽量版（html.is-lite：スマホ・性能の低い端末）
+   ---------------------------------------------------------
+   見た目の印象はそのまま、描く量だけを減らす。
+   ・龍・楽園の画像：スマホ用の軽い画像（WebP）に差し替え
+   ・四つの川：常に続く「呼吸」の明滅を止める（スクロールでの変化は残す）
+   ・光の粒：数は script.js で約半分に。速い明滅をやめ、光のにじみを小さく
+   ========================================================= */
+
+/* 龍の表示の大きさは変えない（小さくすると画像の縁が見えてしまうため）。
+   画像そのものをスマホ用の軽いもの（幅1000px）にしてあるので、
+   元の画像（幅1348px）と同じ大きさに引き伸ばして表示する。 */
+@media (max-width: 700px) {
+    #global-dragon img {
+        width: 1348px;
+        min-width: 1348px;
+    }
+}
+
+html.is-lite .river-svg {
+    animation: none;
+    will-change: auto;
+}
+
+html.is-lite .spark.spark--flicker::before {
+    animation: sparkSlowFade 9s ease-in-out infinite;
+}
+
+html.is-lite .spark::before {
+    box-shadow: 0 0 4px 0 var(--spark-color, #eee);
+}
+
+html.is-lite #genesis-skip .skip-mark::after {
+    animation: none;
+    opacity: 0.8;
 }

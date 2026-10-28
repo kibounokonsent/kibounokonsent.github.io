@@ -511,6 +511,8 @@ document.addEventListener("DOMContentLoaded", () => {
     let dpr = 1;
     let fitScale = 1;
     let narrow = false;
+    // スマホの縦長画面：地図が上に寄って下が空くので、少し下げて大きく見せる
+    let portraitDrop = 0;
 
     // 投影の係数（毎フレーム更新）
     const cam = { cs: 1, ss: 0, ct: 1, st: 0, S: 1, tx: 0, ty: 0, ox: 0, oy: 0, invP: 1 / PERSPECTIVE };
@@ -524,7 +526,7 @@ document.addEventListener("DOMContentLoaded", () => {
         cam.st = Math.sin(t);
         cam.S = fitScale * view.zoom;
         cam.tx = W / 2 + view.offX + view.panX;
-        cam.ty = H / 2 + Z_CENTER * cam.st * cam.S + view.offY + view.panY;
+        cam.ty = H / 2 + Z_CENTER * cam.st * cam.S + view.offY + view.panY + portraitDrop * (1 - view.flat * 0.5);
         cam.ox = W / 2;
         cam.oy = H * PERSPECTIVE_ORIGIN_Y;
         cam.invP = (1 - view.flat) / PERSPECTIVE;
@@ -1245,12 +1247,29 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const labels = [];
 
+    /*
+     * 旅の記録：訪れたことのある世界は、名前の横に小さな灯りがともる
+     * （記録は ryu-tuning.js が各世界のページを開いたときに残す）
+     */
+    let visits = Tuning?.visits?.() || {};
+    const visited = (world) => Boolean(world && visits[world]);
+
+    /*
+     * 名前どうしが重なったときは、大事な名前を動かさず、
+     * あとの名前を上下へ逃がす（逃げ場が無ければ薄くする）。
+     * 数字が小さいほど優先。
+     */
+    const LABEL_PRIORITY = { eden: 0, fronz: 1, misseo: 1, alias: 2, soul: 3, other: 4 };
+
     function addLabel(world, text, styleKey, pos, opts = {}) {
         labels.push({
             world, text, styleKey, pos,
             dx: opts.dx || 0, dy: opts.dy || 0,
             side: opts.side || "c",
             alpha: 1,
+            prio: world ? LABEL_PRIORITY[world] ?? 5 : styleKey === "river" ? 6 : 7,
+            shift: 0,       // 重なりを避けるための上下のずれ（なめらかに追う）
+            crowd: 1,       // 重なって逃げ場が無いときの薄さ
             img: null, lit: null
         });
     }
@@ -1299,7 +1318,9 @@ document.addEventListener("DOMContentLoaded", () => {
         const chars = [...lb.text];
         const spacing = st.size * st.ls;
         const widths = chars.map((ch) => measure.measureText(ch).width);
-        const textW = widths.reduce((a, b) => a + b, 0) + spacing * (chars.length - 1);
+        // 訪れた世界の灯り（名前の前に置く小さな結晶）
+        const markW = visited(lb.world) ? Math.round(st.size * 1.15) : 0;
+        const textW = widths.reduce((a, b) => a + b, 0) + spacing * (chars.length - 1) + markW;
 
         // 横に添える名前は、結晶へ向かう細い線を引く
         const lineW = lb.side === "c" ? 0 : narrow ? 12 : 22;
@@ -1322,7 +1343,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const drawText = (fill) => {
             g.fillStyle = fill;
-            let x = textX;
+            let x = textX + markW;
             chars.forEach((ch, i) => {
                 g.fillText(ch, x, y);
                 x += widths[i] + spacing;
@@ -1348,6 +1369,23 @@ document.addEventListener("DOMContentLoaded", () => {
 
         drawText(color);
 
+        if (markW) {
+            const mx = textX + markW * 0.38;
+            const r = Math.max(2.4, st.size * 0.22);
+            g.save();
+            g.shadowBlur = 7 * dpr;
+            g.shadowColor = "rgba(255,250,235,0.9)";
+            g.fillStyle = lit ? "#ffffff" : "rgba(255,252,242,0.92)";
+            g.beginPath();
+            g.moveTo(mx, y - r * 1.35);
+            g.lineTo(mx + r * 0.8, y);
+            g.lineTo(mx, y + r * 1.35);
+            g.lineTo(mx - r * 0.8, y);
+            g.closePath();
+            g.fill();
+            g.restore();
+        }
+
         if (lineW) {
             g.fillStyle = "rgba(240,238,232,0.45)";
             const lx = lb.side === "l" ? textX + textW + gap : pad;
@@ -1370,9 +1408,19 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
+    // 優先度の高い順（重なりを避けるとき、先に置いたものが動かない）
+    const labelsByPrio = () => labels.slice().sort((a, b) => a.prio - b.prio);
+    let labelOrder = null;
+    let labelsSettling = false;   // 名前が逃げている途中（次のコマも描く）
+
     function drawLabels() {
 
-        labels.forEach((lb) => {
+        if (!labelOrder) labelOrder = labelsByPrio();
+        labelsSettling = false;
+
+        const placed = [];
+
+        labelOrder.forEach((lb) => {
 
             if (!lb.img) return;
 
@@ -1385,14 +1433,57 @@ document.addEventListener("DOMContentLoaded", () => {
             const img = isLit ? lb.lit : lb.img;
 
             let x = q[0] + lb.dx * k;
-            const y = q[1] + dy * k;
+            const y0 = q[1] + dy * k;
 
             // 画面の端からはみ出さないように寄せる（スマホの縦長画面向け）
             const textW = img.w - img.pad * 2;
             if (lb.side === "l") x = Math.max(x, textW + 6);
             if (lb.side === "r") x = Math.min(x, W - textW - 6);
+            if (lb.side === "c") x = clamp(x, textW / 2 + 6, Math.max(textW / 2 + 6, W - textW / 2 - 6));
 
-            ctx.globalAlpha = lb.alpha * img.alpha;
+            /*
+             * 文字の箱（線を含む）。すでに置いた名前と重なるなら、
+             * 上 → 下 → さらに上 … と逃げ場を探す。
+             */
+            const bw = img.w - img.pad * 2;
+            const bh = img.h - img.pad * 2;
+            const left = x - img.anchorX + img.pad;
+            const stepY = bh + 4;
+            const hitsAt = (yy) => placed.some((b) =>
+                left < b.r && left + bw > b.l &&
+                yy - bh / 2 < b.b && yy + bh / 2 > b.t
+            );
+
+            let target = 0;
+            let crowdTarget = 1;
+            if (hitsAt(y0 + lb.shift) || hitsAt(y0)) {
+                const tries = [0, -1, 1, -2, 2];
+                const found = tries.find((n) => !hitsAt(y0 + n * stepY));
+                if (found === undefined) {
+                    crowdTarget = 0.25;
+                } else {
+                    target = found * stepY;
+                }
+            }
+
+            // ガタつかないよう、ずれ・薄さはなめらかに追いかける
+            if (reduceMotion) {
+                lb.shift = target;
+                lb.crowd = crowdTarget;
+            } else {
+                lb.shift += (target - lb.shift) * 0.22;
+                if (Math.abs(target - lb.shift) < 0.3) lb.shift = target;
+                lb.crowd += (crowdTarget - lb.crowd) * 0.18;
+                if (lb.shift !== target || Math.abs(crowdTarget - lb.crowd) > 0.01) labelsSettling = true;
+            }
+
+            const y = y0 + lb.shift;
+
+            if (lb.crowd > 0.5) {
+                placed.push({ l: left - 4, r: left + bw + 4, t: y - bh / 2 - 2, b: y + bh / 2 + 2 });
+            }
+
+            ctx.globalAlpha = lb.alpha * img.alpha * lb.crowd;
             ctx.drawImage(
                 img.canvas,
                 Math.round(x - img.anchorX), Math.round(y - img.h / 2),
@@ -1441,6 +1532,8 @@ document.addEventListener("DOMContentLoaded", () => {
      */
 
     let autoSpin = !reduceMotion;
+    let intro = null;
+    let stepIntroActive = false;
     let running = false;
     let lastTime = 0;
     let lastDraw = -Infinity;
@@ -1481,7 +1574,25 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const k = 1 - Math.exp(-dt / 0.35);
 
-        if (autoSpin) view.spinTarget += dt * 1.6;
+        // 到着の演出（真上 → 斜め）。操作で目標が変えられたら打ち切る
+        if (intro) {
+            if (view.tiltTarget !== intro.lastTilt || view.spinTarget !== intro.lastSpin) {
+                intro = null;
+            } else {
+                const u = clamp((performance.now() - intro.start) / intro.dur, 0, 1);
+                const e = u < 0.5 ? 4 * u * u * u : 1 - Math.pow(-2 * u + 2, 3) / 2;
+                view.tilt = view.tiltTarget = intro.tilt0 + (intro.tilt1 - intro.tilt0) * e;
+                view.spin = view.spinTarget = intro.spin0 + (intro.spin1 - intro.spin0) * e;
+                intro.lastTilt = view.tiltTarget;
+                intro.lastSpin = view.spinTarget;
+                if (u >= 1) intro = null;
+                else {
+                    stepIntroActive = true;
+                }
+            }
+        }
+
+        if (autoSpin && !intro) view.spinTarget += dt * 1.6;
 
         view.tilt = approach(view.tilt, view.tiltTarget, k, 0.01);
         view.spin = approach(view.spin, view.spinTarget, k, 0.01);
@@ -1532,6 +1643,12 @@ document.addEventListener("DOMContentLoaded", () => {
             view.offX === view.offXTarget &&
             view.offY === view.offYTarget &&
             view.flat === view.flatTarget;
+
+        if (labelsSettling) changing = true;
+        if (stepIntroActive) {
+            changing = true;
+            stepIntroActive = false;
+        }
 
         // 自動回転だけなら、ゆっくりなので毎秒30コマで十分
         return changing || !(settled || (autoSpin && view.tilt === view.tiltTarget));
@@ -1599,8 +1716,10 @@ document.addEventListener("DOMContentLoaded", () => {
         canvas.style.height = `${H}px`;
 
         // スマホの縦長画面では、外周の漂う結晶が少し切れても地図を大きく見せる
-        const fitWidth = narrow ? 820 : 1180;
+        const tall = narrow && H / W > 1.5;
+        const fitWidth = tall ? 740 : narrow ? 820 : 1180;
         fitScale = Math.min(W / fitWidth, H / 1120);
+        portraitDrop = tall ? H * 0.075 : 0;
 
         if (dprChanged || wasNarrow !== narrow || !labels[0].img) buildLabels();
 
@@ -1766,7 +1885,8 @@ document.addEventListener("DOMContentLoaded", () => {
         page.classList.toggle("is-eden-dim", key !== "eden");
         updateEdenRadiance();
 
-        panelEyebrow.textContent = data.title;
+        // 一度訪れた世界には、小さく「訪れた世界」と添える
+        panelEyebrow.textContent = visited(key) ? `${data.title}　·　訪れた世界` : data.title;
         panelName.textContent = data.name;
         panelDesc.textContent = data.description;
         panelLink.href = data.url;
@@ -1801,6 +1921,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     resize();
+
+    // 世界のページから「戻る」で帰ってきたとき、旅の記録を読み直して灯りを更新する
+    window.addEventListener("pageshow", (e) => {
+        if (!e.persisted) return;
+        visits = Tuning?.visits?.() || {};
+        buildLabels();
+        lastDraw = -Infinity;
+        wake();
+    });
 
     if ("ResizeObserver" in window) {
         new ResizeObserver(resize).observe(stage);
@@ -1848,11 +1977,19 @@ document.addEventListener("DOMContentLoaded", () => {
         view.tilt = view.tiltTarget = restTilt();
         view.spin = view.spinTarget = 0;
     } else {
-        window.setTimeout(() => {
-            view.tiltTarget = restTilt();
-            view.spinTarget = flatMode ? view.spinTarget : 0;
-            wake();
-        }, 1200);
+        /*
+         * 以前は 1.2秒待ってから目標値を切り替えていたため、
+         * 動き出しが一番速い（急にガクッと傾く）動きになっていた。
+         * ページが浮かび上がるのと重ねて、ゆっくり動き出し・ゆっくり止まる
+         * 曲線で傾ける。途中で触られたら、そこで演出をやめて操作を優先する。
+         */
+        intro = {
+            start: performance.now() + 500,
+            dur: 2800,
+            tilt0: view.tilt, tilt1: restTilt(),
+            spin0: view.spin, spin1: flatMode ? view.spin : 0,
+            lastTilt: view.tiltTarget, lastSpin: view.spinTarget
+        };
     }
 
     wake();

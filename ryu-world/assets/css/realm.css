@@ -850,7 +850,7 @@ body::before {
     font-size: 0.8rem;
     letter-spacing: 0.2em;
 
-    opacity: 0.68;
+    opacity: 0.78;
 }
 
 #back-to-map:focus-visible,
@@ -1003,4 +1003,22 @@ body.has-selection .work:not(.is-selected) {
         text-align: center;
     }
 
+}
+
+
+/* =========================================================
+   エイリアスワールド：十二使徒の鎖（alias-chains.js）
+   背景の闇（#realm-page::before）のすぐ上、本文の後ろに置く。
+   ========================================================= */
+
+#alias-chains {
+    position: fixed;
+    inset: 0;
+
+    z-index: -1;
+
+    width: 100%;
+    height: 100%;
+
+    pointer-events: none;
 }

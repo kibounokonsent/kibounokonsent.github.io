@@ -629,9 +629,15 @@ document.addEventListener("DOMContentLoaded", () => {
             { count: 12, spread: 36, revealFrom: 0.5, revealTo: 0.9 }
         ];
 
+        // 軽量版（スマホなど）：粒は約半分。画面が小さいので密度はほぼ同じに見える
+        const lite = document.documentElement.classList.contains("is-lite");
+        const countScale = lite ? 0.55 : 1;
+
         waves.forEach((wave) => {
 
-            for (let i = 0; i < wave.count; i++) {
+            const count = Math.round(wave.count * countScale);
+
+            for (let i = 0; i < count; i++) {
 
                 const key =
                     riverKeys[

@@ -792,7 +792,7 @@ body.eden-shell {
     background:
         radial-gradient(ellipse at 50% 30%, rgba(255, 255, 255, 0.07), transparent 60%),
         linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)),
-        url("../images/dragon-soft.png") center 30% / cover no-repeat,
+        url("../images/dragon-soft.webp") center 30% / cover no-repeat,
         #000;
 }
 
