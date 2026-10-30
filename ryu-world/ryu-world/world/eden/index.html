@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 読み込みの最初の一瞬、白い画面が出ないように -->
+    <style>html{background:#000}</style>
+
+    <title>悠久の楽園 ― 龍の世界</title>
+    <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+
+    <!-- OGP / SNS共有用 -->
+    <meta name="description" content="龍の間、天使たち、生命の木、知恵の木、龍の書へと続く、悠久の楽園。">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="龍の世界">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:title" content="悠久の楽園 ― 龍の世界">
+    <meta property="og:description" content="龍の間、天使たち、生命の木、知恵の木、龍の書へと続く、悠久の楽園。">
+    <meta property="og:url" content="https://kibounokonsent.github.io/ryu-world/world/eden/">
+    <meta property="og:image" content="https://kibounokonsent.github.io/ryu-world/assets/images/ogp/eden.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="悠久の楽園 ― 龍の世界のOGP画像">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="悠久の楽園 ― 龍の世界">
+    <meta name="twitter:description" content="龍の間、天使たち、生命の木、知恵の木、龍の書へと続く、悠久の楽園。">
+    <meta name="twitter:image" content="https://kibounokonsent.github.io/ryu-world/assets/images/ogp/eden.jpg">
+
+    <link rel="stylesheet" href="../../assets/css/eden.css">
+    <link rel="stylesheet" href="../../assets/css/eden-places.css">
+    <!-- 調律（音・揺らぎ）：全ページ共通 -->
+    <script src="../../assets/js/ryu-tuning.js" data-ambient="none" data-ui="none"></script>
+
+</head>
+
+<!--
+    悠久の楽園の「枠」。
+    音楽（歓喜の歌）はこのページが流し続け、楽園の中の場所（門・龍の間・
+    天使たち・生命の木・知恵の木・龍の書）は中の枠に読み込んで切り替える。
+    そのため、場所を移っても曲が途切れず、かけ直す必要もない。
+
+    #angels のように # を付けると、その場所から開く（例：index.html#book）。
+-->
+<body class="eden-shell is-ready">
+
+    <iframe id="eden-frame" title="悠久の楽園"></iframe>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">歓喜の歌</span>
+    </button>
+
+    <!-- 歓喜の歌（フリーBGMとして無料配布されている音源） -->
+    <audio id="music" src="../../assets/eden/joy.mp3" loop preload="none"></audio>
+
+    <script src="../../assets/js/eden-music.js"></script>
+    <script src="../../assets/js/eden-shell.js"></script>
+
+</body>
+
+</html>

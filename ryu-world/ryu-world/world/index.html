@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 読み込みの最初の一瞬、白い画面が出ないように -->
+    <style>html{background:#000}</style>
+
+    <title>世界地図 ― 龍の世界</title>
+    <link rel="icon" href="../assets/images/favicon.svg" type="image/svg+xml">
+
+    <!-- OGP / SNS共有用 -->
+    <meta name="description" content="龍の世界に広がる、さまざまな世界をたどる地図。">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="龍の世界">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:title" content="世界地図 ― 龍の世界">
+    <meta property="og:description" content="龍の世界に広がる、さまざまな世界をたどる地図。">
+    <meta property="og:url" content="https://kibounokonsent.github.io/ryu-world/world/">
+    <meta property="og:image" content="https://kibounokonsent.github.io/ryu-world/assets/images/ogp/world.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="世界地図 ― 龍の世界のOGP画像">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="世界地図 ― 龍の世界">
+    <meta name="twitter:description" content="龍の世界に広がる、さまざまな世界をたどる地図。">
+    <meta name="twitter:image" content="https://kibounokonsent.github.io/ryu-world/assets/images/ogp/world.jpg">
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../assets/css/world.css">
+    <!-- 調律（音・揺らぎ・眺め）：全ページ共通 -->
+    <script src="../assets/js/ryu-tuning.js" data-ambient="deep" data-view="true" data-pos="map"></script>
+
+</head>
+
+<body>
+
+    <main id="world-page">
+
+        <!-- ==================================================
+             見出し
+             ================================================== -->
+
+        <header id="world-header">
+            <p id="world-header-en">THE WORLD OF RYŪ</p>
+            <h1>龍の世界</h1>
+        </header>
+
+
+        <!-- ==================================================
+             世界地図（立体）
+             --------------------------------------------------
+             エイリアスワールドという厚みのある「大地」の上に
+             各世界が立ち、真下に刹那の奈落が口を開けている。
+             縦の軸：悠久の楽園 → フロンズ → ミスセオ
+                     → エイリアス → 刹那の奈落
+             真上から見ると、楽園を中心とした同心円になる。
+
+             形はすべて world.js が <canvas> に描く
+             （各世界の位置・形の設定もそちらに集約）。
+             ================================================== -->
+
+        <div id="world-stage" aria-hidden="true">
+            <canvas id="world-canvas"></canvas>
+        </div>
+
+
+        <!-- キーボード・読み上げ用の世界一覧（画面上は地図そのものが操作対象） -->
+        <nav id="world-index" aria-label="世界一覧">
+            <button type="button" data-world="eden">悠久の楽園</button>
+            <button type="button" data-world="fronz">フロンズワールド</button>
+            <button type="button" data-world="misseo">ミスセオワールド</button>
+            <button type="button" data-world="other">その他の世界</button>
+            <button type="button" data-world="soul">魂界</button>
+            <button type="button" data-world="alias">エイリアスワールド</button>
+            <button type="button" data-world="abyss">刹那の奈落</button>
+        </nav>
+
+
+        <!-- カーソルを合わせた世界の名前 -->
+        <div id="world-tip" aria-hidden="true"></div>
+
+        <!-- 操作のヒント（最初に触れたら消える） -->
+        <p id="world-hint" aria-hidden="true">ドラッグで傾ける・回す</p>
+
+        <!-- 拡大・傾きを変えたときだけ現れる -->
+        <button type="button" id="view-reset">視点を戻す</button>
+
+        <a id="back-to-creation" href="../index.html">はじまりへ戻る</a>
+
+
+        <!-- ==================================================
+             世界情報パネル
+             ================================================== -->
+
+        <aside id="world-panel" aria-hidden="true" aria-live="polite">
+
+            <div id="world-panel-inner">
+
+                <button type="button" id="panel-close" aria-label="閉じる">×</button>
+
+                <p id="panel-eyebrow"></p>
+
+                <h2 id="panel-name"></h2>
+
+                <p id="panel-desc"></p>
+
+                <a id="panel-link" href="#">
+                    世界について知る
+                </a>
+
+                <p id="panel-soon" hidden>この世界のページは準備中です</p>
+
+            </div>
+
+        </aside>
+
+    </main>
+
+
+    <script src="../assets/js/world.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 読み込みの最初の一瞬、白い画面が出ないように -->
+    <style>html{background:#000}</style>
+
+    <title>コンセントズ ― 龍の世界</title>
+    <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+
+    <!-- OGP / SNS共有用 -->
+    <meta name="description" content="コンセントズ。三体のコンセントを切り替えて眺める場所。">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="龍の世界">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:title" content="コンセントズ ― 龍の世界">
+    <meta property="og:description" content="コンセントズ。三体のコンセントを切り替えて眺める場所。">
+    <meta property="og:url" content="https://kibounokonsent.github.io/ryu-world/world/consents/">
+    <meta property="og:image" content="https://kibounokonsent.github.io/ryu-world/assets/images/ogp/consents.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="コンセントズ ― 龍の世界のOGP画像">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="コンセントズ ― 龍の世界">
+    <meta name="twitter:description" content="コンセントズ。三体のコンセントを切り替えて眺める場所。">
+    <meta name="twitter:image" content="https://kibounokonsent.github.io/ryu-world/assets/images/ogp/consents.jpg">
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../../assets/css/consents.css">
+    <!-- 調律（音・揺らぎ）：全ページ共通 -->
+    <script src="../../assets/js/ryu-tuning.js" data-ambient="none" data-pos="below-music"></script>
+
+</head>
+
+<!--
+    コンセントズ（その他の世界）。
+    3体それぞれを、枠（背景）→ 黒い影 → 本体 の順に組み立てて見せる。
+    キャラクターの一覧・説明文は assets/js/consents.js にまとめてある。
+-->
+<body data-consent="kibou">
+
+    <a id="back-to-map" href="../other/index.html">その他の世界へ戻る</a>
+
+    <button type="button" id="music-toggle" aria-pressed="false">
+        <span class="music-icon" aria-hidden="true"></span>
+        <span class="music-label">Experimental Model</span>
+    </button>
+
+    <!-- Experimental Model（D'elf のフリー音源） -->
+    <audio id="music" src="../../assets/consents/experimental-model.mp3" loop preload="none"></audio>
+
+    <main id="consents-page">
+
+        <header id="consents-header">
+            <p class="consents-en">CONSENTS</p>
+            <h1>コンセントズ</h1>
+        </header>
+
+        <!-- 組み立ての舞台（Scratchのステージと同じ 4:3） -->
+        <section id="consent-stage" aria-live="polite">
+            <img class="c-bg" alt="" aria-hidden="true">
+            <div class="c-glow" aria-hidden="true"></div>
+            <img class="c-shadow" alt="" aria-hidden="true">
+            <img class="c-char" alt="">
+            <div class="c-flash" aria-hidden="true"></div>
+        </section>
+
+        <!-- 3体の切り替え -->
+        <nav id="consent-select" aria-label="コンセントを選ぶ"></nav>
+
+        <section id="consent-info">
+            <p class="info-en"></p>
+            <h2 class="info-name"></h2>
+            <div class="info-text"></div>
+        </section>
+
+        <!-- 音楽のクレジット（D'elf の表記ルール：制作者・楽曲名・サイト） -->
+        <footer id="consents-credit">
+            <p>音楽：「Experimental Model」（Short Free ver.）</p>
+            <p>制作：D'elf ／ <a href="https://d-elf.com/" target="_blank" rel="noopener">d-elf.com</a></p>
+        </footer>
+
+    </main>
+
+    <script src="../../assets/js/page-music.js"></script>
+    <script src="../../assets/js/consents.js"></script>
+
+</body>
+
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- 読み込みの最初の一瞬、白い画面が出ないように -->
+    <style>html{background:#000}</style>
+
+    <title>フロンズワールド ― 龍の世界</title>
+    <link rel="icon" href="../../assets/images/favicon.svg" type="image/svg+xml">
+
+    <!-- OGP / SNS共有用 -->
+    <meta name="description" content="四つの流れが生み出した無数の世界のうち、大いなる世界として語られる一つ。龍の世界における、主な物語の舞台。">
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="龍の世界">
+    <meta property="og:locale" content="ja_JP">
+    <meta property="og:title" content="フロンズワールド ― 龍の世界">
+    <meta property="og:description" content="四つの流れが生み出した無数の世界のうち、大いなる世界として語られる一つ。龍の世界における、主な物語の舞台。">
+    <meta property="og:url" content="https://kibounokonsent.github.io/ryu-world/world/fronz/">
+    <meta property="og:image" content="https://kibounokonsent.github.io/ryu-world/assets/images/ogp/fronz.jpg">
+    <meta property="og:image:type" content="image/jpeg">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="フロンズワールド ― 龍の世界のOGP画像">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="フロンズワールド ― 龍の世界">
+    <meta name="twitter:description" content="四つの流れが生み出した無数の世界のうち、大いなる世界として語られる一つ。龍の世界における、主な物語の舞台。">
+    <meta name="twitter:image" content="https://kibounokonsent.github.io/ryu-world/assets/images/ogp/fronz.jpg">
+
+    <!-- 明朝体を端末に関係なく同じ見た目で表示する（Android など明朝体の無い端末向け） -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;500&display=swap">
+
+    <link rel="stylesheet" href="../../assets/css/realm.css">
+    <!-- 調律（音・揺らぎ）：全ページ共通 -->
+    <script src="../../assets/js/ryu-tuning.js" data-ambient="realm"></script>
+
+</head>
+
+<!-- data-realm で、どの世界のページかを指定する（中身は works.js から組み立てる） -->
+<body data-realm="fronz">
+
+    <main id="realm-page">
+
+        <a id="back-to-map" href="../index.html">世界地図へ戻る</a>
+
+        <header id="realm-header">
+            <p id="realm-title-en"></p>
+            <h1 id="realm-name"></h1>
+            <p id="realm-lead"></p>
+        </header>
+
+        <section id="realm-works" aria-label="作品"></section>
+
+        <!-- 作品の情報パネル -->
+        <aside id="work-panel" aria-hidden="true" aria-live="polite">
+            <div id="work-panel-inner">
+                <button type="button" id="work-close" aria-label="閉じる">×</button>
+                <p id="work-eyebrow"></p>
+                <h2 id="work-name"></h2>
+                <div id="work-summary"></div>
+                <a id="work-link" href="#">作品を見る</a>
+                <p id="work-soon">作品ページは準備中です</p>
+            </div>
+        </aside>
+
+    </main>
+
+    <script src="../../assets/js/works.js"></script>
+    <script src="../../assets/js/realm.js"></script>
+
+</body>
+
+</html>
