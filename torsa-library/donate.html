@@ -380,7 +380,11 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   /* ---------- 挿絵 ----------
      本文の中に「［挿絵：ファイル名］」だけの行を置くと、そこに絵が入る。画像そのものは IMGS にしまっておき、
      綴じるときに、本のファイル（txt）と画像を、ひとつのzipにまとめる。 */
-  const IL = window.TorsaGifts;
+  // 挿絵の行の読みとり（js/book-gifts.js が古くても動くように、ここにも持っておく）
+  const IL = {
+    IMG_FILE: /^[\w.\-]{1,60}\.(?:webp|jpe?g|png|gif)$/i,
+    imageLine(p) { const m = /^\s*[［\[]挿絵\s*[：:]\s*([^｜|］\]]+?)\s*(?:[｜|]\s*([^］\]]*?))?\s*[］\]]\s*$/.exec(String(p || "")); return m && IL.IMG_FILE.test(m[1]) ? { file: m[1], caption: (m[2] || "").trim().slice(0, 100) } : null; }
+  };
   const IMG_KEY = KEY + "-imgs", MAX_IMGS = 30, MAX_EDGE = 1400;
   const IMG_MIME = { webp: "image/webp", jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif" };
   const DATA_IMG = /^data:image\/(?:webp|jpeg|png|gif);base64,[A-Za-z0-9+\/=]+$/;
