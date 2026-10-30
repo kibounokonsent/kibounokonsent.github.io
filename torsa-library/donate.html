@@ -154,6 +154,22 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
 .reader-page p.blank { height: 1em; }
 .reader-page .fin { text-align: center; margin: 24px 0 8px; color: #7a7486; }
 .reader-page .close { display: block; margin: 12px auto 0; }
+.reader-page figure.ill { margin: 18px 0; text-align: center; }
+.reader-page figure.ill img { max-width: 100%; max-height: 60vh; height: auto; border-radius: 4px; box-shadow: 0 2px 12px rgba(43,42,58,.22); }
+.reader-page figure.ill figcaption { margin-top: 6px; font-size: 12px; line-height: 1.6; color: #7a7486; }
+.reader-page .blank-img { text-align: center; font-size: 13px; color: #b04a4a; }
+/* 挿絵 */
+.ill-box { margin-top: 16px; padding: 12px 14px 14px; border: 1px dashed rgba(214,176,98,.55); border-radius: 12px; background: rgba(255,255,255,.03); }
+.ill-box > b { font-family: var(--font-display); color: var(--gold-2); }
+.ill-box .ill-note { margin: 4px 0 10px; font-size: 13px; line-height: 1.7; color: var(--ink-soft); }
+.ill-list { display: grid; gap: 10px; margin-top: 12px; }
+.ill-item { display: grid; grid-template-columns: 96px minmax(0, 1fr); gap: 12px; align-items: start; padding: 8px; border-radius: 10px; background: rgba(0,0,0,.2); }
+.ill-item img { width: 96px; height: 96px; object-fit: cover; border-radius: 6px; background: rgba(0,0,0,.35); -webkit-user-drag: none; }
+.ill-meta { display: grid; gap: 6px; min-width: 0; }
+.ill-meta code { font-size: 12px; color: var(--gold-2); }
+.ill-meta .ill-use { font-size: 12px; color: var(--ink-soft); }
+.ill-meta .row-btns { margin: 0; }
+@media (max-width: 480px) { .ill-item { grid-template-columns: 72px minmax(0, 1fr); } .ill-item img { width: 72px; height: 72px; } }
 
 /* 綴じる */
 .check { list-style: none; padding: 0; margin: 0 0 16px; display: grid; gap: 6px; }
@@ -223,7 +239,7 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
 </div>
 <div class="reader" id="reader" hidden><div class="reader-page" id="readerPage"></div></div>
 <div class="toast" id="toast" hidden></div>
-<input type="file" id="fileIn" accept=".txt,text/plain,.json,application/json" hidden>
+<input type="file" id="fileIn" accept=".txt,text/plain,.json,application/json,.zip,application/zip" hidden>
 
 <script src="js/cover-parts.js"></script>
 <script src="js/cover-core.js"></script>
@@ -339,7 +355,7 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   const STEPS = [
     { key: "intro", label: "はじめに", talk: ["ようこそ、寄贈の間へ～。ここでは、新しい本をつくって、図書館に寄贈できるんだよ～。", "ぼくが順番に案内するね～。下の「つぎへ」で進んでね～。"] },
     { key: "name", label: "本の名前", talk: ["まずは、本の名前を教えてね～。作者の名前と、どんなお話かもね～。"] },
-    { key: "text", label: "本文", talk: ["つぎは本文だよ～。書いたお話を、そのまま貼りつけてね～。空いた行も、そのまま残るよ～。"] },
+    { key: "text", label: "本文", talk: ["つぎは本文だよ～。書いたお話を、そのまま貼りつけてね～。空いた行も、そのまま残るよ～。", "挿絵も入れられるよ～。文の間に、何枚でも入れてね～。"] },
     { key: "cover", label: "表紙", talk: ["表紙をつくろう～。上の見出しで部品のなかまを切りかえて、ひとつずつ選んでいってね～。", "迷ったら「おまかせ」もあるよ～。何度でも押してみてね～。"] },
     { key: "persona", label: "性格", talk: ["この本は、どんな性格かな～？ 近いものを選ぶと、セリフのお手本を入れておくね～。", "あとで、ぜんぶ自分の言葉に書きかえていいからね～。"] },
     { key: "type", label: "くせ", talk: ["本にはね、それぞれ“くせ”があるんだ～。", "飛び出したり、なかなか読ませてくれなかったり……この本はどうかな～？"] },
@@ -361,8 +377,119 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   const save = () => { clearTimeout(saveTimer); saveTimer = setTimeout(() => { try { localStorage.setItem(KEY, JSON.stringify(S)); } catch (e) { /* 保存できない環境 */ } }, 250); };
   const toast = (t) => { const el = $("toast"); el.textContent = t; el.hidden = false; clearTimeout(toast.t); toast.t = setTimeout(() => { el.hidden = true; }, 2200); };
 
+  /* ---------- 挿絵 ----------
+     本文の中に「［挿絵：ファイル名］」だけの行を置くと、そこに絵が入る。画像そのものは IMGS にしまっておき、
+     綴じるときに、本のファイル（txt）と画像を、ひとつのzipにまとめる。 */
+  const IL = window.TorsaGifts;
+  const IMG_KEY = KEY + "-imgs", MAX_IMGS = 30, MAX_EDGE = 1400;
+  const IMG_MIME = { webp: "image/webp", jpg: "image/jpeg", jpeg: "image/jpeg", png: "image/png", gif: "image/gif" };
+  const DATA_IMG = /^data:image\/(?:webp|jpeg|png|gif);base64,[A-Za-z0-9+\/=]+$/;
+  let IMGS = []; // [{ name, caption, data（data:image/…;base64,…） }]
+  try {
+    const j = JSON.parse(localStorage.getItem(IMG_KEY) || "null");
+    if (j && j.id === S.id && Array.isArray(j.list)) IMGS = j.list.filter((i) => i && IL.IMG_FILE.test(i.name) && DATA_IMG.test(i.data)).map((i) => ({ name: i.name, caption: String(i.caption || "").slice(0, 100), data: i.data }));
+  } catch (e) { IMGS = []; }
+  let imgWarned = false, imgTimer = 0;
+  const saveImgs = () => { clearTimeout(imgTimer); try { localStorage.setItem(IMG_KEY, JSON.stringify({ id: S.id, list: IMGS })); } catch (e) { if (!imgWarned) { imgWarned = true; toast("挿絵が多くて、この端末には保存しきれなかったよ。閉じる前に、本を綴じてね"); } } };
+  const saveImgsSoon = () => { clearTimeout(imgTimer); imgTimer = setTimeout(saveImgs, 500); };
+  const resetImgs = () => { IMGS = []; imgWarned = false; try { localStorage.removeItem(IMG_KEY); } catch (e) { /* なにもしない */ } };
+  const cleanCap = (c) => String(c || "").replace(/[｜|［］\[\]\r\n]+/g, " ").trim().slice(0, 100);
+  const nextImgName = (ext) => { let n = 1; while (IMGS.some((i) => i.name.replace(/\.\w+$/, "") === "ill-" + n)) n++; return `ill-${n}.${ext}`; };
+
+  // 画像を、長いほうの辺が1400pxまでに小さくして、webp（だめならjpg）にする
+  async function shrinkImage(file) {
+    const url = URL.createObjectURL(file);
+    try {
+      const im = await new Promise((ok, ng) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => ng(new Error("img")); i.src = url; });
+      let w = im.naturalWidth, h = im.naturalHeight; if (!w || !h) throw new Error("size");
+      const k = Math.min(1, MAX_EDGE / Math.max(w, h)); w = Math.max(1, Math.round(w * k)); h = Math.max(1, Math.round(h * k));
+      const cv = document.createElement("canvas"); cv.width = w; cv.height = h;
+      const cx = cv.getContext("2d"); cx.drawImage(im, 0, 0, w, h);
+      let data = cv.toDataURL("image/webp", 0.86), ext = "webp";
+      if (!/^data:image\/webp/.test(data)) { // webp を作れないブラウザ
+        cx.globalCompositeOperation = "destination-over"; cx.fillStyle = "#fff"; cx.fillRect(0, 0, w, h);
+        data = cv.toDataURL("image/jpeg", 0.88); ext = "jpg";
+      }
+      return { data, ext };
+    } finally { URL.revokeObjectURL(url); }
+  }
+  async function addImages(files) {
+    const added = [];
+    for (const f of [...files]) {
+      if (!/^image\//.test(f.type) && !/\.(png|jpe?g|webp|gif)$/i.test(f.name)) continue;
+      if (IMGS.length >= MAX_IMGS) { toast(`挿絵は ${MAX_IMGS} 枚までだよ`); break; }
+      if (f.size > 25 * 1024 * 1024) { toast("大きすぎる画像は、とばしたよ"); continue; }
+      try { const r = await shrinkImage(f); const it = { name: nextImgName(r.ext), caption: "", data: r.data }; IMGS.push(it); added.push(it); }
+      catch (e) { toast("開けない画像があったよ"); }
+    }
+    saveImgs(); return added;
+  }
+
+  // zip（保存だけ。圧縮はしない。画像はもう圧縮されているので）
+  const CRC_T = (() => { const t = new Uint32Array(256); for (let n = 0; n < 256; n++) { let c = n; for (let k = 0; k < 8; k++) c = c & 1 ? 0xedb88320 ^ (c >>> 1) : c >>> 1; t[n] = c >>> 0; } return t; })();
+  const crc32 = (u) => { let c = 0xffffffff; for (let i = 0; i < u.length; i++) c = CRC_T[(c ^ u[i]) & 255] ^ (c >>> 8); return (c ^ 0xffffffff) >>> 0; };
+  function makeZip(files) { // files: [{ name, bytes }]
+    const enc = new TextEncoder(), parts = [], cd = []; let off = 0;
+    const d = new Date(), dt = (((d.getFullYear() - 1980) << 9) | ((d.getMonth() + 1) << 5) | d.getDate()) & 0xffff, tm = ((d.getHours() << 11) | (d.getMinutes() << 5) | (d.getSeconds() >> 1)) & 0xffff;
+    files.forEach((f) => {
+      const nb = enc.encode(f.name), crc = crc32(f.bytes), sz = f.bytes.length;
+      const lh = new DataView(new ArrayBuffer(30));
+      lh.setUint32(0, 0x04034b50, true); lh.setUint16(4, 20, true); lh.setUint16(6, 0x0800, true); lh.setUint16(10, tm, true); lh.setUint16(12, dt, true);
+      lh.setUint32(14, crc, true); lh.setUint32(18, sz, true); lh.setUint32(22, sz, true); lh.setUint16(26, nb.length, true);
+      parts.push(new Uint8Array(lh.buffer), nb, f.bytes);
+      const ch = new DataView(new ArrayBuffer(46));
+      ch.setUint32(0, 0x02014b50, true); ch.setUint16(4, 20, true); ch.setUint16(6, 20, true); ch.setUint16(8, 0x0800, true); ch.setUint16(12, tm, true); ch.setUint16(14, dt, true);
+      ch.setUint32(16, crc, true); ch.setUint32(20, sz, true); ch.setUint32(24, sz, true); ch.setUint16(28, nb.length, true); ch.setUint32(42, off, true);
+      cd.push(new Uint8Array(ch.buffer), nb);
+      off += 30 + nb.length + sz;
+    });
+    const cdLen = cd.reduce((a, b) => a + b.length, 0), end = new DataView(new ArrayBuffer(22));
+    end.setUint32(0, 0x06054b50, true); end.setUint16(8, files.length, true); end.setUint16(10, files.length, true); end.setUint32(12, cdLen, true); end.setUint32(16, off, true);
+    return new Blob([...parts, ...cd, new Uint8Array(end.buffer)], { type: "application/zip" });
+  }
+  // zipを開く（保存だけのものと、ふつうに圧縮されたもの）
+  async function readZip(buf) {
+    const u = new Uint8Array(buf), dv = new DataView(buf); let e = -1;
+    for (let i = u.length - 22; i >= Math.max(0, u.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { e = i; break; }
+    if (e < 0) throw new Error("zip");
+    const n = Math.min(dv.getUint16(e + 10, true), 300); let p = dv.getUint32(e + 16, true); const out = []; let total = 0;
+    for (let k = 0; k < n; k++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) throw new Error("zip");
+      const method = dv.getUint16(p + 10, true), csz = dv.getUint32(p + 20, true), nl = dv.getUint16(p + 28, true), el = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true), lo = dv.getUint32(p + 42, true);
+      const nb = u.subarray(p + 46, p + 46 + nl); let name;
+      try { name = new TextDecoder("utf-8", { fatal: true }).decode(nb); } catch (err) { name = new TextDecoder("shift_jis").decode(nb); }
+      p += 46 + nl + el + cl; name = name.replace(/\\/g, "/");
+      if (name.endsWith("/")) continue;
+      const st = lo + 30 + dv.getUint16(lo + 26, true) + dv.getUint16(lo + 28, true);
+      if (st + csz > u.length || (total += csz) > 120 * 1024 * 1024) throw new Error("zip");
+      let bytes = u.slice(st, st + csz);
+      if (method === 8) { if (typeof DecompressionStream === "undefined") throw new Error("deflate"); bytes = new Uint8Array(await new Response(new Blob([bytes]).stream().pipeThrough(new DecompressionStream("deflate-raw"))).arrayBuffer()); }
+      else if (method !== 0) throw new Error("zip");
+      out.push({ name, bytes });
+    }
+    return out;
+  }
+  const bytesToB64 = (u) => { let s = ""; for (let i = 0; i < u.length; i += 0x8000) s += String.fromCharCode.apply(null, u.subarray(i, i + 0x8000)); return btoa(s); };
+  const dataToBytes = (d) => { const b = atob(d.slice(d.indexOf(",") + 1)), u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; };
+
+  // 本文の中の、挿絵の行（キャプションは、画像につけたものを足す）
+  const capLine = (p) => {
+    if (!p || !/^\s*[［\[]挿絵/.test(p)) return p;
+    const im = IL.imageLine(p); if (!im) return p;
+    const it = IMGS.find((i) => i.name === im.file), cap = cleanCap(im.caption || (it && it.caption));
+    return `［挿絵：${im.file}${cap ? "｜" + cap : ""}］`;
+  };
+  const isImgLine = (p) => !!p && !!IL.imageLine(p);
+  const usedImgs = () => { const seen = new Set(); paragraphs().forEach((p) => { const im = p && IL.imageLine(p); if (im) seen.add(im.file); }); return [...seen].map((n) => IMGS.find((i) => i.name === n)).filter(Boolean); };
+  const paraHTML = (p) => {
+    if (!p) return '<p class="blank"></p>';
+    const im = IL.imageLine(p); if (!im) return `<p>${esc(p)}</p>`;
+    const it = IMGS.find((i) => i.name === im.file);
+    return it ? `<figure class="ill"><img src="${it.data}" alt="">${im.caption ? `<figcaption>${esc(im.caption)}</figcaption>` : ""}</figure>` : `<p class="blank-img">（挿絵「${esc(im.file)}」の画像がありません）</p>`;
+  };
+
   // 本文を段落にする（1行が1段落。空いた行も残す）
-  const paragraphs = () => { const a = S.text.replace(/\r\n?/g, "\n").split("\n"); while (a.length && !a[a.length - 1].trim()) a.pop(); while (a.length && !a[0].trim()) a.shift(); return a.map((p) => (p.trim() ? p.replace(/\s+$/, "") : "")); };
+  const paragraphs = () => { const a = S.text.replace(/\r\n?/g, "\n").split("\n"); while (a.length && !a[a.length - 1].trim()) a.pop(); while (a.length && !a[0].trim()) a.shift(); return a.map((p) => (p.trim() ? p.replace(/\s+$/, "") : "")).map(capLine); };
   const coverOf = () => ({ ...S.cover, title: S.coverTitle || S.title || "名もなき本", subtitle: S.coverSub, parts: { ...S.cover.parts } });
   const bookView = () => ({ id: "gift-" + S.id, title: S.title || "名もなき本", cover: coverOf() });
 
@@ -415,7 +542,7 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
     const b = (id, f) => { const el = $(id); if (el) el.addEventListener("click", f); };
     b("contBtn", () => { const i = STEPS.findIndex((s, k) => k > 0 && !S.seen[s.key]); go(i > 0 ? i : 1); });
     b("startBtn", () => go(1));
-    b("newBtn", () => { confirmBox("いまの書きかけの本は消えてしまうよ～。新しい本を書く？", "新しい本を書く", () => { S = newBook(); save(); go(1); }); });
+    b("newBtn", () => { confirmBox("いまの書きかけの本は消えてしまうよ～。新しい本を書く？", "新しい本を書く", () => { S = newBook(); resetImgs(); save(); go(1); }); });
     b("loadBtn", () => $("fileIn").click());
   }
 
@@ -433,11 +560,53 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   function text() {
     desk.innerHTML = `<h2>本文</h2><p class="lead">1行が1つの段落になります。空いた行は、そのまま「間」として残ります。</p>
       <label class="field"><span>お話<em>必ず</em></span><textarea class="txt big-text" id="fText" placeholder="ここにお話を書くか、貼りつけてね">${esc(S.text)}</textarea><span class="count" id="fCount"></span></label>
+      <div class="ill-box"><b>挿絵</b>
+        <p class="ill-note">文字を入れていた場所（カーソルの位置）に、絵が入ります。文と文の間にカーソルを置いてから、絵をえらんでね。何枚でも入れられます（${MAX_IMGS}枚まで）。<br>入った行（［挿絵：…］）は、切りとって貼りつければ、場所を動かせます。動く絵（GIF）は、止まった絵になります。</p>
+        <div class="row-btns"><button type="button" class="btn small" id="illAdd">挿絵をえらんで入れる</button></div>
+        <div class="ill-list" id="illList"></div>
+        <input type="file" id="illIn" accept="image/*" multiple hidden>
+      </div>
       <div class="row-btns"><button type="button" class="btn small" id="peek">ためし読みする</button></div>`;
-    const count = () => { const n = Array.from(S.text.replace(/\s/g, "")).length; $("fCount").textContent = `${n.toLocaleString()} 文字 ・ ${paragraphs().filter(Boolean).length} 段落`; };
-    $("fText").addEventListener("input", (e) => { S.text = e.target.value; save(); count(); });
+    const ta = $("fText");
+    let caret = null; // いちばん最近のカーソルの位置（ボタンをさわると、カーソルが外れるので覚えておく）
+    const mark = () => { caret = ta.selectionStart; };
+    ["keyup", "click", "input", "blur", "select"].forEach((ev) => ta.addEventListener(ev, mark));
+    const count = () => {
+      const n = Array.from(S.text.replace(/\s/g, "")).length, ps = paragraphs(), im = ps.filter(isImgLine).length;
+      $("fCount").textContent = `${n.toLocaleString()} 文字 ・ ${ps.filter((p) => p && !isImgLine(p)).length} 段落${im ? ` ・ 挿絵 ${im} か所` : ""}`;
+    };
+    const setText = (v, pos) => { ta.value = v; S.text = v; caret = pos; try { ta.setSelectionRange(pos, pos); } catch (e) { /* なにもしない */ } save(); count(); drawList(); };
+    // カーソルの位置に、挿絵の行を入れる（前後は、かならず行を分ける）
+    const insertAt = (names) => {
+      const v = ta.value, pos = Math.min(caret == null ? v.length : caret, v.length), before = v.slice(0, pos), after = v.slice(pos);
+      const block = names.map((n) => `［挿絵：${n}］`).join("\n"), pre = before && !before.endsWith("\n") ? "\n" : "", suf = after && !after.startsWith("\n") ? "\n" : "";
+      setText(before + pre + block + suf + after, (before + pre + block + suf).length);
+    };
+    const uses = (name) => S.text.split(/\r?\n/).filter((l) => { const im = IL.imageLine(l); return im && im.file === name; }).length;
+    function drawList() {
+      $("illList").innerHTML = IMGS.map((it, i) => { const n = uses(it.name); return `<div class="ill-item" data-i="${i}"><img src="${it.data}" alt=""><div class="ill-meta"><code>${esc(it.name)}</code><span class="ill-use">${n ? `本文に ${n} か所` : "まだ本文に入っていないよ"}</span><input class="txt" data-cap maxlength="60" value="${esc(it.caption)}" placeholder="キャプション（なくてもOK）"><div class="row-btns"><button type="button" class="btn small" data-act="ins">カーソルの位置に入れる</button><button type="button" class="btn small" data-act="del">ぬく</button></div></div></div>`; }).join("");
+    }
+    ta.addEventListener("input", (e) => { S.text = e.target.value; save(); count(); drawList(); });
+    $("illAdd").addEventListener("click", () => $("illIn").click());
+    $("illIn").addEventListener("change", async (e) => {
+      const files = [...e.target.files]; e.target.value = ""; if (!files.length) return;
+      const b = $("illAdd"), t0 = b.textContent; b.disabled = true; b.textContent = "絵を小さくしているよ……";
+      const added = await addImages(files); b.disabled = false; b.textContent = t0;
+      if (added.length) { insertAt(added.map((i) => i.name)); toast(`挿絵を ${added.length} 枚、入れたよ`); } else drawList();
+    });
+    $("illList").addEventListener("click", (e) => {
+      const btn = e.target.closest("[data-act]"), row = e.target.closest(".ill-item"); if (!btn || !row) return;
+      const it = IMGS[+row.dataset.i]; if (!it) return;
+      if (btn.dataset.act === "ins") insertAt([it.name]);
+      else {
+        // 本文の中の、この絵の行も、いっしょに消す
+        const keep = S.text.split(/\r?\n/).filter((l) => { const im = IL.imageLine(l); return !(im && im.file === it.name); });
+        IMGS.splice(+row.dataset.i, 1); saveImgs(); setText(keep.join("\n"), Math.min(caret == null ? 0 : caret, keep.join("\n").length));
+      }
+    });
+    $("illList").addEventListener("input", (e) => { const row = e.target.closest(".ill-item"), it = row && IMGS[+row.dataset.i]; if (it && e.target.matches("[data-cap]")) { it.caption = cleanCap(e.target.value).slice(0, 60); saveImgsSoon(); } });
     $("peek").addEventListener("click", () => openReader(null));
-    count();
+    count(); drawList();
   }
 
   let MAKER = null;
@@ -611,7 +780,7 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   function openReader(done) {
     readerDone = done;
     const ps = paragraphs();
-    $("readerPage").innerHTML = `<h2>${esc(S.title || "名もなき本")}</h2><p class="meta">${esc(S.author || "名もなき作者")}${S.genre ? "　・　" + esc(S.genre) : ""}</p>${ps.length ? ps.map((p) => (p ? `<p>${esc(p)}</p>` : '<p class="blank"></p>')).join("") : "<p>（本文がまだありません）</p>"}<p class="fin">おしまい</p><button type="button" class="btn close" id="rClose" style="color:var(--paper-ink)">本を閉じる</button>`;
+    $("readerPage").innerHTML = `<h2>${esc(S.title || "名もなき本")}</h2><p class="meta">${esc(S.author || "名もなき作者")}${S.genre ? "　・　" + esc(S.genre) : ""}</p>${ps.length ? ps.map(paraHTML).join("") : "<p>（本文がまだありません）</p>"}<p class="fin">おしまい</p><button type="button" class="btn close" id="rClose" style="color:var(--paper-ink)">本を閉じる</button>`;
     $("reader").hidden = false; $("readerPage").scrollTop = 0; $("rClose").addEventListener("click", closeReader);
   }
   function closeReader() { $("reader").hidden = true; const f = readerDone; readerDone = null; f && f(); }
@@ -622,7 +791,11 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
     const p = [], L = S.lines, need = (k, label, step) => { if (!filled(L[k]).length) p.push([label, step]); };
     if (!S.title.trim()) p.push(["題名", 1]);
     if (!S.author.trim()) p.push(["作者の名前", 1]);
-    if (!paragraphs().some(Boolean)) p.push(["本文", 2]);
+    if (!paragraphs().some((x) => x && !isImgLine(x))) p.push(["本文", 2]);
+    const missing = new Set(); let badImg = false;
+    paragraphs().forEach((x) => { if (!x || !/^\s*[［\[]挿絵/.test(x)) return; const im = IL.imageLine(x); if (!im) badImg = true; else if (!IMGS.some((i) => i.name === im.file)) missing.add(im.file); });
+    missing.forEach((n) => p.push([`挿絵の画像「${n}」`, 2]));
+    if (badImg) p.push(["挿絵の行の書き方", 2]);
     if (S.type !== "refuser") need("first", "はじめて手に取ったときのセリフ", 6);
     if (S.type === "jumper") need("jump", "飛び出したときのセリフ", 6);
     if (S.type === "refuser") { for (let i = 0; i < S.refuseCount; i++) if (!filled(L.refuse[i]).length) p.push([`断るとき（${i + 1} 回目）のセリフ`, 6]); need("accept", "読ませてくれるときのセリフ", 6); }
@@ -633,28 +806,32 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   }
   function bind() {
     const p = problems();
-    const items = [["題名と作者", !p.some(([l]) => l === "題名" || l === "作者の名前"), 1], ["本文", !p.some(([l]) => l === "本文"), 2], ["表紙", true, 3], ["性格とくせ", true, 5], ["セリフ", !p.some(([, s]) => s === 6), 6]];
+    const items = [["題名と作者", !p.some(([l]) => l === "題名" || l === "作者の名前"), 1], ["本文", !p.some(([l]) => l === "本文"), 2], ...(usedImgs().length || p.some(([l]) => /^挿絵/.test(l)) ? [[`挿絵（${usedImgs().length} 枚）`, !p.some(([l]) => /^挿絵/.test(l)), 2]] : []), ["表紙", true, 3], ["性格とくせ", true, 5], ["セリフ", !p.some(([, s]) => s === 6), 6]];
     desk.innerHTML = `<h2>綴じる</h2><p class="lead">本を一冊のファイルにまとめます。</p>
       <div class="bind-area"><div class="bind-book" id="bBook">${C.coverHTML(bookView())}</div><div>
         <ul class="check">${items.map(([n, ok, st]) => `<li class="${ok ? "" : "ng"}"><span class="mark">${ok ? "✓" : "!"}</span>${esc(n)}${ok ? "" : `<button type="button" class="btn small go" data-go="${st}">書きに行く</button>`}</li>`).join("")}</ul>
         ${p.length ? `<p class="warn">まだ足りないところ：${p.map(([l]) => esc(l)).join("、")}</p>` : ""}
+        ${usedImgs().length ? `<p class="ill-note" style="margin:8px 0 0;font-size:13px;color:var(--ink-soft)">挿絵が入っているので、本のファイル（txt）と画像が、ひとつの zip ファイルになります。</p>` : ""}
         <div class="row-btns"><button type="button" class="btn primary" id="bindBtn"${p.length ? " disabled" : ""}>本を綴じる</button></div>
       </div></div>
       <div class="done-box" id="doneBox" hidden><b>できあがり！</b> 「<span id="fname"></span>」ができました。
-        <ol><li>このファイル（テキストファイル）を、図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。メモ帳などで開くと、中身をたしかめられるよ。</li><li>管理人さんが書架に入れてくれたら、図書館で会えるよ。</li></ol>
+        <ol id="doneSteps"></ol>
         <div class="row-btns" style="margin-top:10px"><button type="button" class="btn small" id="dlAgain">もう一度ダウンロード</button><button type="button" class="btn small" id="admBtn" title="管理人さん用：data/works.json と data/books.json に貼る JSON が入ったテキスト">管理人用：追加データ（JSON入りtxt）</button><button type="button" class="btn small" id="admCopy" title="管理人さん用の追加データを、クリップボードにコピー">管理人用：追加データをコピー</button><button type="button" class="btn small" id="shareBtn" hidden>送る（共有）</button><button type="button" class="btn small" id="another">新しい本を書く</button></div></div>`;
     desk.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(+b.dataset.go)));
     $("bindBtn").addEventListener("click", () => {
       const f = makeFile();
       $("bBook").classList.remove("bound"); void $("bBook").offsetWidth; $("bBook").classList.add("bound"); sparkles($("bBook"));
       download(f); $("fname").textContent = f.name; $("doneBox").hidden = false;
+      $("doneSteps").innerHTML = f.zip
+        ? "<li>この zip ファイルを、そのまま図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。中には、本のファイルと、挿絵の画像が入っているよ。</li><li>管理人さんは、zip を解凍して、中の「寄贈本_○○.txt」と「book_images」フォルダを、<b>どちらも</b> book_data フォルダに入れます。</li><li>書架に入ったら、図書館で会えるよ。</li>"
+        : "<li>このファイル（テキストファイル）を、図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。メモ帳などで開くと、中身をたしかめられるよ。</li><li>管理人さんが書架に入れてくれたら、図書館で会えるよ。</li>";
       guideSay(["わぁ～、すてきな本ができたね～！", "そのファイルを管理人さんに渡してね～。図書館で会えるのを楽しみにしてるよ～。"]);
       $("dlAgain").onclick = () => download(f);
       $("admBtn").onclick = async () => { const a = await makeAdminFile(f); if (a) download(a); else alert("追加データを作れませんでした。本の内容を確かめてください。"); };
       $("admCopy").onclick = async () => { const b = $("admCopy"), a = await makeAdminFile(f); if (!a) { alert("追加データを作れませんでした。本の内容を確かめてください。"); return; } const ok = await copyText(a.text); const t0 = "管理人用：追加データをコピー"; b.textContent = ok ? "コピーしました！" : "コピーできませんでした（ダウンロードをお使いください）"; setTimeout(() => { b.textContent = t0; }, 2200); };
-      const file = typeof File !== "undefined" ? new File([f.blob], f.name, { type: "text/plain" }) : null;
+      const file = typeof File !== "undefined" ? new File([f.blob], f.name, { type: f.zip ? "application/zip" : "text/plain" }) : null;
       if (file && navigator.canShare && navigator.canShare({ files: [file] })) { $("shareBtn").hidden = false; $("shareBtn").onclick = () => navigator.share({ files: [file], title: S.title, text: "トルサ図書館への寄贈本です" }).catch(() => {}); }
-      $("another").onclick = () => confirmBox("新しい本を書く？ いまの本は、ダウンロードしたファイルから、いつでも開いて直せるよ～。", "新しい本を書く", () => { S = newBook(); save(); go(1); });
+      $("another").onclick = () => confirmBox("新しい本を書く？ いまの本は、ダウンロードしたファイルから、いつでも開いて直せるよ～。", "新しい本を書く", () => { S = newBook(); resetImgs(); save(); go(1); });
     });
   }
   function makeFile() {
@@ -670,7 +847,15 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
     };
     const safe = S.title.trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g, "").slice(0, 30) || "本";
     // テキストファイルにする（メモ帳などで開いて読める・直せる。書き方は js/book-gifts.js の toText）
-    const blob = new Blob(["\uFEFF" + window.TorsaGifts.toText(data).replace(/\n/g, "\r\n")], { type: "text/plain;charset=utf-8" });
+    const body = "\uFEFF" + window.TorsaGifts.toText(data).replace(/\n/g, "\r\n");
+    // 挿絵があるときは、txt と画像を、ひとつのzipにまとめる（解凍して book_data に入れれば、そのまま使える）
+    const pics = usedImgs();
+    if (pics.length) {
+      const bare = S.id.replace(/[^a-z0-9-]/gi, "").toLowerCase();
+      const files = [{ name: `寄贈本_${safe}.txt`, bytes: new TextEncoder().encode(body) }, ...pics.map((i) => ({ name: `book_images/${bare}/${i.name}`, bytes: dataToBytes(i.data) }))];
+      return { blob: makeZip(files), name: `寄贈本_${safe}.zip`, data, safe, zip: true };
+    }
+    const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
     return { blob, name: `寄贈本_${safe}.txt`, data, safe };
   }
   // 管理人用：data/works.json と data/books.json に貼る JSON を、テキストにして出す（js/book-gifts.js の toAdminText）
@@ -696,20 +881,44 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
   /* ---------- 綴じた本を開いて直す ---------- */
   $("fileIn").addEventListener("change", async (e) => {
     const f = e.target.files[0]; e.target.value = ""; if (!f) return;
-    let raw = null; try { raw = window.TorsaGifts.parse(await f.text(), f.name); } catch (err) { raw = null; }
+    let raw = null, pics = [];
+    try {
+      const buf = await f.arrayBuffer(), h = new Uint8Array(buf, 0, Math.min(2, buf.byteLength));
+      if (h[0] === 0x50 && h[1] === 0x4b) { // zip（挿絵つきの本）
+        const files = await readZip(buf);
+        const doc = files.filter((x) => /\.(txt|json)$/i.test(x.name) && !/(^|\/)book_images\//.test(x.name)).sort((a, c) => a.name.split("/").length - c.name.split("/").length)[0];
+        if (!doc) { toast("zip の中に、寄贈本が見つからなかったよ"); return; }
+        let t; try { t = new TextDecoder("utf-8", { fatal: true }).decode(doc.bytes); } catch (err) { t = new TextDecoder("shift_jis").decode(doc.bytes); }
+        raw = window.TorsaGifts.parse(t, doc.name);
+        pics = files.filter((x) => IL.IMG_FILE.test(x.name.split("/").pop()));
+      } else raw = window.TorsaGifts.parse(await f.text(), f.name);
+    } catch (err) { raw = null; if (err && err.message === "deflate") { toast("この zip は、このブラウザでは開けないみたい"); return; } }
     if (!raw) { toast("このファイルは開けなかったよ"); return; }
     const g = window.TorsaGifts.clean(raw, PARTS);
     if (!g) { toast("寄贈本のファイルではないみたい"); return; }
     const b = g.book, w = g.work;
-    S = newBook();
-    Object.assign(S, { id: b.id.replace(/^gift-/, ""), title: b.title, author: w.author, genre: w.genre === "寄贈本" ? "" : w.genre, text: w.paragraphs.join("\n"), coverTitle: b.cover.title === b.title ? "" : b.cover.title, coverSub: b.cover.subtitle || "",
+    // 本文：挿絵の行は、キャプションを画像のほうに移して、行はファイル名だけにする
+    const caps = {}, body = (Array.isArray(raw.work.paragraphs) ? raw.work.paragraphs : []).map((p) => {
+      p = String(p == null ? "" : p); const im = /^\s*[［\[]挿絵/.test(p) ? IL.imageLine(p) : null;
+      if (!im) return p; if (im.caption) caps[im.file] = im.caption; return `［挿絵：${im.file}］`;
+    });
+    S = newBook(); resetImgs();
+    Object.assign(S, { id: b.id.replace(/^gift-/, ""), title: b.title, author: w.author, genre: w.genre === "寄贈本" ? "" : w.genre, text: body.length ? body.join("\n") : w.paragraphs.join("\n"), coverTitle: b.cover.title === b.title ? "" : b.cover.title, coverSub: b.cover.subtitle || "",
       shelfEmote: b.shelfEmote, shelfEmoteSet: true, hall: b.hall, type: b.type, refuseCount: b.refuseCount || 2, frequentFrom: b.lines.frequentFrom || 4,
       personaNote: (raw.book.personality && typeof raw.book.personality.note === "string" ? raw.book.personality.note : "").slice(0, 60),
       persona: (Object.entries(PERSONAS).find(([, p]) => raw.book.personality && p.name === raw.book.personality.preset) || [""])[0] });
     const { title, subtitle, ...cv } = b.cover; S.cover = { ...cv, parts: { ...C.PARTS.DEFAULT, ...(cv.parts || {}) } };
     const one = (l) => (l ? [l] : []);
     S.lines = { first: b.lines.first || [], revisit: b.lines.revisit || [], frequent: b.lines.frequent || [], afterRead: one(b.lines.afterRead), catalog: one(b.lines.catalog), jump: b.lines.jump || [], refuse: [0, 1, 2].map((i) => (b.lines.refuse && b.lines.refuse[i]) || []), accept: b.lines.accept || [] };
-    save(); toast(`「${b.title}」を開いたよ`); go(1);
+    // 挿絵の画像
+    pics.slice(0, 60).forEach((x) => {
+      const name = x.name.split("/").pop(), ext = name.split(".").pop().toLowerCase();
+      if (IMGS.some((i) => i.name === name) || !IMG_MIME[ext]) return;
+      IMGS.push({ name, caption: cleanCap(caps[name]).slice(0, 60), data: `data:${IMG_MIME[ext]};base64,${bytesToB64(x.bytes)}` });
+    });
+    save(); saveImgs();
+    const lost = [...new Set(body.map((p) => (/^\s*[［\[]挿絵/.test(p) ? IL.imageLine(p) : null)).filter(Boolean).map((i) => i.file))].filter((n) => !IMGS.some((i) => i.name === n));
+    toast(lost.length ? `「${b.title}」を開いたよ。挿絵の画像が足りないよ（zip で開いてね）` : `「${b.title}」を開いたよ`); go(1);
   });
 
   // かんたんな確認の窓（ブラウザの confirm は使わない）

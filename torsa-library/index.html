@@ -480,6 +480,10 @@ body.at-door .topbar, body.at-door .walkbar, body.at-door .zone { opacity: 0; po
 .r-body .meta { font-family: var(--font-ui); font-size: 13px; color: var(--paper-soft); margin: 0 0 2.4em; letter-spacing: .08em; }
 .r-body p { margin: 0; text-indent: 1em; line-height: 2.05; }
 .r-body p.blank { height: 1.2em; }
+.r-body figure.ill { margin: 1.6em 0; text-align: center; text-indent: 0; }
+.r-body figure.ill img { max-width: 100%; max-height: 80vh; height: auto; border-radius: 4px; box-shadow: 0 2px 14px rgba(43, 42, 58, .22); }
+.r-body figure.ill figcaption { margin-top: .6em; font-family: var(--font-ui); font-size: .72em; color: var(--paper-soft); letter-spacing: .06em; line-height: 1.6; }
+.r-body .ill-miss { display: block; font-family: var(--font-ui); font-size: .8em; color: var(--paper-soft); }
 .r-body .fin { text-align: center; margin-top: 3em; color: var(--paper-soft); letter-spacing: .4em; font-size: 14px; text-indent: 0; }
 .size-s article { font-size: 15px; } .size-m article { font-size: 17px; } .size-l article { font-size: 20px; }
 .r-foot { display: flex; justify-content: center; padding: 12px 16px calc(12px + env(safe-area-inset-bottom, 0px)); border-top: 1px solid rgba(43, 42, 58, .14); }
@@ -3230,7 +3234,19 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
   const applySize = () => { $("rBody").className = "r-body " + sizes[sizeIdx][0]; $("sizeBtn").textContent = "文字 " + sizes[sizeIdx][1]; };
   $("sizeBtn").addEventListener("click", () => { sizeIdx = (sizeIdx + 1) % 3; applySize(); try { localStorage.setItem(KEY + "-size", sizeIdx); } catch (e) {} });
   applySize();
-  let readingBook = null, readToEnd = false;
+  let readingBook = null, readToEnd = false, pendingImgs = 0;
+  // 本文の1段落ぶん。「[[img:パス|キャプション]]」だけの段落は挿絵になる（パスは book_data/ か assets/ の中の画像だけ）
+  const ILL_PATH = /^(?:book_data|assets)\/[\w\-.\/%]+\.(?:webp|jpe?g|png|gif|avif)$/i;
+  function paraHTML(p) {
+    if (p === "") return '<p class="blank"></p>';
+    const m = /^\[\[img:([^|\]]+?)(?:\|([^\]]*))?\]\]$/.exec(p);
+    if (m) {
+      if (!ILL_PATH.test(m[1]) || m[1].includes("..")) return '<p class="blank"></p>';
+      const cap = (m[2] || "").trim();
+      return `<figure class="ill"><img src="${esc(m[1])}" alt="${esc(cap || "挿絵")}" decoding="async">${cap ? `<figcaption>${esc(cap)}</figcaption>` : ""}</figure>`;
+    }
+    return `<p>${esc(p)}</p>`;
+  }
   function openReader(book) {
     readToEnd = false;
     like("read", book.id);
@@ -3238,12 +3254,21 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     const w = DATA.works.works.find((x) => x.id === book.workId); readingBook = book;
     $("rWhere").textContent = `${book.title} ／ ${w ? w.title : "（作品が見つかりません）"}`;
     $("rArticle").innerHTML = w
-      ? `<h2>${esc(w.title)}</h2><p class="meta">${esc(w.author || "")}${w.genre ? "　・　" + esc(w.genre) : ""}</p>` + w.paragraphs.map((p) => p === "" ? '<p class="blank"></p>' : `<p>${esc(p)}</p>`).join("") + '<p class="fin">おしまい</p>'
+      ? `<h2>${esc(w.title)}</h2><p class="meta">${esc(w.author || "")}${w.genre ? "　・　" + esc(w.genre) : ""}</p>` + w.paragraphs.map(paraHTML).join("") + '<p class="fin">おしまい</p>'
       : `<p>works.json に「${esc(book.workId)}」が見つかりませんでした。</p>`;
+    // 挿絵が読みこまれるまでは、「最後まで読んだ」と数えない（絵がまだ無くて、短い本に見えてしまうため）
+    pendingImgs = 0;
+    $("rArticle").querySelectorAll("figure.ill img").forEach((im) => {
+      if (im.complete && im.naturalWidth) return;
+      pendingImgs++;
+      const done = () => { pendingImgs = Math.max(0, pendingImgs - 1); updateProgress(); };
+      im.addEventListener("load", done, { once: true });
+      im.addEventListener("error", () => { const s = document.createElement("span"); s.className = "ill-miss"; s.textContent = "（挿絵を読みこめませんでした）"; im.replaceWith(s); done(); }, { once: true });
+    });
     $("reader").hidden = false; $("rBody").scrollTop = 0; updateProgress(); $("closeReader").focus({ preventScroll: true });
   }
   // 最後（「おしまい」のあたり）までスクロールしたら「読みおわった」にする（短くてスクロールしない本は、ひらいただけで読みおわり）
-  function updateProgress() { const b = $("rBody"), max = b.scrollHeight - b.clientHeight; $("progress").style.width = (max > 0 ? (b.scrollTop / max) * 100 : 100) + "%"; if (max <= 0 || b.scrollTop >= max - 40) readToEnd = true; }
+  function updateProgress() { const b = $("rBody"), max = b.scrollHeight - b.clientHeight; $("progress").style.width = (max > 0 ? (b.scrollTop / max) * 100 : 100) + "%"; if (!pendingImgs && (max <= 0 || b.scrollTop >= max - 40)) readToEnd = true; }
   $("rBody").addEventListener("scroll", updateProgress, { passive: true });
   $("closeReader").addEventListener("click", () => {
     $("reader").hidden = true; const b = readingBook; if (!b) return;

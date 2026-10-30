@@ -12,6 +12,7 @@
    フォルダの一覧を見せないサーバーに置くときだけ、list.txt にファイル名を書き足してください。
 
    テキストの本の書き方は、このファイルの下の方の「テキストの本」と book_data/README.md を見てください。
+   挿絵は、本文に「［挿絵：ill-1.webp］」の行を書き、画像を book_data/book_images/（整理番号）/ に置きます（寄贈の間が作る zip を解凍して入れればOK）。
    ファイルの中身は、決まった形の値だけを取り出して使います（ほかの書き込みは無視）。
    ========================================================= */
 window.TorsaGifts = (() => {
@@ -23,6 +24,13 @@ window.TorsaGifts = (() => {
   const BAYS = ["w1", "w2", "w3", "e1", "e2", "e3"];
   // book_data の中で、本ではないファイル
   const NOT_BOOK = /^(list\.(json|txt)|readme(\.[a-z]+)?|はじめに.*)$/i;
+  // 挿絵：本文の中に「［挿絵：ファイル名］」または「［挿絵：ファイル名｜キャプション］」だけの行を書くと、そこに絵が入る
+  // 画像は book_data/book_images/（整理番号）/ に置く（寄贈の間が作るzipを book_data で解凍すれば、そのまま入る）
+  const IMG_LINE = /^\s*[［\[]挿絵\s*[：:]\s*([^｜|］\]]+?)\s*(?:[｜|]\s*([^］\]]*?))?\s*[］\]]\s*$/;
+  const IMG_FILE = /^[\w.\-]{1,60}\.(?:webp|jpe?g|png|gif)$/i;
+  const IMG_DIR = "book_data/book_images/";
+  // 本文の1行 → { file, caption }（挿絵の行でなければ null）
+  const imageLine = (p) => { const m = IMG_LINE.exec(String(p || "")); return m && IMG_FILE.test(m[1]) ? { file: m[1], caption: (m[2] || "").trim().slice(0, 100) } : null; };
 
   const str = (v, max) => (typeof v === "string" ? v.replace(/[\u0000-\u0008\u000b\u000c\u000e-\u001f]/g, "").slice(0, max) : "");
   const hex = (v) => (typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v) ? v : "");
@@ -220,6 +228,7 @@ window.TorsaGifts = (() => {
       "  ※ かたまり同士の間に , が1つ。いちばん最後のかたまりのうしろには , を付けません。",
       "  ※ この本の寄贈本_○○.txt を book_data に入れてある場合は、book_data から出してください",
       "     （入れたままだと、同じ本が2冊並びます）。",
+      ...(w.paragraphs.some((p) => /^\[\[img:/.test(p)) ? ["  ※ この本には挿絵があります。zip の中の book_images フォルダは、book_data の中にそのまま置いてください", "     （book_data/book_images/" + b.id.replace(/^gift-/, "") + "/ に画像が入っている形です。txt だけを出して、画像は残します）。"] : []),
       "",
       "【置き場所】" + where,
       ...(g.wantHall && placed && g.wantHall !== (b.hall || "main") ? [`  （寄贈した人は「${HALL_NAME[g.wantHall]}」を希望しましたが、そこは満席か、飛び出す本が先にいるため、${hallName}にしました）`] : []),
@@ -280,7 +289,14 @@ window.TorsaGifts = (() => {
     if (out.type !== "refuser" && !out.lines.first.length) out.lines.first = [{ emote: "normal", text: "……はじめまして。" }];
     if (!out.lines.revisit.length) out.lines.revisit = out.lines.first.length ? out.lines.first.slice(0, 1) : [{ emote: "normal", text: "また来てくれたんだね。" }];
     if (out.type === "jumper" && !out.lines.jump.length) out.lines.jump = [{ emote: "excited", text: "えいっ！" }];
-    const paras = (Array.isArray(w.paragraphs) ? w.paragraphs : []).slice(0, 20000).map((p) => str(p, 8000));
+    const bare = id.replace(/^gift-/, "");
+    // 挿絵の行は、図書館の本文で使う形「[[img:パス|キャプション]]」にする（ファイル名がおかしい行は空行にする）
+    const paras = (Array.isArray(w.paragraphs) ? w.paragraphs : []).slice(0, 20000).map((p) => {
+      p = str(p, 8000);
+      if (!/^\s*[［\[]挿絵/.test(p)) return p;
+      const im = imageLine(p);
+      return im ? `[[img:${IMG_DIR}${bare}/${im.file}${im.caption ? "|" + im.caption : ""}]]` : "";
+    });
     const work = { id, title: str(w.title, 60) || out.title, author: str(w.author, 40) || "名もなき作者", genre: str(w.genre, 20) || "寄贈本", paragraphs: paras.length ? paras : ["（本文がありません）"] };
     return { book: out, work, at: Date.parse(raw.createdAt) || 0, wantHall: out.hall };
   }
@@ -324,5 +340,5 @@ window.TorsaGifts = (() => {
     });
     return gifts.length;
   }
-  return { load, merge, clean, parse, parseText, toText, toAdminText, EMOTES, TYPES };
+  return { load, merge, clean, parse, parseText, toText, toAdminText, imageLine, IMG_LINE, IMG_FILE, EMOTES, TYPES };
 })();
