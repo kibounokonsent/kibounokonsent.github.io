@@ -469,8 +469,9 @@ body.at-door .topbar, body.at-door .walkbar, body.at-door .zone { opacity: 0; po
 .panel-foot { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-top: 18px; padding-top: 14px; border-top: 1px solid rgba(43, 42, 58, .2); }
 
 /* ---------- 読書画面 ---------- */
-#reader { position: fixed; inset: 0; z-index: 25; background: var(--paper); color: var(--paper-ink); display: grid; grid-template-rows: auto minmax(0, 1fr) auto; animation: fadein .35s ease; -webkit-user-select: text; user-select: text; }
+#reader { position: fixed; inset: 0; z-index: 25; background: var(--paper); color: var(--paper-ink); display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr) auto; animation: fadein .35s ease; -webkit-user-select: text; user-select: text; }
 .r-head { position: relative; display: flex; align-items: center; gap: 10px; padding: calc(10px + env(safe-area-inset-top, 0px)) clamp(16px, 3vw, 32px) 10px; border-bottom: 1px solid rgba(43, 42, 58, .14); font-size: 13px; color: var(--paper-soft); }
+#reader > * { min-width: 0; } /* 長い題名・長い行があっても、読書画面の幅が画面より広がらないように */
 .r-head .where { margin-right: auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .r-head .btn, .r-foot .btn { border-color: rgba(43, 42, 58, .4); background: transparent; color: var(--paper-ink); backdrop-filter: none; }
 .progress { position: absolute; left: 0; bottom: -1px; height: 2px; background: #5c7a4c; width: 0; }
