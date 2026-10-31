@@ -105,7 +105,7 @@
           "id": "cape_l",
           "bone": "cape_l"
         },
-        { "id": "boubou", "bone": "boubou", "touch": "boubou",  
+        { "id": "boubou", "bone": "boubou", "touch": "boubou",  "mosaic": 6 ,
               "hidden": true},
               
 
@@ -223,7 +223,8 @@
         {
           "id": "book",
           "bone": "book",
-          "touch": "book"
+          "touch": "book",
+          "mosaic": 6 
         },
         {
           "id": "bookmark",

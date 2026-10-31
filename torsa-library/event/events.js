@@ -21,6 +21,7 @@
    ・flash(     … 白くぱちぱち光る（セリフ・選択肢・さわったときの "flash"）
    ・BOX_VARS   … 会話の箱の見た目（events.json の "box"。いちばん外に書くと全イベント共通）
    ・special(   … 何回目かにさわったときの特別な反応（secrets・touch の "on"）
+   ・pixelate(  … 部品（レイヤー）にモザイクをかける。parts に "mosaic": 12、セリフ・選択肢・さわったときの "mosaic": { "部品id": 12 } で入り切り（0 で外す）。setMosaic( で切りかえ
    ・playSound( … 効果音ファイルを鳴らす（イベントの "sounds" に登録、"sound" で鳴らす、"stopSound" で止める）
 
    ・onRoom(    … 部屋（羊の間など）に入ったときに起こるイベント（trigger の room・after・minAffinity。書き方は onHall の上）
@@ -262,6 +263,7 @@ window.TorsaEvents = (ctxIn) => {
   let choosing = false, secretN = {}, touchN = {}; // touchN＝さわった回数（on の何回目に使う）
   // 途中から変える動き：MO＝motion の上書き、BO＝骨ごとの上書き。SM・SB はなめらかに近づいている今の値、PH はゆれの進み具合
   let MO = {}, BO = {}, SM = {}, SB = {}, PH = {};
+  let MOS = {}; // モザイク：部品id → { size（絵の単位）, shape }
   // 動きの時計（allSpeed の分だけ速く進む）。さわったときの反応も、この時計で動く
   let AT = 0;
   addEventListener("pointermove", (e) => { if (!playing) return; A.tx = clamp((e.clientX / innerWidth) * 2 - 1, -1, 1); A.ty = clamp((e.clientY / innerHeight) * 2 - 1, -1, 1); }, { passive: true });
@@ -290,7 +292,69 @@ window.TorsaEvents = (ctxIn) => {
       const c = document.createElement("canvas"); c.width = w; c.height = h;
       const [W, H] = EV.canvas, o = (C.origin && C.origin[p.id]) || [0, 0, W, H];
       c.getContext("2d").drawImage(im, (o[0] - x0) * ppu, (o[1] - y0) * ppu, o[2] * ppu, o[3] * ppu);
-      bmp[p.id] = { c, x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+      bmp[p.id] = { c, src: c, x: x0, y: y0, w: x1 - x0, h: y1 - y0 };
+      applyMos(p.id);
+    });
+  }
+
+  /* ---------- モザイク（部品＝レイヤー単位） ---------- */
+  // 使い方（event/events.json）
+  //   parts の中：      { "id": "chest", "bone": "body", "mosaic": 12 }                   … はじめからモザイク（12＝ブロック1つの大きさ。絵の単位）
+  //                     { "id": "chest", ..., "mosaic": { "size": 12, "shape": "block" } } … shape："keep"＝輪郭はそのまま（ふつう）／"block"＝輪郭もブロックになる
+  //   セリフ・選択肢・さわったとき： "mosaic": { "chest": 16, "hand": 0 }                  … 途中からかける・変える（0 か false で外す）。{ "size": 16, "shape": "block" } も書ける
+  // ブロックの格子は「絵の座標」のはじっこから数えるので、モザイクをかけた部品どうしでも、ブロックの線がそろう。
+  // 部品が動いても（骨・呼吸）、モザイクはその部品といっしょに動く。画面の大きさがかわっても、ブロックの大きさ（絵の単位）はかわらない。
+  const normMos = (v) => {
+    if (v == null || v === false) return null;
+    const o = typeof v === "object" ? v : { size: v }, size = Number(o.size);
+    return size > 0 ? { size, shape: o.shape === "block" ? "block" : "keep" } : null;
+  };
+  // src（部品の絵の canvas）をブロックごとの平均の色にして、新しい canvas で返す。ox・oy＝その canvas の左上の、絵の座標
+  function pixelate(src, size, ox, oy, shape) {
+    const w = src.width, h = src.height;
+    if (!(size * ppu >= 1.5) || !w || !h) return src; // 小さすぎるときは、かけても同じなので、そのまま
+    let sd; try { sd = src.getContext("2d", { willReadFrequently: true }).getImageData(0, 0, w, h).data; } catch (e) { return src; }
+    const cb = new Int32Array(w), rb = new Int32Array(h);
+    for (let x = 0; x < w; x++) cb[x] = Math.floor((ox + (x + 0.5) / ppu) / size);
+    for (let y = 0; y < h; y++) rb[y] = Math.floor((oy + (y + 0.5) / ppu) / size);
+    const c0 = cb[0], r0 = rb[0], nc = cb[w - 1] - c0 + 1, nr = rb[h - 1] - r0 + 1, n = nc * nr;
+    const R = new Float64Array(n), G = new Float64Array(n), B = new Float64Array(n), A = new Float64Array(n), N = new Float64Array(n);
+    for (let y = 0; y < h; y++) {
+      const row = (rb[y] - r0) * nc;
+      for (let x = 0; x < w; x++) {
+        const k = row + cb[x] - c0, i = (y * w + x) * 4, a = sd[i + 3];
+        N[k]++; A[k] += a;
+        if (a) { R[k] += sd[i] * a; G[k] += sd[i + 1] * a; B[k] += sd[i + 2] * a; } // 透明に近いところの色に引っぱられないよう、濃さで重みをつける
+      }
+    }
+    const out = document.createElement("canvas"); out.width = w; out.height = h;
+    const ox2 = out.getContext("2d"), od = ox2.createImageData(w, h), o = od.data;
+    for (let y = 0; y < h; y++) {
+      const row = (rb[y] - r0) * nc;
+      for (let x = 0; x < w; x++) {
+        const k = row + cb[x] - c0, i = (y * w + x) * 4;
+        if (A[k] <= 0) continue; // ブロックの中がぜんぶ透明なら、透明のまま
+        o[i] = R[k] / A[k]; o[i + 1] = G[k] / A[k]; o[i + 2] = B[k] / A[k];
+        o[i + 3] = shape === "block" ? A[k] / N[k] : sd[i + 3]; // keep＝もとの輪郭／block＝ブロックの平均の濃さ
+      }
+    }
+    ox2.putImageData(od, 0, 0);
+    return out;
+  }
+  // 部品 id に、いまの MOS のとおりモザイクをかける（なければ、元の絵にもどす）
+  function applyMos(id) {
+    const im = bmp[id]; if (!im) return;
+    const m = MOS[id];
+    im.c = m ? pixelate(im.src, m.size, im.x, im.y, m.shape) : im.src;
+    delete alphaData[id]; // さわったかどうかの判定も、新しい絵で調べ直す
+  }
+  // spec＝{ "部品id": 12, "部品id2": 0, "部品id3": { "size": 8, "shape": "block" } }
+  function setMosaic(spec) {
+    if (!spec || typeof spec !== "object") return;
+    Object.entries(spec).forEach(([id, v]) => {
+      if (!EV.parts.some((pp) => pp.id === id)) { console.warn("モザイクをかける部品がありません:", id); return; }
+      const m = normMos(v); if (m) MOS[id] = m; else delete MOS[id];
+      applyMos(id);
     });
   }
   addEventListener("resize", () => { if (!playing) return; clearTimeout(resizeT); resizeT = setTimeout(layout, 150); });
@@ -962,6 +1026,7 @@ window.TorsaEvents = (ctxIn) => {
   // "boneMotion": { "leaf_back": { "speed": 1.2, "sway": 4 } } と書くと、その骨だけ変わる（チョコバーは { "bou": { "wobble": { "speed": 3 } } }）
   function applyMotion(o) {
     if (!o) return;
+    if (o.mosaic) setMosaic(o.mosaic);
     if (o.motion) Object.assign(MO, o.motion);
     if (o.boneMotion) Object.entries(o.boneMotion).forEach(([id, v]) => { BO[id] = { ...(BO[id] || {}), ...v, wobble: { ...((BO[id] || {}).wobble || {}), ...(v.wobble || {}) } }; });
   }
@@ -1116,6 +1181,7 @@ window.TorsaEvents = (ctxIn) => {
     MO = {}; BO = {}; SM = {}; SB = {}; PH = {};
     Object.keys(VIS).forEach((k) => { delete VIS[k]; delete VIS_T[k]; delete VIS_F[k]; delete popInAt[k]; }); Object.keys(autoT).forEach((k) => { clearTimeout(autoT[k]); delete autoT[k]; }); secretN = {}; touchN = {}; TSET = "";
     ORDER = drawOrder(EV.parts);
+    MOS = {}; EV.parts.forEach((p) => { const m = normMos(p.mosaic); if (m) MOS[p.id] = m; }); // はじめからモザイクの部品
     EV.parts.forEach((p) => { if (p.hidden || p.outfit) { VIS[p.id] = 0; VIS_T[p.id] = 0; } }); // outfit（2枚目の絵）の部品も、はじめはかくしておく
     // イベントに "outfit": "b" と書くと、はじめからその服で始まる（1枚目のトルサはかくれる）
     if (EV.outfit && EV.outfit !== "base") EV.parts.forEach((p) => {
@@ -1302,6 +1368,12 @@ window.TorsaEvents = (ctxIn) => {
     }, 400);
   }
   window.__event = (id) => play(id || (CONF && Object.keys(CONF.events)[0]));
+  // 確認用：イベント中に、コンソールからモザイクを切りかえる。例 __mosaic({ chest: 0 })＝外す、__mosaic({ chest: 12 })＝かける、__mosaic("off")＝ぜんぶ外す
+  window.__mosaic = (spec) => {
+    if (!playing) { console.warn("イベント中に使ってください"); return; }
+    if (spec === "off") spec = Object.fromEntries(Object.keys(MOS).map((id) => [id, 0]));
+    setMosaic(spec); return { ...MOS };
+  };
 
   // 思い出（パレット）用：イベントの一覧
   // trigger＝いつ起こるか（イベント確認のページ event-preview.html で、条件を表示するのに使う）

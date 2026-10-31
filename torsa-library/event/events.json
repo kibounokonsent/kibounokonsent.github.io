@@ -276,6 +276,7 @@
         {
           "id": "bou",
           "bone": "bou",
+          "mosaic": 6 ,
           "z": 2.5,
           "touch": "snack"
         },
