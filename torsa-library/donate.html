@@ -820,25 +820,25 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
       </div></div>
       <div class="done-box" id="doneBox" hidden><b>できあがり！</b> 「<span id="fname"></span>」ができました。
         <ol id="doneSteps"></ol>
-        <div class="row-btns" style="margin-top:10px"><button type="button" class="btn small" id="dlAgain">もう一度ダウンロード</button><button type="button" class="btn small" id="admBtn" title="管理人さん用：data/works.json と data/books.json に貼る JSON が入ったテキスト">管理人用：追加データ（JSON入りtxt）</button><button type="button" class="btn small" id="admCopy" title="管理人さん用の追加データを、クリップボードにコピー">管理人用：追加データをコピー</button><button type="button" class="btn small" id="shareBtn" hidden>送る（共有）</button><button type="button" class="btn small" id="another">新しい本を書く</button></div></div>`;
+        <div class="row-btns" style="margin-top:10px"><button type="button" class="btn small" id="dlAgain">もう一度ダウンロード</button><button type="button" class="btn small" id="admCopy" title="本のデータ（data/works.json と data/books.json に貼る JSON）を、クリップボードにコピー">JSONをコピー</button><button type="button" class="btn small" id="shareBtn" hidden>送る（共有）</button><button type="button" class="btn small" id="another">新しい本を書く</button></div></div>`;
     desk.querySelectorAll("[data-go]").forEach((b) => b.addEventListener("click", () => go(+b.dataset.go)));
-    $("bindBtn").addEventListener("click", () => {
-      const f = makeFile();
+    $("bindBtn").addEventListener("click", async () => {
+      const bb = $("bindBtn"); bb.disabled = true;
+      let f; try { f = await makeFile(); } finally { bb.disabled = false; }
       $("bBook").classList.remove("bound"); void $("bBook").offsetWidth; $("bBook").classList.add("bound"); sparkles($("bBook"));
       download(f); $("fname").textContent = f.name; $("doneBox").hidden = false;
       $("doneSteps").innerHTML = f.zip
-        ? "<li>この zip ファイルを、そのまま図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。中には、本のファイルと、挿絵の画像が入っているよ。</li><li>管理人さんは、zip を解凍して、中の「寄贈本_○○.txt」と「book_images」フォルダを、<b>どちらも</b> book_data フォルダに入れます。</li><li>書架に入ったら、図書館で会えるよ。</li>"
-        : "<li>このファイル（テキストファイル）を、図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。メモ帳などで開くと、中身をたしかめられるよ。</li><li>管理人さんが書架に入れてくれたら、図書館で会えるよ。</li>";
+        ? "<li>この zip ファイルを、そのまま図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。中には、本のファイルと、挿絵の画像が入っているよ。</li><li>管理人さんは、zip を解凍して、中の「寄贈本_○○.txt」の JSON を data/works.json と data/books.json に貼り、「book_images」フォルダを book_data フォルダに入れます。</li><li>書架に入ったら、図書館で会えるよ。</li>"
+        : "<li>このファイル（テキストファイル）を、図書館の管理人さんに渡してね（メールやメッセージで送るのが簡単だよ）。中には、管理人さんがそのまま貼れる JSON（本のデータ）が入っているよ。直したくなったら、「綴じた本を開いて直す」でこのファイルを開いてね。</li><li>管理人さんが書架に入れてくれたら、図書館で会えるよ。</li>";
       guideSay(["わぁ～、すてきな本ができたね～！", "そのファイルを管理人さんに渡してね～。図書館で会えるのを楽しみにしてるよ～。"]);
       $("dlAgain").onclick = () => download(f);
-      $("admBtn").onclick = async () => { const a = await makeAdminFile(f); if (a) download(a); else alert("追加データを作れませんでした。本の内容を確かめてください。"); };
-      $("admCopy").onclick = async () => { const b = $("admCopy"), a = await makeAdminFile(f); if (!a) { alert("追加データを作れませんでした。本の内容を確かめてください。"); return; } const ok = await copyText(a.text); const t0 = "管理人用：追加データをコピー"; b.textContent = ok ? "コピーしました！" : "コピーできませんでした（ダウンロードをお使いください）"; setTimeout(() => { b.textContent = t0; }, 2200); };
+      $("admCopy").onclick = async () => { const b = $("admCopy"), ok = await copyText(f.text); b.textContent = ok ? "コピーしました！" : "コピーできませんでした（ダウンロードをお使いください）"; setTimeout(() => { b.textContent = "JSONをコピー"; }, 2200); };
       const file = typeof File !== "undefined" ? new File([f.blob], f.name, { type: f.zip ? "application/zip" : "text/plain" }) : null;
       if (file && navigator.canShare && navigator.canShare({ files: [file] })) { $("shareBtn").hidden = false; $("shareBtn").onclick = () => navigator.share({ files: [file], title: S.title, text: "トルサ図書館への寄贈本です" }).catch(() => {}); }
       $("another").onclick = () => confirmBox("新しい本を書く？ いまの本は、ダウンロードしたファイルから、いつでも開いて直せるよ～。", "新しい本を書く", () => { S = newBook(); resetImgs(); save(); go(1); });
     });
   }
-  function makeFile() {
+  async function makeFile() {
     const L = S.lines, clean = (a) => filled(a).map((l) => ({ emote: l.emote, text: l.text.trim() }));
     const lines = { first: clean(L.first), revisit: clean(L.revisit), afterRead: clean(L.afterRead)[0], catalog: clean(L.catalog)[0] };
     if (S.type === "revisit") { lines.frequent = clean(L.frequent); lines.frequentFrom = S.frequentFrom; }
@@ -850,35 +850,38 @@ textarea.txt { resize: vertical; line-height: 1.8; font-family: var(--font-read)
       work: { title: S.title.trim(), author: S.author.trim(), genre: S.genre.trim() || "寄贈本", paragraphs: paragraphs() }
     };
     const safe = S.title.trim().replace(/[\\/:*?"<>|\u0000-\u001f]/g, "").slice(0, 30) || "本";
-    // テキストファイルにする（メモ帳などで開いて読める・直せる。書き方は js/book-gifts.js の toText）
-    const body = "\uFEFF" + window.TorsaGifts.toText(data).replace(/\n/g, "\r\n");
+    // テキストファイルにする：中身は、data/works.json と data/books.json にそのまま貼れる JSON（棚の置き場所も入る）。
+    // book_data フォルダに入れても読めるし、「綴じた本を開いて直す」でも開ける（書き方は js/book-gifts.js の toAdminText）
+    const a = window.TorsaGifts.toAdminText(data, PARTS, await booksNow());
+    const text = a ? a.text : window.TorsaGifts.toText(data); // 万一作れなかったときだけ、前の形のテキスト
+    const body = "\uFEFF" + text.replace(/\n/g, "\r\n");
     // 挿絵があるときは、txt と画像を、ひとつのzipにまとめる（解凍して book_data に入れれば、そのまま使える）
     const pics = usedImgs();
     if (pics.length) {
       const bare = S.id.replace(/[^a-z0-9-]/gi, "").toLowerCase();
       const files = [{ name: `寄贈本_${safe}.txt`, bytes: new TextEncoder().encode(body) }, ...pics.map((i) => ({ name: `book_images/${bare}/${i.name}`, bytes: dataToBytes(i.data) }))];
-      return { blob: makeZip(files), name: `寄贈本_${safe}.zip`, data, safe, zip: true };
+      return { blob: makeZip(files), name: `寄贈本_${safe}.zip`, data, safe, text, zip: true };
     }
     const blob = new Blob([body], { type: "text/plain;charset=utf-8" });
-    return { blob, name: `寄贈本_${safe}.txt`, data, safe };
+    return { blob, name: `寄贈本_${safe}.txt`, data, safe, text };
   }
-  // 管理人用：data/works.json と data/books.json に貼る JSON を、テキストにして出す（js/book-gifts.js の toAdminText）
+  // クリップボードにコピー
   async function copyText(t) {
     try { if (navigator.clipboard && window.isSecureContext) { await navigator.clipboard.writeText(t); return true; } } catch (e) { /* 下の方法で */ }
     try { const ta = document.createElement("textarea"); ta.value = t; ta.setAttribute("readonly", ""); ta.style.cssText = "position:fixed;top:0;left:0;opacity:0"; document.body.appendChild(ta); ta.select(); const ok = document.execCommand("copy"); ta.remove(); return ok; } catch (e) { return false; }
   }
-  async function makeAdminFile(f) {
-    let books = null;
+  // 棚の空きを見て置き場所を決めるために、いまの data/books.json を読む。ページを開いたときに先に読んでおく（綴じるボタンを押してすぐに、ファイルができるように）
+  async function loadBooks() {
     try {
       const ctl = typeof AbortController !== "undefined" ? new AbortController() : null, t = ctl && setTimeout(() => ctl.abort(), 4000);
       const r = await fetch("data/books.json", { cache: "no-cache", signal: ctl && ctl.signal }); if (t) clearTimeout(t);
-      if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.books)) books = j.books; }
-    } catch (e) { books = null; }
-    const a = window.TorsaGifts.toAdminText(f.data, PARTS, books);
-    if (!a) return null;
-    const blob = new Blob(["\uFEFF" + a.text.replace(/\n/g, "\r\n")], { type: "text/plain;charset=utf-8" });
-    return { blob, text: a.text, name: `管理人用_追加データ_${f.safe}.txt` };
+      if (r.ok) { const j = await r.json(); if (j && Array.isArray(j.books)) return j.books; }
+    } catch (e) { /* 読めなかったときは、仮の場所になる */ }
+    return null;
   }
+  let BOOKS_P = null;
+  async function booksNow() { let b = await (BOOKS_P = BOOKS_P || loadBooks()); if (!b) { BOOKS_P = loadBooks(); b = await BOOKS_P; } return b; }
+  booksNow();
   function download(f) { const a = document.createElement("a"); a.href = URL.createObjectURL(f.blob); a.download = f.name; document.body.appendChild(a); a.click(); setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 1000); }
   function sparkles(el) { const r = el.getBoundingClientRect(); for (let i = 0; i < 26; i++) { const s = document.createElement("span"); s.className = "sparkle"; const a = Math.random() * Math.PI * 2, d = 60 + Math.random() * 110; s.style.cssText = `left:${r.left + r.width / 2}px;top:${r.top + r.height / 2}px;--dx:${Math.cos(a) * d}px;--dy:${Math.sin(a) * d}px`; document.body.appendChild(s); setTimeout(() => s.remove(), 1100); } }
 

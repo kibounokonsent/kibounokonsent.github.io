@@ -639,6 +639,228 @@
         "catalog": { "emote": "happy", "text": "目録からきたんだね〜？泡沫をじっくりたのしんでね〜" }
       },
       "place": { "bay": "w3", "row": 2, "slot": 5 }
+    },
+    {
+      "id": "gift-dt0jiae0g5e9",
+      "title": "人獣共存＃1",
+      "workId": "gift-dt0jiae0g5e9",
+      "type": "refuser",
+      "_typeNote": "飄々としている、胡散臭い感じ",
+      "hall": "east",
+      "shelfEmote": "…",
+      "cover": {
+        "title": "人獣共存＃1",
+        "subtitle": "",
+        "titleDirection": "horizontal",
+        "color": "#989761",
+        "accent": "#69cee8",
+        "emblem": "star",
+        "parts": {
+          "base": "crackle",
+          "scene": "forest",
+          "pattern": "none",
+          "sparkle": "none",
+          "spine": "plain",
+          "frame": "double",
+          "corners": "metal",
+          "band": "none",
+          "emblemBase": "circle",
+          "emblemPos": "middle",
+          "plate": "plate",
+          "titleDeco": "none",
+          "titlePos": "bottom",
+          "clasp": "none",
+          "bookmark": "none",
+          "finish": "none"
+        },
+        "textColor": "#ffffff"
+      },
+      "lines": {
+        "first": [],
+        "revisit": [
+          { "emote": "smug", "text": "や。また来たのか。いいよ？読みな。" }
+        ],
+        "afterRead": { "emote": "happy", "text": "感想は何かな?この本はどうだった？ 面白いかもしれないし、言ったとおり、苦しい物語かもしれない。まあそれは君の心の中だけに、ね。" },
+        "catalog": { "emote": "surprise", "text": "うわぁ！？びっくりした。 ⋯読む?" },
+        "refuse": [
+          [
+            { "emote": "angry", "text": "帰りなよ～。君に会った物語は他にある。 (`•ω•´) ｺﾗｯ" },
+            { "emote": "silent", "text": "これは、苦しい話だよ？といっても、まだ一話だけど。" }
+          ],
+          [
+            { "emote": "silent", "text": "言ったでしょ。これは戦争。獣と人っていう、今でも56され、56し続けてる。 だから、君が読むような本は別にある。" }
+          ]
+        ],
+        "accept": [
+          { "emote": "normal", "text": "いいんだね？なら、ゆるりと読書を楽しんで。 ｼｬｰﾅｲ(´ー`)" }
+        ]
+      },
+      "refuseCount": 2,
+      "place": { "bay": "w3", "row": 3, "slot": 5 }
+    },
+    {
+      "id": "gift-m1ybdn1c90cr",
+      "title": "人獣共存#2~3",
+      "workId": "gift-m1ybdn1c90cr",
+      "type": "refuser",
+      "_typeNote": "ツン優しい",
+      "hall": "main",
+      "shelfEmote": "～",
+      "cover": {
+        "title": "人獣共存#2~4",
+        "subtitle": "~開戦に向けて~",
+        "titleDirection": "horizontal",
+        "color": "#000233",
+        "accent": "#805900",
+        "emblem": "star",
+        "parts": {
+          "base": "crackle",
+          "scene": "forest",
+          "pattern": "none",
+          "sparkle": "none",
+          "spine": "plain",
+          "frame": "double",
+          "corners": "metal",
+          "band": "none",
+          "emblemBase": "circle",
+          "emblemPos": "middle",
+          "plate": "plate",
+          "titleDeco": "none",
+          "titlePos": "bottom",
+          "clasp": "none",
+          "bookmark": "none",
+          "finish": "none"
+        },
+        "textColor": "#ffffff"
+      },
+      "lines": {
+        "first": [],
+        "revisit": [
+          { "emote": "excited", "text": "来たのか。 今回はもっと読んでもいいぞ?" }
+        ],
+        "afterRead": { "emote": "sad", "text": "なかなかヘビーな話だろう。 いやになったら文句言って逃げていいからな。" },
+        "catalog": { "emote": "sweat", "text": "新しい利用者が来る、か⋯俺を読んでくれるだろうか⋯((ﾎﾞｿ !!き、来たのか。読むか？" },
+        "refuse": [
+          [
+            { "emote": "silent", "text": "1つ目を見たか?じゃあわかるだろう。 回れ右、だ。" }
+          ]
+        ],
+        "accept": [
+          { "emote": "normal", "text": "お前のことを気遣ったんだけどな。 ⋯読みたいか?" }
+        ]
+      },
+      "refuseCount": 1,
+      "place": { "bay": "e3", "row": 4, "slot": 7 }
+    },
+    {
+      "id": "gift-j33dhze4x4yv",
+      "title": "人獣共存#4~5",
+      "workId": "gift-j33dhze4x4yv",
+      "type": "revisit",
+      "_typeNote": "潔いが不愛想。",
+      "hall": "east",
+      "shelfEmote": "?",
+      "cover": {
+        "title": "人獣共存#4~5",
+        "subtitle": "開戦",
+        "titleDirection": "horizontal",
+        "color": "#ffffff",
+        "accent": "#767165",
+        "emblem": "star",
+        "parts": {
+          "base": "crackle",
+          "scene": "forest",
+          "pattern": "none",
+          "sparkle": "none",
+          "spine": "plain",
+          "frame": "double",
+          "corners": "metal",
+          "band": "none",
+          "emblemBase": "circle",
+          "emblemPos": "middle",
+          "plate": "plate",
+          "titleDeco": "none",
+          "titlePos": "bottom",
+          "clasp": "none",
+          "bookmark": "none",
+          "finish": "none"
+        },
+        "textColor": "#005c56"
+      },
+      "lines": {
+        "first": [
+          { "emote": "normal", "text": "⋯読むがいい。 他のやつらとボクは違うさ。" }
+        ],
+        "revisit": [
+          { "emote": "normal", "text": "⋯読むがいい。 そんなにボクを読みたいのか？" },
+          { "emote": "normal", "text": "ボクにそんな価値はないと思うのだが。" }
+        ],
+        "afterRead": { "emote": "normal", "text": "じゃあ。" },
+        "catalog": { "emote": "normal", "text": "読むのか。 どうぞご勝手に。" },
+        "frequent": [
+          { "emote": "normal", "text": "[この本の好感度が上がりました。対応が変化します。]" },
+          { "emote": "normal", "text": "となるとでも思ったか? はぁ⋯。" },
+          { "emote": "normal", "text": "⋯" },
+          { "emote": "normal", "text": "⋯" },
+          { "emote": "normal", "text": "⋯ボクは、きっとイゲイルの生き写しだ。 君の反応を覗いていたら、そんな感じがしてきた。" }
+        ],
+        "frequentFrom": 10
+      },
+      "place": { "bay": "w1", "row": 1, "slot": 2 }
+    },
+    {
+      "id": "gift-gg38q821rjzk",
+      "title": "人獣共存#6~7",
+      "workId": "gift-gg38q821rjzk",
+      "type": "refuser",
+      "_typeNote": "二重人格者、頭脳派の人格と、脳金の人格",
+      "hall": "west",
+      "shelfEmote": "～",
+      "cover": {
+        "title": "人獣共存#6~7",
+        "subtitle": "散命",
+        "titleDirection": "horizontal",
+        "color": "#ffffff",
+        "accent": "#000000",
+        "emblem": "star",
+        "parts": {
+          "base": "crackle",
+          "scene": "battlefield",
+          "pattern": "none",
+          "sparkle": "embers",
+          "spine": "plain",
+          "frame": "double",
+          "corners": "metal",
+          "band": "none",
+          "emblemBase": "circle",
+          "emblemPos": "middle",
+          "plate": "plate",
+          "titleDeco": "none",
+          "titlePos": "bottom",
+          "clasp": "none",
+          "bookmark": "none",
+          "finish": "none"
+        },
+        "textColor": "#ff0000"
+      },
+      "lines": {
+        "first": [],
+        "revisit": [
+          { "emote": "normal", "text": "「もう読まなくていいだろ⋯残酷な話だぞ」『おう！また来たのか！読んでくれ！』 「『ハもるなよ!!』」" }
+        ],
+        "afterRead": { "emote": "sad", "text": "「⋯お前は、これで良かったんだな。」" },
+        "catalog": { "emote": "smug", "text": "『そこから来たか⋯(｀-ω-´)ｷﾘｯ』 『読んでくr』「ほんとは読ませたくないんだがな。」 『被せないで？』" },
+        "refuse": [
+          [
+            { "emote": "silent", "text": "「この本は読ませない。内容がいよいよヘビーになってきたからな。」" }
+          ]
+        ],
+        "accept": [
+          { "emote": "smug", "text": "『おいおい、読ませないでどうする。オレらは読んでもらうための本だぞ?』" }
+        ]
+      },
+      "refuseCount": 1,
+      "place": { "bay": "e1", "row": 1, "slot": 2 }
     }
   ],
   "_roomNote": "hall：本を置く棟。書かなければ本館。\"east\"＝東の書館、\"west\"＝西の書館、\"vault\"＝禁書庫（place で棚の位置を決める。禁書庫の本は年齢確認をするまで蔵書目録にも出ない）。room：\"annex\" と書くと図書館の間だけに置かれる（place はいらない）。",

@@ -3,7 +3,9 @@
    ---------------------------------------------------------
    本の寄贈の間（donate.html）で作った「寄贈本_○○.txt」を book_data フォルダに入れると、
    図書館を開いたときに自動で書架に並びます。棚の場所は空いているところに自動で決まります。
-   （前に作った「寄贈本_○○.json」も、そのまま読めます）
+   （前に作った「寄贈本_○○.json」も、前の「■題名」「■表紙」…の形の txt も、そのまま読めます）
+   いまの寄贈本の txt の中身は、data/works.json と data/books.json に貼るための JSON です（toAdminText）。
+   book_data に入れる代わりに、その JSON をそれぞれのファイルに貼っても同じ本が並びます（両方はしないでください）。
 
    フォルダの中身の見つけ方（上から順にためして、見つかったものをぜんぶ使う）
      1. book_data/list.txt に書いたファイル名（1行に1つ。前の list.json も読みます）
@@ -205,7 +207,7 @@ window.TorsaGifts = (() => {
     const note = [str(pe.preset, 40).trim(), str(pe.note, 80).trim()].filter(Boolean).join("。");
     if (note) { const { id, title, workId, type, ...rest } = b; b = { id, title, workId, type, _typeNote: note, ...rest }; }
     delete b.gift; // 手で足した本は、ふつうの本として並べる
-    if (b.hall === "main") delete b.hall; // 本館は書かなくてよい（いまある本と同じ書き方）
+    // hall は本館でも書く（このファイルを開き直したり book_data に入れたりしても、同じ棟に並ぶように）
     if (!placed) delete b.place;
     const HALL_NAME = { main: "本館", east: "東の書館", west: "西の書館" };
     const hallName = HALL_NAME[b.hall || "main"];
@@ -214,25 +216,16 @@ window.TorsaGifts = (() => {
     const json = (v) => JSON.stringify(v, null, 2)
       .replace(/\{\s*"emote": ("[^"]*"),\s*"text": ("(?:[^"\\]|\\.)*")\s*\}/g, "{ \"emote\": $1, \"text\": $2 }")
       .replace(/\{\s*"bay": ("[^"]*"),\s*"row": (\d+),\s*"slot": (\d+)\s*\}/g, "{ \"bay\": $1, \"row\": $2, \"slot\": $3 }");
+    const one = (v, n = 60) => String(v == null ? "" : v).replace(/\s+/g, " ").trim().slice(0, n); // 見出しの1行用（改行を入れない）
+    const hasImg = w.paragraphs.some((p) => /^\[\[img:/.test(p));
     const o = [
-      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-      "　トルサ図書館　管理人用　本の追加データ",
-      "━━━━━━━━━━━━━━━━━━━━━━━━━━━━",
-      `本：${b.title}　／　作者：${w.author}　／　整理番号（id）：${b.id}`,
-      "",
-      "【追加のしかた】2つのファイルに、1つずつ貼ります。",
-      "  1. data/works.json の「\"works\": [ … ]」の中の、最後の } のうしろに , を付けて、",
-      "     下の「works.json に足すもの」を貼る",
-      "  2. data/books.json の「\"books\": [ … ]」の中の、最後の } のうしろに , を付けて、",
-      "     下の「books.json に足すもの」を貼る",
-      "  ※ かたまり同士の間に , が1つ。いちばん最後のかたまりのうしろには , を付けません。",
-      "  ※ この本の寄贈本_○○.txt を book_data に入れてある場合は、book_data から出してください",
-      "     （入れたままだと、同じ本が2冊並びます）。",
-      ...(w.paragraphs.some((p) => /^\[\[img:/.test(p)) ? ["  ※ この本には挿絵があります。zip の中の book_images フォルダは、book_data の中にそのまま置いてください", "     （book_data/book_images/" + b.id.replace(/^gift-/, "") + "/ に画像が入っている形です。txt だけを出して、画像は残します）。"] : []),
-      "",
-      "【置き場所】" + where,
-      ...(g.wantHall && placed && g.wantHall !== (b.hall || "main") ? [`  （寄贈した人は「${HALL_NAME[g.wantHall]}」を希望しましたが、そこは満席か、飛び出す本が先にいるため、${hallName}にしました）`] : []),
-      known ? "  （いまの data/books.json を読んで、空いている場所を選びました）" : "  （data/books.json を読めなかったので、仮の場所です。ほかの本と重なるときは、bay・row・slot のどれかをずらしてください）",
+      `トルサ図書館　寄贈本：${one(b.title)}　／　作者：${one(w.author, 40)}　／　整理番号（id）：${b.id}`,
+      `寄贈日：${one(raw.createdAt, 40)}`,
+      `置き場所：${where}` + (known ? "" : "　（data/books.json を読めなかったので、仮の場所です。ほかの本と重なるときは、bay・row・slot のどれかをずらしてください）"),
+      ...(g.wantHall && placed && g.wantHall !== (b.hall || "main") ? [`（寄贈した人は「${HALL_NAME[g.wantHall]}」を希望しましたが、そこは満席か、飛び出す本が先にいるため、${hallName}にしました）`] : []),
+      "貼りかた：下の2つの JSON を、data/works.json の \"works\" の配列と、data/books.json の \"books\" の配列の、それぞれ最後の } のうしろに , を付けて貼ります。",
+      "※ このファイルを book_data に入れて使うときは、貼らないでください（同じ本が2冊並びます）。",
+      ...(hasImg ? ["※ 挿絵があります。zip の中の book_images フォルダを、book_data の中にそのまま置いてください（book_data/book_images/" + b.id.replace(/^gift-/, "") + "/ に画像が入る形）。"] : []),
       "",
       "■works.json に足すもの（ここから）",
       json(w),
@@ -246,12 +239,33 @@ window.TorsaGifts = (() => {
     return { text: o.join("\n"), placed, id: b.id, hall: b.hall || "main", place: b.place || null };
   }
 
+  // 「■works.json に足すもの」「■books.json に足すもの」の JSON が入ったテキスト（toAdminText が作る形）→ 寄贈本のデータ
+  // 貼る用に整えた形（clean を通したあとの形）から、clean に渡せる形にもどす
+  function parseJsonText(s) {
+    s = String(s).replace(/\r\n?/g, "\n");
+    const grab = (name) => {
+      const m = new RegExp("(?:^|\\n)■" + name + " に足すもの（ここから）\\n([\\s\\S]*?)\\n■" + name + " に足すもの（ここまで）").exec(s);
+      if (!m) return null; try { return JSON.parse(m[1]); } catch (e) { return null; }
+    };
+    const w = grab("works\\.json"), b = grab("books\\.json");
+    if (!w || !b || typeof w !== "object" || typeof b !== "object") return null;
+    // 本文の挿絵：[[img:book_data/book_images/整理番号/ファイル名|キャプション]] → ［挿絵：ファイル名｜キャプション］
+    const unimg = (p) => { const m = /^\[\[img:[^|\]]*\/([^\/|\]]+?)(?:\|([^\]]*))?\]\]$/.exec(String(p == null ? "" : p)); return m ? `［挿絵：${m[1]}${m[2] ? "｜" + m[2] : ""}］` : p; };
+    const at = /(?:^|\n)寄贈日[：:]\s*(\S+)/.exec(s);
+    return {
+      torsaLibraryGift: 1, createdAt: at ? at[1] : "", madeWith: "トルサ図書館 寄贈の間",
+      book: { id: b.id, title: b.title, type: b.type, hall: b.hall || "", shelfEmote: b.shelfEmote || "", personality: { preset: "", note: typeof b._typeNote === "string" ? b._typeNote : "" }, cover: b.cover, lines: b.lines },
+      work: { title: w.title, author: w.author, genre: w.genre, paragraphs: (Array.isArray(w.paragraphs) ? w.paragraphs : []).map(unimg) }
+    };
+  }
+
   // ファイルの中身（文字）→ 寄贈本のデータ（JSON でもテキストでも）
   function parse(t, name) {
     if (t == null) return null;
     const s = String(t).replace(/^﻿/, "");
     if (/\.json$/i.test(name || "") || /^\s*\{/.test(s)) { try { return JSON.parse(s); } catch (e) { if (/\.json$/i.test(name || "")) return null; } }
-    return parseText(s);
+    if (/■works\.json に足すもの（ここから）/.test(s)) return parseJsonText(s); // いまの寄贈の間が作る形（貼れる JSON 入り）
+    return parseText(s);              // 前の、「■題名」「■表紙」…の形
   }
 
   // 1冊ぶんを、決まった形だけ取り出して整える
