@@ -7,7 +7,7 @@
       "trigger": {
         "room": "sheep",
         "after": "vault-fall",
-        "minAffinity": 200,
+        "minAffinity": 300,
         "delaySec": 5
       },
       "scratchOrigin": [-101.47536, 15.51341],

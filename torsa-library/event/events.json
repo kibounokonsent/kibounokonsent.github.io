@@ -11,7 +11,7 @@
       "trigger": {
         "hall": "vault",
         "delaySec": 8,
-        "minAffinity": 0,
+        "minAffinity": 200,
         "once": true
       },
       "_artNote": "絵は1つのファイル（art）にまとまっています。中は部品ごとのレイヤー（id が部品名）。レイヤーごとに描き直して上書きすれば、そのまま動きます。canvas はキャンバスの大きさ。",
