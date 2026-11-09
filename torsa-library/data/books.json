@@ -862,6 +862,58 @@
       "refuseCount": 1,
       "place": { "bay": "e1", "row": 1, "slot": 2 }
     },
+
+    {
+  "id": "gift-4nav7qmpkvjd",
+  "title": "忘れられた駅",
+  "workId": "gift-4nav7qmpkvjd",
+  "type": "jumper",
+  "_typeNote": "物静かで、未練がましい人",
+  "hall": "main",
+  "shelfEmote": "…",
+  "cover": {
+    "title": "忘れられた駅",
+    "subtitle": "",
+    "titleDirection": "horizontal",
+    "color": "#000000",
+    "accent": "#ffffff",
+    "emblem": "moon",
+    "parts": {
+      "base": "cloth",
+      "scene": "snowtown",
+      "pattern": "diamonds",
+      "sparkle": "none",
+      "spine": "plain",
+      "frame": "double",
+      "corners": "metal",
+      "band": "none",
+      "emblemBase": "none",
+      "emblemPos": "middle",
+      "plate": "none",
+      "titleDeco": "none",
+      "titlePos": "top",
+      "clasp": "none",
+      "bookmark": "charm",
+      "finish": "worn"
+    },
+    "textColor": "#ffffff"
+  },
+  "lines": {
+    "first": [
+      { "emote": "normal", "text": "こんにちは\n貴方はこの本...私を覚えてくれますか？" }
+    ],
+    "revisit": [
+      { "emote": "normal", "text": "覚えていてくれたんですね...\n忘れないでくださいね、これからも、ずっと" }
+    ],
+    "afterRead": { "emote": "normal", "text": "最後まで読み終わったんですね...\nなら、この本...私がこれほど忘れないでと頼んでいる理由をわかってくれたでしょうか" },
+    "catalog": { "emote": "normal", "text": "興味を持ってくれて、ありがとうございます。\n忘れないでください。16番、忘れられた駅。私を、覚えていてくださいね。" },
+    "jump": [
+      { "emote": "normal", "text": "私も忘れられないために...\nできれば、読んでください" }
+    ]
+  },
+  "jumpDelayMs": 1500,
+  "place": { "bay": "e2", "row": 1, "slot": 4 }
+},
     
     {
   "id": "gift-g0ckpn53u5ur",
