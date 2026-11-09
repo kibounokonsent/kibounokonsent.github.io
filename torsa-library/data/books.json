@@ -862,6 +862,60 @@
       "refuseCount": 1,
       "place": { "bay": "e1", "row": 1, "slot": 2 }
     },
+    
+    {
+  "id": "gift-g0ckpn53u5ur",
+  "title": "BRAINIAC",
+  "workId": "gift-g0ckpn53u5ur",
+  "type": "revisit",
+  "_typeNote": "上品",
+  "hall": "west",
+  "shelfEmote": "…",
+  "cover": {
+    "title": "BRAINIAC",
+    "subtitle": "",
+    "titleDirection": "horizontal",
+    "color": "#a49584",
+    "accent": "#2b3f8c",
+    "emblem": "none",
+    "parts": {
+      "base": "night",
+      "scene": "forest",
+      "pattern": "none",
+      "sparkle": "dust",
+      "spine": "banded",
+      "frame": "filigree",
+      "corners": "triangle",
+      "band": "middle",
+      "emblemBase": "crescent",
+      "emblemPos": "none",
+      "plate": "plate",
+      "titleDeco": "lines",
+      "titlePos": "middle",
+      "clasp": "none",
+      "bookmark": "tassel",
+      "finish": "worn"
+    },
+    "textColor": "#ff0000"
+  },
+  "lines": {
+    "first": [
+      { "emote": "normal", "text": "初めましてだな..." },
+      { "emote": "normal", "text": "ゆっくりしていってくれ。" }
+    ],
+    "revisit": [
+      { "emote": "happy", "text": "...また来てくれたのか、ありがとう。" }
+    ],
+    "afterRead": { "emote": "normal", "text": "最後まで読んでくれてありがとう。" },
+    "catalog": { "emote": "normal", "text": "目録から観に来てくれたのか、ゆっくりしていってくれ。" },
+    "frequent": [
+      { "emote": "silent", "text": "なにが、正しかったのだろうな..." },
+      { "emote": "silent", "text": "...すまない、ただ...少し考えてしまうんだ。" }
+    ],
+    "frequentFrom": 5
+  },
+  "place": { "bay": "w1", "row": 0, "slot": 6 }
+},
     {
       "id": "gift-qtjvkfx8b2y1",
       "title": "RESISTANCE",
