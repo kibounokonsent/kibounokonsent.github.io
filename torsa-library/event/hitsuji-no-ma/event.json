@@ -8,6 +8,7 @@
         "room": "sheep",
         "after": "vault-fall",
         "minAffinity": 300,
+        "readBooks": { "place": "vault", "count": 15 },
         "delaySec": 5
       },
       "scratchOrigin": [-101.47536, 15.51341],

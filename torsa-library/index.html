@@ -3277,6 +3277,7 @@ body.fx-off .magic-circle svg, body.fx-off .float-y, body.fx-off .hover-float, b
     $("reader").hidden = true; const b = readingBook; if (!b) return;
     bookMem(b.id).read++; save();
     if (readToEnd) like("readEnd", b.id); // 最後まで読むと、好感度がいちばんふえる
+    if (EVENTS && EVENTS.onRead && !ROOM.cur) EVENTS.onRead(HALL_ID); // 「○冊読んだら」のイベント（trigger の readBooks）を数えなおす
     if (b.lines.afterRead) talk(b, [b.lines.afterRead], [{ label: "棚に戻す", primary: true, run: () => { closeTalk(); torsa("afterRead"); } }]);
     else torsa("afterRead");
   });

@@ -24,7 +24,8 @@
    ・pixelate(  … 部品（レイヤー）にモザイクをかける。parts に "mosaic": 12、セリフ・選択肢・さわったときの "mosaic": { "部品id": 12 } で入り切り（0 で外す）。setMosaic( で切りかえ
    ・playSound( … 効果音ファイルを鳴らす（イベントの "sounds" に登録、"sound" で鳴らす、"stopSound" で止める）
 
-   ・onRoom(    … 部屋（羊の間など）に入ったときに起こるイベント（trigger の room・after・minAffinity。書き方は onHall の上）
+   ・onRoom(    … 部屋（羊の間など）に入ったときに起こるイベント（trigger の room・after・minAffinity・readBooks。書き方は onHall の上）
+   ・readCount( … trigger の readBooks（その場所の本を何冊読んだか）を数える。本を読みおえたときに onRead( で数えなおす
    ・EXTRA      … events.json のほかに読みこむイベントのファイル（羊の間のイベントは event/hitsuji-no-ma/event.json）
    ・ask(       … イベントが始まる前の「見る／今は見ない」の画面。注意書きは data/event-notice.json に書きます
                   （「今は見ない」を選んでも、パレットの「思い出」からいつでも見られます）
@@ -1313,9 +1314,24 @@ window.TorsaEvents = (ctxIn) => {
   //   room: "sheep"        … その部屋（羊の間など）に入ったとき
   //   after: "vault-fall"  … そのイベントを見たあとだけ（["a", "b"] と並べると、ぜんぶ見たあと）
   //   minAffinity: 200     … トルサの好感度がこの値より上のとき
+  //   readBooks: { "place": "vault", "count": 10 }
+  //                        … その場所の本を、count 冊以上読んだとき（同じ本を何回読んでも1冊）
+  //                          place は "vault"（禁書庫）・"forbidden"・"east" など。["vault", "forbidden"] と並べると、合わせて数える
+  //                          place を書かなければ禁書庫（vault と forbidden）の本を数える
+  //                          minAffinity といっしょに書くと「好感度が○以上、かつ○冊読んだ」になる
   //   delaySec: 6          … 入ってから何秒で始まるか
   //   once: false          … 何度でも起こす（書かなければ、一度見たら起こらない）
   const seenAll = (a) => !a || (Array.isArray(a) ? a : [a]).every((id) => ctx.mem && ctx.mem.events && ctx.mem.events[id]);
+  // 本がどこにあるか（index.html の roomOf と同じ決め方：room があれば部屋、なければ hall の棟、どちらもなければ本館）
+  const placeOfBook = (b) => b.room || b.hall || "main";
+  // その場所の本を、何冊読んだか（読んだ回数ではなく冊数）
+  function readCount(rb) {
+    const places = rb.place == null ? ["vault", "forbidden"] : (Array.isArray(rb.place) ? rb.place : [rb.place]);
+    const books = (ctx.DATA && ctx.DATA.books && ctx.DATA.books.books) || [];
+    const mb = (ctx.mem && ctx.mem.books) || {};
+    return books.filter((b) => places.includes(placeOfBook(b)) && mb[b.id] && mb[b.id].read > 0).length;
+  }
+  const readOK = (tr) => !tr.readBooks || readCount(tr.readBooks) >= (tr.readBooks.count ?? 1);
   let waitT = 0, roomT = 0;
   function onHall(hallId) {
     clearTimeout(waitT);
@@ -1329,6 +1345,7 @@ window.TorsaEvents = (ctxIn) => {
         const tryPlay = () => {
           if (playing || (ctx.hall && ctx.hall() !== hallId)) return;
           if ((ctx.affinity ? ctx.affinity() : 0) < (tr.minAffinity || 0)) return;
+          if (!readOK(tr)) return;
           if (ctx.busy && ctx.busy()) { waitT = setTimeout(tryPlay, 2500); return; }
           if (document.body.classList.contains("ev-asking")) return;
           ask(id);
@@ -1345,7 +1362,7 @@ window.TorsaEvents = (ctxIn) => {
       if (!CONF) return;
       const hit = Object.entries(CONF.events).find(([id, ev]) => {
         const tr = ev.trigger || {};
-        return tr.room === roomId && !(tr.once !== false && ctx.mem && ctx.mem.events && ctx.mem.events[id]) && seenAll(tr.after) && (ctx.affinity ? ctx.affinity() : 0) >= (tr.minAffinity || 0);
+        return tr.room === roomId && !(tr.once !== false && ctx.mem && ctx.mem.events && ctx.mem.events[id]) && seenAll(tr.after) && (ctx.affinity ? ctx.affinity() : 0) >= (tr.minAffinity || 0) && readOK(tr);
       });
       if (!hit) return;
       const [id, ev] = hit, tr = ev.trigger;
@@ -1357,6 +1374,30 @@ window.TorsaEvents = (ctxIn) => {
         ask(id);
       };
       roomT = setTimeout(tryPlay, (tr.delaySec ?? 5) * 1000);
+    });
+  }
+
+  // 本を読みおえたとき（index.html の closeReader から呼ばれる）：readBooks の条件があるイベントだけ、いまいる棟で数えなおす
+  // （棟に入ったときにはまだ冊数が足りなくて、その棟の中で読んで条件をみたしたとき用）
+  let readT = 0;
+  function onRead(hallId) {
+    clearTimeout(readT);
+    confReady.then(() => {
+      if (!CONF || playing) return;
+      const hit = Object.entries(CONF.events).find(([id, ev]) => {
+        const tr = ev.trigger || {};
+        return tr.readBooks && !tr.room && tr.hall === hallId && !(tr.once !== false && ctx.mem && ctx.mem.events && ctx.mem.events[id]) && seenAll(tr.after) && (ctx.affinity ? ctx.affinity() : 0) >= (tr.minAffinity || 0) && readOK(tr);
+      });
+      if (!hit) return;
+      const [id] = hit;
+      prefetch(id);
+      const tryPlay = () => {
+        if (playing || (ctx.hall && ctx.hall() !== hallId)) return;
+        if (ctx.busy && ctx.busy()) { readT = setTimeout(tryPlay, 2500); return; }
+        if (document.body.classList.contains("ev-asking")) return;
+        ask(id);
+      };
+      readT = setTimeout(tryPlay, 3000); // 本を閉じて、トルサのひとことが終わるくらいの間をあける
     });
   }
 
@@ -1380,5 +1421,5 @@ window.TorsaEvents = (ctxIn) => {
   const list = () => (CONF ? Object.entries(CONF.events).map(([id, e]) => ({ id, name: e.name || id, hall: (e.trigger || {}).hall || (e.trigger || {}).room || "", trigger: { ...(e.trigger || {}) } })) : []);
   // 思い出から見るとき（replay）も、注意書きの画面を出す（data/event-notice.json の askOnReplay を false にすると出さない）
   const playAsked = (id, opts) => ((opts && opts.replay) ? ask(id, opts) : play(id, opts));
-  return { play: playAsked, playNow: play, ask, prefetch, onHall, onRoom, list, get playing() { return playing; }, ready: confReady };
+  return { play: playAsked, playNow: play, ask, prefetch, onHall, onRoom, onRead, readCount, list, get playing() { return playing; }, ready: confReady };
 };

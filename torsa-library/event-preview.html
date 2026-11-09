@@ -158,6 +158,7 @@ body.bare { background: #000; }
       else if (t.hall) conds.push(`<li><b>${esc(PLACE[t.hall] || t.hall)}</b>に入ったとき</li>`);
       else conds.push(`<li>自動では起こらない</li>`);
       if (t.minAffinity) conds.push(`<li>好感度 <b>${esc(t.minAffinity)}</b> 以上</li>`);
+      if (t.readBooks) { const rp = t.readBooks.place == null ? ["vault"] : [].concat(t.readBooks.place); conds.push(`<li><b>${esc(rp.map((x) => PLACE[x] || x).join("・"))}</b>の本を <b>${esc(t.readBooks.count ?? 1)}</b> 冊以上読んだ</li>`); }
       (Array.isArray(t.after) ? t.after : t.after ? [t.after] : []).forEach((a) => conds.push(`<li><b>${esc(all[a] || a)}</b> を見たあと</li>`));
       if (t.delaySec != null) conds.push(`<li>${esc(t.delaySec)} 秒後</li>`);
       conds.push(`<li>${t.once === false ? "何度でも起こる" : "一度だけ（あとは思い出から）"}</li>`);
