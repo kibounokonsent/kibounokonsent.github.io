@@ -914,6 +914,58 @@
   "jumpDelayMs": 1500,
   "place": { "bay": "e2", "row": 1, "slot": 4 }
 },
+
+{
+  "id": "gift-4nav7qmpkvjdx",
+  "title": "2026世界挨拶辞典",
+  "workId": "gift-4nav7qmpkvjdx",
+  "type": "revisit",
+  "_typeNote": "博識で上品",
+  "hall": "east",
+  "shelfEmote": "…",
+  "cover": {
+    "title": "世界挨拶辞典",
+    "subtitle": "",
+    "titleDirection": "horizontal",
+    "color": "#000000",
+    "accent": "#ffe74d",
+    "emblem": "star",
+    "parts": {
+      "base": "cloth",
+      "scene": "gears",
+      "pattern": "diamonds",
+      "sparkle": "feathers",
+      "spine": "banded",
+      "frame": "runes",
+      "corners": "metal",
+      "band": "corner",
+      "emblemBase": "crescent",
+      "emblemPos": "top",
+      "plate": "emboss",
+      "titleDeco": "stars",
+      "titlePos": "top",
+      "clasp": "none",
+      "bookmark": "ribbon",
+      "finish": "gloss"
+    },
+    "textColor": "#f2df64"
+  },
+  "lines": {
+    "first": [
+      { "emote": "normal", "text": "こんにちは。\n旅行の予定がおありなんでしょうか？まあ手に取ったなら、ぜひお読みください\nほぼ世界中の言語の挨拶を網羅していますよ" }
+    ],
+    "revisit": [
+      { "emote": "normal", "text": "Γεια σας.\nまた会いましたね。何か気になる言語でも？" }
+    ],
+    "afterRead": { "emote": "normal", "text": "おかえりなさい。気になった言語の挨拶は知れましたか？\nぜひまた来て、読んでみてください。\nSzia!" },
+    "catalog": { "emote": "normal", "text": "興味を持ってくれてありがとうございます。\nぜひ世界中の言語たちを少し味わってみませんか？" },
+    "frequent": [
+      { "emote": "normal", "text": "Merhaba!\nまた会いましたね。たくさん読んでくれてうれしいです。世界中の人と友達になってくださいね！" }
+    ],
+    "frequentFrom": 3
+  },
+  "place": { "bay": "w2", "row": 2, "slot": 3 }
+},
     
     {
   "id": "gift-g0ckpn53u5ur",
