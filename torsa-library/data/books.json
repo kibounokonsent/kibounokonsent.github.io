@@ -966,6 +966,65 @@
   },
   "place": { "bay": "w2", "row": 2, "slot": 3 }
 },
+
+{
+  "id": "gift-e7jdlls91amj",
+  "title": "弟とその友について",
+  "workId": "gift-e7jdlls91amj",
+  "type": "refuser",
+  "_typeNote": "しずかなお姉さま",
+  "hall": "main",
+  "shelfEmote": "?",
+  "cover": {
+    "title": "弟とその友について",
+    "subtitle": "",
+    "titleDirection": "vertical",
+    "color": "#2e2736",
+    "accent": "#ffffff",
+    "emblem": "book",
+    "parts": {
+      "base": "velvet",
+      "scene": "none",
+      "pattern": "none",
+      "sparkle": "snow",
+      "spine": "wajitoji",
+      "frame": "double",
+      "corners": "none",
+      "band": "none",
+      "emblemBase": "star",
+      "emblemPos": "bottom",
+      "plate": "emboss",
+      "titleDeco": "diamonds",
+      "titlePos": "middle",
+      "clasp": "strap",
+      "bookmark": "none",
+      "finish": "worn"
+    },
+    "textColor": "#0000ff"
+  },
+  "lines": {
+    "first": [],
+    "revisit": [
+      { "emote": "smug", "text": "また思い出しに来てくれたのね。ありがとう。" }
+    ],
+    "afterRead": { "emote": "normal", "text": "弟の夢路様の本も、どこかにいるはずよ。" },
+    "catalog": { "emote": "sleepy", "text": "……あら、ぼーっとしてたわ。わたしを読みたいのね。" },
+    "refuse": [
+      [
+        { "emote": "silent", "text": "………………。" }
+      ],
+      [
+        { "emote": "normal", "text": "…ああ、ごめんなさいね。少しぼーっとしていたの。" },
+        { "emote": "question", "text": "夢路様のことばに、触りたいの？" }
+      ]
+    ],
+    "accept": [
+      { "emote": "happy", "text": "夢路様のことば、丁寧に触ってちょうだい。" }
+    ]
+  },
+  "refuseCount": 2,
+  "place": { "bay": "e3", "row": 0, "slot": 3 }
+},
     
     {
   "id": "gift-g0ckpn53u5ur",
