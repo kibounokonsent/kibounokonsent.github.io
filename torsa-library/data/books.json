@@ -541,6 +541,67 @@
       }
     },
     {
+  "id": "gift-e8z1ri4kkh63",
+  "title": "月光",
+  "workId": "gift-e8z1ri4kkh63",
+  "type": "refuser",
+  "_typeNote": "人なつっこい。無邪気",
+  "hall": "main",
+  "shelfEmote": "♪",
+  "cover": {
+    "title": "𝌘𝌍𝌟𝌡𝌌𝌯",
+    "subtitle": "月光",
+    "titleDirection": "vertical",
+    "color": "#39484d",
+    "accent": "#b8b8b8",
+    "emblem": "none",
+    "parts": {
+      "base": "linen",
+      "scene": "moonclouds",
+      "pattern": "none",
+      "sparkle": "stars",
+      "spine": "wajitoji",
+      "frame": "none",
+      "corners": "bracket",
+      "band": "none",
+      "emblemBase": "magic",
+      "emblemPos": "bottom",
+      "plate": "slip",
+      "titleDeco": "diamonds",
+      "titlePos": "top",
+      "clasp": "none",
+      "bookmark": "none",
+      "finish": "worn"
+    }
+  },
+  "lines": {
+    "first": [
+      { "emote": "happy", "text": "エヘヘ、はじめましてっ。" },
+      { "emote": "heart", "text": "ねえねえ、きみは、おつきさまのおともだち？" }
+    ],
+    "revisit": [
+      { "emote": "happy", "text": "きょうもきらきら。きみもきらきら？" }
+    ],
+    "afterRead": { "emote": "heart", "text": "ありがとお。また、おはなししようねっ。" },
+    "catalog": { "emote": "shy", "text": "エヘヘ…ぼくにあいにきたの？" },
+    "refuse": [
+      [
+        { "emote": "normal", "text": "エヘヘ、まだだめ。おつきさまもよみたがってる。" },
+        { "emote": "happy", "text": "ぼくのなまえは“月光”。もっとおはなししてってよっ。" }
+      ],
+      [
+        { "emote": "happy", "text": "あとちょっと、まってね。おつきさまがみえるよ。" }
+      ]
+    ],
+    "accept": [
+      { "emote": "happy", "text": "……あっ！おつきさま。みえた。" },
+      { "emote": "smug", "text": "きらきらで、すきとおってるね……ウフフ……アハハ…" }
+    ]
+  },
+  "refuseCount": 2,
+  "place": { "bay": "e2", "row": 4, "slot": 7 }
+},
+    {
       "id": "gift-te2qejpz3d7t",
       "title": "宇宙に家がある夜",
       "workId": "gift-te2qejpz3d7t",
